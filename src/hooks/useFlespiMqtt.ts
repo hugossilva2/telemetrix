@@ -1,0 +1,86 @@
+import { useEffect, useRef, useState } from "react";
+import mqtt, { type MqttClient } from "mqtt";
+import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
+import { mergeTelemetry, parseFlespiMessage } from "@/lib/flespi/parse";
+import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
+
+export interface UseFlespiMqttResult {
+  status: MqttStatus;
+  telemetry: VehicleTelemetry;
+  lastMessageAt: number | null;
+  error: string | null;
+}
+
+/**
+ * Conecta ao broker MQTT do Flespi via WebSocket e escuta a telemetria do
+ * device configurado. Reconexão automática com backoff exponencial é gerida
+ * pela própria biblioteca `mqtt` (reconnectPeriod).
+ *
+ * Somente executa no browser — retorna estado inicial no SSR.
+ */
+export function useFlespiMqtt(): UseFlespiMqttResult {
+  const [status, setStatus] = useState<MqttStatus>("idle");
+  const [telemetry, setTelemetry] = useState<VehicleTelemetry>({});
+  const [lastMessageAt, setLastMessageAt] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const clientRef = useRef<MqttClient | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    setStatus("connecting");
+    let reconnectDelay = 1000;
+    const maxDelay = 30000;
+
+    const client = mqtt.connect(FLESPI_CONFIG.brokerUrl, {
+      username: FLESPI_CONFIG.token,
+      password: "",
+      clean: true,
+      keepalive: 30,
+      reconnectPeriod: reconnectDelay,
+      connectTimeout: 15000,
+      protocolVersion: 5,
+      clientId: `veh-${Math.random().toString(16).slice(2, 10)}`,
+    });
+    clientRef.current = client;
+
+    client.on("connect", () => {
+      reconnectDelay = 1000;
+      client.options.reconnectPeriod = reconnectDelay;
+      setStatus("connected");
+      setError(null);
+      client.subscribe(FLESPI_TOPIC, { qos: 0 }, (err) => {
+        if (err) setError(`Falha ao inscrever: ${err.message}`);
+      });
+    });
+
+    client.on("reconnect", () => {
+      setStatus("reconnecting");
+      // backoff exponencial
+      reconnectDelay = Math.min(reconnectDelay * 2, maxDelay);
+      client.options.reconnectPeriod = reconnectDelay;
+    });
+
+    client.on("offline", () => setStatus("offline"));
+    client.on("close", () => setStatus((s) => (s === "connected" ? "offline" : s)));
+
+    client.on("error", (err) => {
+      setStatus("error");
+      setError(err.message);
+    });
+
+    client.on("message", (_topic, payload) => {
+      const parsed = parseFlespiMessage(payload.toString());
+      if (!parsed) return;
+      setLastMessageAt(Date.now());
+      setTelemetry((prev) => mergeTelemetry(prev, parsed));
+    });
+
+    return () => {
+      client.end(true);
+      clientRef.current = null;
+    };
+  }, []);
+
+  return { status, telemetry, lastMessageAt, error };
+}

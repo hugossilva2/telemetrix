@@ -1,0 +1,13 @@
+{
+  "name": "Gestão Veicular",
+  "short_name": "Veicular",
+  "description": "PWA de gestão veicular em tempo real",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b1220",
+  "theme_color": "#0b1220",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "48x48", "type": "image/x-icon" }
+  ]
+}

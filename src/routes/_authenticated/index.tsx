@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Gauge, Fuel as FuelIcon, Battery, Route as RouteIcon, Zap } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { Progress } from "@/components/ui/progress";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -19,9 +23,64 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
 });
 
+const LOW_BATTERY_V = 11.8;
+
 function Dashboard() {
   const { status, telemetry, lastMessageAt } = useFlespiMqtt();
   const fuel = telemetry.fuelLevel;
+
+  const { data: alerts } = useQuery({
+    queryKey: ["vehicle-alerts"],
+    queryFn: async () => {
+      const { data: userData } = await supabase.auth.getUser();
+      const uid = userData.user?.id;
+      if (!uid) return { engine: false, battery: false };
+      const { data } = await supabase
+        .from("vehicles")
+        .select("alert_engine_on,alert_low_battery")
+        .eq("user_id", uid)
+        .limit(1)
+        .maybeSingle();
+      return {
+        engine: !!data?.alert_engine_on,
+        battery: !!data?.alert_low_battery,
+      };
+    },
+  });
+
+  const prevIgnition = useRef<boolean | undefined>(undefined);
+  const lowBatteryNotified = useRef(false);
+
+  useEffect(() => {
+    if (!alerts?.engine) return;
+    if (
+      prevIgnition.current === false &&
+      telemetry.ignitionOn === true
+    ) {
+      toast.warning("Motor ligado", {
+        description: "A ignição do veículo foi acionada.",
+      });
+    }
+    if (telemetry.ignitionOn !== undefined) {
+      prevIgnition.current = telemetry.ignitionOn;
+    }
+  }, [telemetry.ignitionOn, alerts?.engine]);
+
+  useEffect(() => {
+    if (!alerts?.battery) return;
+    const v = telemetry.batteryVoltage;
+    if (v === undefined) return;
+    if (v < LOW_BATTERY_V && !lowBatteryNotified.current) {
+      lowBatteryNotified.current = true;
+      toast.error("Bateria baixa", {
+        description: `Tensão em ${v.toFixed(2)} V.`,
+      });
+    } else if (v >= LOW_BATTERY_V + 0.3) {
+      lowBatteryNotified.current = false;
+    }
+  }, [telemetry.batteryVoltage, alerts?.battery]);
+
+
 
   return (
     <AppShell title="Painel" subtitle="Telemetria em tempo real">

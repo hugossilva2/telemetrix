@@ -16,6 +16,7 @@ import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
+import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/flespi-webhook'
 import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 
 const AuthRoute = AuthRouteImport.update({
@@ -53,6 +54,11 @@ const AuthenticatedAbastecimentoRoute =
     path: '/abastecimento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicFlespiWebhookRoute = ApiPublicFlespiWebhookRouteImport.update({
+  id: '/api/public/flespi-webhook',
+  path: '/api/public/flespi-webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedViagensIdRoute = AuthenticatedViagensIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/mapa': typeof AuthenticatedMapaRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -76,6 +83,7 @@ export interface FileRoutesByTo {
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,6 +95,7 @@ export interface FileRoutesById {
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,6 +107,7 @@ export interface FileRouteTypes {
     | '/mapa'
     | '/viagens'
     | '/viagens/$id'
+    | '/api/public/flespi-webhook'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/viagens'
     | '/'
     | '/viagens/$id'
+    | '/api/public/flespi-webhook'
   id:
     | '__root__'
     | '/_authenticated'
@@ -117,11 +128,13 @@ export interface FileRouteTypes {
     | '/_authenticated/viagens'
     | '/_authenticated/'
     | '/_authenticated/viagens/$id'
+    | '/api/public/flespi-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAbastecimentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/flespi-webhook': {
+      id: '/api/public/flespi-webhook'
+      path: '/api/public/flespi-webhook'
+      fullPath: '/api/public/flespi-webhook'
+      preLoaderRoute: typeof ApiPublicFlespiWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/viagens/$id': {
       id: '/_authenticated/viagens/$id'
       path: '/$id'
@@ -218,6 +238,7 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

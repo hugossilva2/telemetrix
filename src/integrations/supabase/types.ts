@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      device_trip_state: {
+        Row: {
+          device_id: string
+          ignition_on: boolean | null
+          last_lat: number | null
+          last_lng: number | null
+          last_mileage: number | null
+          max_speed_kmh: number
+          mileage_at_start: number | null
+          start_lat: number | null
+          start_lng: number | null
+          start_time: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          device_id: string
+          ignition_on?: boolean | null
+          last_lat?: number | null
+          last_lng?: number | null
+          last_mileage?: number | null
+          max_speed_kmh?: number
+          mileage_at_start?: number | null
+          start_lat?: number | null
+          start_lng?: number | null
+          start_time?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          device_id?: string
+          ignition_on?: boolean | null
+          last_lat?: number | null
+          last_lng?: number | null
+          last_mileage?: number | null
+          max_speed_kmh?: number
+          mileage_at_start?: number | null
+          start_lat?: number | null
+          start_lng?: number | null
+          start_time?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
       fuel_logs: {
         Row: {
           created_at: string
@@ -133,6 +181,7 @@ export type Database = {
           avg_consumption_kmpl: number
           created_at: string
           current_mileage: number
+          flespi_device_id: string | null
           id: string
           name: string
           plate: string
@@ -145,6 +194,7 @@ export type Database = {
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
+          flespi_device_id?: string | null
           id?: string
           name: string
           plate: string
@@ -157,6 +207,7 @@ export type Database = {
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
+          flespi_device_id?: string | null
           id?: string
           name?: string
           plate?: string

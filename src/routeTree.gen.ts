@@ -12,9 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
+import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
@@ -28,6 +30,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
+  id: '/viagens',
+  path: '/viagens',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
@@ -46,6 +53,11 @@ const AuthenticatedAbastecimentoRoute =
     path: '/abastecimento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedViagensIdRoute = AuthenticatedViagensIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedViagensRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -53,13 +65,17 @@ export interface FileRoutesByFullPath {
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/viagens/$id': typeof AuthenticatedViagensIdRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
+  '/viagens/$id': typeof AuthenticatedViagensIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,13 +84,29 @@ export interface FileRoutesById {
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
+  '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/abastecimento' | '/ajustes' | '/mapa'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/abastecimento'
+    | '/ajustes'
+    | '/mapa'
+    | '/viagens'
+    | '/viagens/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/auth' | '/abastecimento' | '/ajustes' | '/mapa' | '/'
+  to:
+    | '/auth'
+    | '/abastecimento'
+    | '/ajustes'
+    | '/mapa'
+    | '/viagens'
+    | '/'
+    | '/viagens/$id'
   id:
     | '__root__'
     | '/_authenticated'
@@ -82,7 +114,9 @@ export interface FileRouteTypes {
     | '/_authenticated/abastecimento'
     | '/_authenticated/ajustes'
     | '/_authenticated/mapa'
+    | '/_authenticated/viagens'
     | '/_authenticated/'
+    | '/_authenticated/viagens/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,6 +147,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/viagens': {
+      id: '/_authenticated/viagens'
+      path: '/viagens'
+      fullPath: '/viagens'
+      preLoaderRoute: typeof AuthenticatedViagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/mapa': {
       id: '/_authenticated/mapa'
       path: '/mapa'
@@ -134,13 +175,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAbastecimentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/viagens/$id': {
+      id: '/_authenticated/viagens/$id'
+      path: '/$id'
+      fullPath: '/viagens/$id'
+      preLoaderRoute: typeof AuthenticatedViagensIdRouteImport
+      parentRoute: typeof AuthenticatedViagensRoute
+    }
   }
 }
+
+interface AuthenticatedViagensRouteChildren {
+  AuthenticatedViagensIdRoute: typeof AuthenticatedViagensIdRoute
+}
+
+const AuthenticatedViagensRouteChildren: AuthenticatedViagensRouteChildren = {
+  AuthenticatedViagensIdRoute: AuthenticatedViagensIdRoute,
+}
+
+const AuthenticatedViagensRouteWithChildren =
+  AuthenticatedViagensRoute._addFileChildren(AuthenticatedViagensRouteChildren)
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
+  AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
@@ -148,6 +208,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
+  AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 

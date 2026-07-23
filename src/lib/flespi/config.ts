@@ -7,4 +7,7 @@ export const FLESPI_CONFIG = {
   deviceId: "8634775",
 } as const;
 
-export const FLESPI_TOPIC = `flespi/message/gw/devices/${FLESPI_CONFIG.deviceId}/+`;
+// `#` = casa o tópico do device e qualquer subtópico. Alguns fluxos do Flespi
+// publicam em `flespi/message/gw/devices/{id}` (sem segmento extra) e outros
+// em `.../{id}/xxx`; o `#` cobre ambos os casos.
+export const FLESPI_TOPIC = `flespi/message/gw/devices/${FLESPI_CONFIG.deviceId}/#`;

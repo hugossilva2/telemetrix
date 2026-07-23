@@ -1,24 +1,78 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Gauge, Fuel as FuelIcon, Battery, Route as RouteIcon, Zap } from "lucide-react";
+import { AppShell } from "@/components/layout/AppShell";
+import { StatusHeader } from "@/components/dashboard/StatusHeader";
+import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
+import { Progress } from "@/components/ui/progress";
+import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "Painel · Gestão Veicular" },
+      { name: "description", content: "Telemetria ao vivo do veículo via Flespi MQTT." },
+      { property: "og:title", content: "Painel · Gestão Veicular" },
+      { property: "og:description", content: "Telemetria ao vivo do veículo via Flespi MQTT." },
+    ],
+  }),
+  component: Dashboard,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function Dashboard() {
+  const { status, telemetry, lastMessageAt } = useFlespiMqtt();
+  const fuel = telemetry.fuelLevel;
+
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
+    <AppShell title="Painel" subtitle="Telemetria em tempo real">
+      <StatusHeader
+        ignitionOn={telemetry.ignitionOn}
+        status={status}
+        lastMessageAt={lastMessageAt}
       />
-    </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <TelemetryCard
+          label="Velocidade"
+          value={formatSpeed(telemetry.speedKmh)}
+          Icon={Gauge}
+          accent="primary"
+        />
+        <TelemetryCard
+          label="Odômetro"
+          value={formatKm(telemetry.mileageKm)}
+          Icon={RouteIcon}
+          accent="sky"
+        />
+        <TelemetryCard
+          label="Combustível"
+          value={fuel === undefined ? "—" : formatPct(fuel)}
+          Icon={FuelIcon}
+          accent="emerald"
+        >
+          {fuel !== undefined ? (
+            <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Disponível com o motor ligado.
+            </p>
+          )}
+        </TelemetryCard>
+        <TelemetryCard
+          label="RPM"
+          value={formatRpm(telemetry.engineRpm)}
+          Icon={Zap}
+          accent="amber"
+        />
+        <div className="col-span-2">
+          <TelemetryCard
+            label="Bateria"
+            value={formatVolts(telemetry.batteryVoltage)}
+            Icon={Battery}
+            accent="emerald"
+          />
+        </div>
+      </div>
+    </AppShell>
   );
 }

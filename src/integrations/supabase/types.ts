@@ -14,7 +14,136 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fuel_logs: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          liters_filled: number
+          mileage_at_fill: number
+          price_per_liter: number
+          total_cost: number
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          liters_filled: number
+          mileage_at_fill: number
+          price_per_liter: number
+          total_cost: number
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          liters_filled?: number
+          mileage_at_fill?: number
+          price_per_liter?: number
+          total_cost?: number
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trips: {
+        Row: {
+          created_at: string
+          distance_km: number | null
+          end_lat: number | null
+          end_lng: number | null
+          end_time: string | null
+          id: string
+          start_lat: number | null
+          start_lng: number | null
+          start_time: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          distance_km?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          end_time?: string | null
+          id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_time: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          distance_km?: number | null
+          end_lat?: number | null
+          end_lng?: number | null
+          end_time?: string | null
+          id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          start_time?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          alert_engine_on: boolean
+          alert_low_battery: boolean
+          created_at: string
+          current_mileage: number
+          id: string
+          name: string
+          plate: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          alert_engine_on?: boolean
+          alert_low_battery?: boolean
+          created_at?: string
+          current_mileage?: number
+          id?: string
+          name: string
+          plate: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          alert_engine_on?: boolean
+          alert_low_battery?: boolean
+          created_at?: string
+          current_mileage?: number
+          id?: string
+          name?: string
+          plate?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

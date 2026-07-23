@@ -19,8 +19,8 @@ export const Route = createFileRoute("/mapa")({
 
 function MapaPage() {
   const { telemetry, status } = useFlespiMqtt();
-  const lat = telemetry.position?.latitude;
-  const lng = telemetry.position?.longitude;
+  const lat = telemetry.latitude;
+  const lng = telemetry.longitude;
 
   const fallback = (
     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -45,8 +45,8 @@ function MapaPage() {
             <VehicleMap
               lat={lat}
               lng={lng}
-              speed={telemetry.position?.speed}
-              ignition={telemetry.engine?.ignition?.status}
+              speed={telemetry.speedKmh}
+              ignition={telemetry.ignitionOn}
             />
           </Suspense>
         </ClientOnly>

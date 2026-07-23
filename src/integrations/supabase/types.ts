@@ -60,12 +60,18 @@ export type Database = {
       }
       trips: {
         Row: {
+          avg_speed_kmh: number | null
           created_at: string
           distance_km: number | null
           end_lat: number | null
           end_lng: number | null
           end_time: string | null
+          estimated_cost: number | null
+          fuel_liters: number | null
           id: string
+          max_speed_kmh: number | null
+          mileage_at_end: number | null
+          mileage_at_start: number | null
           start_lat: number | null
           start_lng: number | null
           start_time: string
@@ -73,12 +79,18 @@ export type Database = {
           vehicle_id: string | null
         }
         Insert: {
+          avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
+          estimated_cost?: number | null
+          fuel_liters?: number | null
           id?: string
+          max_speed_kmh?: number | null
+          mileage_at_end?: number | null
+          mileage_at_start?: number | null
           start_lat?: number | null
           start_lng?: number | null
           start_time: string
@@ -86,12 +98,18 @@ export type Database = {
           vehicle_id?: string | null
         }
         Update: {
+          avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
+          estimated_cost?: number | null
+          fuel_liters?: number | null
           id?: string
+          max_speed_kmh?: number | null
+          mileage_at_end?: number | null
+          mileage_at_start?: number | null
           start_lat?: number | null
           start_lng?: number | null
           start_time?: string
@@ -112,6 +130,7 @@ export type Database = {
         Row: {
           alert_engine_on: boolean
           alert_low_battery: boolean
+          avg_consumption_kmpl: number
           created_at: string
           current_mileage: number
           id: string
@@ -123,6 +142,7 @@ export type Database = {
         Insert: {
           alert_engine_on?: boolean
           alert_low_battery?: boolean
+          avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
           id?: string
@@ -134,6 +154,7 @@ export type Database = {
         Update: {
           alert_engine_on?: boolean
           alert_low_battery?: boolean
+          avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
           id?: string

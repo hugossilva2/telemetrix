@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
       { title: "Painel · Gestão Veicular" },
@@ -32,18 +32,8 @@ function Dashboard() {
       />
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <TelemetryCard
-          label="Velocidade"
-          value={formatSpeed(telemetry.speedKmh)}
-          Icon={Gauge}
-          accent="primary"
-        />
-        <TelemetryCard
-          label="Odômetro"
-          value={formatKm(telemetry.mileageKm)}
-          Icon={RouteIcon}
-          accent="sky"
-        />
+        <TelemetryCard label="Velocidade" value={formatSpeed(telemetry.speedKmh)} Icon={Gauge} accent="primary" />
+        <TelemetryCard label="Odômetro" value={formatKm(telemetry.mileageKm)} Icon={RouteIcon} accent="sky" />
         <TelemetryCard
           label="Combustível"
           value={fuel === undefined ? "—" : formatPct(fuel)}
@@ -53,24 +43,12 @@ function Dashboard() {
           {fuel !== undefined ? (
             <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
           ) : (
-            <p className="text-xs text-muted-foreground">
-              Disponível com o motor ligado.
-            </p>
+            <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
           )}
         </TelemetryCard>
-        <TelemetryCard
-          label="RPM"
-          value={formatRpm(telemetry.engineRpm)}
-          Icon={Zap}
-          accent="amber"
-        />
+        <TelemetryCard label="RPM" value={formatRpm(telemetry.engineRpm)} Icon={Zap} accent="amber" />
         <div className="col-span-2">
-          <TelemetryCard
-            label="Bateria"
-            value={formatVolts(telemetry.batteryVoltage)}
-            Icon={Battery}
-            accent="emerald"
-          />
+          <TelemetryCard label="Bateria" value={formatVolts(telemetry.batteryVoltage)} Icon={Battery} accent="emerald" />
         </div>
       </div>
     </AppShell>

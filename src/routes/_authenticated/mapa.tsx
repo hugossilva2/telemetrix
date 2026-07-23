@@ -5,7 +5,7 @@ import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 
-export const Route = createFileRoute("/mapa")({
+export const Route = createFileRoute("/_authenticated/mapa")({
   head: () => ({
     meta: [
       { title: "Mapa · Gestão Veicular" },
@@ -42,12 +42,7 @@ function MapaPage() {
       <div className="h-[calc(100vh-200px)] min-h-[420px] overflow-hidden rounded-2xl border border-border">
         <ClientOnly fallback={fallback}>
           <Suspense fallback={fallback}>
-            <VehicleMap
-              lat={lat}
-              lng={lng}
-              speed={telemetry.speedKmh}
-              ignition={telemetry.ignitionOn}
-            />
+            <VehicleMap lat={lat} lng={lng} speed={telemetry.speedKmh} ignition={telemetry.ignitionOn} />
           </Suspense>
         </ClientOnly>
       </div>

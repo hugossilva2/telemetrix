@@ -9,104 +9,154 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MapaRouteImport } from './routes/mapa'
-import { Route as AjustesRouteImport } from './routes/ajustes'
-import { Route as AbastecimentoRouteImport } from './routes/abastecimento'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
 
-const MapaRoute = MapaRouteImport.update({
-  id: '/mapa',
-  path: '/mapa',
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AjustesRoute = AjustesRouteImport.update({
-  id: '/ajustes',
-  path: '/ajustes',
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AbastecimentoRoute = AbastecimentoRouteImport.update({
-  id: '/abastecimento',
-  path: '/abastecimento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
+  id: '/mapa',
+  path: '/mapa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAbastecimentoRoute =
+  AuthenticatedAbastecimentoRouteImport.update({
+    id: '/abastecimento',
+    path: '/abastecimento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/auth': typeof AuthRoute
+  '/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/mapa': typeof AuthenticatedMapaRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
+  '/auth': typeof AuthRoute
+  '/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/mapa': typeof AuthenticatedMapaRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/mapa': typeof AuthenticatedMapaRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/abastecimento' | '/ajustes' | '/mapa'
+  fullPaths: '/' | '/auth' | '/abastecimento' | '/ajustes' | '/mapa'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/abastecimento' | '/ajustes' | '/mapa'
-  id: '__root__' | '/' | '/abastecimento' | '/ajustes' | '/mapa'
+  to: '/auth' | '/abastecimento' | '/ajustes' | '/mapa' | '/'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/abastecimento'
+    | '/_authenticated/ajustes'
+    | '/_authenticated/mapa'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AbastecimentoRoute: typeof AbastecimentoRoute
-  AjustesRoute: typeof AjustesRoute
-  MapaRoute: typeof MapaRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/mapa': {
-      id: '/mapa'
-      path: '/mapa'
-      fullPath: '/mapa'
-      preLoaderRoute: typeof MapaRouteImport
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ajustes': {
-      id: '/ajustes'
-      path: '/ajustes'
-      fullPath: '/ajustes'
-      preLoaderRoute: typeof AjustesRouteImport
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/abastecimento': {
-      id: '/abastecimento'
-      path: '/abastecimento'
-      fullPath: '/abastecimento'
-      preLoaderRoute: typeof AbastecimentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mapa': {
+      id: '/_authenticated/mapa'
+      path: '/mapa'
+      fullPath: '/mapa'
+      preLoaderRoute: typeof AuthenticatedMapaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/abastecimento': {
+      id: '/_authenticated/abastecimento'
+      path: '/abastecimento'
+      fullPath: '/abastecimento'
+      preLoaderRoute: typeof AuthenticatedAbastecimentoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedMapaRoute: AuthenticatedMapaRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AbastecimentoRoute: AbastecimentoRoute,
-  AjustesRoute: AjustesRoute,
-  MapaRoute: MapaRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

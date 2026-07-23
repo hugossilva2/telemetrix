@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { OngoingTripBanner } from "@/components/trips/OngoingTripBanner";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -89,6 +90,8 @@ function Dashboard() {
         status={status}
         lastMessageAt={lastMessageAt}
       />
+
+      <OngoingTripBanner />
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <TelemetryCard label="Velocidade" value={formatSpeed(telemetry.speedKmh)} Icon={Gauge} accent="primary" />

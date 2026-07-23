@@ -29,6 +29,7 @@ type VehicleRow = {
   current_mileage: number;
   alert_engine_on: boolean;
   alert_low_battery: boolean;
+  avg_consumption_kmpl: number;
 };
 
 function AjustesPage() {
@@ -43,7 +44,7 @@ function AjustesPage() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery")
+        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl")
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
         .limit(1)
@@ -56,6 +57,7 @@ function AjustesPage() {
   const [name, setName] = useState("");
   const [plate, setPlate] = useState("");
   const [mileage, setMileage] = useState("");
+  const [consumption, setConsumption] = useState("10");
   const [alertEngine, setAlertEngine] = useState(false);
   const [alertBattery, setAlertBattery] = useState(false);
 
@@ -64,6 +66,7 @@ function AjustesPage() {
       setName(vehicle.name);
       setPlate(vehicle.plate);
       setMileage(String(vehicle.current_mileage ?? 0));
+      setConsumption(String(vehicle.avg_consumption_kmpl ?? 10));
       setAlertEngine(vehicle.alert_engine_on);
       setAlertBattery(vehicle.alert_low_battery);
     }
@@ -80,6 +83,7 @@ function AjustesPage() {
         name: name.trim() || "Meu carro",
         plate: plate.trim().toUpperCase() || "SEM-PLACA",
         current_mileage: Number(mileage) || 0,
+        avg_consumption_kmpl: Number(consumption) > 0 ? Number(consumption) : 10,
         alert_engine_on: alertEngine,
         alert_low_battery: alertBattery,
       };
@@ -156,6 +160,22 @@ function AjustesPage() {
                 onChange={(e) => setMileage(e.target.value)}
                 disabled={isLoading}
               />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="consumption">Consumo médio (km/l)</Label>
+              <Input
+                id="consumption"
+                type="number"
+                inputMode="decimal"
+                min="0"
+                step="0.1"
+                value={consumption}
+                onChange={(e) => setConsumption(e.target.value)}
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Usado para estimar combustível e custo por viagem.
+              </p>
             </div>
           </div>
         </section>

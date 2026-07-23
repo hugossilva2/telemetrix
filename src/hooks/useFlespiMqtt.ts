@@ -49,14 +49,25 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
       client.options.reconnectPeriod = reconnectDelay;
       setStatus("connected");
       setError(null);
-      client.subscribe(FLESPI_TOPIC, { qos: 0 }, (err) => {
-        if (err) setError(`Falha ao inscrever: ${err.message}`);
+      // Assina o tópico configurado + variantes conhecidas do Flespi
+      // (message tem ou não sufixo, e state/telemetry publica em outro caminho).
+      const topics = [
+        FLESPI_TOPIC,
+        `flespi/message/gw/devices/${FLESPI_CONFIG.deviceId}`,
+        `flespi/state/gw/devices/${FLESPI_CONFIG.deviceId}/telemetry/#`,
+      ];
+      client.subscribe(topics, { qos: 0 }, (err, granted) => {
+        if (err) {
+          setError(`Falha ao inscrever: ${err.message}`);
+          console.warn("[flespi] subscribe error", err);
+        } else {
+          console.log("[flespi] subscribed", granted);
+        }
       });
     });
 
     client.on("reconnect", () => {
       setStatus("reconnecting");
-      // backoff exponencial
       reconnectDelay = Math.min(reconnectDelay * 2, maxDelay);
       client.options.reconnectPeriod = reconnectDelay;
     });
@@ -67,10 +78,13 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
     client.on("error", (err) => {
       setStatus("error");
       setError(err.message);
+      console.warn("[flespi] error", err);
     });
 
-    client.on("message", (_topic, payload) => {
-      const parsed = parseFlespiMessage(payload.toString());
+    client.on("message", (topic, payload) => {
+      const raw = payload.toString();
+      console.log("[flespi] message", topic, raw.slice(0, 200));
+      const parsed = parseFlespiMessage(raw);
       if (!parsed) return;
       setLastMessageAt(Date.now());
       setTelemetry((prev) => mergeTelemetry(prev, parsed));

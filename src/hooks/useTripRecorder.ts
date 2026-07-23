@@ -23,8 +23,11 @@ export function useTripRecorder() {
     const prev = prevIgnition.current;
     prevIgnition.current = ign;
 
-    // Abrir viagem (OFF → ON)
-    if (prev === false && ign === true) {
+    // Abrir viagem: OFF→ON, OU primeira observação já ligada sem viagem aberta.
+    const shouldOpen =
+      (prev === false && ign === true) ||
+      (prev === undefined && ign === true && !tripStore.get());
+    if (shouldOpen) {
       const open: OpenTrip = {
         startTime: new Date().toISOString(),
         startLat: telemetry.latitude ?? null,
@@ -42,8 +45,8 @@ export function useTripRecorder() {
       return;
     }
 
-    // Fechar viagem (ON → OFF)
-    if (prev === true && ign === false) {
+    // Fechar viagem (ON → OFF) — inclui quando app subiu já ligado (prev=undefined).
+    if ((prev === true || prev === undefined) && ign === false) {
       const open = tripStore.get();
       if (!open) return;
       void finalizeTrip(open, telemetry).catch((e) => {

@@ -203,7 +203,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
             await supabaseAdmin.from("trips").insert({
               user_id: vehicle.user_id,
               vehicle_id: vehicle.id,
-              start_time: state.start_time,
+              start_time: state.start_time as string,
               end_time: nowIso,
               start_lat: state.start_lat,
               start_lng: state.start_lng,

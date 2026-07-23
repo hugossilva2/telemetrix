@@ -9,105 +9,27 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as MapaRouteImport } from './routes/mapa'
-import { Route as AjustesRouteImport } from './routes/ajustes'
-import { Route as AbastecimentoRouteImport } from './routes/abastecimento'
-import { Route as IndexRouteImport } from './routes/index'
 
-const MapaRoute = MapaRouteImport.update({
-  id: '/mapa',
-  path: '/mapa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AjustesRoute = AjustesRouteImport.update({
-  id: '/ajustes',
-  path: '/ajustes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AbastecimentoRoute = AbastecimentoRouteImport.update({
-  id: '/abastecimento',
-  path: '/abastecimento',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-
-export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
-}
+export interface FileRoutesByFullPath {}
+export interface FileRoutesByTo {}
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/abastecimento': typeof AbastecimentoRoute
-  '/ajustes': typeof AjustesRoute
-  '/mapa': typeof MapaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/abastecimento' | '/ajustes' | '/mapa'
+  fullPaths: never
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/abastecimento' | '/ajustes' | '/mapa'
-  id: '__root__' | '/' | '/abastecimento' | '/ajustes' | '/mapa'
+  to: never
+  id: '__root__'
   fileRoutesById: FileRoutesById
 }
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AbastecimentoRoute: typeof AbastecimentoRoute
-  AjustesRoute: typeof AjustesRoute
-  MapaRoute: typeof MapaRoute
-}
+export interface RootRouteChildren {}
 
 declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/mapa': {
-      id: '/mapa'
-      path: '/mapa'
-      fullPath: '/mapa'
-      preLoaderRoute: typeof MapaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ajustes': {
-      id: '/ajustes'
-      path: '/ajustes'
-      fullPath: '/ajustes'
-      preLoaderRoute: typeof AjustesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/abastecimento': {
-      id: '/abastecimento'
-      path: '/abastecimento'
-      fullPath: '/abastecimento'
-      preLoaderRoute: typeof AbastecimentoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
+  interface FileRoutesByPath {}
 }
 
-const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AbastecimentoRoute: AbastecimentoRoute,
-  AjustesRoute: AjustesRoute,
-  MapaRoute: MapaRoute,
-}
+const rootRouteChildren: RootRouteChildren = {}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()

@@ -42,6 +42,21 @@ function timeAgo(ts: number | null): string {
 export function StatusHeader({ ignitionOn, status, lastMessageAt }: Props) {
   const on = ignitionOn === true;
   const known = ignitionOn !== undefined;
+
+  // Tick a cada 1s para o "há Xs" andar mesmo sem mensagem nova.
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  const secsSince =
+    lastMessageAt != null
+      ? Math.max(0, Math.floor((Date.now() - lastMessageAt) / 1000))
+      : null;
+  // Telemetria chega a cada ~15s; acima de 30s consideramos sinal atrasado.
+  const stale = secsSince != null && secsSince > 30;
+
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-center justify-between gap-3">
@@ -65,11 +80,16 @@ export function StatusHeader({ ignitionOn, status, lastMessageAt }: Props) {
         </Badge>
       </div>
       <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span className={`inline-block size-2 rounded-full ${statusDot[status]}`} />
-        <span>{statusText[status]}</span>
+        <span
+          className={`inline-block size-2 rounded-full ${
+            stale && status === "connected" ? "bg-yellow-500 animate-pulse" : statusDot[status]
+          }`}
+        />
+        <span>{stale && status === "connected" ? "Sinal atrasado" : statusText[status]}</span>
         <span aria-hidden>•</span>
         <span>{timeAgo(lastMessageAt)}</span>
       </div>
     </div>
   );
 }
+

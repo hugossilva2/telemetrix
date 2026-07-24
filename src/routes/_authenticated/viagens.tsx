@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Leaf, Route as RouteIcon } from "lucide-react";
@@ -29,10 +29,48 @@ type TripRow = {
   estimated_cost: number | null;
 };
 
+function getTripStartMs(t: TripRow) {
+  return new Date(t.start_time).getTime();
+}
+
+function getTripEndMs(t: TripRow) {
+  if (!t.end_time) return getTripStartMs(t);
+  return new Date(t.end_time).getTime();
+}
+
+function tripScore(t: TripRow) {
+  const durationS = Math.max(0, (getTripEndMs(t) - getTripStartMs(t)) / 1000);
+  return (t.distance_km ?? 0) * 10_000 + durationS;
+}
+
+function removeOverlappingFragments(rows: TripRow[]) {
+  const selected: TripRow[] = [];
+  const byBestSignal = [...rows].sort((a, b) => tripScore(b) - tripScore(a));
+
+  for (const trip of byBestSignal) {
+    const start = getTripStartMs(trip);
+    const end = getTripEndMs(trip);
+    const overlapsExisting = selected.some((kept) => {
+      const keptStart = getTripStartMs(kept);
+      const keptEnd = getTripEndMs(kept);
+      return start <= keptEnd && end >= keptStart;
+    });
+
+    if (!overlapsExisting) selected.push(trip);
+  }
+
+  return selected.sort((a, b) => getTripStartMs(b) - getTripStartMs(a));
+}
+
 const monthLabel = (d: Date) =>
   d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
 function ViagensPage() {
+  const showingTripDetail = useRouterState({
+    select: (state) =>
+      state.matches.some((match) => match.routeId === "/_authenticated/viagens/$id"),
+  });
+
   const { data: trips, isLoading } = useQuery({
     queryKey: ["trips-list"],
     queryFn: async (): Promise<TripRow[]> => {
@@ -46,6 +84,11 @@ function ViagensPage() {
     },
   });
 
+  const visibleTrips = useMemo(
+    () => removeOverlappingFragments(trips ?? []),
+    [trips],
+  );
+
   // Mês selecionado: chave "YYYY-MM"
   const [monthKey, setMonthKey] = useState<string>(() => {
     const now = new Date();
@@ -55,14 +98,14 @@ function ViagensPage() {
   // Meses disponíveis (com viagens)
   const availableMonths = useMemo(() => {
     const set = new Set<string>();
-    for (const t of trips ?? []) {
+    for (const t of visibleTrips) {
       const d = new Date(t.start_time);
       set.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`);
     }
     // sempre inclui o mês atual para permitir navegação
     set.add(monthKey);
     return Array.from(set).sort().reverse();
-  }, [trips, monthKey]);
+  }, [visibleTrips, monthKey]);
 
   const currentIdx = availableMonths.indexOf(monthKey);
   const canPrev = currentIdx < availableMonths.length - 1;
@@ -75,14 +118,14 @@ function ViagensPage() {
 
   // Viagens do mês
   const monthTrips = useMemo(() => {
-    return (trips ?? []).filter((t) => {
+    return visibleTrips.filter((t) => {
       const d = new Date(t.start_time);
       return (
         d.getFullYear() === monthDate.getFullYear() &&
         d.getMonth() === monthDate.getMonth()
       );
     });
-  }, [trips, monthDate]);
+  }, [visibleTrips, monthDate]);
 
   // Totais do mês
   const totals = useMemo(() => {
@@ -100,7 +143,7 @@ function ViagensPage() {
 
   // Eficiência (km/L) por viagem + comparação com viagens de distância similar (±20%)
   const efficiencyById = useMemo(() => {
-    const all = trips ?? [];
+    const all = visibleTrips;
     const withEff = all
       .map((t) => {
         const km = t.distance_km ?? 0;
@@ -123,7 +166,11 @@ function ViagensPage() {
       map.set(t.id, { kmpl: t.kmpl, better: t.kmpl >= avg * 1.05, sampleSize: peers.length });
     }
     return map;
-  }, [trips]);
+  }, [visibleTrips]);
+
+  if (showingTripDetail) {
+    return <Outlet />;
+  }
 
   return (
     <AppShell title="Viagens" subtitle="Relatório mensal">

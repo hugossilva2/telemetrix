@@ -1,6 +1,6 @@
 export const DEFAULT_GAS_PRICE_PER_LITER = 5.89;
 
-function isUsableNumber(value: number | null | undefined) {
+function isUsableNumber(value: number | null | undefined): value is number {
   return typeof value === "number" && Number.isFinite(value) && value >= 0;
 }
 

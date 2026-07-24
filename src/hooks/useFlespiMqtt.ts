@@ -84,7 +84,9 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
     client.on("message", (topic, payload) => {
       const raw = payload.toString();
       console.log("[flespi] message", topic, raw.slice(0, 200));
-      const parsed = parseFlespiMessage(raw);
+      const parsed = topic.includes("/telemetry/")
+        ? parseFlespiStateTopic(topic, raw)
+        : parseFlespiMessage(raw);
       if (!parsed) return;
       setLastMessageAt(Date.now());
       setTelemetry((prev) => mergeTelemetry(prev, parsed));

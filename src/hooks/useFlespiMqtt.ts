@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mqtt, { type MqttClient } from "mqtt";
 import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
-import { mergeTelemetry, parseFlespiMessage } from "@/lib/flespi/parse";
+import { mergeTelemetry, parseFlespiMessage, parseFlespiStateTopic } from "@/lib/flespi/parse";
 import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
 
 export interface UseFlespiMqttResult {

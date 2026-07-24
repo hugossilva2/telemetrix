@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
 import { useMap } from "react-leaflet";
+import L from "leaflet";
 import { Crosshair, Maximize2, Minimize2, Navigation, NavigationOff } from "lucide-react";
 
 /** Régua de escala do Leaflet. */
 export function ScaleControl() {
   const map = useMap();
   useEffect(() => {
-    // @ts-expect-error leaflet types
-    const ctrl = (map as unknown as { L?: unknown }) && null;
-    void ctrl;
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const L = require("leaflet");
     const scale = L.control.scale({ imperial: false, position: "bottomright" });
     scale.addTo(map);
     return () => {

@@ -1,4 +1,5 @@
 import { Polyline } from "react-leaflet";
+import type { LatLngExpression } from "leaflet";
 
 export type SpeedSample = {
   lat: number;
@@ -7,7 +8,6 @@ export type SpeedSample = {
   t?: number;
 };
 
-/** Cor pela faixa de velocidade (km/h). */
 export function colorForSpeed(kmh: number | null | undefined): string {
   const v = typeof kmh === "number" && Number.isFinite(kmh) ? kmh : 0;
   if (v < 20) return "#3b82f6";
@@ -17,24 +17,20 @@ export function colorForSpeed(kmh: number | null | undefined): string {
   return "#ef4444";
 }
 
-/**
- * Desenha o rastro como uma sequência de segmentos coloridos pela velocidade
- * do ponto inicial de cada segmento. Fallback: se todos os pontos não tiverem
- * velocidade, desenha uma polyline única verde.
- */
 export function SpeedPolyline({ points }: { points: SpeedSample[] }) {
   if (points.length < 2) return null;
-
   const hasSpeed = points.some((p) => typeof p.speed === "number");
+  const positions: LatLngExpression[] = points.map((p) => [p.lat, p.lng]);
+
   if (!hasSpeed) {
     return (
       <>
         <Polyline
-          positions={points.map((p) => [p.lat, p.lng])}
+          positions={positions}
           pathOptions={{ color: "#22c55e", weight: 5, opacity: 0.85, lineCap: "round" }}
         />
         <Polyline
-          positions={points.map((p) => [p.lat, p.lng])}
+          positions={positions}
           pathOptions={{ color: "#ffffff", weight: 1.5, opacity: 0.35, dashArray: "2 6" }}
         />
       </>
@@ -45,13 +41,14 @@ export function SpeedPolyline({ points }: { points: SpeedSample[] }) {
     <>
       {points.slice(0, -1).map((p, i) => {
         const next = points[i + 1];
+        const seg: LatLngExpression[] = [
+          [p.lat, p.lng],
+          [next.lat, next.lng],
+        ];
         return (
           <Polyline
             key={i}
-            positions={[
-              [p.lat, p.lng],
-              [next.lat, next.lng],
-            ]}
+            positions={seg}
             pathOptions={{
               color: colorForSpeed(p.speed),
               weight: 5,
@@ -96,7 +93,10 @@ export function SpeedLegend() {
     >
       <span style={{ opacity: 0.7 }}>km/h</span>
       {items.map((it) => (
-        <span key={it.label} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+        <span
+          key={it.label}
+          style={{ display: "inline-flex", alignItems: "center", gap: 4, fontVariantNumeric: "tabular-nums" }}
+        >
           <span
             style={{
               width: 10,
@@ -106,7 +106,7 @@ export function SpeedLegend() {
               display: "inline-block",
             }}
           />
-          <span style={{ tabularNums: "true" as unknown as undefined }}>{it.label}</span>
+          <span>{it.label}</span>
         </span>
       ))}
     </div>

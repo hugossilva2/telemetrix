@@ -69,6 +69,7 @@ function AjustesPage() {
       setPlate(vehicle.plate);
       setMileage(String(vehicle.current_mileage ?? 0));
       setConsumption(String(vehicle.avg_consumption_kmpl ?? 10));
+      setDeviceId(vehicle.flespi_device_id ?? "");
       setAlertEngine(vehicle.alert_engine_on);
       setAlertBattery(vehicle.alert_low_battery);
     }

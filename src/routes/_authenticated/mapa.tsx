@@ -127,7 +127,7 @@ function MapaPage() {
             : "Sem conexão"
       }
     >
-      <div className="h-[calc(100vh-200px)] min-h-[420px] overflow-hidden rounded-2xl border border-border">
+      <div className="h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-2xl border border-border">
         <ClientOnly fallback={fallback}>
           <Suspense fallback={fallback}>
             <VehicleMap

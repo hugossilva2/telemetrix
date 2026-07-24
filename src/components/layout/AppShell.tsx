@@ -9,15 +9,18 @@ interface AppShellProps {
 
 export function AppShell({ title, subtitle, action, children }: AppShellProps) {
   return (
-    <div className="mx-auto flex min-h-screen max-w-md flex-col bg-background pb-20">
+    <div
+      className="mx-auto flex min-h-[100dvh] max-w-md flex-col bg-background"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 5.25rem)" }}
+    >
       <header
         className="sticky top-0 z-30 border-b border-border bg-background/95 px-4 py-3 backdrop-blur"
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}
       >
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <h1 className="text-lg font-semibold tracking-tight">{title}</h1>
-            {subtitle && <div className="text-xs text-muted-foreground">{subtitle}</div>}
+          <div className="min-w-0">
+            <h1 className="truncate text-lg font-semibold tracking-tight">{title}</h1>
+            {subtitle && <div className="truncate text-xs text-muted-foreground">{subtitle}</div>}
           </div>
           {action}
         </div>

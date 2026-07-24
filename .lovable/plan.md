@@ -1,43 +1,24 @@
 ## Objetivo
-Resolver os 3 avisos restantes do PWABuilder mostrados no screenshot:
-1. Adicionar service worker (faster & more reliable)
-2. Corrigir tamanhos de ícones no manifest
-3. Adicionar screenshots ao manifest
+1. Gerar novo ícone conceito "Pulso do Veículo" (silhueta minimalista de carro de perfil com o assoalho virando um gráfico de ECG/linha de performance, fundo dark, brilho verde neon/ciano).
+2. Renomear o app de "DriveWise" para **Telemetrix**.
 
 ## Passos
 
-### 1. Service Worker (offline básico)
-Seguindo a skill PWA (offline explícito), instalar `vite-plugin-pwa` e configurar com `generateSW`:
-- `registerType: "autoUpdate"`, `injectRegister: null`, `devOptions.enabled: false`
-- Navegações HTML: `NetworkFirst`
-- Assets hasheados same-origin: `CacheFirst`
-- Excluir `/~oauth` e `/api/*` do fallback
-- Criar `src/pwa/register-sw.ts` com wrapper de registro que recusa em: dev, iframe, hosts `id-preview--*`, `preview--*`, `*.lovableproject.com`, `*.lovableproject-dev.com`, `*.beta.lovable.dev`, e quando `?sw=off` (nesse caso faz unregister)
-- Importar o wrapper apenas em `src/start.ts` (client entry), sem afetar SSR
-- Não registrar SW no editor de preview do Lovable — só funciona no domínio publicado
+### 1. Ícone
+- Gerar via `imagegen` (premium, quadrado, fundo dark #0b1220) em 1024×1024 salvando em `src/assets/telemetrix-icon.png`.
+- Redimensionar cópias para `public/icons/icon-192.png` (192×192), `public/icons/icon-512.png` (512×512), `public/icons/apple-touch-icon.png` (180×180) e `public/favicon.ico`.
+- Prompt: silhueta de carro de perfil minimalista, linha do assoalho continua como traço de eletrocardiograma/linha de performance, glow verde-neon/ciano, fundo escuro sólido, estilo flat/tech, sem texto.
 
-### 2. Ícones do manifest
-Auditar `public/manifest.webmanifest`:
-- Garantir entries com `sizes` exatos que batem com o arquivo real (192x192 e 512x512)
-- Adicionar ícone `any` + `maskable` separados, com `type: "image/png"`
-- Se PWABuilder reclamar do tamanho real do PNG, regenerar via `imagegen` com dimensões exatas
+### 2. Renome para Telemetrix
+Substituir "DriveWise" por "Telemetrix" em:
+- `public/manifest.webmanifest` (`name`, `short_name`, `description`)
+- `src/routes/__root.tsx` (title, description, og:*)
+- Textos visíveis: `src/components/layout/BottomNav.tsx`, headers das rotas (Painel, Ajustes, InstallAppCard) e quaisquer strings "DriveWise" encontradas via `rg`.
+- README se existir.
 
-### 3. Screenshots no manifest
-Capturar 2 screenshots do app rodando (via Playwright headless em `localhost:8080`, viewport mobile 390x844 e desktop 1280x800) das rotas `/` (Painel) e `/mapa`. Salvar em `public/screenshots/`. Adicionar ao manifest:
-```
-"screenshots": [
-  { "src": "/screenshots/mobile-painel.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Painel em tempo real" },
-  { "src": "/screenshots/desktop-mapa.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Mapa ao vivo" }
-]
-```
+Nota: manter o slug publicado atual (`drive-wise-69.lovable.app`); renomear a URL é opcional e só se o usuário pedir depois.
 
-## Detalhes técnicos
-- `vite-plugin-pwa` no `vite.config.ts` com `strategies: "generateSW"` e `filename: "sw.js"`
-- Wrapper de registro chamado uma única vez após montagem do app no client
-- Manifest continua com os campos já ajustados (prefer_related_applications, iarc_rating_id, scope_extensions)
-
-## Verificação
-1. Build sem erros
-2. Publicar
-3. Rodar "Retest" no PWABuilder — os 3 itens devem ficar verdes
-4. Verificar em `?sw=off` que o SW é desregistrado
+### 3. Verificação
+- Build sem erros.
+- `curl` no `/manifest.webmanifest` mostra "Telemetrix".
+- Screenshot rápido do Painel confirmando o novo nome.

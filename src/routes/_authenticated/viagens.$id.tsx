@@ -15,6 +15,7 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
+import { estimateTripCost } from "@/lib/trips/cost";
 import {
   formatDateTime,
   formatDurationBetween,
@@ -96,8 +97,20 @@ function TripDetailPage() {
     },
   });
 
+  const tripCost = trip
+    ? estimateTripCost({
+        estimatedCost: trip.estimated_cost,
+        fuelLiters: trip.fuel_liters,
+      })
+    : null;
+
   const analysis = useMemo(() => {
     if (!trip || !allTrips) return null;
+
+    const currentTripCost = estimateTripCost({
+      estimatedCost: trip.estimated_cost,
+      fuelLiters: trip.fuel_liters,
+    });
 
     const kmpl =
       trip.distance_km && trip.fuel_liters && trip.fuel_liters > 0
@@ -116,10 +129,20 @@ function TripDetailPage() {
         (t.fuel_liters ?? 0) > 0,
     );
     const simKmpl = similar
-      .map((t) => (t.distance_km! / t.fuel_liters!))
-      .filter((v) => Number.isFinite(v) && v > 0);
+      .map((t) => {
+        if (t.distance_km == null || t.fuel_liters == null || t.fuel_liters <= 0) {
+          return null;
+        }
+        return t.distance_km / t.fuel_liters;
+      })
+      .filter((v): v is number => v != null && Number.isFinite(v) && v > 0);
     const simCost = similar
-      .map((t) => t.estimated_cost)
+      .map((t) =>
+        estimateTripCost({
+          estimatedCost: t.estimated_cost,
+          fuelLiters: t.fuel_liters,
+        }),
+      )
       .filter((v): v is number => v != null);
     const avgKmpl =
       simKmpl.length > 0 ? simKmpl.reduce((s, v) => s + v, 0) / simKmpl.length : null;
@@ -129,8 +152,8 @@ function TripDetailPage() {
     const kmplDiffPct =
       kmpl != null && avgKmpl != null ? ((kmpl - avgKmpl) / avgKmpl) * 100 : null;
     const costDiffPct =
-      trip.estimated_cost != null && avgCost != null && avgCost > 0
-        ? ((trip.estimated_cost - avgCost) / avgCost) * 100
+      currentTripCost != null && avgCost != null && avgCost > 0
+        ? ((currentTripCost - avgCost) / avgCost) * 100
         : null;
     const better = kmplDiffPct != null && kmplDiffPct >= 5;
 
@@ -147,13 +170,21 @@ function TripDetailPage() {
       return d >= firstOfMonth && d < firstOfNext;
     });
     const monthKm = monthTrips.reduce((s, t) => s + (t.distance_km ?? 0), 0);
-    const monthCost = monthTrips.reduce((s, t) => s + (t.estimated_cost ?? 0), 0);
+    const monthCost = monthTrips.reduce(
+      (s, t) =>
+        s +
+        (estimateTripCost({
+          estimatedCost: t.estimated_cost,
+          fuelLiters: t.fuel_liters,
+        }) ?? 0),
+      0,
+    );
     const monthLiters = monthTrips.reduce((s, t) => s + (t.fuel_liters ?? 0), 0);
 
     const kmSharePct = monthKm > 0 ? ((trip.distance_km ?? 0) / monthKm) * 100 : 0;
     const costSharePct =
-      monthCost > 0 && trip.estimated_cost != null
-        ? (trip.estimated_cost / monthCost) * 100
+      monthCost > 0 && currentTripCost != null
+        ? (currentTripCost / monthCost) * 100
         : 0;
 
     // Projeção do mês (só faz sentido se o mês selecionado é o mês corrente)
@@ -174,6 +205,7 @@ function TripDetailPage() {
       kmplDiffPct,
       costDiffPct,
       better,
+      tripCost: currentTripCost,
       monthKm,
       monthCost,
       monthLiters,
@@ -321,7 +353,7 @@ function TripDetailPage() {
             <Stat
               Icon={Fuel}
               label="Custo estimado"
-              value={trip.estimated_cost != null ? formatBRL(trip.estimated_cost) : "—"}
+              value={tripCost != null ? formatBRL(tripCost) : "—"}
               highlight
             />
           </div>
@@ -356,7 +388,7 @@ function TripDetailPage() {
                   <CompareRow
                     label="Custo"
                     thisValue={
-                      trip.estimated_cost != null ? formatBRL(trip.estimated_cost) : "—"
+                      analysis.tripCost != null ? formatBRL(analysis.tripCost) : "—"
                     }
                     avgValue={
                       analysis.avgCost != null ? formatBRL(analysis.avgCost) : "—"
@@ -384,7 +416,7 @@ function TripDetailPage() {
                 <ShareBar
                   label="Custo do mês"
                   pct={analysis.costSharePct}
-                  right={`${formatBRL(trip.estimated_cost ?? 0)} / ${formatBRL(analysis.monthCost)}`}
+                  right={`${formatBRL(analysis.tripCost ?? 0)} / ${formatBRL(analysis.monthCost)}`}
                   accent="emerald"
                 />
               </div>

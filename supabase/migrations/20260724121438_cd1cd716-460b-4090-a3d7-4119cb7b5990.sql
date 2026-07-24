@@ -1,0 +1,1 @@
+DELETE FROM public.trips WHERE id = '78b547c1-252d-4012-a30b-14d14e3ce50a';

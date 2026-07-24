@@ -65,12 +65,12 @@ function MapaPage() {
       lastPointRef.current = null;
     }
     if ((prev === true || prev === undefined) && ignition === false) {
-      const pos =
+      const pos: TrailPoint | null =
         typeof lat === "number" && typeof lng === "number"
-          ? ([lat, lng] as TrailPoint)
+          ? { lat, lng, t: Date.now() }
           : lastKnownPosRef.current;
       if (pos) {
-        const next: Parked = { lat: pos[0], lng: pos[1], at: Date.now() };
+        const next: Parked = { lat: pos.lat, lng: pos.lng, at: Date.now() };
         setParked(next);
         try {
           window.localStorage.setItem(PARKED_KEY, JSON.stringify(next));

@@ -181,6 +181,19 @@ function AjustesPage() {
                 Usado para estimar combustível e custo por viagem.
               </p>
             </div>
+            <div className="space-y-1">
+              <Label htmlFor="deviceId">ID do rastreador Flespi</Label>
+              <Input
+                id="deviceId"
+                value={deviceId}
+                onChange={(e) => setDeviceId(e.target.value)}
+                placeholder="Ex: 8634775"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Vincula este veículo ao dispositivo para gravar viagens no servidor mesmo com o app fechado.
+              </p>
+            </div>
           </div>
         </section>
 

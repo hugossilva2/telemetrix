@@ -2,7 +2,9 @@ import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
-import type { TrailPoint } from "@/components/map/VehicleMap";
+import type { SpeedSample } from "@/components/map/SpeedPolyline";
+
+type TrailPoint = SpeedSample;
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 

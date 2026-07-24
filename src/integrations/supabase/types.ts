@@ -70,6 +70,7 @@ export type Database = {
           liters_filled: number
           mileage_at_fill: number
           price_per_liter: number
+          receipt_url: string | null
           total_cost: number
           user_id: string
           vehicle_id: string | null
@@ -81,6 +82,7 @@ export type Database = {
           liters_filled: number
           mileage_at_fill: number
           price_per_liter: number
+          receipt_url?: string | null
           total_cost: number
           user_id: string
           vehicle_id?: string | null
@@ -92,6 +94,7 @@ export type Database = {
           liters_filled?: number
           mileage_at_fill?: number
           price_per_liter?: number
+          receipt_url?: string | null
           total_cost?: number
           user_id?: string
           vehicle_id?: string | null

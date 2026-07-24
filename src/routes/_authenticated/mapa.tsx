@@ -89,7 +89,7 @@ function MapaPage() {
       if (mileageStart === null && ignition === true) setMileageStart(mileage);
     }
     if (typeof lat !== "number" || typeof lng !== "number") return;
-    const pt: TrailPoint = [lat, lng];
+    const pt: TrailPoint = { lat, lng, speed: telemetry.speedKmh ?? null, t: Date.now() };
     lastKnownPosRef.current = pt;
     const last = lastPointRef.current;
     if (last) {

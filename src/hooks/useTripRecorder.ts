@@ -151,7 +151,7 @@ async function finalizeTrip(
   ]);
 
   const kmpl = Number(vehicle?.avg_consumption_kmpl) || 10;
-  const price = Number(lastFuel?.price_per_liter) || 0;
+  const price = Number(lastFuel?.price_per_liter) || 5.89;
   const fuelLiters = kmpl > 0 ? distanceKm / kmpl : null;
   const estimatedCost =
     fuelLiters !== null && price > 0 ? fuelLiters * price : null;

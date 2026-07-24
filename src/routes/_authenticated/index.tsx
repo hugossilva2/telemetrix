@@ -11,6 +11,7 @@ import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripBanner } from "@/components/trips/OngoingTripBanner";
+import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -112,6 +113,7 @@ function Dashboard() {
         <div className="col-span-2">
           <TelemetryCard label="Bateria" value={formatVolts(telemetry.batteryVoltage)} Icon={Battery} accent="emerald" />
         </div>
+        <LiveConsumptionCard />
       </div>
     </AppShell>
   );

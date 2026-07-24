@@ -141,6 +141,19 @@ export default function VehicleMap({
             </Popup>
           </Marker>
         )}
+        {showParked && parked && (
+          <Marker position={[parked.lat, parked.lng]} icon={parkedIcon}>
+            <Popup>
+              <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                <strong>🅿️ Último local estacionado</strong>
+                <br />
+                {new Date(parked.at).toLocaleString("pt-BR")}
+                <br />
+                {parked.lat.toFixed(5)}, {parked.lng.toFixed(5)}
+              </div>
+            </Popup>
+          </Marker>
+        )}
         {hasPosition && (
           <>
             <Recenter lat={lat!} lng={lng!} follow />

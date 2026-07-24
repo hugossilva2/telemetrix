@@ -1,7 +1,8 @@
-import { useTripRecorder } from "@/hooks/useTripRecorder";
-
-/** Componente invisível que roda o recorder enquanto o usuário está logado. */
+/**
+ * Gravação de viagens agora é feita 100% no servidor via webhook do Flespi
+ * (src/routes/api/public/flespi-webhook.ts). O hook client-side foi
+ * desativado para evitar viagens duplicadas.
+ */
 export function TripRecorder() {
-  useTripRecorder();
   return null;
 }

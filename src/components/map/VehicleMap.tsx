@@ -43,6 +43,27 @@ const startIcon = L.divIcon({
   iconAnchor: [8, 8],
 });
 
+const parkedIcon = L.divIcon({
+  className: "parked-marker",
+  html: `
+    <div style="position:relative;width:30px;height:38px;">
+      <div style="
+        position:absolute;left:50%;top:0;transform:translateX(-50%);
+        width:28px;height:28px;border-radius:50% 50% 50% 0;
+        transform-origin:center;rotate:-45deg;
+        background:#ef4444;border:3px solid #0b1220;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>
+      <div style="
+        position:absolute;left:50%;top:5px;transform:translateX(-50%);
+        width:18px;height:18px;border-radius:50%;
+        background:#0b1220;color:#fff;font-size:11px;font-weight:800;
+        display:flex;align-items:center;justify-content:center;">P</div>
+    </div>
+  `,
+  iconSize: [30, 38],
+  iconAnchor: [15, 36],
+});
+
 function Recenter({ lat, lng, follow }: { lat: number; lng: number; follow: boolean }) {
   const map = useMap();
   useEffect(() => {

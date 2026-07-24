@@ -59,10 +59,13 @@ export function LiveConsumptionCard() {
     }
   }
 
+  const DEFAULT_PRICE = 6.0;
   const kmpl = data?.kmpl ?? 10;
-  const price = data?.pricePerLiter ?? null;
+  const priceFromLog = data?.pricePerLiter != null ? Number(data.pricePerLiter) : null;
+  const price = priceFromLog ?? DEFAULT_PRICE;
+  const usingFallbackPrice = priceFromLog === null;
   const liters = distanceKm !== null ? distanceKm / kmpl : null;
-  const cost = liters !== null && price !== null ? liters * Number(price) : null;
+  const cost = liters !== null ? liters * price : null;
 
   return (
     <div className="col-span-2 rounded-2xl border border-border/60 bg-card p-4">
@@ -72,8 +75,7 @@ export function LiveConsumptionCard() {
           Consumo em tempo real
         </div>
         <div className="text-[10px] text-muted-foreground">
-          {kmpl.toFixed(1)} km/L
-          {price !== null && ` · ${BRL.format(Number(price))}/L`}
+          {kmpl.toFixed(1)} km/L · {BRL.format(price)}/L
         </div>
       </div>
 
@@ -100,7 +102,7 @@ export function LiveConsumptionCard() {
               {cost !== null ? BRL.format(cost) : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">
-              {price === null ? "cadastre um abastecimento" : "com base no último preço"}
+              {usingFallbackPrice ? "preço padrão — cadastre um abastecimento" : "com base no último preço"}
             </div>
           </div>
         </div>

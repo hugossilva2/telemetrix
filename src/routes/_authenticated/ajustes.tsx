@@ -30,6 +30,7 @@ type VehicleRow = {
   alert_engine_on: boolean;
   alert_low_battery: boolean;
   avg_consumption_kmpl: number;
+  flespi_device_id: string | null;
 };
 
 function AjustesPage() {
@@ -44,7 +45,7 @@ function AjustesPage() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl")
+        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl,flespi_device_id")
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
         .limit(1)
@@ -58,6 +59,7 @@ function AjustesPage() {
   const [plate, setPlate] = useState("");
   const [mileage, setMileage] = useState("");
   const [consumption, setConsumption] = useState("10");
+  const [deviceId, setDeviceId] = useState("");
   const [alertEngine, setAlertEngine] = useState(false);
   const [alertBattery, setAlertBattery] = useState(false);
 
@@ -67,6 +69,7 @@ function AjustesPage() {
       setPlate(vehicle.plate);
       setMileage(String(vehicle.current_mileage ?? 0));
       setConsumption(String(vehicle.avg_consumption_kmpl ?? 10));
+      setDeviceId(vehicle.flespi_device_id ?? "");
       setAlertEngine(vehicle.alert_engine_on);
       setAlertBattery(vehicle.alert_low_battery);
     }
@@ -84,6 +87,7 @@ function AjustesPage() {
         plate: plate.trim().toUpperCase() || "SEM-PLACA",
         current_mileage: Number(mileage) || 0,
         avg_consumption_kmpl: Number(consumption) > 0 ? Number(consumption) : 10,
+        flespi_device_id: deviceId.trim() || null,
         alert_engine_on: alertEngine,
         alert_low_battery: alertBattery,
       };
@@ -175,6 +179,19 @@ function AjustesPage() {
               />
               <p className="text-xs text-muted-foreground">
                 Usado para estimar combustível e custo por viagem.
+              </p>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="deviceId">ID do rastreador Flespi</Label>
+              <Input
+                id="deviceId"
+                value={deviceId}
+                onChange={(e) => setDeviceId(e.target.value)}
+                placeholder="Ex: 8634775"
+                disabled={isLoading}
+              />
+              <p className="text-xs text-muted-foreground">
+                Vincula este veículo ao dispositivo para gravar viagens no servidor mesmo com o app fechado.
               </p>
             </div>
           </div>

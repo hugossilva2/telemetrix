@@ -81,10 +81,11 @@ export interface VehicleMapProps {
   distanceKm?: number;
   lastUpdate?: number | null;
   status?: string;
+  parked?: { lat: number; lng: number; at: number } | null;
 }
 
 export default function VehicleMap({
-  lat, lng, speed, ignition, trail = [], distanceKm = 0, lastUpdate, status,
+  lat, lng, speed, ignition, trail = [], distanceKm = 0, lastUpdate, status, parked,
 }: VehicleMapProps) {
   const hasPosition = typeof lat === "number" && typeof lng === "number";
   const center = useMemo<[number, number]>(
@@ -94,6 +95,14 @@ export default function VehicleMap({
   const moving = !!ignition && typeof speed === "number" && speed > 3;
   const icon = useMemo(() => makeCarIcon({ moving, ignition: !!ignition }), [moving, ignition]);
   const start = trail[0];
+  // Só mostra o marcador de estacionado quando o veículo NÃO está no mesmo ponto ao vivo
+  // (evita sobrepor o ícone do carro quando está desligado exatamente ali).
+  const showParked = !!parked && (
+    !hasPosition ||
+    !!ignition ||
+    Math.abs(parked.lat - (lat as number)) > 0.00005 ||
+    Math.abs(parked.lng - (lng as number)) > 0.00005
+  );
 
   const secondsAgo = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : null;
 

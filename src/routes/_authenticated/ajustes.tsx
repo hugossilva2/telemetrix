@@ -30,6 +30,7 @@ type VehicleRow = {
   alert_engine_on: boolean;
   alert_low_battery: boolean;
   avg_consumption_kmpl: number;
+  flespi_device_id: string | null;
 };
 
 function AjustesPage() {

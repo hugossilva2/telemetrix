@@ -1,49 +1,71 @@
-## Dashboard completo da viagem em `/viagens/$id`
+## Incrementar visão do mapa (Leaflet + OSM)
 
-O card já é clicável e leva para `/viagens/$id`, mas hoje essa tela mostra só um resumo simples. Vou transformá-la num **dashboard completo** com comparações, projeções e contexto financeiro do mês.
+Melhorias aplicadas em `/mapa` (tempo real) e `/viagens/$id` (histórico), mantendo o custo zero e sem tokens externos.
 
-### O que a nova página vai ter
+### 1. Seletor de estilo de mapa (base layer)
 
-1. **Cabeçalho** — data/hora de início, duração e badge "eficiente" quando aplicável.
+Novo controle flutuante no canto superior direito com 4 opções:
 
-2. **Mini-mapa** (já existe) com marcadores de início e fim.
+- **Escuro** — CartoDB Dark Matter (padrão, combina com o dark mode)
+- **Claro** — CartoDB Positron
+- **Ruas** — OpenStreetMap padrão
+- **Satélite** — Esri World Imagery + overlay de labels
 
-3. **KPIs principais** (grid 2x3):
-   - Distância
-   - Duração
-   - Velocidade média
-   - Velocidade máxima
-   - Consumo (km/L)
-   - Custo estimado (R$)
+A escolha fica salva em `localStorage` (`mapStyle:v1`) e vale para os dois mapas.
 
-4. **Início x Fim** — card lado a lado com horário e odômetro no início e no fim da viagem.
+### 2. Marcadores ricos e POIs da jornada
 
-5. **Comparativo com viagens similares** (±20% da distância):
-   - Consumo médio das similares vs. esta viagem, com % de diferença (verde se melhor, vermelho se pior).
-   - Custo médio das similares vs. esta viagem.
-   - Nº de viagens usadas na amostra; se não houver amostra, exibe "sem viagens similares ainda".
+No `/mapa`:
+- 🚗 veículo (já existe, mantém animação de pulso conforme movimento)
+- 🟢 partida da rota atual (já existe)
+- 🅿️ último estacionado (já existe)
+- ⚡ **ponto de velocidade máxima** da rota atual (badge com km/h)
+- 🛑 **paradas detectadas** — pontos onde o carro ficou >2 min parado com ignição ligada (marcador cinza com duração no popup)
+- ⛽ **últimos abastecimentos** (opcional, toggle) — carrega os 5 mais recentes com localização, se houver
 
-6. **Posição no mês** — mostra quanto essa viagem representa do mês atual:
-   - "X% da distância do mês", "Y% do custo do mês".
-   - Barra de progresso pequena para cada uma.
+No `/viagens/$id`:
+- 🟢 início / 🔴 fim (já existem)
+- ⚡ ponto de velocidade máxima
+- 🛑 paradas detectadas ao longo da viagem
+- Popup em cada marcador com horário, velocidade e odômetro naquele instante
 
-7. **Projeção do mês** (baseado no ritmo até hoje):
-   - Estimativa de km, litros e custo até o fim do mês (regra de três simples: total_até_hoje ÷ dias_decorridos × dias_do_mês).
-   - Card destacando o custo projetado em R$.
+### 3. Rastro colorido por velocidade
 
-8. **Rodapé** — link "Ver todas as viagens do mês" voltando para `/viagens`.
+Substitui a Polyline verde única por segmentos coloridos conforme a velocidade instantânea:
 
-### Detalhes técnicos
+```text
+0–20 km/h   →  azul     (#3b82f6)
+20–40 km/h  →  verde    (#22c55e)
+40–60 km/h  →  amarelo  (#eab308)
+60–80 km/h  →  laranja  (#f97316)
+80+ km/h    →  vermelho (#ef4444)
+```
 
-- Uma única query nova: `SELECT` das viagens do mesmo mês da viagem atual + viagens de distância similar (posso reaproveitar uma busca ampla e filtrar em memória, igual `/viagens` já faz). Continua tudo client-side com RLS.
-- Cálculos puros em `useMemo` no componente — sem alterar schema, sem migration, sem tocar em `useTripRecorder` ou no webhook.
-- Estilo mantém padrão atual (cards `rounded-2xl border bg-card`, `tabular-nums`, cores `emerald-500` para positivo e `rose-500` para negativo).
-- Nenhum arquivo fora de `src/routes/_authenticated/viagens.$id.tsx` precisa mudar. Formatadores existentes (`formatBRL`, `formatDecimal`, `formatSpeed`, `formatDurationBetween`) são reutilizados.
+Legenda discreta no canto inferior esquerdo (chip com gradiente + rótulos). No `/mapa` usa os pontos acumulados em memória; no histórico, reconstrói a partir dos pontos salvos da viagem (quando existirem) ou desenha a linha reta início→fim atual como fallback.
 
-### Fora de escopo (posso fazer depois se quiser)
+### 4. Camadas e controles extras
 
-- Gráfico histórico de consumo por viagem (recharts).
-- Comparar duas viagens específicas lado a lado.
-- Exportar PDF/CSV da viagem.
+- **Botão recentrar** (📍) — volta o mapa ao veículo/rota atual.
+- **Botão fullscreen** (⛶) — expande o mapa usando a Fullscreen API do browser.
+- **Toggle "Seguir veículo"** — liga/desliga o auto-recentrar no `/mapa` (hoje é sempre on).
+- **Régua de escala** (`L.control.scale`) no canto inferior.
+- **Minimapa** no canto — visão geral com um retângulo indicando a área atual (usa `leaflet-minimap` via CDN, ou implementação leve própria se preferir zero dependências).
+
+### 5. Detalhes técnicos
+
+- Novo componente `src/components/map/MapStyleControl.tsx` — dropdown com as 4 bases, persiste em `localStorage`.
+- Novo componente `src/components/map/SpeedPolyline.tsx` — recebe `points: {lat,lng,speed}[]` e renderiza uma sequência de `<Polyline>` coloridas por faixa.
+- Novo hook `src/hooks/useDetectedStops.ts` — dado um array de pontos com timestamp, retorna clusters onde o veículo ficou parado > 2min.
+- `VehicleMap.tsx` e `TripMap.tsx` recebem `mapStyle` via prop (com fallback ao localStorage) e passam a incluir os novos marcadores/controles.
+- `mapa.tsx` passa a acumular `{lat,lng,speed,t}` (hoje só guarda `[lat,lng]`) para alimentar o rastro colorido e detecção de paradas — mudança isolada no estado local, não altera schema nem webhook.
+- Sem migrations. Sem dependências novas obrigatórias (minimapa é opcional; se optar por ele, adiciono `leaflet-minimap`).
+- Estilo mantém o padrão atual (pílulas escuras translúcidas, cores emerald/rose, `tabular-nums`).
+
+### Fora de escopo (posso fazer depois)
+
+- Reconstruir rastro histórico completo (precisaria salvar pontos intermediários no Supabase — hoje só temos início/fim).
+- Geofences (áreas de alerta ao entrar/sair).
+- Heatmap mensal de todas as rotas.
+- Medição de distância manual clicando no mapa.
 
 Posso implementar?

@@ -2,7 +2,9 @@ import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
-import type { TrailPoint } from "@/components/map/VehicleMap";
+import type { SpeedSample } from "@/components/map/SpeedPolyline";
+
+type TrailPoint = SpeedSample;
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 
@@ -18,16 +20,9 @@ export const Route = createFileRoute("/_authenticated/mapa")({
   component: MapaPage,
 });
 
-// Haversine em km
+import { haversineKm as haversine } from "@/lib/trips/geo";
 function haversineKm(a: TrailPoint, b: TrailPoint) {
-  const R = 6371;
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const dLat = toRad(b[0] - a[0]);
-  const dLng = toRad(b[1] - a[1]);
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
+  return haversine(a.lat, a.lng, b.lat, b.lng);
 }
 
 const PARKED_KEY = "lastParked:v1";
@@ -70,12 +65,12 @@ function MapaPage() {
       lastPointRef.current = null;
     }
     if ((prev === true || prev === undefined) && ignition === false) {
-      const pos =
+      const pos: TrailPoint | null =
         typeof lat === "number" && typeof lng === "number"
-          ? ([lat, lng] as TrailPoint)
+          ? { lat, lng, t: Date.now() }
           : lastKnownPosRef.current;
       if (pos) {
-        const next: Parked = { lat: pos[0], lng: pos[1], at: Date.now() };
+        const next: Parked = { lat: pos.lat, lng: pos.lng, at: Date.now() };
         setParked(next);
         try {
           window.localStorage.setItem(PARKED_KEY, JSON.stringify(next));
@@ -94,7 +89,7 @@ function MapaPage() {
       if (mileageStart === null && ignition === true) setMileageStart(mileage);
     }
     if (typeof lat !== "number" || typeof lng !== "number") return;
-    const pt: TrailPoint = [lat, lng];
+    const pt: TrailPoint = { lat, lng, speed: telemetry.speedKmh ?? null, t: Date.now() };
     lastKnownPosRef.current = pt;
     const last = lastPointRef.current;
     if (last) {

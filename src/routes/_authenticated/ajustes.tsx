@@ -45,7 +45,7 @@ function AjustesPage() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl")
+        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl,flespi_device_id")
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
         .limit(1)

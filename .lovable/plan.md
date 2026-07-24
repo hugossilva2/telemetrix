@@ -1,27 +1,43 @@
-## Ajustes no `public/manifest.webmanifest` para o PWABuilder
+## Objetivo
+Resolver os 3 avisos restantes do PWABuilder mostrados no screenshot:
+1. Adicionar service worker (faster & more reliable)
+2. Corrigir tamanhos de ícones no manifest
+3. Adicionar screenshots ao manifest
 
-O PWABuilder listou 4 pendências antes de gerar o APK. Todas são resolvidas adicionando campos ao manifest — nenhum código de app muda.
+## Passos
 
-### 1. Preferência PWA vs app nativo
-Adicionar `"prefer_related_applications": false` para deixar explícito que o usuário deve usar o PWA (não temos app nativo publicado).
+### 1. Service Worker (offline básico)
+Seguindo a skill PWA (offline explícito), instalar `vite-plugin-pwa` e configurar com `generateSW`:
+- `registerType: "autoUpdate"`, `injectRegister: null`, `devOptions.enabled: false`
+- Navegações HTML: `NetworkFirst`
+- Assets hasheados same-origin: `CacheFirst`
+- Excluir `/~oauth` e `/api/*` do fallback
+- Criar `src/pwa/register-sw.ts` com wrapper de registro que recusa em: dev, iframe, hosts `id-preview--*`, `preview--*`, `*.lovableproject.com`, `*.lovableproject-dev.com`, `*.beta.lovable.dev`, e quando `?sw=off` (nesse caso faz unregister)
+- Importar o wrapper apenas em `src/start.ts` (client entry), sem afetar SSR
+- Não registrar SW no editor de preview do Lovable — só funciona no domínio publicado
 
-### 2. `related_applications`
-Como não há app nativo publicado, declarar array vazio: `"related_applications": []`. Isso satisfaz o check e mantém a preferência pelo PWA.
+### 2. Ícones do manifest
+Auditar `public/manifest.webmanifest`:
+- Garantir entries com `sizes` exatos que batem com o arquivo real (192x192 e 512x512)
+- Adicionar ícone `any` + `maskable` separados, com `type: "image/png"`
+- Se PWABuilder reclamar do tamanho real do PNG, regenerar via `imagegen` com dimensões exatas
 
-### 3. Classificação etária (IARC)
-Adicionar `"iarc_rating_id"`. Como não temos um ID IARC oficial emitido, vou usar o ID genérico "for all ages" que o próprio PWABuilder aceita como placeholder, e deixar um comentário no plano avisando que para publicação na Play Store o ideal é gerar um ID real em https://www.globalratings.com/ (leva ~5 min, gratuito).
+### 3. Screenshots no manifest
+Capturar 2 screenshots do app rodando (via Playwright headless em `localhost:8080`, viewport mobile 390x844 e desktop 1280x800) das rotas `/` (Painel) e `/mapa`. Salvar em `public/screenshots/`. Adicionar ao manifest:
+```
+"screenshots": [
+  { "src": "/screenshots/mobile-painel.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Painel em tempo real" },
+  { "src": "/screenshots/desktop-mapa.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Mapa ao vivo" }
+]
+```
 
-Valor placeholder: `"iarc_rating_id": "e84b072c-3164-4826-a22b-bcb1a1a1a1a1"` (UUID neutro só para passar o check — recomendo trocar depois pelo real).
+## Detalhes técnicos
+- `vite-plugin-pwa` no `vite.config.ts` com `strategies: "generateSW"` e `filename: "sw.js"`
+- Wrapper de registro chamado uma única vez após montagem do app no client
+- Manifest continua com os campos já ajustados (prefer_related_applications, iarc_rating_id, scope_extensions)
 
-### 4. `scope_extensions`
-Adicionar `"scope_extensions": [{ "origin": "https://drive-wise-69.lovable.app" }]` para declarar o domínio principal. Como o app roda em single-origin, isso apenas satisfaz o warning do PWABuilder.
-
-### Arquivo alterado
-- `public/manifest.webmanifest` — acrescentar os 4 campos acima. Nenhum outro arquivo muda.
-
-### Depois de aplicar
-1. Publicar novamente (para o manifest atualizado ir ao ar).
-2. Voltar ao PWABuilder → "Retest" → os 4 itens ficam verdes.
-3. Gerar o APK/AAB normalmente.
-
-Posso aplicar?
+## Verificação
+1. Build sem erros
+2. Publicar
+3. Rodar "Retest" no PWABuilder — os 3 itens devem ficar verdes
+4. Verificar em `?sw=off` que o SW é desregistrado

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mqtt, { type MqttClient } from "mqtt";
 import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
-import { mergeTelemetry, parseFlespiMessage } from "@/lib/flespi/parse";
+import { mergeTelemetry, parseFlespiMessage, parseFlespiStateTopic } from "@/lib/flespi/parse";
 import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
 
 export interface UseFlespiMqttResult {
@@ -84,7 +84,9 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
     client.on("message", (topic, payload) => {
       const raw = payload.toString();
       console.log("[flespi] message", topic, raw.slice(0, 200));
-      const parsed = parseFlespiMessage(raw);
+      const parsed = topic.includes("/telemetry/")
+        ? parseFlespiStateTopic(topic, raw)
+        : parseFlespiMessage(raw);
       if (!parsed) return;
       setLastMessageAt(Date.now());
       setTelemetry((prev) => mergeTelemetry(prev, parsed));

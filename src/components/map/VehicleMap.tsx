@@ -1,68 +1,14 @@
-import { useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, useMap } from "react-leaflet";
-import L from "leaflet";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
+import { MapStyleControl } from "./MapStyleControl";
+import { MapButtons, ScaleControl } from "./MapControls";
+import { SpeedLegend, SpeedPolyline, type SpeedSample } from "./SpeedPolyline";
+import { StyledTileLayers } from "./StyledTileLayers";
+import { detectStops, formatStopDuration } from "@/lib/map/stops";
+import { useMapStyle } from "@/lib/map/tiles";
+import { makeCarIcon, maxSpeedIcon, parkedIcon, startIcon, stopIcon } from "./icons";
 
 export type TrailPoint = [number, number];
-
-function makeCarIcon(opts: { moving: boolean; ignition: boolean }) {
-  const color = opts.ignition ? (opts.moving ? "#22c55e" : "#eab308") : "#6b7280";
-  const shadow = opts.ignition
-    ? opts.moving
-      ? "rgba(34,197,94,0.35)"
-      : "rgba(234,179,8,0.3)"
-    : "rgba(107,114,128,0.25)";
-  const pulse = opts.moving
-    ? `<span style="position:absolute;inset:-8px;border-radius:50%;background:${shadow};animation:vehPulse 1.6s ease-out infinite;"></span>`
-    : "";
-  return L.divIcon({
-    className: "vehicle-marker",
-    html: `
-      <div style="position:relative;width:28px;height:28px;">
-        ${pulse}
-        <div style="
-          position:relative;width:28px;height:28px;border-radius:50%;
-          background:${color};border:3px solid #0b1220;
-          box-shadow:0 0 0 4px ${shadow};
-          display:flex;align-items:center;justify-content:center;
-          color:#0b1220;font-size:14px;font-weight:700;">🚗</div>
-      </div>
-      <style>@keyframes vehPulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}</style>
-    `,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
-}
-
-const startIcon = L.divIcon({
-  className: "start-marker",
-  html: `<div style="
-    width:16px;height:16px;border-radius:50%;
-    background:#3b82f6;border:3px solid #0b1220;
-    box-shadow:0 0 0 3px rgba(59,130,246,0.35);"></div>`,
-  iconSize: [16, 16],
-  iconAnchor: [8, 8],
-});
-
-const parkedIcon = L.divIcon({
-  className: "parked-marker",
-  html: `
-    <div style="position:relative;width:30px;height:38px;">
-      <div style="
-        position:absolute;left:50%;top:0;transform:translateX(-50%);
-        width:28px;height:28px;border-radius:50% 50% 50% 0;
-        transform-origin:center;rotate:-45deg;
-        background:#ef4444;border:3px solid #0b1220;
-        box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>
-      <div style="
-        position:absolute;left:50%;top:5px;transform:translateX(-50%);
-        width:18px;height:18px;border-radius:50%;
-        background:#0b1220;color:#fff;font-size:11px;font-weight:800;
-        display:flex;align-items:center;justify-content:center;">P</div>
-    </div>
-  `,
-  iconSize: [30, 38],
-  iconAnchor: [15, 36],
-});
 
 function Recenter({ lat, lng, follow }: { lat: number; lng: number; follow: boolean }) {
   const map = useMap();
@@ -72,12 +18,24 @@ function Recenter({ lat, lng, follow }: { lat: number; lng: number; follow: bool
   return null;
 }
 
+function ImperativeCenter({
+  bind,
+}: {
+  bind: (fn: (lat: number, lng: number) => void) => void;
+}) {
+  const map = useMap();
+  useEffect(() => {
+    bind((lat, lng) => map.setView([lat, lng], map.getZoom(), { animate: true }));
+  }, [bind, map]);
+  return null;
+}
+
 export interface VehicleMapProps {
   lat: number | null | undefined;
   lng: number | null | undefined;
   speed?: number | null;
   ignition?: boolean | null;
-  trail?: TrailPoint[];
+  trail?: SpeedSample[];
   distanceKm?: number;
   lastUpdate?: number | null;
   status?: string;
@@ -85,8 +43,21 @@ export interface VehicleMapProps {
 }
 
 export default function VehicleMap({
-  lat, lng, speed, ignition, trail = [], distanceKm = 0, lastUpdate, status, parked,
+  lat,
+  lng,
+  speed,
+  ignition,
+  trail = [],
+  distanceKm = 0,
+  lastUpdate,
+  status,
+  parked,
 }: VehicleMapProps) {
+  const [mapStyle, setMapStyle] = useMapStyle();
+  const [follow, setFollow] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const recenterRef = useRef<(lat: number, lng: number) => void>(() => {});
+
   const hasPosition = typeof lat === "number" && typeof lng === "number";
   const center = useMemo<[number, number]>(
     () => (hasPosition ? [lat!, lng!] : [-23.5505, -46.6333]),
@@ -95,52 +66,87 @@ export default function VehicleMap({
   const moving = !!ignition && typeof speed === "number" && speed > 3;
   const icon = useMemo(() => makeCarIcon({ moving, ignition: !!ignition }), [moving, ignition]);
   const start = trail[0];
-  // Só mostra o marcador de estacionado quando o veículo NÃO está no mesmo ponto ao vivo
-  // (evita sobrepor o ícone do carro quando está desligado exatamente ali).
-  const showParked = !!parked && (
-    !hasPosition ||
-    !!ignition ||
-    Math.abs(parked.lat - (lat as number)) > 0.00005 ||
-    Math.abs(parked.lng - (lng as number)) > 0.00005
-  );
+
+  const maxSpeedPoint = useMemo(() => {
+    let best: SpeedSample | null = null;
+    for (const p of trail) {
+      if (typeof p.speed === "number" && (best == null || (p.speed ?? 0) > (best.speed ?? 0))) {
+        best = p;
+      }
+    }
+    return best && typeof best.speed === "number" && best.speed > 5 ? best : null;
+  }, [trail]);
+
+  const stops = useMemo(() => detectStops(trail, { minMs: 2 * 60 * 1000 }), [trail]);
+
+  const showParked =
+    !!parked &&
+    (!hasPosition ||
+      !!ignition ||
+      Math.abs(parked.lat - (lat as number)) > 0.00005 ||
+      Math.abs(parked.lng - (lng as number)) > 0.00005);
 
   const secondsAgo = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : null;
 
   return (
-    <div style={{ position: "relative", height: "100%", width: "100%" }}>
+    <div ref={containerRef} style={{ position: "relative", height: "100%", width: "100%", background: "#0b1220" }}>
       <MapContainer
         center={center}
         zoom={16}
         style={{ height: "100%", width: "100%", background: "#0b1220" }}
         scrollWheelZoom
       >
-        <TileLayer
-          attribution='&copy; OpenStreetMap'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {trail.length > 1 && (
-          <>
-            <Polyline
-              positions={trail}
-              pathOptions={{ color: "#22c55e", weight: 5, opacity: 0.85, lineCap: "round" }}
-            />
-            <Polyline
-              positions={trail}
-              pathOptions={{ color: "#ffffff", weight: 1.5, opacity: 0.35, dashArray: "2 6" }}
-            />
-          </>
-        )}
+        <StyledTileLayers style={mapStyle} />
+        <ScaleControl />
+        <ImperativeCenter bind={(fn) => (recenterRef.current = fn)} />
+
+        <SpeedPolyline points={trail} />
+
         {start && (
-          <Marker position={start} icon={startIcon}>
+          <Marker position={[start.lat, start.lng]} icon={startIcon}>
             <Popup>
               <div style={{ fontSize: 12 }}>
                 <strong>Ponto de partida</strong>
                 <br />
-                {start[0].toFixed(5)}, {start[1].toFixed(5)}
+                {start.lat.toFixed(5)}, {start.lng.toFixed(5)}
               </div>
             </Popup>
           </Marker>
         )}
+
+        {maxSpeedPoint && (
+          <Marker position={[maxSpeedPoint.lat, maxSpeedPoint.lng]} icon={maxSpeedIcon}>
+            <Popup>
+              <div style={{ fontSize: 12 }}>
+                <strong>⚡ Velocidade máxima</strong>
+                <br />
+                {(maxSpeedPoint.speed ?? 0).toFixed(0)} km/h
+                {maxSpeedPoint.t ? (
+                  <>
+                    <br />
+                    {new Date(maxSpeedPoint.t).toLocaleTimeString("pt-BR")}
+                  </>
+                ) : null}
+              </div>
+            </Popup>
+          </Marker>
+        )}
+
+        {stops.map((s, i) => (
+          <Marker key={i} position={[s.lat, s.lng]} icon={stopIcon}>
+            <Popup>
+              <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                <strong>Parada</strong>
+                <br />
+                Duração: {formatStopDuration(s.durationMs)}
+                <br />
+                {new Date(s.startedAt).toLocaleTimeString("pt-BR")} →{" "}
+                {new Date(s.endedAt).toLocaleTimeString("pt-BR")}
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+
         {showParked && parked && (
           <Marker position={[parked.lat, parked.lng]} icon={parkedIcon}>
             <Popup>
@@ -154,18 +160,26 @@ export default function VehicleMap({
             </Popup>
           </Marker>
         )}
+
         {hasPosition && (
           <>
-            <Recenter lat={lat!} lng={lng!} follow />
+            <Recenter lat={lat!} lng={lng!} follow={follow} />
             <CircleMarker
               center={[lat!, lng!]}
               radius={40}
-              pathOptions={{ color: moving ? "#22c55e" : "transparent", weight: 1, opacity: 0.25, fillOpacity: 0 }}
+              pathOptions={{
+                color: moving ? "#22c55e" : "transparent",
+                weight: 1,
+                opacity: 0.25,
+                fillOpacity: 0,
+              }}
             />
             <Marker position={[lat!, lng!]} icon={icon}>
               <Popup>
                 <div style={{ fontSize: 12, lineHeight: 1.5 }}>
-                  <strong>{ignition ? (moving ? "🟢 Em movimento" : "🟡 Ligado parado") : "⚫ Desligado"}</strong>
+                  <strong>
+                    {ignition ? (moving ? "🟢 Em movimento" : "🟡 Ligado parado") : "⚫ Desligado"}
+                  </strong>
                   <br />
                   {typeof speed === "number" ? `${speed.toFixed(0)} km/h` : "—"}
                   <br />
@@ -178,10 +192,19 @@ export default function VehicleMap({
       </MapContainer>
 
       {/* HUD overlay */}
-      <div style={{
-        position: "absolute", top: 12, left: 12, right: 12, zIndex: 500,
-        display: "flex", gap: 8, flexWrap: "wrap", pointerEvents: "none",
-      }}>
+      <div
+        style={{
+          position: "absolute",
+          top: 12,
+          left: 12,
+          right: 60,
+          zIndex: 500,
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+          pointerEvents: "none",
+        }}
+      >
         <HudPill
           dot={ignition ? (moving ? "#22c55e" : "#eab308") : "#6b7280"}
           label={ignition ? (moving ? "Em movimento" : "Ligado parado") : "Desligado"}
@@ -194,26 +217,54 @@ export default function VehicleMap({
           label={status === "connected" ? (secondsAgo != null ? `↻ ${secondsAgo}s` : "Ao vivo") : "Offline"}
         />
       </div>
+
+      <MapStyleControl value={mapStyle} onChange={setMapStyle} />
+
+      <MapButtons
+        containerRef={containerRef}
+        follow={follow}
+        onToggleFollow={() => setFollow((v) => !v)}
+        onRecenter={
+          hasPosition
+            ? () => recenterRef.current(lat as number, lng as number)
+            : undefined
+        }
+      />
+
+      {trail.length > 1 && <SpeedLegend />}
     </div>
   );
 }
 
 function HudPill({ label, dot, pulse }: { label: string; dot?: string; pulse?: boolean }) {
   return (
-    <div style={{
-      display: "inline-flex", alignItems: "center", gap: 6,
-      padding: "6px 10px", borderRadius: 999,
-      background: "rgba(11,18,32,0.85)",
-      border: "1px solid rgba(148,163,184,0.25)",
-      color: "#e2e8f0", fontSize: 12, fontWeight: 600,
-      backdropFilter: "blur(6px)", pointerEvents: "auto",
-    }}>
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "6px 10px",
+        borderRadius: 999,
+        background: "rgba(11,18,32,0.85)",
+        border: "1px solid rgba(148,163,184,0.25)",
+        color: "#e2e8f0",
+        fontSize: 12,
+        fontWeight: 600,
+        backdropFilter: "blur(6px)",
+        pointerEvents: "auto",
+      }}
+    >
       {dot && (
-        <span style={{
-          width: 8, height: 8, borderRadius: 999, background: dot,
-          boxShadow: pulse ? `0 0 0 4px ${dot}33` : undefined,
-          animation: pulse ? "vehDot 1.4s ease-out infinite" : undefined,
-        }} />
+        <span
+          style={{
+            width: 8,
+            height: 8,
+            borderRadius: 999,
+            background: dot,
+            boxShadow: pulse ? `0 0 0 4px ${dot}33` : undefined,
+            animation: pulse ? "vehDot 1.4s ease-out infinite" : undefined,
+          }}
+        />
       )}
       <span>{label}</span>
       <style>{`@keyframes vehDot{0%{box-shadow:0 0 0 0 ${dot}66}100%{box-shadow:0 0 0 8px ${dot}00}}`}</style>

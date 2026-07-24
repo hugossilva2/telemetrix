@@ -59,7 +59,7 @@ export function LiveConsumptionCard() {
     }
   }
 
-  const DEFAULT_PRICE = 6.0;
+  const DEFAULT_PRICE = 5.89;
   const kmpl = data?.kmpl ?? 10;
   const priceFromLog = data?.pricePerLiter != null ? Number(data.pricePerLiter) : null;
   const price = priceFromLog ?? DEFAULT_PRICE;

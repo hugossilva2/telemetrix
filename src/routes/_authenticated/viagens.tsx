@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Leaf, Route as RouteIcon } from "lucide-reac
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal } from "@/lib/format";
+import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 
 export const Route = createFileRoute("/_authenticated/viagens")({
@@ -134,7 +135,10 @@ function ViagensPage() {
     let liters = 0;
     for (const t of monthTrips) {
       km += t.distance_km ?? 0;
-      cost += t.estimated_cost ?? 0;
+      cost += estimateTripCost({
+        estimatedCost: t.estimated_cost,
+        fuelLiters: t.fuel_liters,
+      }) ?? 0;
       liters += t.fuel_liters ?? 0;
     }
     const kmpl = liters > 0 ? km / liters : null;
@@ -230,6 +234,10 @@ function ViagensPage() {
         <ul className="space-y-2">
           {monthTrips.map((t) => {
             const eff = efficiencyById.get(t.id);
+            const tripCost = estimateTripCost({
+              estimatedCost: t.estimated_cost,
+              fuelLiters: t.fuel_liters,
+            });
             return (
               <li key={t.id}>
                 <Link
@@ -257,8 +265,8 @@ function ViagensPage() {
                       {eff?.kmpl != null && (
                         <span>{formatDecimal(eff.kmpl)} km/L</span>
                       )}
-                      {t.estimated_cost != null && (
-                        <span className="text-foreground">{formatBRL(t.estimated_cost)}</span>
+                      {tripCost != null && (
+                        <span className="text-foreground">{formatBRL(tripCost)}</span>
                       )}
                       {eff?.better && eff.sampleSize > 0 && (
                         <span

@@ -59,6 +59,7 @@ function AjustesPage() {
   const [plate, setPlate] = useState("");
   const [mileage, setMileage] = useState("");
   const [consumption, setConsumption] = useState("10");
+  const [deviceId, setDeviceId] = useState("");
   const [alertEngine, setAlertEngine] = useState(false);
   const [alertBattery, setAlertBattery] = useState(false);
 

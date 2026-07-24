@@ -230,6 +230,10 @@ function AjustesPage() {
         </Button>
       </form>
 
+      <div className="mt-4">
+        <InstallAppCard />
+      </div>
+
       <Button
         onClick={handleSignOut}
         variant="outline"

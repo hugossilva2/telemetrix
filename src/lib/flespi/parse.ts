@@ -52,6 +52,76 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
   }
 }
 
+/**
+ * Extrai telemetria de mensagens do tópico `flespi/state/.../telemetry/<campo>`,
+ * onde o payload é um valor escalar (número/bool/string) OU um JSON aninhado
+ * (ex.: tópico `.../position` com objeto completo).
+ */
+export function parseFlespiStateTopic(
+  topic: string,
+  raw: string,
+): VehicleTelemetry | null {
+  const marker = "/telemetry/";
+  const idx = topic.indexOf(marker);
+  if (idx < 0) return null;
+  const key = topic.slice(idx + marker.length); // ex.: "position.latitude" ou "position"
+
+  // Tenta JSON primeiro; se falhar, trata como escalar.
+  let value: unknown = raw;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    /* payload escalar não-JSON (raro) */
+  }
+
+  const out: VehicleTelemetry = {};
+  const assign = (k: string, v: unknown) => {
+    switch (k) {
+      case "position.latitude":
+        out.latitude = num(v);
+        break;
+      case "position.longitude":
+        out.longitude = num(v);
+        break;
+      case "position.speed":
+        out.speedKmh = num(v);
+        break;
+      case "engine.ignition.status":
+        out.ignitionOn = bool(v);
+        break;
+      case "vehicle.mileage":
+        out.mileageKm = num(v);
+        break;
+      case "battery.voltage":
+        out.batteryVoltage = num(v);
+        break;
+      case "can.fuel.level":
+        out.fuelLevel = num(v);
+        break;
+      case "can.engine.rpm":
+        out.engineRpm = num(v);
+        break;
+      case "timestamp":
+        out.timestamp = num(v);
+        break;
+    }
+  };
+
+  if (key === "position" && value && typeof value === "object") {
+    const o = value as Record<string, unknown>;
+    out.latitude = num(o.latitude);
+    out.longitude = num(o.longitude);
+    if (o.speed !== undefined) out.speedKmh = num(o.speed);
+  } else {
+    assign(key, value);
+  }
+
+  // Retorna null se nada foi extraído
+  const hasAny = Object.values(out).some((v) => v !== undefined);
+  return hasAny ? out : null;
+}
+
+
 // Mescla telemetria nova sobre a anterior, preservando campos ausentes.
 export function mergeTelemetry(
   prev: VehicleTelemetry,

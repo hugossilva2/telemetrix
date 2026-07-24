@@ -14,9 +14,9 @@ import { InstallAppCard } from "@/components/settings/InstallAppCard";
 export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({
     meta: [
-      { title: "Ajustes · Gestão Veicular" },
+      { title: "Ajustes · Telemetrix" },
       { name: "description", content: "Configurações do veículo e alertas." },
-      { property: "og:title", content: "Ajustes · Gestão Veicular" },
+      { property: "og:title", content: "Ajustes · Telemetrix" },
       { property: "og:description", content: "Configurações do veículo e alertas." },
     ],
   }),

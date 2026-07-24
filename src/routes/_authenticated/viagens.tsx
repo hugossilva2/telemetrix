@@ -11,9 +11,9 @@ import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 export const Route = createFileRoute("/_authenticated/viagens")({
   head: () => ({
     meta: [
-      { title: "Viagens · Gestão Veicular" },
+      { title: "Viagens · Telemetrix" },
       { name: "description", content: "Histórico de viagens com relatório mensal, filtro e comparativo de eficiência." },
-      { property: "og:title", content: "Viagens · Gestão Veicular" },
+      { property: "og:title", content: "Viagens · Telemetrix" },
       { property: "og:description", content: "Relatório mensal e comparativo de eficiência entre viagens." },
     ],
   }),

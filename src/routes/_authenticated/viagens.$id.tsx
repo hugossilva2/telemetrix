@@ -27,13 +27,13 @@ const TripMap = lazy(() => import("@/components/trips/TripMap"));
 export const Route = createFileRoute("/_authenticated/viagens/$id")({
   head: () => ({
     meta: [
-      { title: "Dashboard da viagem · Gestão Veicular" },
+      { title: "Dashboard da viagem · Telemetrix" },
       {
         name: "description",
         content:
           "Dashboard completo da viagem: KPIs, comparativo com viagens similares, participação no mês e projeção financeira.",
       },
-      { property: "og:title", content: "Dashboard da viagem · Gestão Veicular" },
+      { property: "og:title", content: "Dashboard da viagem · Telemetrix" },
       {
         property: "og:description",
         content:

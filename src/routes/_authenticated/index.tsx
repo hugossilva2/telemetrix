@@ -16,9 +16,9 @@ import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard"
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
-      { title: "Painel · Gestão Veicular" },
+      { title: "Painel · Telemetrix" },
       { name: "description", content: "Telemetria ao vivo do veículo via Flespi MQTT." },
-      { property: "og:title", content: "Painel · Gestão Veicular" },
+      { property: "og:title", content: "Painel · Telemetrix" },
       { property: "og:description", content: "Telemetria ao vivo do veículo via Flespi MQTT." },
     ],
   }),

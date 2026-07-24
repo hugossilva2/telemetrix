@@ -11,9 +11,9 @@ const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 export const Route = createFileRoute("/_authenticated/mapa")({
   head: () => ({
     meta: [
-      { title: "Mapa · Gestão Veicular" },
+      { title: "Mapa · Telemetrix" },
       { name: "description", content: "Localização do veículo em tempo real, rota percorrida e status." },
-      { property: "og:title", content: "Mapa · Gestão Veicular" },
+      { property: "og:title", content: "Mapa · Telemetrix" },
       { property: "og:description", content: "Acompanhe a posição do veículo em tempo real." },
     ],
   }),

@@ -30,6 +30,19 @@ function haversineKm(a: TrailPoint, b: TrailPoint) {
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
+const PARKED_KEY = "lastParked:v1";
+type Parked = { lat: number; lng: number; at: number };
+
+function readParked(): Parked | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(PARKED_KEY);
+    return raw ? (JSON.parse(raw) as Parked) : null;
+  } catch {
+    return null;
+  }
+}
+
 function MapaPage() {
   const { telemetry, status, lastMessageAt } = useFlespiMqtt();
   const lat = telemetry.latitude;
@@ -38,23 +51,42 @@ function MapaPage() {
 
   const [trail, setTrail] = useState<TrailPoint[]>([]);
   const [distance, setDistance] = useState(0);
+  const [parked, setParked] = useState<Parked | null>(() => readParked());
   const lastPointRef = useRef<TrailPoint | null>(null);
   const prevIgnitionRef = useRef<boolean | undefined>(undefined);
+  const lastKnownPosRef = useRef<TrailPoint | null>(null);
 
-  // Reset trail on ignition OFF -> ON (nova viagem)
+  // Reset trail on ignition OFF -> ON (nova viagem); salva ponto ao desligar.
   useEffect(() => {
-    if (prevIgnitionRef.current === false && ignition === true) {
+    const prev = prevIgnitionRef.current;
+    if (prev === false && ignition === true) {
       setTrail([]);
       setDistance(0);
       lastPointRef.current = null;
     }
+    if ((prev === true || prev === undefined) && ignition === false) {
+      const pos =
+        typeof lat === "number" && typeof lng === "number"
+          ? ([lat, lng] as TrailPoint)
+          : lastKnownPosRef.current;
+      if (pos) {
+        const next: Parked = { lat: pos[0], lng: pos[1], at: Date.now() };
+        setParked(next);
+        try {
+          window.localStorage.setItem(PARKED_KEY, JSON.stringify(next));
+        } catch {
+          /* ignore */
+        }
+      }
+    }
     prevIgnitionRef.current = ignition;
-  }, [ignition]);
+  }, [ignition, lat, lng]);
 
   // Acumula pontos do rastro
   useEffect(() => {
     if (typeof lat !== "number" || typeof lng !== "number") return;
     const pt: TrailPoint = [lat, lng];
+    lastKnownPosRef.current = pt;
     const last = lastPointRef.current;
     if (last) {
       const d = haversineKm(last, pt);
@@ -95,6 +127,7 @@ function MapaPage() {
               distanceKm={distance}
               lastUpdate={lastMessageAt}
               status={status}
+              parked={parked}
             />
           </Suspense>
         </ClientOnly>

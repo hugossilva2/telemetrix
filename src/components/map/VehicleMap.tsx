@@ -43,6 +43,27 @@ const startIcon = L.divIcon({
   iconAnchor: [8, 8],
 });
 
+const parkedIcon = L.divIcon({
+  className: "parked-marker",
+  html: `
+    <div style="position:relative;width:30px;height:38px;">
+      <div style="
+        position:absolute;left:50%;top:0;transform:translateX(-50%);
+        width:28px;height:28px;border-radius:50% 50% 50% 0;
+        transform-origin:center;rotate:-45deg;
+        background:#ef4444;border:3px solid #0b1220;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>
+      <div style="
+        position:absolute;left:50%;top:5px;transform:translateX(-50%);
+        width:18px;height:18px;border-radius:50%;
+        background:#0b1220;color:#fff;font-size:11px;font-weight:800;
+        display:flex;align-items:center;justify-content:center;">P</div>
+    </div>
+  `,
+  iconSize: [30, 38],
+  iconAnchor: [15, 36],
+});
+
 function Recenter({ lat, lng, follow }: { lat: number; lng: number; follow: boolean }) {
   const map = useMap();
   useEffect(() => {
@@ -60,10 +81,11 @@ export interface VehicleMapProps {
   distanceKm?: number;
   lastUpdate?: number | null;
   status?: string;
+  parked?: { lat: number; lng: number; at: number } | null;
 }
 
 export default function VehicleMap({
-  lat, lng, speed, ignition, trail = [], distanceKm = 0, lastUpdate, status,
+  lat, lng, speed, ignition, trail = [], distanceKm = 0, lastUpdate, status, parked,
 }: VehicleMapProps) {
   const hasPosition = typeof lat === "number" && typeof lng === "number";
   const center = useMemo<[number, number]>(
@@ -73,6 +95,14 @@ export default function VehicleMap({
   const moving = !!ignition && typeof speed === "number" && speed > 3;
   const icon = useMemo(() => makeCarIcon({ moving, ignition: !!ignition }), [moving, ignition]);
   const start = trail[0];
+  // Só mostra o marcador de estacionado quando o veículo NÃO está no mesmo ponto ao vivo
+  // (evita sobrepor o ícone do carro quando está desligado exatamente ali).
+  const showParked = !!parked && (
+    !hasPosition ||
+    !!ignition ||
+    Math.abs(parked.lat - (lat as number)) > 0.00005 ||
+    Math.abs(parked.lng - (lng as number)) > 0.00005
+  );
 
   const secondsAgo = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : null;
 
@@ -107,6 +137,19 @@ export default function VehicleMap({
                 <strong>Ponto de partida</strong>
                 <br />
                 {start[0].toFixed(5)}, {start[1].toFixed(5)}
+              </div>
+            </Popup>
+          </Marker>
+        )}
+        {showParked && parked && (
+          <Marker position={[parked.lat, parked.lng]} icon={parkedIcon}>
+            <Popup>
+              <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                <strong>🅿️ Último local estacionado</strong>
+                <br />
+                {new Date(parked.at).toLocaleString("pt-BR")}
+                <br />
+                {parked.lat.toFixed(5)}, {parked.lng.toFixed(5)}
               </div>
             </Popup>
           </Marker>

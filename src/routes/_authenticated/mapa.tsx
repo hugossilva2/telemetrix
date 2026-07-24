@@ -20,16 +20,9 @@ export const Route = createFileRoute("/_authenticated/mapa")({
   component: MapaPage,
 });
 
-// Haversine em km
+import { haversineKm as haversine } from "@/lib/trips/geo";
 function haversineKm(a: TrailPoint, b: TrailPoint) {
-  const R = 6371;
-  const toRad = (v: number) => (v * Math.PI) / 180;
-  const dLat = toRad(b[0] - a[0]);
-  const dLng = toRad(b[1] - a[1]);
-  const lat1 = toRad(a[0]);
-  const lat2 = toRad(b[0]);
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
+  return haversine(a.lat, a.lng, b.lat, b.lng);
 }
 
 const PARKED_KEY = "lastParked:v1";

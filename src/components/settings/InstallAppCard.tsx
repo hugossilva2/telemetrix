@@ -55,7 +55,7 @@ export function InstallAppCard() {
       ) : deferred ? (
         <>
           <p className="text-xs text-muted-foreground">
-            Instale o DriveWise como app nativo para receber notificações e abrir em tela cheia.
+            Instale o Telemetrix como app nativo para receber notificações e abrir em tela cheia.
           </p>
           <Button type="button" onClick={install} className="mt-3 w-full">
             <Download className="mr-2 size-4" />

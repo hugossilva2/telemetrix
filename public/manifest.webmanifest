@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "DriveWise · Gestão Veicular",
-  "short_name": "DriveWise",
-  "description": "PWA de gestão veicular em tempo real via Flespi.",
+  "name": "Telemetrix",
+  "short_name": "Telemetrix",
+  "description": "Telemetrix — telemetria veicular em tempo real via Flespi.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -24,7 +24,7 @@
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "screenshots": [
-    { "src": "/screenshots/mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "DriveWise no celular" },
-    { "src": "/screenshots/desktop.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "DriveWise no desktop" }
+    { "src": "/screenshots/mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Telemetrix no celular" },
+    { "src": "/screenshots/desktop.png", "sizes": "1280x800", "type": "image/png", "form_factor": "wide", "label": "Telemetrix no desktop" }
   ]
 }

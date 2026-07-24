@@ -14,9 +14,9 @@ import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 export const Route = createFileRoute("/_authenticated/abastecimento")({
   head: () => ({
     meta: [
-      { title: "Abastecimento · Gestão Veicular" },
+      { title: "Abastecimento · Telemetrix" },
       { name: "description", content: "Registre abastecimentos e acompanhe o custo por km." },
-      { property: "og:title", content: "Abastecimento · Gestão Veicular" },
+      { property: "og:title", content: "Abastecimento · Telemetrix" },
       { property: "og:description", content: "Registre abastecimentos e acompanhe o custo por km." },
     ],
   }),

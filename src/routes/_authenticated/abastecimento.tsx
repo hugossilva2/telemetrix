@@ -158,22 +158,22 @@ function AbastecimentoPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="price">Preço/litro (R$)</Label>
-            <Input id="price" type="number" step="0.01" min="0" placeholder="5.89" value={price} onChange={(e) => setPrice(e.target.value)} required />
+            <Input id="price" type="number" inputMode="decimal" step="0.01" min="0" placeholder="5.89" value={price} onChange={(e) => setPrice(e.target.value)} required className="h-11 text-base" />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="total">Valor total (R$)</Label>
-            <Input id="total" type="number" step="0.01" min="0" placeholder="200.00" value={total} onChange={(e) => setTotal(e.target.value)} required />
+            <Input id="total" type="number" inputMode="decimal" step="0.01" min="0" placeholder="200.00" value={total} onChange={(e) => setTotal(e.target.value)} required className="h-11 text-base" />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="datetime">Data e hora</Label>
-          <Input id="datetime" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} required />
+          <Input id="datetime" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} required className="h-11 text-base" />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="mileage">Odômetro atual (km)</Label>
-          <Input id="mileage" type="number" step="1" min="0" value={mileage} onChange={(e) => setMileage(e.target.value)} required />
+          <Input id="mileage" type="number" inputMode="numeric" step="1" min="0" value={mileage} onChange={(e) => setMileage(e.target.value)} required className="h-11 text-base" />
           <p className="text-xs text-muted-foreground">
             {telemetry.mileageKm != null ? "Auto-preenchido pelo MQTT." : "Aguardando telemetria — preencha manualmente."}
           </p>

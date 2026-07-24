@@ -23,9 +23,9 @@ export function BottomNav() {
               activeOptions={{ exact }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="flex flex-col items-center gap-1 py-2.5 text-[11px] transition-colors hover:text-foreground"
+              className="flex min-h-[56px] flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors hover:text-foreground active:bg-accent/40"
             >
-              <Icon className="size-5" />
+              <Icon className="size-[22px]" />
               <span>{label}</span>
             </Link>
           </li>

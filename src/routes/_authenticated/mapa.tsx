@@ -127,6 +127,7 @@ function MapaPage() {
               distanceKm={distance}
               lastUpdate={lastMessageAt}
               status={status}
+              parked={parked}
             />
           </Suspense>
         </ClientOnly>

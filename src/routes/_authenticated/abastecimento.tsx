@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
+import { Camera, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,6 +30,12 @@ interface FuelLog {
   liters_filled: number;
   total_cost: number;
   mileage_at_fill: number;
+  receipt_url: string | null;
+}
+
+function toLocalDatetimeInput(d: Date) {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
 function AbastecimentoPage() {
@@ -38,13 +45,26 @@ function AbastecimentoPage() {
   const [price, setPrice] = useState("");
   const [total, setTotal] = useState("");
   const [mileage, setMileage] = useState("");
+  const [datetime, setDatetime] = useState(() => toLocalDatetimeInput(new Date()));
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Auto-preencher odômetro com telemetria MQTT
   useEffect(() => {
     if (telemetry.mileageKm != null && !mileage) {
       setMileage(telemetry.mileageKm.toFixed(0));
     }
   }, [telemetry.mileageKm, mileage]);
+
+  useEffect(() => {
+    if (!photo) {
+      setPhotoPreview(null);
+      return;
+    }
+    const url = URL.createObjectURL(photo);
+    setPhotoPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [photo]);
 
   const liters = useMemo(() => {
     const p = parseFloat(price);
@@ -57,7 +77,7 @@ function AbastecimentoPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fuel_logs")
-        .select("id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill")
+        .select("id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill,receipt_url")
         .order("date", { ascending: true });
       if (error) throw error;
       return data as FuelLog[];
@@ -74,13 +94,27 @@ function AbastecimentoPage() {
       if (!(priceNum > 0) || !(totalNum > 0) || !(mileageNum >= 0)) {
         throw new Error("Preencha todos os campos com valores válidos.");
       }
+      const isoDate = datetime ? new Date(datetime).toISOString() : new Date().toISOString();
+
+      let receiptUrl: string | null = null;
+      if (photo) {
+        const ext = photo.name.split(".").pop() || "jpg";
+        const path = `${userData.user.id}/${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage
+          .from("fuel-receipts")
+          .upload(path, photo, { contentType: photo.type || "image/jpeg", upsert: false });
+        if (upErr) throw upErr;
+        receiptUrl = path;
+      }
+
       const { error } = await supabase.from("fuel_logs").insert({
         user_id: userData.user.id,
-        date: new Date().toISOString(),
+        date: isoDate,
         price_per_liter: priceNum,
         liters_filled: totalNum / priceNum,
         total_cost: totalNum,
         mileage_at_fill: mileageNum,
+        receipt_url: receiptUrl,
       });
       if (error) throw error;
     },
@@ -88,12 +122,14 @@ function AbastecimentoPage() {
       toast.success("Abastecimento salvo!");
       setPrice("");
       setTotal("");
+      setPhoto(null);
+      setDatetime(toLocalDatetimeInput(new Date()));
+      if (fileInputRef.current) fileInputRef.current.value = "";
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
-  // Histórico de custo R$/km entre abastecimentos consecutivos
   const chartData = useMemo(() => {
     const rows: { label: string; costPerKm: number }[] = [];
     for (let i = 1; i < logs.length; i++) {
@@ -131,11 +167,53 @@ function AbastecimentoPage() {
         </div>
 
         <div className="space-y-1.5">
+          <Label htmlFor="datetime">Data e hora</Label>
+          <Input id="datetime" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} required />
+        </div>
+
+        <div className="space-y-1.5">
           <Label htmlFor="mileage">Odômetro atual (km)</Label>
           <Input id="mileage" type="number" step="1" min="0" value={mileage} onChange={(e) => setMileage(e.target.value)} required />
           <p className="text-xs text-muted-foreground">
             {telemetry.mileageKm != null ? "Auto-preenchido pelo MQTT." : "Aguardando telemetria — preencha manualmente."}
           </p>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="photo">Foto do comprovante (opcional)</Label>
+          {photoPreview ? (
+            <div className="relative">
+              <img src={photoPreview} alt="Prévia do comprovante" className="max-h-56 w-full rounded-lg object-contain bg-muted/50" />
+              <button
+                type="button"
+                onClick={() => {
+                  setPhoto(null);
+                  if (fileInputRef.current) fileInputRef.current.value = "";
+                }}
+                className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow"
+                aria-label="Remover foto"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <label
+              htmlFor="photo"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-6 text-sm text-muted-foreground hover:bg-muted/50"
+            >
+              <Camera className="h-4 w-4" />
+              Tirar foto ou escolher da galeria
+            </label>
+          )}
+          <input
+            id="photo"
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+          />
         </div>
 
         <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">

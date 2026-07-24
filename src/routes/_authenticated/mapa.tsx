@@ -48,9 +48,12 @@ function MapaPage() {
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
   const ignition = telemetry.ignitionOn;
+  const mileage = telemetry.mileageKm;
 
   const [trail, setTrail] = useState<TrailPoint[]>([]);
-  const [distance, setDistance] = useState(0);
+  const [gpsDistance, setGpsDistance] = useState(0);
+  const [mileageStart, setMileageStart] = useState<number | null>(null);
+  const [mileageNow, setMileageNow] = useState<number | null>(null);
   const [parked, setParked] = useState<Parked | null>(() => readParked());
   const lastPointRef = useRef<TrailPoint | null>(null);
   const prevIgnitionRef = useRef<boolean | undefined>(undefined);
@@ -61,7 +64,9 @@ function MapaPage() {
     const prev = prevIgnitionRef.current;
     if (prev === false && ignition === true) {
       setTrail([]);
-      setDistance(0);
+      setGpsDistance(0);
+      setMileageStart(typeof mileage === "number" ? mileage : null);
+      setMileageNow(typeof mileage === "number" ? mileage : null);
       lastPointRef.current = null;
     }
     if ((prev === true || prev === undefined) && ignition === false) {
@@ -80,10 +85,14 @@ function MapaPage() {
       }
     }
     prevIgnitionRef.current = ignition;
-  }, [ignition, lat, lng]);
+  }, [ignition, lat, lng, mileage]);
 
-  // Acumula pontos do rastro
+  // Acumula pontos do rastro + odômetro atual
   useEffect(() => {
+    if (typeof mileage === "number") {
+      setMileageNow(mileage);
+      if (mileageStart === null && ignition === true) setMileageStart(mileage);
+    }
     if (typeof lat !== "number" || typeof lng !== "number") return;
     const pt: TrailPoint = [lat, lng];
     lastKnownPosRef.current = pt;
@@ -92,11 +101,19 @@ function MapaPage() {
       const d = haversineKm(last, pt);
       // Filtra ruído GPS: só adiciona se mover mais de 5 metros
       if (d < 0.005) return;
-      setDistance((prev) => prev + d);
+      setGpsDistance((prev) => prev + d);
     }
     lastPointRef.current = pt;
     setTrail((prev) => (prev.length > 500 ? [...prev.slice(-499), pt] : [...prev, pt]));
-  }, [lat, lng]);
+  }, [lat, lng, mileage, ignition, mileageStart]);
+
+  // Distância: prefere delta de odômetro (mais preciso que Haversine com amostras a 15s).
+  const distance =
+    mileageStart !== null && mileageNow !== null && mileageNow >= mileageStart
+      ? mileageNow - mileageStart
+      : gpsDistance;
+
+
 
   const fallback = (
     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">

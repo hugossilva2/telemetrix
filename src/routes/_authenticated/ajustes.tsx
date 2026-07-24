@@ -87,6 +87,7 @@ function AjustesPage() {
         plate: plate.trim().toUpperCase() || "SEM-PLACA",
         current_mileage: Number(mileage) || 0,
         avg_consumption_kmpl: Number(consumption) > 0 ? Number(consumption) : 10,
+        flespi_device_id: deviceId.trim() || null,
         alert_engine_on: alertEngine,
         alert_low_battery: alertBattery,
       };

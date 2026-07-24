@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
+import { InstallAppCard } from "@/components/settings/InstallAppCard";
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({

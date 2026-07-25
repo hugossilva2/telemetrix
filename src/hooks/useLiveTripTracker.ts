@@ -48,13 +48,23 @@ export function useLiveTripTracker() {
             : [],
       };
       tripStore.set(open);
+      // Se havia destino pendente, promove para ativo agora que o motor ligou
+      const promoted = tripDestinationStore.promotePending();
+      if (promoted) {
+        toast.success(`Viagem iniciada — monitorando até ${promoted.name}`);
+      }
       return;
     }
 
-    // ON -> OFF: fecha viagem local (webhook grava no banco)
+    // ON -> OFF: fecha viagem local (webhook grava no banco) e limpa destino ativo
     if ((prev === true || prev === undefined) && ign === false) {
       tripStore.set(null);
+      const active = tripDestinationStore.getActive();
+      if (active) {
+        tripDestinationStore.setActive(null);
+      }
     }
+
   }, [telemetry.ignitionOn, telemetry.latitude, telemetry.longitude, telemetry.mileageKm, telemetry.speedKmh]);
 
   // Atualiza últimos dados + rastro enquanto motor ligado

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-import { Clock, Fuel, Route as RouteIcon, Wallet } from "lucide-react";
+import { Clock, Fuel, Route as RouteIcon, Wallet, Navigation, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOpenTrip } from "@/lib/trips/store";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,12 +8,15 @@ import { haversineKm } from "@/lib/trips/geo";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
+import { Button } from "@/components/ui/button";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
 export function OngoingTripCard() {
   const open = useOpenTrip();
   const { telemetry } = useFlespiMqtt();
+  const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
@@ -52,7 +55,47 @@ export function OngoingTripCard() {
     staleTime: 60_000,
   });
 
+  // Distância até o destino (se houver) e detecção de chegada
+  const currLat = telemetry.latitude;
+  const currLng = telemetry.longitude;
+  const remainingKm =
+    destination && typeof currLat === "number" && typeof currLng === "number"
+      ? haversineKm(currLat, currLng, destination.lat, destination.lng)
+      : null;
+
+  useEffect(() => {
+    if (!destination || remainingKm === null) return;
+    if (remainingKm * 1000 <= destination.radiusM) {
+      tripDestinationStore.setActive(null);
+    }
+  }, [destination, remainingKm]);
+
+  if (!open && !pendingDestination) return null;
+
+  if (!open && pendingDestination) {
+    return (
+      <section className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+        <div className="flex items-center gap-2 text-xs">
+          <Navigation className="size-4 text-amber-500" />
+          <span className="text-amber-500">
+            Viagem programada para <b>{pendingDestination.name}</b> — começa ao ligar o carro.
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={() => tripDestinationStore.setPending(null)}
+          aria-label="Cancelar destino"
+        >
+          <X className="size-4" />
+        </Button>
+      </section>
+    );
+  }
+
   if (!open) return null;
+
 
   const durationS = Math.max(
     0,
@@ -103,19 +146,33 @@ export function OngoingTripCard() {
   return (
     <section className="mt-3 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5">
       <div className="flex items-center justify-between border-b border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
-        <div className="flex items-center gap-2">
-          <span className="relative flex size-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="relative flex size-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-xs font-semibold uppercase tracking-wide text-emerald-500">
-            Viagem em andamento
+          <span className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-500">
+            {destination ? `Indo para ${destination.name}` : "Viagem em andamento"}
           </span>
         </div>
-        <span className="text-xs tabular-nums text-emerald-500/80">
-          {typeof telemetry.speedKmh === "number" ? `${telemetry.speedKmh.toFixed(0)} km/h` : "—"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs tabular-nums text-emerald-500/80">
+            {typeof telemetry.speedKmh === "number" ? `${telemetry.speedKmh.toFixed(0)} km/h` : "—"}
+          </span>
+          {destination && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 text-emerald-500 hover:text-emerald-400"
+              onClick={() => tripDestinationStore.setActive(null)}
+              aria-label="Encerrar destino"
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
       </div>
+
 
       <div className="h-44 w-full">
         <ClientOnly fallback={mapFallback}>
@@ -129,6 +186,20 @@ export function OngoingTripCard() {
           </Suspense>
         </ClientOnly>
       </div>
+
+      {destination && remainingKm !== null && (
+        <div className="flex items-center justify-between border-t border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs">
+          <span className="flex items-center gap-1.5 text-emerald-500">
+            <Navigation className="size-3.5" />
+            {remainingKm < 1
+              ? `${Math.round(remainingKm * 1000)} m restantes`
+              : `${remainingKm.toFixed(1)} km restantes`}
+          </span>
+          <span className="text-muted-foreground">até {destination.name}</span>
+        </div>
+      )}
+
+
 
       <div className="grid grid-cols-4 gap-2 p-3">
         <KpiTile Icon={Clock} label="Tempo" value={formatDurationSeconds(durationS)} />

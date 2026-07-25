@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { getRouteEta } from "@/lib/places.functions";
 import { iconFor } from "@/routes/_authenticated/lugares";
+import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 
 function formatEta(seconds: number): string {
   const m = Math.round(seconds / 60);
@@ -18,6 +19,8 @@ function formatEta(seconds: number): string {
 export function FavoritePlacesEta() {
   const { telemetry } = useFlespiMqtt();
   const eta = useServerFn(getRouteEta);
+  const startTrip = useStartTripDialog();
+
 
   const { data: places = [] } = useQuery({
     queryKey: ["favorite_places"],
@@ -93,9 +96,23 @@ export function FavoritePlacesEta() {
             const km = q?.data?.distanceMeters
               ? (q.data.distanceMeters / 1000).toFixed(1)
               : null;
+            const etaText = typeof seconds === "number" ? formatEta(seconds) : null;
             return (
               <li key={p.id} className="snap-start">
-                <div className="flex min-w-[140px] flex-col gap-1 rounded-2xl border border-border bg-card p-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    startTrip.openFor({
+                      id: p.id,
+                      name: p.name,
+                      icon: p.icon,
+                      lat: p.lat,
+                      lng: p.lng,
+                      geofence_radius_m: (p as { geofence_radius_m?: number }).geofence_radius_m ?? 150,
+                    })
+                  }
+                  className="flex min-w-[140px] flex-col gap-1 rounded-2xl border border-border bg-card p-3 text-left transition active:scale-[0.98] hover:border-primary/50"
+                >
                   <div className="flex items-center gap-2">
                     <div className="grid size-8 place-items-center rounded-full bg-primary/10 text-primary">
                       <Icon className="size-4" />
@@ -108,10 +125,10 @@ export function FavoritePlacesEta() {
                     <span className="text-xs text-muted-foreground">Calculando…</span>
                   ) : q?.isError ? (
                     <span className="text-xs text-destructive">Falhou</span>
-                  ) : typeof seconds === "number" ? (
+                  ) : etaText ? (
                     <div className="flex items-baseline gap-1.5">
                       <span className="text-lg font-bold tabular-nums text-primary">
-                        {formatEta(seconds)}
+                        {etaText}
                       </span>
                       {km && (
                         <span className="text-xs text-muted-foreground">· {km} km</span>
@@ -120,12 +137,36 @@ export function FavoritePlacesEta() {
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
                   )}
-                </div>
+                </button>
               </li>
             );
           })}
         </ul>
       </div>
+
+      <StartTripDialog
+        open={startTrip.open}
+        onOpenChange={(o) => (!o ? startTrip.close() : null)}
+        place={startTrip.place}
+        etaInfo={(() => {
+          const p = startTrip.place;
+          if (!p) return null;
+          const idx = places.findIndex((x) => x.id === p.id);
+          const q = idx >= 0 ? etaQueries[idx] : undefined;
+          const s = q?.data?.durationSeconds;
+          const km = q?.data?.distanceMeters
+            ? (q.data.distanceMeters / 1000).toFixed(1)
+            : null;
+          if (typeof s !== "number") return null;
+          return (
+            <span className="block text-foreground">
+              <span className="font-semibold text-primary">{formatEta(s)}</span>
+              {km && <span className="text-muted-foreground"> · {km} km</span>}
+            </span>
+          );
+        })()}
+      />
     </section>
   );
+
 }

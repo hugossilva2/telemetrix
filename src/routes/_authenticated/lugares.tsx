@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlaceDetails, searchPlaces, type PlaceSuggestion } from "@/lib/places.functions";
+import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 
 export const Route = createFileRoute("/_authenticated/lugares")({
   head: () => ({
@@ -40,6 +41,7 @@ function LugaresPage() {
   const qc = useQueryClient();
   const search = useServerFn(searchPlaces);
   const details = useServerFn(getPlaceDetails);
+  const startTrip = useStartTripDialog();
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState<IconKey>("home");
@@ -230,13 +232,29 @@ function LugaresPage() {
                   key={p.id}
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
                 >
-                  <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
-                    <Icon className="size-5" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{p.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">{p.address}</p>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      startTrip.openFor({
+                        id: p.id,
+                        name: p.name,
+                        icon: p.icon,
+                        lat: p.lat,
+                        lng: p.lng,
+                        geofence_radius_m:
+                          (p as { geofence_radius_m?: number }).geofence_radius_m ?? 150,
+                      })
+                    }
+                    className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  >
+                    <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
+                      <Icon className="size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{p.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{p.address}</p>
+                    </div>
+                  </button>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -251,6 +269,12 @@ function LugaresPage() {
           </ul>
         )}
       </section>
+
+      <StartTripDialog
+        open={startTrip.open}
+        onOpenChange={(o) => (!o ? startTrip.close() : null)}
+        place={startTrip.place}
+      />
     </AppShell>
   );
 }

@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
+import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
@@ -37,6 +38,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
   id: '/viagens',
   path: '/viagens',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRastreadorRoute = AuthenticatedRastreadorRouteImport.update({
+  id: '/rastreador',
+  path: '/rastreador',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/rastreador': typeof AuthenticatedRastreadorRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
+  '/rastreador': typeof AuthenticatedRastreadorRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
+  '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/lugares'
     | '/mapa'
+    | '/rastreador'
     | '/viagens'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/lugares'
     | '/mapa'
+    | '/rastreador'
     | '/viagens'
     | '/'
     | '/viagens/$id'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ajustes'
     | '/_authenticated/lugares'
     | '/_authenticated/mapa'
+    | '/_authenticated/rastreador'
     | '/_authenticated/viagens'
     | '/_authenticated/'
     | '/_authenticated/viagens/$id'
@@ -177,6 +189,13 @@ declare module '@tanstack/react-router' {
       path: '/viagens'
       fullPath: '/viagens'
       preLoaderRoute: typeof AuthenticatedViagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rastreador': {
+      id: '/_authenticated/rastreador'
+      path: '/rastreador'
+      fullPath: '/rastreador'
+      preLoaderRoute: typeof AuthenticatedRastreadorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/mapa': {
@@ -240,6 +259,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
+  AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -249,6 +269,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
+  AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }

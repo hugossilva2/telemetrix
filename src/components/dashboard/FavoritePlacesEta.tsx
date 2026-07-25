@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { getRouteEta } from "@/lib/places.functions";
 import { iconFor } from "@/routes/_authenticated/lugares";
+import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 
 function formatEta(seconds: number): string {
   const m = Math.round(seconds / 60);

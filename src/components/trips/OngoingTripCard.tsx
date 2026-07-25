@@ -55,7 +55,47 @@ export function OngoingTripCard() {
     staleTime: 60_000,
   });
 
+  // Distância até o destino (se houver) e detecção de chegada
+  const currLat = telemetry.latitude;
+  const currLng = telemetry.longitude;
+  const remainingKm =
+    destination && typeof currLat === "number" && typeof currLng === "number"
+      ? haversineKm(currLat, currLng, destination.lat, destination.lng)
+      : null;
+
+  useEffect(() => {
+    if (!destination || remainingKm === null) return;
+    if (remainingKm * 1000 <= destination.radiusM) {
+      tripDestinationStore.setActive(null);
+    }
+  }, [destination, remainingKm]);
+
+  if (!open && !pendingDestination) return null;
+
+  if (!open && pendingDestination) {
+    return (
+      <section className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+        <div className="flex items-center gap-2 text-xs">
+          <Navigation className="size-4 text-amber-500" />
+          <span className="text-amber-500">
+            Viagem programada para <b>{pendingDestination.name}</b> — começa ao ligar o carro.
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-7"
+          onClick={() => tripDestinationStore.setPending(null)}
+          aria-label="Cancelar destino"
+        >
+          <X className="size-4" />
+        </Button>
+      </section>
+    );
+  }
+
   if (!open) return null;
+
 
   const durationS = Math.max(
     0,

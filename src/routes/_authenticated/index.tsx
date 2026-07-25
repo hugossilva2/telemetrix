@@ -12,6 +12,7 @@ import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
 import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";
+import { FavoritePlacesEta } from "@/components/dashboard/FavoritePlacesEta";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -78,6 +79,8 @@ function Dashboard() {
       />
 
       <OngoingTripCard />
+
+      <FavoritePlacesEta />
 
       <div className="mt-4 grid grid-cols-2 gap-3">
         <TelemetryCard

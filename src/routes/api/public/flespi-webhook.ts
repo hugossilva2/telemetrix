@@ -309,7 +309,14 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
           }
         }
 
-        return Response.json({ ok: true, processed });
+        return Response.json({
+          ok: true,
+          processed,
+          skippedNoDevice,
+          skippedUnknownVehicle,
+          skippedOutOfOrder,
+          received: messages.length,
+        });
       },
     },
   },

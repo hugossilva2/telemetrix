@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
+import { tripDestinationStore } from "@/lib/trips/activeDestination";
 
 /**
  * Mantém o estado local da viagem em andamento (tripStore) com base na

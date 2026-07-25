@@ -13,6 +13,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const MIN_DISTANCE_KM = 0.1;
 const MIN_DURATION_S = 60;
+const MOTION_SPEED_THRESHOLD = 3; // km/h — considera "em movimento"
+const MOTION_ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 min entre alertas de movimento
+const PING_MIN_INTERVAL_MS = 20 * 1000; // grava ping no máximo a cada 20s
 
 type FlespiMessage = Record<string, unknown> & {
   "device.id"?: number | string;
@@ -152,6 +155,87 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
 
           const prevIgn = state?.ignition_on ?? null;
 
+          // ---------- tracker_pings (amostragem) ----------
+          if (
+            typeof lat === "number" &&
+            typeof lng === "number"
+          ) {
+            const lastPingMs = state?.last_message_at
+              ? new Date(state.last_message_at as string).getTime()
+              : 0;
+            if (tsMs - lastPingMs >= PING_MIN_INTERVAL_MS) {
+              await supabaseAdmin.from("tracker_pings").insert({
+                user_id: vehicle.user_id,
+                vehicle_id: vehicle.id,
+                lat,
+                lng,
+                speed_kmh: typeof speed === "number" ? speed : null,
+                ignition: typeof ign === "boolean" ? ign : null,
+                recorded_at: nowIso,
+              });
+            }
+          }
+
+          // ---------- tracker_events: ignição ----------
+          if (ign === true && prevIgn === false) {
+            await supabaseAdmin.from("tracker_events").insert({
+              user_id: vehicle.user_id,
+              vehicle_id: vehicle.id,
+              type: "ignition_on",
+              lat: lat ?? null,
+              lng: lng ?? null,
+              occurred_at: nowIso,
+            });
+          } else if (ign === false && prevIgn === true) {
+            await supabaseAdmin.from("tracker_events").insert({
+              user_id: vehicle.user_id,
+              vehicle_id: vehicle.id,
+              type: "ignition_off",
+              lat: lat ?? null,
+              lng: lng ?? null,
+              occurred_at: nowIso,
+            });
+          }
+
+          // ---------- tracker_events: movimento com motor desligado ----------
+          if (
+            ign === false &&
+            typeof speed === "number" &&
+            speed >= MOTION_SPEED_THRESHOLD
+          ) {
+            const lastMotion = (state?.geofence_state as any)?.last_motion_off_at as
+              | string
+              | undefined;
+            const lastMotionMs = lastMotion ? new Date(lastMotion).getTime() : 0;
+            if (tsMs - lastMotionMs >= MOTION_ALERT_COOLDOWN_MS) {
+              await supabaseAdmin.from("tracker_events").insert({
+                user_id: vehicle.user_id,
+                vehicle_id: vehicle.id,
+                type: "motion_off_ignition",
+                lat: lat ?? null,
+                lng: lng ?? null,
+                metadata: { speed_kmh: speed },
+                occurred_at: nowIso,
+              });
+              // persistir cooldown no geofence_state
+              const nextGeo = {
+                ...((state?.geofence_state as any) ?? {}),
+                last_motion_off_at: nowIso,
+              };
+              await supabaseAdmin
+                .from("device_trip_state")
+                .upsert({
+                  device_id: deviceId,
+                  user_id: vehicle.user_id,
+                  vehicle_id: vehicle.id,
+                  geofence_state: nextGeo,
+                  updated_at: nowIso,
+                });
+            }
+          }
+
+
+
           // Abre viagem: OFF→ON ou primeira observação já ligada sem estado.
           const shouldOpen =
             ign === true &&
@@ -178,6 +262,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               last_mileage: mileage ?? null,
               max_speed_kmh: speed ?? 0,
               updated_at: nowIso,
+              last_message_at: nowIso,
             });
             processed++;
             continue;
@@ -293,6 +378,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                 mileage_at_start:
                   state.mileage_at_start ?? mileage ?? null,
                 updated_at: nowIso,
+                last_message_at: nowIso,
               })
               .eq("device_id", deviceId);
             processed++;
@@ -305,6 +391,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               ignition_on: false,
               updated_at: nowIso,
               max_speed_kmh: 0,
+              last_message_at: nowIso,
             });
           }
         }

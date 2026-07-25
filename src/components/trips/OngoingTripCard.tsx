@@ -16,6 +16,7 @@ const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 export function OngoingTripCard() {
   const open = useOpenTrip();
   const { telemetry } = useFlespiMqtt();
+  const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {

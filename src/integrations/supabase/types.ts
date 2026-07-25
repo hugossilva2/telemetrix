@@ -17,9 +17,11 @@ export type Database = {
       device_trip_state: {
         Row: {
           device_id: string
+          geofence_state: Json
           ignition_on: boolean | null
           last_lat: number | null
           last_lng: number | null
+          last_message_at: string | null
           last_mileage: number | null
           max_speed_kmh: number
           mileage_at_start: number | null
@@ -32,9 +34,11 @@ export type Database = {
         }
         Insert: {
           device_id: string
+          geofence_state?: Json
           ignition_on?: boolean | null
           last_lat?: number | null
           last_lng?: number | null
+          last_message_at?: string | null
           last_mileage?: number | null
           max_speed_kmh?: number
           mileage_at_start?: number | null
@@ -47,9 +51,11 @@ export type Database = {
         }
         Update: {
           device_id?: string
+          geofence_state?: Json
           ignition_on?: boolean | null
           last_lat?: number | null
           last_lng?: number | null
+          last_message_at?: string | null
           last_mileage?: number | null
           max_speed_kmh?: number
           mileage_at_start?: number | null
@@ -66,6 +72,8 @@ export type Database = {
         Row: {
           address: string
           created_at: string
+          geofence_enabled: boolean
+          geofence_radius_m: number
           icon: string
           id: string
           lat: number
@@ -77,6 +85,8 @@ export type Database = {
         Insert: {
           address: string
           created_at?: string
+          geofence_enabled?: boolean
+          geofence_radius_m?: number
           icon?: string
           id?: string
           lat: number
@@ -88,6 +98,8 @@ export type Database = {
         Update: {
           address?: string
           created_at?: string
+          geofence_enabled?: boolean
+          geofence_radius_m?: number
           icon?: string
           id?: string
           lat?: number
@@ -138,6 +150,131 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "fuel_logs_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      tracker_events: {
+        Row: {
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          metadata: Json | null
+          occurred_at: string
+          place_id: string | null
+          type: Database["public"]["Enums"]["tracker_event_type"]
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          metadata?: Json | null
+          occurred_at?: string
+          place_id?: string | null
+          type: Database["public"]["Enums"]["tracker_event_type"]
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          metadata?: Json | null
+          occurred_at?: string
+          place_id?: string | null
+          type?: Database["public"]["Enums"]["tracker_event_type"]
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_events_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "favorite_places"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tracker_events_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_pings: {
+        Row: {
+          id: string
+          ignition: boolean | null
+          lat: number
+          lng: number
+          recorded_at: string
+          speed_kmh: number | null
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          id?: string
+          ignition?: boolean | null
+          lat: number
+          lng: number
+          recorded_at?: string
+          speed_kmh?: number | null
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          id?: string
+          ignition?: boolean | null
+          lat?: number
+          lng?: number
+          recorded_at?: string
+          speed_kmh?: number | null
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_pings_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -216,6 +353,10 @@ export type Database = {
       vehicles: {
         Row: {
           alert_engine_on: boolean
+          alert_geofence: boolean
+          alert_ignition: boolean
+          alert_motion_off: boolean
+          alert_signal_lost: boolean
           avg_consumption_kmpl: number
           created_at: string
           current_mileage: number
@@ -223,11 +364,17 @@ export type Database = {
           id: string
           name: string
           plate: string
+          signal_lost_notified_at: string | null
+          tracker_mode: boolean
           updated_at: string
           user_id: string
         }
         Insert: {
           alert_engine_on?: boolean
+          alert_geofence?: boolean
+          alert_ignition?: boolean
+          alert_motion_off?: boolean
+          alert_signal_lost?: boolean
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
@@ -235,11 +382,17 @@ export type Database = {
           id?: string
           name: string
           plate: string
+          signal_lost_notified_at?: string | null
+          tracker_mode?: boolean
           updated_at?: string
           user_id: string
         }
         Update: {
           alert_engine_on?: boolean
+          alert_geofence?: boolean
+          alert_ignition?: boolean
+          alert_motion_off?: boolean
+          alert_signal_lost?: boolean
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
@@ -247,6 +400,8 @@ export type Database = {
           id?: string
           name?: string
           plate?: string
+          signal_lost_notified_at?: string | null
+          tracker_mode?: boolean
           updated_at?: string
           user_id?: string
         }
@@ -260,7 +415,12 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      tracker_event_type:
+        | "ignition_on"
+        | "ignition_off"
+        | "motion_off_ignition"
+        | "geofence_exit"
+        | "signal_lost"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -387,6 +547,14 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      tracker_event_type: [
+        "ignition_on",
+        "ignition_off",
+        "motion_off_ignition",
+        "geofence_exit",
+        "signal_lost",
+      ],
+    },
   },
 } as const

@@ -19,6 +19,8 @@ function formatEta(seconds: number): string {
 export function FavoritePlacesEta() {
   const { telemetry } = useFlespiMqtt();
   const eta = useServerFn(getRouteEta);
+  const startTrip = useStartTripDialog();
+
 
   const { data: places = [] } = useQuery({
     queryKey: ["favorite_places"],

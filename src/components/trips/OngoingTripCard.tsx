@@ -146,19 +146,33 @@ export function OngoingTripCard() {
   return (
     <section className="mt-3 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5">
       <div className="flex items-center justify-between border-b border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
-        <div className="flex items-center gap-2">
-          <span className="relative flex size-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="relative flex size-2 shrink-0">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-xs font-semibold uppercase tracking-wide text-emerald-500">
-            Viagem em andamento
+          <span className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-500">
+            {destination ? `Indo para ${destination.name}` : "Viagem em andamento"}
           </span>
         </div>
-        <span className="text-xs tabular-nums text-emerald-500/80">
-          {typeof telemetry.speedKmh === "number" ? `${telemetry.speedKmh.toFixed(0)} km/h` : "—"}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs tabular-nums text-emerald-500/80">
+            {typeof telemetry.speedKmh === "number" ? `${telemetry.speedKmh.toFixed(0)} km/h` : "—"}
+          </span>
+          {destination && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-7 text-emerald-500 hover:text-emerald-400"
+              onClick={() => tripDestinationStore.setActive(null)}
+              aria-label="Encerrar destino"
+            >
+              <X className="size-4" />
+            </Button>
+          )}
+        </div>
       </div>
+
 
       <div className="h-44 w-full">
         <ClientOnly fallback={mapFallback}>

@@ -1,0 +1,1 @@
+ALTER TABLE public.vehicles DROP COLUMN IF EXISTS alert_low_battery;

@@ -187,6 +187,20 @@ export function OngoingTripCard() {
         </ClientOnly>
       </div>
 
+      {destination && remainingKm !== null && (
+        <div className="flex items-center justify-between border-t border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs">
+          <span className="flex items-center gap-1.5 text-emerald-500">
+            <Navigation className="size-3.5" />
+            {remainingKm < 1
+              ? `${Math.round(remainingKm * 1000)} m restantes`
+              : `${remainingKm.toFixed(1)} km restantes`}
+          </span>
+          <span className="text-muted-foreground">até {destination.name}</span>
+        </div>
+      )}
+
+
+
       <div className="grid grid-cols-4 gap-2 p-3">
         <KpiTile Icon={Clock} label="Tempo" value={formatDurationSeconds(durationS)} />
         <KpiTile Icon={RouteIcon} label="Distância" value={`${distanceKm.toFixed(2)} km`} />

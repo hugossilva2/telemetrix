@@ -16,6 +16,8 @@ const MIN_DURATION_S = 60;
 
 type FlespiMessage = Record<string, unknown> & {
   "device.id"?: number | string;
+  ident?: number | string;
+  cid?: number | string;
   "engine.ignition.status"?: boolean;
   "position.latitude"?: number;
   "position.longitude"?: number;
@@ -23,6 +25,14 @@ type FlespiMessage = Record<string, unknown> & {
   "vehicle.mileage"?: number;
   timestamp?: number;
 };
+
+function resolveDeviceId(msg: FlespiMessage): string | null {
+  const candidates = [msg["device.id"], msg.ident, msg.cid];
+  for (const c of candidates) {
+    if (c !== undefined && c !== null && `${c}`.trim() !== "") return String(c);
+  }
+  return null;
+}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371;

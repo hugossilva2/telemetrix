@@ -142,3 +142,16 @@
     color: var(--color-foreground);
   }
 }
+
+/* Manter o mapa Leaflet abaixo de modais/overlays (Radix Dialog usa z-50). */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control {
+  z-index: 1 !important;
+}
+.leaflet-pane.leaflet-marker-pane,
+.leaflet-pane.leaflet-tooltip-pane,
+.leaflet-pane.leaflet-popup-pane {
+  z-index: 2 !important;
+}

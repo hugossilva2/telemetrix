@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { getPlaceDetails, searchPlaces, type PlaceSuggestion } from "@/lib/places.functions";
+import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 
 export const Route = createFileRoute("/_authenticated/lugares")({
   head: () => ({

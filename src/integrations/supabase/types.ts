@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      favorite_places: {
+        Row: {
+          address: string
+          created_at: string
+          icon: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          icon?: string
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fuel_logs: {
         Row: {
           created_at: string

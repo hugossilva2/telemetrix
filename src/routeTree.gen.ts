@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
+import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
 import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/flespi-webhook'
@@ -43,6 +44,11 @@ const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
   path: '/mapa',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLugaresRoute = AuthenticatedLugaresRouteImport.update({
+  id: '/lugares',
+  path: '/lugares',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
   id: '/ajustes',
   path: '/ajustes',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
+  '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
+  '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/abastecimento'
     | '/ajustes'
+    | '/lugares'
     | '/mapa'
     | '/viagens'
     | '/viagens/$id'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/abastecimento'
     | '/ajustes'
+    | '/lugares'
     | '/mapa'
     | '/viagens'
     | '/'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/abastecimento'
     | '/_authenticated/ajustes'
+    | '/_authenticated/lugares'
     | '/_authenticated/mapa'
     | '/_authenticated/viagens'
     | '/_authenticated/'
@@ -174,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMapaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lugares': {
+      id: '/_authenticated/lugares'
+      path: '/lugares'
+      fullPath: '/lugares'
+      preLoaderRoute: typeof AuthenticatedLugaresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ajustes': {
       id: '/_authenticated/ajustes'
       path: '/ajustes'
@@ -219,6 +238,7 @@ const AuthenticatedViagensRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -227,6 +247,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,

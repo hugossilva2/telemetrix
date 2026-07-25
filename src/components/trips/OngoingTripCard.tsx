@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
-import { Clock, Fuel, Route as RouteIcon, Wallet } from "lucide-react";
+import { Clock, Fuel, Route as RouteIcon, Wallet, Navigation, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useOpenTrip } from "@/lib/trips/store";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,6 +8,8 @@ import { haversineKm } from "@/lib/trips/geo";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
+import { Button } from "@/components/ui/button";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 

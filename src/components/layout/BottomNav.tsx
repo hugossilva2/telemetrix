@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Car, Fuel, MapPin, Radar, Route as RouteIcon, Settings } from "lucide-react";
 
 const items = [

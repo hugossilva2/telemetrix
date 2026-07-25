@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Gauge, Fuel as FuelIcon, Battery, Route as RouteIcon, Zap } from "lucide-react";
+import { Gauge, Fuel as FuelIcon, Route as RouteIcon, Zap } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -8,9 +8,9 @@ import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { Progress } from "@/components/ui/progress";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
-import { formatKm, formatPct, formatRpm, formatSpeed, formatVolts } from "@/lib/format";
+import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
-import { OngoingTripBanner } from "@/components/trips/OngoingTripBanner";
+import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
 import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";
 
 export const Route = createFileRoute("/_authenticated/")({
@@ -25,33 +25,32 @@ export const Route = createFileRoute("/_authenticated/")({
   component: Dashboard,
 });
 
-const LOW_BATTERY_V = 11.8;
-
 function Dashboard() {
   const { status, telemetry, lastMessageAt } = useFlespiMqtt();
-  const fuel = telemetry.fuelLevel;
+  const ignitionOn = telemetry.ignitionOn === true;
+
+  // Quando desligado, força tudo em estado "off" (evita mostrar cache do último pacote).
+  const speed = ignitionOn ? telemetry.speedKmh : 0;
+  const rpm = ignitionOn ? telemetry.engineRpm : 0;
+  const fuel = ignitionOn ? telemetry.fuelLevel : undefined;
 
   const { data: alerts } = useQuery({
     queryKey: ["vehicle-alerts"],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) return { engine: false, battery: false };
+      if (!uid) return { engine: false };
       const { data } = await supabase
         .from("vehicles")
-        .select("alert_engine_on,alert_low_battery")
+        .select("alert_engine_on")
         .eq("user_id", uid)
         .limit(1)
         .maybeSingle();
-      return {
-        engine: !!data?.alert_engine_on,
-        battery: !!data?.alert_low_battery,
-      };
+      return { engine: !!data?.alert_engine_on };
     },
   });
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
-  const lowBatteryNotified = useRef(false);
 
   useEffect(() => {
     if (!alerts?.engine) return;
@@ -68,21 +67,7 @@ function Dashboard() {
     }
   }, [telemetry.ignitionOn, alerts?.engine]);
 
-  useEffect(() => {
-    if (!alerts?.battery) return;
-    const v = telemetry.batteryVoltage;
-    if (v === undefined) return;
-    if (v < LOW_BATTERY_V && !lowBatteryNotified.current) {
-      lowBatteryNotified.current = true;
-      toast.error("Bateria baixa", {
-        description: `Tensão em ${v.toFixed(2)} V.`,
-      });
-    } else if (v >= LOW_BATTERY_V + 0.3) {
-      lowBatteryNotified.current = false;
-    }
-  }, [telemetry.batteryVoltage, alerts?.battery]);
-
-
+  const dimmed = !ignitionOn ? "opacity-60" : "";
 
   return (
     <AppShell title="Painel" subtitle="Telemetria em tempo real">
@@ -92,16 +77,28 @@ function Dashboard() {
         lastMessageAt={lastMessageAt}
       />
 
-      <OngoingTripBanner />
+      <OngoingTripCard />
 
       <div className="mt-4 grid grid-cols-2 gap-3">
-        <TelemetryCard label="Velocidade" value={formatSpeed(telemetry.speedKmh)} Icon={Gauge} accent="primary" />
-        <TelemetryCard label="Odômetro" value={formatKm(telemetry.mileageKm)} Icon={RouteIcon} accent="sky" />
+        <TelemetryCard
+          label="Velocidade"
+          value={formatSpeed(speed)}
+          Icon={Gauge}
+          accent="primary"
+          className={dimmed}
+        />
+        <TelemetryCard
+          label="Odômetro"
+          value={formatKm(telemetry.mileageKm)}
+          Icon={RouteIcon}
+          accent="sky"
+        />
         <TelemetryCard
           label="Combustível"
           value={fuel === undefined ? "—" : formatPct(fuel)}
           Icon={FuelIcon}
           accent="emerald"
+          className={dimmed}
         >
           {fuel !== undefined ? (
             <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
@@ -109,11 +106,18 @@ function Dashboard() {
             <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
           )}
         </TelemetryCard>
-        <TelemetryCard label="RPM" value={formatRpm(telemetry.engineRpm)} Icon={Zap} accent="amber" />
-        <div className="col-span-2">
-          <TelemetryCard label="Bateria" value={formatVolts(telemetry.batteryVoltage)} Icon={Battery} accent="emerald" />
-        </div>
-        <LiveConsumptionCard />
+        <TelemetryCard
+          label="RPM"
+          value={formatRpm(rpm)}
+          Icon={Zap}
+          accent="amber"
+          className={dimmed}
+        />
+        {ignitionOn && (
+          <div className="col-span-2">
+            <LiveConsumptionCard />
+          </div>
+        )}
       </div>
     </AppShell>
   );

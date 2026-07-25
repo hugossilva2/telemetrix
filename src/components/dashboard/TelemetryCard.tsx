@@ -7,6 +7,7 @@ interface Props {
   Icon: LucideIcon;
   accent?: "primary" | "emerald" | "sky" | "amber";
   children?: ReactNode;
+  className?: string;
 }
 
 const accentBg: Record<NonNullable<Props["accent"]>, string> = {
@@ -16,9 +17,9 @@ const accentBg: Record<NonNullable<Props["accent"]>, string> = {
   amber: "bg-amber-500/15 text-amber-500",
 };
 
-export function TelemetryCard({ label, value, Icon, accent = "primary", children }: Props) {
+export function TelemetryCard({ label, value, Icon, accent = "primary", children, className = "" }: Props) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className={`rounded-2xl border border-border bg-card p-4 transition-opacity ${className}`}>
       <div className="flex items-center justify-between">
         <span className="text-xs uppercase tracking-wide text-muted-foreground">{label}</span>
         <span className={`grid size-8 place-items-center rounded-full ${accentBg[accent]}`}>

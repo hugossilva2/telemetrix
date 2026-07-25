@@ -16,6 +16,8 @@ const MIN_DURATION_S = 60;
 
 type FlespiMessage = Record<string, unknown> & {
   "device.id"?: number | string;
+  ident?: number | string;
+  cid?: number | string;
   "engine.ignition.status"?: boolean;
   "position.latitude"?: number;
   "position.longitude"?: number;
@@ -23,6 +25,14 @@ type FlespiMessage = Record<string, unknown> & {
   "vehicle.mileage"?: number;
   timestamp?: number;
 };
+
+function resolveDeviceId(msg: FlespiMessage): string | null {
+  const candidates = [msg["device.id"], msg.ident, msg.cid];
+  for (const c of candidates) {
+    if (c !== undefined && c !== null && `${c}`.trim() !== "") return String(c);
+  }
+  return null;
+}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
   const R = 6371;
@@ -69,13 +79,17 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
         );
 
         let processed = 0;
+        let skippedNoDevice = 0;
+        let skippedUnknownVehicle = 0;
+        let skippedOutOfOrder = 0;
+
         for (const msg of messages) {
-          const deviceIdRaw = msg["device.id"];
-          const deviceId =
-            deviceIdRaw !== undefined && deviceIdRaw !== null
-              ? String(deviceIdRaw)
-              : null;
-          if (!deviceId) continue;
+          const deviceId = resolveDeviceId(msg);
+          if (!deviceId) {
+            skippedNoDevice++;
+            console.log("[flespi-webhook] skip: no device id", Object.keys(msg).slice(0, 10));
+            continue;
+          }
 
           // Resolve veículo/usuário pelo device_id.
           const { data: vehicle } = await supabaseAdmin
@@ -83,7 +97,11 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
             .select("id,user_id,avg_consumption_kmpl")
             .eq("flespi_device_id", deviceId)
             .maybeSingle();
-          if (!vehicle) continue;
+          if (!vehicle) {
+            skippedUnknownVehicle++;
+            console.log("[flespi-webhook] skip: no vehicle for device", deviceId);
+            continue;
+          }
 
           const ign = msg["engine.ignition.status"];
           const lat = msg["position.latitude"];
@@ -101,6 +119,36 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
             .select("*")
             .eq("device_id", deviceId)
             .maybeSingle();
+
+          // Guarda contra mensagens fora de ordem (Flespi pode enfileirar).
+          if (state?.updated_at) {
+            const stateMs = new Date(state.updated_at as string).getTime();
+            if (tsMs < stateMs - 1000) {
+              skippedOutOfOrder++;
+              console.log(
+                "[flespi-webhook] skip: out-of-order",
+                deviceId,
+                "msg",
+                nowIso,
+                "state",
+                state.updated_at,
+              );
+              continue;
+            }
+          }
+
+          console.log(
+            "[flespi-webhook]",
+            deviceId,
+            "ign=",
+            ign,
+            "ts=",
+            nowIso,
+            "prevIgn=",
+            state?.ignition_on ?? null,
+            "hasOpenTrip=",
+            state?.start_time != null,
+          );
 
           const prevIgn = state?.ignition_on ?? null;
 
@@ -261,7 +309,14 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
           }
         }
 
-        return Response.json({ ok: true, processed });
+        return Response.json({
+          ok: true,
+          processed,
+          skippedNoDevice,
+          skippedUnknownVehicle,
+          skippedOutOfOrder,
+          received: messages.length,
+        });
       },
     },
   },

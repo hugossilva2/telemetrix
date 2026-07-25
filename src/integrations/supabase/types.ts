@@ -180,7 +180,6 @@ export type Database = {
       vehicles: {
         Row: {
           alert_engine_on: boolean
-          alert_low_battery: boolean
           avg_consumption_kmpl: number
           created_at: string
           current_mileage: number
@@ -193,7 +192,6 @@ export type Database = {
         }
         Insert: {
           alert_engine_on?: boolean
-          alert_low_battery?: boolean
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number
@@ -206,7 +204,6 @@ export type Database = {
         }
         Update: {
           alert_engine_on?: boolean
-          alert_low_battery?: boolean
           avg_consumption_kmpl?: number
           created_at?: string
           current_mileage?: number

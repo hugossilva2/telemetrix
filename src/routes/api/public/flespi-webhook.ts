@@ -155,6 +155,87 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
 
           const prevIgn = state?.ignition_on ?? null;
 
+          // ---------- tracker_pings (amostragem) ----------
+          if (
+            typeof lat === "number" &&
+            typeof lng === "number"
+          ) {
+            const lastPingMs = state?.last_message_at
+              ? new Date(state.last_message_at as string).getTime()
+              : 0;
+            if (tsMs - lastPingMs >= PING_MIN_INTERVAL_MS) {
+              await supabaseAdmin.from("tracker_pings").insert({
+                user_id: vehicle.user_id,
+                vehicle_id: vehicle.id,
+                lat,
+                lng,
+                speed_kmh: typeof speed === "number" ? speed : null,
+                ignition: typeof ign === "boolean" ? ign : null,
+                recorded_at: nowIso,
+              });
+            }
+          }
+
+          // ---------- tracker_events: ignição ----------
+          if (ign === true && prevIgn === false) {
+            await supabaseAdmin.from("tracker_events").insert({
+              user_id: vehicle.user_id,
+              vehicle_id: vehicle.id,
+              type: "ignition_on",
+              lat: lat ?? null,
+              lng: lng ?? null,
+              occurred_at: nowIso,
+            });
+          } else if (ign === false && prevIgn === true) {
+            await supabaseAdmin.from("tracker_events").insert({
+              user_id: vehicle.user_id,
+              vehicle_id: vehicle.id,
+              type: "ignition_off",
+              lat: lat ?? null,
+              lng: lng ?? null,
+              occurred_at: nowIso,
+            });
+          }
+
+          // ---------- tracker_events: movimento com motor desligado ----------
+          if (
+            ign === false &&
+            typeof speed === "number" &&
+            speed >= MOTION_SPEED_THRESHOLD
+          ) {
+            const lastMotion = (state?.geofence_state as any)?.last_motion_off_at as
+              | string
+              | undefined;
+            const lastMotionMs = lastMotion ? new Date(lastMotion).getTime() : 0;
+            if (tsMs - lastMotionMs >= MOTION_ALERT_COOLDOWN_MS) {
+              await supabaseAdmin.from("tracker_events").insert({
+                user_id: vehicle.user_id,
+                vehicle_id: vehicle.id,
+                type: "motion_off_ignition",
+                lat: lat ?? null,
+                lng: lng ?? null,
+                metadata: { speed_kmh: speed },
+                occurred_at: nowIso,
+              });
+              // persistir cooldown no geofence_state
+              const nextGeo = {
+                ...((state?.geofence_state as any) ?? {}),
+                last_motion_off_at: nowIso,
+              };
+              await supabaseAdmin
+                .from("device_trip_state")
+                .upsert({
+                  device_id: deviceId,
+                  user_id: vehicle.user_id,
+                  vehicle_id: vehicle.id,
+                  geofence_state: nextGeo,
+                  updated_at: nowIso,
+                });
+            }
+          }
+
+
+
           // Abre viagem: OFF→ON ou primeira observação já ligada sem estado.
           const shouldOpen =
             ign === true &&

@@ -234,6 +234,69 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
             }
           }
 
+          // ---------- tracker_events: geofence exit ----------
+          if (
+            typeof lat === "number" &&
+            typeof lng === "number"
+          ) {
+            const { data: vehicleAlerts } = await supabaseAdmin
+              .from("vehicles")
+              .select("alert_geofence")
+              .eq("id", vehicle.id)
+              .maybeSingle();
+            if (vehicleAlerts?.alert_geofence !== false) {
+              const { data: places } = await supabaseAdmin
+                .from("favorite_places")
+                .select("id,name,lat,lng,geofence_radius_m")
+                .eq("user_id", vehicle.user_id)
+                .eq("geofence_enabled", true);
+              if (places && places.length > 0) {
+                const geoState = (state?.geofence_state as any) ?? {};
+                const placesState: Record<string, boolean> =
+                  geoState.places ?? {};
+                const nextPlaces: Record<string, boolean> = { ...placesState };
+                let changed = false;
+                for (const p of places) {
+                  if (typeof p.lat !== "number" || typeof p.lng !== "number") continue;
+                  const radiusKm = ((p.geofence_radius_m as number) || 150) / 1000;
+                  const distKm = haversineKm(p.lat, p.lng, lat, lng);
+                  const inside = distKm <= radiusKm;
+                  const wasInside = placesState[p.id as string];
+                  if (wasInside === true && inside === false) {
+                    await supabaseAdmin.from("tracker_events").insert({
+                      user_id: vehicle.user_id,
+                      vehicle_id: vehicle.id,
+                      type: "geofence_exit",
+                      lat,
+                      lng,
+                      place_id: p.id,
+                      metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 150 },
+                      occurred_at: nowIso,
+                    });
+                  }
+                  if (nextPlaces[p.id as string] !== inside) {
+                    nextPlaces[p.id as string] = inside;
+                    changed = true;
+                  }
+                }
+                if (changed) {
+                  const nextGeo = { ...geoState, places: nextPlaces };
+                  await supabaseAdmin
+                    .from("device_trip_state")
+                    .upsert({
+                      device_id: deviceId,
+                      user_id: vehicle.user_id,
+                      vehicle_id: vehicle.id,
+                      geofence_state: nextGeo,
+                      updated_at: nowIso,
+                    });
+                }
+              }
+            }
+          }
+
+
+
 
 
           // Abre viagem: OFF→ON ou primeira observação já ligada sem estado.

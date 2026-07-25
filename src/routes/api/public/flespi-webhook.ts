@@ -13,6 +13,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 const MIN_DISTANCE_KM = 0.1;
 const MIN_DURATION_S = 60;
+const MOTION_SPEED_THRESHOLD = 3; // km/h — considera "em movimento"
+const MOTION_ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 min entre alertas de movimento
+const PING_MIN_INTERVAL_MS = 20 * 1000; // grava ping no máximo a cada 20s
 
 type FlespiMessage = Record<string, unknown> & {
   "device.id"?: number | string;

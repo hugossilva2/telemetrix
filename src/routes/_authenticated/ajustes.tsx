@@ -29,7 +29,6 @@ type VehicleRow = {
   plate: string;
   current_mileage: number;
   alert_engine_on: boolean;
-  alert_low_battery: boolean;
   avg_consumption_kmpl: number;
   flespi_device_id: string | null;
 };
@@ -46,7 +45,7 @@ function AjustesPage() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id,name,plate,current_mileage,alert_engine_on,alert_low_battery,avg_consumption_kmpl,flespi_device_id")
+        .select("id,name,plate,current_mileage,alert_engine_on,avg_consumption_kmpl,flespi_device_id")
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
         .limit(1)
@@ -62,7 +61,6 @@ function AjustesPage() {
   const [consumption, setConsumption] = useState("10");
   const [deviceId, setDeviceId] = useState("");
   const [alertEngine, setAlertEngine] = useState(false);
-  const [alertBattery, setAlertBattery] = useState(false);
 
   useEffect(() => {
     if (vehicle) {
@@ -72,7 +70,6 @@ function AjustesPage() {
       setConsumption(String(vehicle.avg_consumption_kmpl ?? 10));
       setDeviceId(vehicle.flespi_device_id ?? "");
       setAlertEngine(vehicle.alert_engine_on);
-      setAlertBattery(vehicle.alert_low_battery);
     }
   }, [vehicle]);
 
@@ -90,7 +87,6 @@ function AjustesPage() {
         avg_consumption_kmpl: Number(consumption) > 0 ? Number(consumption) : 10,
         flespi_device_id: deviceId.trim() || null,
         alert_engine_on: alertEngine,
-        alert_low_battery: alertBattery,
       };
 
       if (vehicle?.id) {
@@ -208,13 +204,6 @@ function AjustesPage() {
               <Switch
                 checked={alertEngine}
                 onCheckedChange={setAlertEngine}
-              />
-            </label>
-            <label className="flex items-center justify-between gap-3">
-              <span className="text-sm">Alertar bateria baixa</span>
-              <Switch
-                checked={alertBattery}
-                onCheckedChange={setAlertBattery}
               />
             </label>
           </div>

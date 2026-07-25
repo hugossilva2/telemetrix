@@ -1,8 +1,11 @@
+import { useLiveTripTracker } from "@/hooks/useLiveTripTracker";
+
 /**
- * Gravação de viagens agora é feita 100% no servidor via webhook do Flespi
- * (src/routes/api/public/flespi-webhook.ts). O hook client-side foi
- * desativado para evitar viagens duplicadas.
+ * Mantém o estado local da viagem (tripStore) enquanto o app estiver aberto,
+ * para alimentar cronômetro, mini-mapa e consumo em tempo real na UI.
+ * A persistência no banco é feita pelo webhook Flespi no servidor.
  */
 export function TripRecorder() {
+  useLiveTripTracker();
   return null;
 }

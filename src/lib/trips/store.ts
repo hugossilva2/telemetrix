@@ -4,6 +4,13 @@ import { useSyncExternalStore } from "react";
  * Estado da viagem "em andamento" (motor ligado) em memória compartilhada
  * entre componentes. Persistido em localStorage para sobreviver a reloads.
  */
+export interface TrailPoint {
+  lat: number;
+  lng: number;
+  speed?: number | null;
+  t: number;
+}
+
 export interface OpenTrip {
   startTime: string; // ISO
   startLat: number | null;
@@ -13,15 +20,20 @@ export interface OpenTrip {
   lastLng: number | null;
   lastMileage: number | null;
   maxSpeedKmh: number;
+  trail: TrailPoint[];
 }
 
-const STORAGE_KEY = "openTrip:v1";
+const STORAGE_KEY = "openTrip:v2";
+const MAX_TRAIL = 500;
 
 function readInitial(): OpenTrip | null {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as OpenTrip) : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as OpenTrip;
+    if (!Array.isArray(parsed.trail)) parsed.trail = [];
+    return parsed;
   } catch {
     return null;
   }
@@ -45,6 +57,13 @@ export const tripStore = {
       else window.localStorage.removeItem(STORAGE_KEY);
     }
     emit();
+  },
+  appendTrail(pt: TrailPoint) {
+    if (!current) return;
+    const trail = current.trail.length >= MAX_TRAIL
+      ? [...current.trail.slice(-MAX_TRAIL + 1), pt]
+      : [...current.trail, pt];
+    this.set({ ...current, trail });
   },
   subscribe(l: () => void) {
     listeners.add(l);

@@ -18,6 +18,7 @@ import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/m
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
+import { Route as ApiPublicTrackerHeartbeatRouteImport } from './routes/api/public/tracker-heartbeat'
 import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/flespi-webhook'
 import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 
@@ -66,6 +67,12 @@ const AuthenticatedAbastecimentoRoute =
     path: '/abastecimento',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicTrackerHeartbeatRoute =
+  ApiPublicTrackerHeartbeatRouteImport.update({
+    id: '/api/public/tracker-heartbeat',
+    path: '/api/public/tracker-heartbeat',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicFlespiWebhookRoute = ApiPublicFlespiWebhookRouteImport.update({
   id: '/api/public/flespi-webhook',
   path: '/api/public/flespi-webhook',
@@ -88,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
+  '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
@@ -100,6 +108,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthenticatedIndexRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
+  '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +123,7 @@ export interface FileRoutesById {
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
+  '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -128,6 +138,7 @@ export interface FileRouteTypes {
     | '/viagens'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
+    | '/api/public/tracker-heartbeat'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/auth'
@@ -140,6 +151,7 @@ export interface FileRouteTypes {
     | '/'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
+    | '/api/public/tracker-heartbeat'
   id:
     | '__root__'
     | '/_authenticated'
@@ -153,12 +165,14 @@ export interface FileRouteTypes {
     | '/_authenticated/'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-webhook'
+    | '/api/public/tracker-heartbeat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
+  ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -226,6 +240,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAbastecimentoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/tracker-heartbeat': {
+      id: '/api/public/tracker-heartbeat'
+      path: '/api/public/tracker-heartbeat'
+      fullPath: '/api/public/tracker-heartbeat'
+      preLoaderRoute: typeof ApiPublicTrackerHeartbeatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/flespi-webhook': {
       id: '/api/public/flespi-webhook'
       path: '/api/public/flespi-webhook'
@@ -281,6 +302,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
+  ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

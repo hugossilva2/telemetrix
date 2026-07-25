@@ -155,6 +155,19 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
 
           const prevIgn = state?.ignition_on ?? null;
 
+          // ---------- signal recuperado: limpa flag de "sinal perdido" ----------
+          const { data: vehicleFlags } = await supabaseAdmin
+            .from("vehicles")
+            .select("signal_lost_notified_at")
+            .eq("id", vehicle.id)
+            .maybeSingle();
+          if (vehicleFlags?.signal_lost_notified_at) {
+            await supabaseAdmin
+              .from("vehicles")
+              .update({ signal_lost_notified_at: null })
+              .eq("id", vehicle.id);
+          }
+
           // ---------- tracker_pings (amostragem) ----------
           if (
             typeof lat === "number" &&

@@ -269,6 +269,12 @@ function LugaresPage() {
           </ul>
         )}
       </section>
+
+      <StartTripDialog
+        open={startTrip.open}
+        onOpenChange={(o) => (!o ? startTrip.close() : null)}
+        place={startTrip.place}
+      />
     </AppShell>
   );
 }

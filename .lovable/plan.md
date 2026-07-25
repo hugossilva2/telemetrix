@@ -1,82 +1,111 @@
-## Fase 1 — Correções e Dashboard "ao vivo"
+## Modo Rastreador (foco em segurança)
 
-Nesta rodada, sem locais favoritos/ETA (fica para fase 2 com OpenRouteService).
+Nova rota `/rastreador` dedicada a rastreio de moto/veículo, com alertas de segurança e push notifications. O painel completo atual continua intacto.
 
-### 1. Zerar telemetria com motor desligado
+### 1. Banco de dados
 
-Quando `engine.ignition.status === false`, o Dashboard deve exibir tudo em estado "desligado" em vez de mostrar o último valor recebido do MQTT (que persiste no cache).
+Nova tabela `tracker_events` para o histórico de eventos de segurança (ligou, desligou, movimento suspeito, saída de cerca, perda de sinal):
+- `type` (enum: `ignition_on`, `ignition_off`, `motion_off_ignition`, `geofence_exit`, `signal_lost`)
+- `lat`, `lng`, `occurred_at`, `place_id` (fk opcional para `favorite_places`)
 
-Regras aplicadas em `src/routes/_authenticated/index.tsx`:
-- Velocidade: `0 km/h` (fixo)
-- RPM: `0`
-- Combustível: `—` com nota "Disponível com o motor ligado" (já é assim, mas hoje mostra o último 60% em cache — vamos limpar quando `ignitionOn === false`)
-- Odômetro: continua exibindo o valor real (é cumulativo, faz sentido mostrar)
-- Cards ganham estilo esmaecido (opacidade reduzida) quando desligado, reforçando o estado
+Tabela `tracker_pings` para o "histórico automático" de posições (amostragem esparsa, ~1 por minuto quando em movimento):
+- `lat`, `lng`, `speed_kmh`, `ignition`, `recorded_at`
 
-### 2. Remover cartão "Bateria"
+Extensão em `favorite_places`:
+- `geofence_radius_m` (int, default 150) — raio da cerca ao redor do ponto
+- `geofence_enabled` (bool, default false)
 
-O usuário confirmou: é a bateria interna do FMC003, não interessa.
-- Remove o `TelemetryCard` de bateria do Dashboard
-- Remove o alerta "Bateria baixa" e o toggle correspondente em Ajustes
-- Migração para dropar a coluna `alert_low_battery` de `vehicles`
+Extensão em `vehicles`:
+- `tracker_mode` (bool, default false) — marca o veículo como "modo rastreador"
+- `push_subscription` (jsonb) — endpoint Web Push do dispositivo do dono
 
-### 3. Velocidade em "tempo real"
+Nova tabela `push_subscriptions` (multi-device por usuário):
+- `endpoint`, `p256dh`, `auth`, `user_agent`, `created_at`
 
-Hoje o MQTT chega a cada ~15s. Enquanto isso, a UI fica congelada. Melhorias:
-- Assinar também o tópico `flespi/state/gw/devices/{id}/telemetry/position.speed` (já é feito) e o `.../position` (já é feito). Confirmar que o parser aplica `speed` imediatamente sem esperar o pacote completo — já faz.
-- Adicionar um indicador visual "atualizado há Xs" no card de velocidade, para deixar claro que o número é da última amostra.
-- Quando `ignitionOn === true` mas a última amostra tem mais de 20s, exibir badge sutil "aguardando…" no card.
+Todas com RLS `auth.uid() = user_id` e GRANTs.
 
-Observação honesta: não dá para ter velocidade "verdadeiramente realtime" com o FMC003 mandando a cada 15s. O que dá para melhorar é o feedback visual. Se quiser mais frequência, é config no próprio Flespi (data-forwarding / intervalos do device) — fora do escopo do app.
+### 2. Backend / webhook
 
-### 4. Mini-mapa + cronômetro + consumo no Dashboard
+`src/routes/api/public/flespi-webhook.ts` ganha lógica de detecção e enfileira eventos:
 
-Novo componente `OngoingTripCard` (substitui/expande o atual `OngoingTripBanner`), visível apenas quando existe viagem aberta (`useOpenTrip()` retorna algo):
+```text
+para cada mensagem:
+  gravar tracker_ping (amostrado: 1 a cada 60s ou se mudou >100m)
+  se ignition mudou true→false: registrar ignition_off + atualizar last_parking
+  se ignition mudou false→true: registrar ignition_on
+  se ignition=false E speed>3km/h ou moveu >50m: registrar motion_off_ignition
+  para cada favorite_place com geofence_enabled: se estava dentro e saiu → geofence_exit
+  disparar Web Push para cada push_subscription do dono
+```
 
-Layout (topo do Dashboard, acima dos cards de telemetria):
-- Mini-mapa (altura ~180px) com o rastro da viagem atual e marcador do carro na posição atual, seguindo o padrão do `TripMap` mas em versão compacta.
-- Linha de KPIs abaixo do mapa:
-  - ⏱️ Tempo decorrido (cronômetro atualizando 1×/s)
-  - 📏 Distância percorrida (via delta de odômetro, cai para GPS)
-  - ⛽ Consumo estimado em L (`distância / kmpl do veículo`)
-  - 💰 Custo estimado (`litros × preço do último abastecimento || R$ 5,89`)
+Cron leve (server route `/api/public/tracker-heartbeat` chamada por pg_cron a cada 5min):
+- Se última mensagem > 15min → registrar `signal_lost` + push (só uma vez até voltar).
 
-Reaproveita `SpeedPolyline`, `startIcon`, `endIcon` e a lógica já existente em `mapa.tsx` (o trail é montado lá — vamos extrair para um hook `useOngoingTripTrail()` em `src/lib/trips/` para o Dashboard e o Mapa consumirem o mesmo estado).
+### 3. Push notifications (Web Push VAPID)
 
-### 5. Viagem perdida (trabalho → casa)
+- Gerar par VAPID → guardar como secrets `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT`.
+- `public/sw-push.js`: service worker dedicado só a push (separado do PWA app-shell, conforme regra da knowledge).
+- Server fn `subscribeToPush` grava a inscrição na tabela.
+- No webhook, ao criar evento, usar `web-push` (compatível com Cloudflare Workers via `@block65/webcrypto-web-push`) para disparar.
 
-Diagnóstico atual:
-- Existe apenas 1 viagem em `trips` (14,2 km, 24/07 11:22 → 11:55).
-- `device_trip_state` está vazio.
+### 4. UI — Rota `/rastreador`
 
-`device_trip_state` vazia é normal DEPOIS de fechar uma viagem (o webhook faz `DELETE`). Não é sinal de falha.
+Estrutura mobile-first, mapa em tela cheia como no Waze/Uber:
 
-Hipóteses para a viagem perdida:
-1. **A mensagem OFF do Flespi nunca chegou ao webhook.** Sem ela o servidor não fecha. Vou adicionar log detalhado (via `console.log` no handler) para vermos em `stack_modern--server-function-logs` os próximos eventos e o `deviceId`/`ign` que chegam.
-2. **Filtro de ruído descartou.** Regras atuais: `distance < 100m E duration < 60s` → descarta. Viagem real trabalho→casa não deveria cair aí. Vamos manter.
-3. **Payload sem `device.id`.** Se o Flespi manda o campo com outro nome (ex.: `ident`), o loop faz `continue` silencioso. Vou adicionar fallback: tentar `device.id`, `ident`, `cid` e logar quando nenhum casar.
-4. **Ordem cronológica.** Se o Flespi enfileirou mensagens fora de ordem, uma antiga com `ign=true` pode reabrir uma viagem já fechada. Vou comparar `timestamp` da mensagem com `state.updated_at` e ignorar mensagens mais antigas.
+```text
+┌─────────────────────────────────┐
+│ [Status] MOTO ligada · 14:32    │  header sticky, badge verde/cinza
+├─────────────────────────────────┤
+│                                 │
+│         MAPA GRANDE             │  70% da tela
+│      (posição atual + P         │
+│       último estacionado)       │
+│                                 │
+├─────────────────────────────────┤
+│ [🔔 3 eventos hoje]  [+ ponto]  │  ações rápidas
+├─────────────────────────────────┤
+│ Últimos eventos                 │
+│ 🟢 Ligou · 14:32 · Casa         │
+│ 🔴 Desligou · 12:10 · Trabalho  │
+│ ⚠️ Saiu da cerca "Casa" · 08:15 │
+└─────────────────────────────────┘
+```
 
-Ações concretas no webhook:
-- Adicionar logs (device id, ignition, timestamp, ação tomada) para todos os eventos.
-- Adicionar fallback de `deviceId` (`device.id` → `ident` → `cid`).
-- Ignorar mensagens fora de ordem (`msg.timestamp * 1000 < state.updated_at`).
+Componentes novos:
+- `TrackerMap.tsx` — mapa cheio com posição atual, último estacionado, cercas desenhadas (círculos), pontos salvos.
+- `TrackerEventList.tsx` — timeline de `tracker_events`, agrupada por dia.
+- `SavePointButton.tsx` — botão flutuante "Salvar posição atual" que abre modal (nome + ícone).
+- `GeofenceEditor.tsx` — em `/lugares`, slider de raio (50m–1000m) + toggle para ligar geofence por ponto.
+- `PushPermissionBanner.tsx` — pede permissão + registra subscription na primeira visita à rota.
 
-Depois eu peço para você fazer uma viagem curta de teste e leio os logs para confirmar que o webhook está recebendo e classificando os eventos corretamente. Se não estiver chegando nada, o problema é a configuração no painel Flespi (URL/secret/formato do payload), e vou te passar o passo-a-passo para verificar.
+### 5. Ajustes
 
-### Arquivos afetados
+Nova seção "Modo Rastreador":
+- Toggle "Ativar modo rastreador neste veículo"
+- Lista de alertas (Ignition, Movimento suspeito, Geofence, Perda de sinal) com toggle cada
+- Botão "Testar push" (dispara push de teste)
+- Lista de dispositivos inscritos com opção de remover
 
-- `src/routes/_authenticated/index.tsx` — zera telemetria com motor off, remove card de bateria, insere `OngoingTripCard`.
-- `src/routes/_authenticated/ajustes.tsx` — remove toggle de bateria baixa.
-- `src/components/dashboard/StatusHeader.tsx` — pequena revisão do texto quando desligado.
-- `src/components/trips/OngoingTripCard.tsx` — novo (substitui `OngoingTripBanner` no Dashboard; banner segue existindo em outras telas se aplicável).
-- `src/components/map/MiniTripMap.tsx` — novo, versão compacta do TripMap.
-- `src/lib/trips/useOngoingTripTrail.ts` — novo hook que centraliza o trail atual (extraído do `mapa.tsx`).
-- `src/routes/api/public/flespi-webhook.ts` — logs, fallback de deviceId, guarda contra mensagens fora de ordem.
-- Migração: `ALTER TABLE vehicles DROP COLUMN alert_low_battery;`
+### 6. Navegação
 
-### O que fica para a Fase 2 (quando você quiser)
+Substituir o ícone menos usado da BottomNav pela rota `/rastreador` **quando** o veículo ativo estiver em `tracker_mode`; senão manter como está. Alternativa mais simples: sempre adicionar como 6º item (já são 6 hoje). Vou seguir por: adicionar como 6º e destacar visualmente quando há eventos novos.
 
-- Locais favoritos (Casa/Trabalho/Academia): CRUD em Ajustes, tabela `saved_places` com RLS.
-- ETA "estilo Waze" usando OpenRouteService (grátis, sem trânsito em tempo real — o ETA será baseado em velocidades típicas por tipo de via, não em congestionamento real).
-- Botão "Estou indo para X" no Dashboard mostra distância + ETA estimado.
+### Ordem de entrega (fases pequenas, cada uma testável)
+
+1. **Migração DB** — tabelas + colunas + RLS + GRANTs. Você aprova a SQL antes de rodar.
+2. **Rota `/rastreador` estática** — mapa grande + lista de eventos lendo da tabela (ainda vazia). Botão "salvar ponto".
+3. **Detecção de eventos no webhook** — ignition on/off + motion_off_ignition + gravação de pings, sem push ainda. Testamos com uma viagem real.
+4. **Geofence** — editor em `/lugares` + detecção no webhook.
+5. **Heartbeat de sinal perdido** — server route + agendamento.
+6. **Web Push** — VAPID, service worker de push, inscrição, envio pelo webhook. Fase final porque exige aprovação de permissão no seu celular.
+7. **Ajustes + polish** — toggles por alerta, teste de push, badge de eventos novos na BottomNav.
+
+Paro em cada fase pra você validar antes de seguir.
+
+### Detalhes técnicos
+
+- Web Push do lado servidor no Cloudflare Worker: usar `@block65/webcrypto-web-push` (compatível com workerd). Evitar `web-push` clássico que depende de `node:crypto` de forma incompatível.
+- Amostragem de pings: gravar só se `now - last_ping > 60s` OU `haversine > 100m` OU `ignition mudou`. Evita inflar a tabela.
+- Detecção de "motion_off_ignition": exige duas leituras consecutivas com deslocamento real, pra descartar jitter de GPS parado.
+- Geofence: cálculo por haversine no webhook, guardar `is_inside` da leitura anterior por veículo em `device_trip_state` (já existe) — adicionar coluna `geofence_state jsonb` mapeando `place_id → bool`.
+- Service worker de push é isolado (`/sw-push.js`, escopo `/`), não conflita com o PWA app-shell atual.

@@ -262,6 +262,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               last_mileage: mileage ?? null,
               max_speed_kmh: speed ?? 0,
               updated_at: nowIso,
+              last_message_at: nowIso,
             });
             processed++;
             continue;

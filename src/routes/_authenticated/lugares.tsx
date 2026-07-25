@@ -41,6 +41,7 @@ function LugaresPage() {
   const qc = useQueryClient();
   const search = useServerFn(searchPlaces);
   const details = useServerFn(getPlaceDetails);
+  const startTrip = useStartTripDialog();
 
   const [name, setName] = useState("");
   const [icon, setIcon] = useState<IconKey>("home");

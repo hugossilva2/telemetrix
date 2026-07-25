@@ -391,6 +391,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               ignition_on: false,
               updated_at: nowIso,
               max_speed_kmh: 0,
+              last_message_at: nowIso,
             });
           }
         }

@@ -1,9 +1,12 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";
+import { saveClosedTrip } from "@/lib/trips/saveTrip";
+
 
 /**
  * Mantém o estado local da viagem em andamento (tripStore) com base na
@@ -13,6 +16,8 @@ import { tripDestinationStore } from "@/lib/trips/activeDestination";
  */
 export function useLiveTripTracker() {
   const { telemetry } = useFlespiMqtt();
+  const queryClient = useQueryClient();
+
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);
 
@@ -56,14 +61,29 @@ export function useLiveTripTracker() {
       return;
     }
 
-    // ON -> OFF: fecha viagem local (webhook grava no banco) e limpa destino ativo
+    // ON -> OFF: fecha viagem local e grava no banco (fallback do webhook)
     if ((prev === true || prev === undefined) && ign === false) {
+      const closing = tripStore.get();
       tripStore.set(null);
       const active = tripDestinationStore.getActive();
       if (active) {
         tripDestinationStore.setActive(null);
       }
+      if (closing) {
+        saveClosedTrip(closing)
+          .then((result) => {
+            if (result === "saved") {
+              toast.success("Viagem salva no histórico");
+              queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+            }
+          })
+          .catch((err) => {
+            console.error("[trip] falha ao salvar viagem", err);
+            toast.error("Não foi possível salvar a viagem");
+          });
+      }
     }
+
 
   }, [telemetry.ignitionOn, telemetry.latitude, telemetry.longitude, telemetry.mileageKm, telemetry.speedKmh]);
 

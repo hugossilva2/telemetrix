@@ -16,6 +16,8 @@ import { saveClosedTrip } from "@/lib/trips/saveTrip";
  */
 export function useLiveTripTracker() {
   const { telemetry } = useFlespiMqtt();
+  const queryClient = useQueryClient();
+
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);
 

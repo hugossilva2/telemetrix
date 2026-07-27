@@ -25,18 +25,8 @@ function haversineKm(a: TrailPoint, b: TrailPoint) {
   return haversine(a.lat, a.lng, b.lat, b.lng);
 }
 
-const PARKED_KEY = "lastParked:v1";
-type Parked = { lat: number; lng: number; at: number };
+import { useParkedSpot } from "@/lib/tracker/parked";
 
-function readParked(): Parked | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = window.localStorage.getItem(PARKED_KEY);
-    return raw ? (JSON.parse(raw) as Parked) : null;
-  } catch {
-    return null;
-  }
-}
 
 function MapaPage() {
   const { telemetry, status, lastMessageAt } = useFlespiMqtt();

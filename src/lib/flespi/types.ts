@@ -14,6 +14,9 @@ export interface VehicleTelemetry {
   canSpeedKmh?: number; // velocidade pelo CAN, quando disponível
   greenDrivingType?: string; // Green Driving nativo (se habilitado no rastreador)
   greenDrivingValue?: number;
+  positionValid?: boolean; // position.valid — se há fix de GPS
+  satellites?: number; // position.satellites
+  gsmSignal?: number; // gsm.signal.level (0-100)
   timestamp?: number; // epoch em segundos, se disponível
 }
 

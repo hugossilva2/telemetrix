@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Power, PowerOff } from "lucide-react";
+import { Power, PowerOff, Satellite, SatelliteDish } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { MqttStatus } from "@/lib/flespi/types";
 
@@ -8,7 +8,11 @@ interface Props {
   ignitionOn?: boolean;
   status: MqttStatus;
   lastMessageAt: number | null;
+  positionValid?: boolean;
+  satellites?: number;
+  hasFix?: boolean;
 }
+
 
 const statusText: Record<MqttStatus, string> = {
   idle: "Iniciando",

@@ -93,3 +93,29 @@ export function makeCarIcon(opts: { moving: boolean; ignition: boolean }) {
     iconAnchor: [14, 14],
   });
 }
+
+const ECO_EVENT_STYLE: Record<string, { color: string; glyph: string }> = {
+  harsh_brake: { color: "#ef4444", glyph: "↓" },
+  harsh_accel: { color: "#f97316", glyph: "↑" },
+  harsh_corner: { color: "#f59e0b", glyph: "↻" },
+  overspeed: { color: "#f43f5e", glyph: "!" },
+  high_rpm: { color: "#8b5cf6", glyph: "R" },
+};
+
+/** Marcador de evento de direção agressiva no traçado da viagem. */
+export function makeEcoEventIcon(type: string, severity?: string) {
+  const s = ECO_EVENT_STYLE[type] ?? { color: "#94a3b8", glyph: "•" };
+  const size = severity === "severe" ? 20 : 16;
+  const ring = severity === "severe" ? 4 : 2;
+  return L.divIcon({
+    className: "eco-event-marker",
+    html: `<div style="
+      width:${size}px;height:${size}px;border-radius:50%;
+      background:${s.color};border:2px solid #0b1220;
+      box-shadow:0 0 0 ${ring}px ${s.color}44;
+      display:flex;align-items:center;justify-content:center;
+      color:#0b1220;font-size:${size - 8}px;font-weight:800;line-height:1;">${s.glyph}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}

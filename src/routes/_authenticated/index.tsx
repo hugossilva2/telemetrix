@@ -86,7 +86,10 @@ function Dashboard() {
 
       <FavoritePlacesEta />
 
+      <MaintenanceAlertsCard />
+
       <ExpiringDocsCard />
+
 
 
       <div className="mt-4 grid grid-cols-2 gap-3">

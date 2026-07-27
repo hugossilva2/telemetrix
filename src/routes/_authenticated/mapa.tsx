@@ -39,12 +39,12 @@ function MapaPage() {
   const [gpsDistance, setGpsDistance] = useState(0);
   const [mileageStart, setMileageStart] = useState<number | null>(null);
   const [mileageNow, setMileageNow] = useState<number | null>(null);
-  const [parked, setParked] = useState<Parked | null>(() => readParked());
+  const parked = useParkedSpot(lat, lng, ignition);
   const lastPointRef = useRef<TrailPoint | null>(null);
   const prevIgnitionRef = useRef<boolean | undefined>(undefined);
   const lastKnownPosRef = useRef<TrailPoint | null>(null);
 
-  // Reset trail on ignition OFF -> ON (nova viagem); salva ponto ao desligar.
+  // Reset trail on ignition OFF -> ON (nova viagem).
   useEffect(() => {
     const prev = prevIgnitionRef.current;
     if (prev === false && ignition === true) {
@@ -54,23 +54,9 @@ function MapaPage() {
       setMileageNow(typeof mileage === "number" ? mileage : null);
       lastPointRef.current = null;
     }
-    if ((prev === true || prev === undefined) && ignition === false) {
-      const pos: TrailPoint | null =
-        typeof lat === "number" && typeof lng === "number"
-          ? { lat, lng, t: Date.now() }
-          : lastKnownPosRef.current;
-      if (pos) {
-        const next: Parked = { lat: pos.lat, lng: pos.lng, at: Date.now() };
-        setParked(next);
-        try {
-          window.localStorage.setItem(PARKED_KEY, JSON.stringify(next));
-        } catch {
-          /* ignore */
-        }
-      }
-    }
     prevIgnitionRef.current = ignition;
-  }, [ignition, lat, lng, mileage]);
+  }, [ignition, mileage]);
+
 
   // Acumula pontos do rastro + odômetro atual
   useEffect(() => {

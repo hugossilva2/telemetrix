@@ -5,6 +5,8 @@ import { Award, Flame, Leaf, Sparkles, TrendingDown, TrendingUp } from "lucide-r
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { EcoScoreRing } from "@/components/eco/EcoScoreRing";
+import { TelemetryDiagnosticsCard } from "@/components/eco/TelemetryDiagnosticsCard";
+
 import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, ecoBand, formatIdle } from "@/lib/eco/score";
 import type { EcoEventType } from "@/lib/eco/detect";
 import {

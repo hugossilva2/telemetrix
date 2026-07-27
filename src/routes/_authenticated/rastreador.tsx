@@ -47,12 +47,19 @@ const EVENT_META: Record<
     color: "text-red-500",
     bg: "bg-red-500/10",
   },
+  geofence_enter: {
+    label: "Chegou na cerca",
+    Icon: LogIn,
+    color: "text-sky-500",
+    bg: "bg-sky-500/10",
+  },
   geofence_exit: {
     label: "Saiu da cerca",
     Icon: AlertTriangle,
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
+
   signal_lost: { label: "Sinal perdido", Icon: MapPinOff, color: "text-orange-500", bg: "bg-orange-500/10" },
 };
 

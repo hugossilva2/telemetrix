@@ -90,6 +90,23 @@ function ViagensPage() {
     },
   });
 
+  const queryClient = useQueryClient();
+  const runBackfill = useServerFn(backfillTripsFromFlespi);
+  const backfill = useMutation({
+    mutationFn: () => runBackfill({ data: { days: 30 } }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+      if (res.imported > 0) {
+        toast.success(`${res.imported} viagem(ns) importada(s) do rastreador`);
+      } else {
+        toast.info("Nenhuma viagem nova encontrada no histórico");
+      }
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao importar histórico"),
+  });
+
+
+
   const visibleTrips = useMemo(
     () => removeOverlappingFragments(trips ?? []),
     [trips],

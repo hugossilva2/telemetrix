@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronRight, MapPin, ShieldCheck, UserRound, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
+import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
+
 
 export const Route = createFileRoute("/_authenticated/gestao")({
   head: () => ({

@@ -16,7 +16,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
 import { estimateTripCost } from "@/lib/trips/cost";
-import { EcoTripCard } from "@/components/eco/EcoTripCard";
+import { EcoTripCard, parseEcoEvents } from "@/components/eco/EcoTripCard";
+import { EcoEventsChart } from "@/components/eco/EcoEventsChart";
 import {
   formatDateTime,
   formatDurationBetween,
@@ -107,6 +108,11 @@ function TripDetailPage() {
       return (data ?? []) as TripRow[];
     },
   });
+
+  const ecoEvents = useMemo(
+    () => (trip ? parseEcoEvents(trip.eco_events) : []),
+    [trip],
+  );
 
   const tripCost = trip
     ? estimateTripCost({
@@ -281,6 +287,7 @@ function TripDetailPage() {
                       ? [trip.end_lat, trip.end_lng]
                       : null
                   }
+                  ecoEvents={ecoEvents}
                 />
               </Suspense>
             </ClientOnly>
@@ -372,6 +379,11 @@ function TripDetailPage() {
           {/* Eco Score */}
           <SectionTitle>Pontuação de direção</SectionTitle>
           <EcoTripCard trip={trip} />
+          {ecoEvents.length > 1 && (
+            <div className="mt-3">
+              <EcoEventsChart events={ecoEvents} />
+            </div>
+          )}
 
           {/* Comparativo com viagens similares */}
           <SectionTitle>Comparativo com viagens similares</SectionTitle>

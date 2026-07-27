@@ -80,6 +80,9 @@ function Dashboard() {
         ignitionOn={telemetry.ignitionOn}
         status={status}
         lastMessageAt={lastMessageAt}
+        positionValid={telemetry.positionValid}
+        satellites={telemetry.satellites}
+        hasFix={telemetry.latitude !== undefined && telemetry.longitude !== undefined}
       />
 
       <OngoingTripCard />

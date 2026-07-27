@@ -53,6 +53,9 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
           ? String(pick(data, "green.driving.type"))
           : undefined,
       greenDrivingValue: num(pick(data, "green.driving.value")),
+      positionValid: bool(pick(data, "position.valid")),
+      satellites: num(pick(data, "position.satellites")),
+      gsmSignal: num(pick(data, "gsm.signal.level")),
       timestamp: num(pick(data, "timestamp")),
     };
 
@@ -126,11 +129,21 @@ export function parseFlespiStateTopic(
         out.greenDrivingValue = num(v);
         break;
 
+      case "position.valid":
+        out.positionValid = bool(v);
+        break;
+      case "position.satellites":
+        out.satellites = num(v);
+        break;
+      case "gsm.signal.level":
+        out.gsmSignal = num(v);
+        break;
       case "timestamp":
         out.timestamp = num(v);
         break;
     }
   };
+
 
   if (key === "position" && value && typeof value === "object") {
     const o = value as Record<string, unknown>;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Power, PowerOff } from "lucide-react";
+import { Power, PowerOff, Satellite, SatelliteDish } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { MqttStatus } from "@/lib/flespi/types";
 
@@ -8,7 +8,11 @@ interface Props {
   ignitionOn?: boolean;
   status: MqttStatus;
   lastMessageAt: number | null;
+  positionValid?: boolean;
+  satellites?: number;
+  hasFix?: boolean;
 }
+
 
 const statusText: Record<MqttStatus, string> = {
   idle: "Iniciando",
@@ -39,7 +43,14 @@ function timeAgo(ts: number | null): string {
   return `há ${h}h`;
 }
 
-export function StatusHeader({ ignitionOn, status, lastMessageAt }: Props) {
+export function StatusHeader({
+  ignitionOn,
+  status,
+  lastMessageAt,
+  positionValid,
+  satellites,
+  hasFix,
+}: Props) {
   const on = ignitionOn === true;
   const known = ignitionOn !== undefined;
 
@@ -88,6 +99,26 @@ export function StatusHeader({ ignitionOn, status, lastMessageAt }: Props) {
         <span>{stale && status === "connected" ? "Sinal atrasado" : statusText[status]}</span>
         <span aria-hidden>•</span>
         <span>{timeAgo(lastMessageAt)}</span>
+      </div>
+      <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
+        {hasFix ? (
+          <SatelliteDish className="size-3.5 text-emerald-500" />
+        ) : (
+          <Satellite className="size-3.5 text-yellow-500" />
+        )}
+        <span>
+          {hasFix
+            ? "GPS com sinal"
+            : positionValid === false || satellites === 0
+              ? "GPS sem fix — rastreador conectado, mas sem satélites"
+              : "GPS aguardando posição"}
+        </span>
+        {satellites !== undefined && (
+          <>
+            <span aria-hidden>•</span>
+            <span className="tabular-nums">{satellites} sat.</span>
+          </>
+        )}
       </div>
     </div>
   );

@@ -398,7 +398,10 @@ function EcoPage() {
           motor recebidos a cada ~6 segundos.
         </p>
       </div>
+
+      <TelemetryDiagnosticsCard />
     </AppShell>
+
   );
 }
 

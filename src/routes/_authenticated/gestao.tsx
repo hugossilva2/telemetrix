@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldCheck, UserRound, Wrench } from "lucide-react";
+import { BarChart3, ChevronRight, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";

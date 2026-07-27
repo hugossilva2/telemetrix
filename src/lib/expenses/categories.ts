@@ -42,15 +42,15 @@ export const EXPENSE_CATEGORIES: {
   Icon: LucideIcon;
   color: string;
 }[] = [
-  { value: "pedagio", label: "Pedágio", Icon: TrafficCone, color: "hsl(var(--chart-1))" },
-  { value: "estacionamento", label: "Estacionamento", Icon: ParkingCircle, color: "hsl(var(--chart-2))" },
-  { value: "lavagem", label: "Lavagem", Icon: Droplets, color: "hsl(var(--chart-3))" },
-  { value: "multa", label: "Multa", Icon: ReceiptText, color: "hsl(var(--destructive))" },
-  { value: "seguro", label: "Seguro", Icon: ShieldCheck, color: "hsl(var(--chart-4))" },
-  { value: "manutencao", label: "Manutenção", Icon: Wrench, color: "hsl(var(--chart-5))" },
-  { value: "financiamento", label: "Financiamento", Icon: Landmark, color: "hsl(var(--primary))" },
-  { value: "acessorio", label: "Acessório", Icon: Car, color: "hsl(var(--muted-foreground))" },
-  { value: "outro", label: "Outro", Icon: CircleDollarSign, color: "hsl(var(--muted-foreground))" },
+  { value: "pedagio", label: "Pedágio", Icon: TrafficCone, color: "var(--chart-1)" },
+  { value: "estacionamento", label: "Estacionamento", Icon: ParkingCircle, color: "var(--chart-2)" },
+  { value: "lavagem", label: "Lavagem", Icon: Droplets, color: "var(--chart-3)" },
+  { value: "multa", label: "Multa", Icon: ReceiptText, color: "var(--destructive)" },
+  { value: "seguro", label: "Seguro", Icon: ShieldCheck, color: "var(--chart-4)" },
+  { value: "manutencao", label: "Manutenção", Icon: Wrench, color: "var(--chart-5)" },
+  { value: "financiamento", label: "Financiamento", Icon: Landmark, color: "var(--primary)" },
+  { value: "acessorio", label: "Acessório", Icon: Car, color: "var(--muted-foreground)" },
+  { value: "outro", label: "Outro", Icon: CircleDollarSign, color: "var(--muted-foreground)" },
 ];
 
 export const EXPENSE_LABEL: Record<ExpenseCategory, string> = EXPENSE_CATEGORIES.reduce(

@@ -25,7 +25,8 @@ export const testAutomation = createServerFn({ method: "POST" })
       trigger: (automation as { trigger: string }).trigger,
     });
 
-    await supabase.from("automation_runs").insert({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    await supabaseAdmin.from("automation_runs").insert({
       user_id: userId,
       automation_id: (automation as { id: string }).id,
       place_id: (automation as { place_id: string }).place_id,
@@ -35,6 +36,7 @@ export const testAutomation = createServerFn({ method: "POST" })
       error: result.error,
       manual: true,
     });
+
 
     return result;
   });

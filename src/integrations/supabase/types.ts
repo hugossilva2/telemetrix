@@ -110,6 +110,60 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          driver_id: string | null
+          due_date: string | null
+          expense_date: string
+          file_path: string | null
+          id: string
+          notes: string | null
+          paid: boolean
+          place: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          driver_id?: string | null
+          due_date?: string | null
+          expense_date?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          place?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          driver_id?: string | null
+          due_date?: string | null
+          expense_date?: string
+          file_path?: string | null
+          id?: string
+          notes?: string | null
+          paid?: boolean
+          place?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
+      }
       favorite_places: {
         Row: {
           address: string
@@ -569,6 +623,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      expense_category:
+        | "pedagio"
+        | "estacionamento"
+        | "lavagem"
+        | "multa"
+        | "seguro"
+        | "manutencao"
+        | "financiamento"
+        | "acessorio"
+        | "outro"
       maintenance_type:
         | "oleo"
         | "filtro_oleo"
@@ -720,6 +784,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      expense_category: [
+        "pedagio",
+        "estacionamento",
+        "lavagem",
+        "multa",
+        "seguro",
+        "manutencao",
+        "financiamento",
+        "acessorio",
+        "outro",
+      ],
       maintenance_type: [
         "oleo",
         "filtro_oleo",

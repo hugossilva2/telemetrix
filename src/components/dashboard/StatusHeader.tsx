@@ -100,6 +100,26 @@ export function StatusHeader({
         <span aria-hidden>•</span>
         <span>{timeAgo(lastMessageAt)}</span>
       </div>
+      <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
+        {hasFix ? (
+          <SatelliteDish className="size-3.5 text-emerald-500" />
+        ) : (
+          <Satellite className="size-3.5 text-yellow-500" />
+        )}
+        <span>
+          {hasFix
+            ? "GPS com sinal"
+            : positionValid === false || satellites === 0
+              ? "GPS sem fix — rastreador conectado, mas sem satélites"
+              : "GPS aguardando posição"}
+        </span>
+        {satellites !== undefined && (
+          <>
+            <span aria-hidden>•</span>
+            <span className="tabular-nums">{satellites} sat.</span>
+          </>
+        )}
+      </div>
     </div>
   );
 }

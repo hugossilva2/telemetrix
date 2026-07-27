@@ -126,6 +126,7 @@ function AbastecimentoPage() {
       setPhoto(null);
       setDatetime(toLocalDatetimeInput(new Date()));
       if (fileInputRef.current) fileInputRef.current.value = "";
+      if (cameraInputRef.current) cameraInputRef.current.value = "";
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
     },
     onError: (e: Error) => toast.error(e.message),

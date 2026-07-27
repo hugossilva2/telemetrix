@@ -16,6 +16,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
 import { estimateTripCost } from "@/lib/trips/cost";
+import { EcoTripCard } from "@/components/eco/EcoTripCard";
 import {
   formatDateTime,
   formatDurationBetween,
@@ -59,6 +60,16 @@ type TripDetail = {
   mileage_at_end: number | null;
   fuel_liters: number | null;
   estimated_cost: number | null;
+  eco_score: number | null;
+  harsh_brake_count: number | null;
+  harsh_accel_count: number | null;
+  harsh_corner_count: number | null;
+  overspeed_count: number | null;
+  high_rpm_count: number | null;
+  idle_seconds: number | null;
+  wasted_fuel_liters: number | null;
+  wasted_cost: number | null;
+  eco_events: unknown;
 };
 
 type TripRow = Pick<
@@ -75,7 +86,7 @@ function TripDetailPage() {
       const { data, error } = await supabase
         .from("trips")
         .select(
-          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost",
+          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events",
         )
         .eq("id", id)
         .maybeSingle();
@@ -357,6 +368,10 @@ function TripDetailPage() {
               highlight
             />
           </div>
+
+          {/* Eco Score */}
+          <SectionTitle>Pontuação de direção</SectionTitle>
+          <EcoTripCard trip={trip} />
 
           {/* Comparativo com viagens similares */}
           <SectionTitle>Comparativo com viagens similares</SectionTitle>

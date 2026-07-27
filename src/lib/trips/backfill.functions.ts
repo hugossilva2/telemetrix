@@ -4,6 +4,7 @@ import { FLESPI_CONFIG } from "@/lib/flespi/config";
 import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { reconstructTrips, type FlespiMessage } from "@/lib/trips/reconstruct";
+import { summarizeEco } from "@/lib/eco/score";
 
 /**
  * Importa o histórico de mensagens armazenado na Flespi e reconstrói as
@@ -24,7 +25,7 @@ export const backfillTripsFromFlespi = createServerFn({ method: "POST" })
         from,
         to,
         fields:
-          "timestamp,engine.ignition.status,vehicle.mileage,position.latitude,position.longitude,position.speed",
+          "timestamp,engine.ignition.status,vehicle.mileage,position.latitude,position.longitude,position.speed,position.direction,can.engine.rpm,can.engine.load.level,can.vehicle.speed",
       }),
     });
 
@@ -74,6 +75,13 @@ export const backfillTripsFromFlespi = createServerFn({ method: "POST" })
       .map((t) => {
         const durationH = (t.endMs - t.startMs) / 3_600_000;
         const fuelLiters = kmpl > 0 ? t.distanceKm / kmpl : null;
+        const eco = summarizeEco({
+          events: t.ecoEvents,
+          idleSeconds: t.idleSeconds,
+          distanceKm: t.distanceKm,
+          kmpl,
+          pricePerLiter: price,
+        });
         return {
           user_id: userId,
           vehicle_id: vehicle?.id ?? null,
@@ -90,6 +98,16 @@ export const backfillTripsFromFlespi = createServerFn({ method: "POST" })
           mileage_at_end: t.mileageEnd,
           fuel_liters: fuelLiters,
           estimated_cost: fuelLiters != null ? fuelLiters * price : null,
+          eco_score: eco.score,
+          harsh_brake_count: eco.counts.harsh_brake,
+          harsh_accel_count: eco.counts.harsh_accel,
+          harsh_corner_count: eco.counts.harsh_corner,
+          overspeed_count: eco.counts.overspeed,
+          high_rpm_count: eco.counts.high_rpm,
+          idle_seconds: eco.idleSeconds,
+          wasted_fuel_liters: eco.wastedFuelLiters,
+          wasted_cost: eco.wastedCost,
+          eco_events: t.ecoEvents as unknown as never,
         };
       });
 

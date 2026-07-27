@@ -10,6 +10,7 @@ import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
 import { Button } from "@/components/ui/button";
+import { summarizeEco, ecoBand } from "@/lib/eco/score";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
@@ -123,6 +124,15 @@ export function OngoingTripCard() {
   const liters = kmpl > 0 ? distanceKm / kmpl : 0;
   const cost = liters * price;
 
+  const eco = summarizeEco({
+    events: open.ecoEvents ?? [],
+    idleSeconds: open.idleSeconds ?? 0,
+    distanceKm,
+    kmpl,
+    pricePerLiter: price,
+  });
+  const band = ecoBand(eco.score);
+
   const start: [number, number] | null =
     typeof open.startLat === "number" && typeof open.startLng === "number"
       ? [open.startLat, open.startLng]
@@ -200,6 +210,18 @@ export function OngoingTripCard() {
       )}
 
 
+
+      <div className="flex items-center justify-between border-t border-emerald-500/20 px-3 py-2 text-xs">
+        <span className="flex items-center gap-2">
+          <span className="text-muted-foreground">Eco Score</span>
+          <span className={`font-semibold tabular-nums ${band.color}`}>
+            {eco.score} · {band.label}
+          </span>
+        </span>
+        <span className="text-muted-foreground tabular-nums">
+          {eco.totalEvents} evento(s)
+        </span>
+      </div>
 
       <div className="grid grid-cols-4 gap-2 p-3">
         <KpiTile Icon={Clock} label="Tempo" value={formatDurationSeconds(durationS)} />

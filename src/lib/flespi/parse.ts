@@ -45,8 +45,17 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
       batteryVoltage: num(pick(data, "battery.voltage")),
       fuelLevel: num(pick(data, "can.fuel.level")),
       engineRpm: num(pick(data, "can.engine.rpm")),
+      engineLoad: num(pick(data, "can.engine.load.level")),
+      headingDeg: num(pick(data, "position.direction")),
+      canSpeedKmh: num(pick(data, "can.vehicle.speed")),
+      greenDrivingType:
+        pick(data, "green.driving.type") !== undefined
+          ? String(pick(data, "green.driving.type"))
+          : undefined,
+      greenDrivingValue: num(pick(data, "green.driving.value")),
       timestamp: num(pick(data, "timestamp")),
     };
+
   } catch {
     return null;
   }
@@ -101,6 +110,22 @@ export function parseFlespiStateTopic(
       case "can.engine.rpm":
         out.engineRpm = num(v);
         break;
+      case "can.engine.load.level":
+        out.engineLoad = num(v);
+        break;
+      case "position.direction":
+        out.headingDeg = num(v);
+        break;
+      case "can.vehicle.speed":
+        out.canSpeedKmh = num(v);
+        break;
+      case "green.driving.type":
+        out.greenDrivingType = v !== undefined && v !== null ? String(v) : undefined;
+        break;
+      case "green.driving.value":
+        out.greenDrivingValue = num(v);
+        break;
+
       case "timestamp":
         out.timestamp = num(v);
         break;
@@ -112,6 +137,8 @@ export function parseFlespiStateTopic(
     out.latitude = num(o.latitude);
     out.longitude = num(o.longitude);
     if (o.speed !== undefined) out.speedKmh = num(o.speed);
+    if (o.direction !== undefined) out.headingDeg = num(o.direction);
+
   } else {
     assign(key, value);
   }

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { backfillTripsFromFlespi } from "@/lib/trips/backfill.functions";
 import { formatBRL, formatDecimal } from "@/lib/format";
+import { EcoScoreBadge } from "@/components/eco/EcoScoreRing";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 
@@ -33,6 +34,7 @@ type TripRow = {
   avg_speed_kmh: number | null;
   fuel_liters: number | null;
   estimated_cost: number | null;
+  eco_score: number | null;
 };
 
 function getTripStartMs(t: TripRow) {
@@ -82,7 +84,7 @@ function ViagensPage() {
     queryFn: async (): Promise<TripRow[]> => {
       const { data, error } = await supabase
         .from("trips")
-        .select("id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost")
+        .select("id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost,eco_score")
         .order("start_time", { ascending: false })
         .limit(500);
       if (error) throw error;
@@ -308,6 +310,7 @@ function ViagensPage() {
                       {tripCost != null && (
                         <span className="text-foreground">{formatBRL(tripCost)}</span>
                       )}
+                      <EcoScoreBadge score={t.eco_score} />
                       {eff?.better && eff.sampleSize > 0 && (
                         <span
                           className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500"

@@ -1,4 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { fireAutomationsForPlace } from "@/lib/automations/run.server";
+
 
 /**
  * Webhook do Flespi. Recebe telemetria via HTTP e detecta transições da

@@ -16,6 +16,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useParkedSpot } from "@/lib/tracker/parked";
+
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -72,7 +74,9 @@ const dtf = new Intl.DateTimeFormat("pt-BR", {
 
 function RastreadorPage() {
   const { telemetry, status, lastMessageAt } = useFlespiMqtt();
+  const parked = useParkedSpot(telemetry.latitude, telemetry.longitude, telemetry.ignitionOn);
   const qc = useQueryClient();
+
 
   const { data: events = [] } = useQuery({
     queryKey: ["tracker_events"],
@@ -154,7 +158,9 @@ function RastreadorPage() {
               ignition={telemetry.ignitionOn}
               lastUpdate={lastMessageAt}
               status={status}
+              parked={parked}
             />
+
           </Suspense>
         </ClientOnly>
       </section>

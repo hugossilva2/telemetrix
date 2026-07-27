@@ -204,41 +204,67 @@ function AbastecimentoPage() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="photo">Foto do comprovante (opcional)</Label>
-          {photoPreview ? (
+          <Label>Comprovante (opcional)</Label>
+          {photo ? (
             <div className="relative">
-              <img src={photoPreview} alt="Prévia do comprovante" className="max-h-56 w-full rounded-lg object-contain bg-muted/50" />
+              {photo.type.startsWith("image/") && photoPreview ? (
+                <img src={photoPreview} alt="Prévia do comprovante" className="max-h-56 w-full rounded-lg object-contain bg-muted/50" />
+              ) : (
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-4 text-sm">
+                  <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="truncate">{photo.name}</span>
+                </div>
+              )}
               <button
                 type="button"
                 onClick={() => {
                   setPhoto(null);
+                  if (cameraInputRef.current) cameraInputRef.current.value = "";
                   if (fileInputRef.current) fileInputRef.current.value = "";
                 }}
                 className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow"
-                aria-label="Remover foto"
+                aria-label="Remover comprovante"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
           ) : (
-            <label
-              htmlFor="photo"
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-6 text-sm text-muted-foreground hover:bg-muted/50"
-            >
-              <Camera className="h-4 w-4" />
-              Tirar foto ou escolher da galeria
-            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <label
+                htmlFor="photo-camera"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-5 text-xs text-muted-foreground hover:bg-muted/50"
+              >
+                <Camera className="h-4 w-4" />
+                Tirar foto
+              </label>
+              <label
+                htmlFor="photo-file"
+                className="flex cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border border-dashed border-border bg-muted/30 px-3 py-5 text-xs text-muted-foreground hover:bg-muted/50"
+              >
+                <Paperclip className="h-4 w-4" />
+                Galeria ou arquivo
+              </label>
+            </div>
           )}
           <input
-            id="photo"
-            ref={fileInputRef}
+            id="photo-camera"
+            ref={cameraInputRef}
             type="file"
             accept="image/*"
             capture="environment"
             className="hidden"
             onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
           />
+          <input
+            id="photo-file"
+            ref={fileInputRef}
+            type="file"
+            accept="image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt"
+            className="hidden"
+            onChange={(e) => setPhoto(e.target.files?.[0] ?? null)}
+          />
         </div>
+
 
         <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">
           <span className="text-muted-foreground">Litros abastecidos</span>

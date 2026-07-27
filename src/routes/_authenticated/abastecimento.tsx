@@ -3,7 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
-import { Camera, X } from "lucide-react";
+import { Camera, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -130,6 +130,30 @@ function AbastecimentoPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("fuel_logs").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Abastecimento excluído.");
+      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const openReceipt = useMutation({
+    mutationFn: async (path: string) => {
+      const { data, error } = await supabase.storage
+        .from("fuel-receipts")
+        .createSignedUrl(path, 60 * 5);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+    onSuccess: (url) => window.open(url, "_blank", "noopener,noreferrer"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const chartData = useMemo(() => {
     const rows: { label: string; costPerKm: number }[] = [];
     for (let i = 1; i < logs.length; i++) {
@@ -225,6 +249,61 @@ function AbastecimentoPage() {
           {save.isPending ? "Salvando…" : "Salvar abastecimento"}
         </Button>
       </form>
+
+      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-semibold">Abastecimentos registrados</h2>
+        {logs.length === 0 ? (
+          <p className="mt-3 text-xs text-muted-foreground">Nenhum abastecimento registrado ainda.</p>
+        ) : (
+          <ul className="mt-3 divide-y divide-border">
+            {[...logs]
+              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .map((log) => (
+                <li key={log.id} className="flex items-start justify-between gap-3 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium">
+                      {new Date(log.date).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {Number(log.liters_filled).toFixed(2)} L · R$ {Number(log.price_per_liter).toFixed(2)}/L ·{" "}
+                      {Number(log.mileage_at_fill).toLocaleString("pt-BR")} km
+                    </p>
+                    {log.receipt_url ? (
+                      <button
+                        type="button"
+                        onClick={() => openReceipt.mutate(log.receipt_url as string)}
+                        className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-primary"
+                      >
+                        <Receipt className="h-3.5 w-3.5" />
+                        Ver comprovante
+                      </button>
+                    ) : null}
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="font-mono text-sm font-semibold">
+                      R$ {Number(log.total_cost).toFixed(2)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => remove.mutate(log.id)}
+                      disabled={remove.isPending}
+                      className="text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label="Excluir abastecimento"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+          </ul>
+        )}
+      </div>
 
       <div className="mt-4 rounded-2xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Histórico de custo (R$/km)</h2>

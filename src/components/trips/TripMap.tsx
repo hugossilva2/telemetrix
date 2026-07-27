@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
-import { MapContainer, Marker, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { MapStyleControl } from "@/components/map/MapStyleControl";
 import { MapButtons, ScaleControl } from "@/components/map/MapControls";
 import { SpeedPolyline, SpeedLegend, type SpeedSample } from "@/components/map/SpeedPolyline";
 import { StyledTileLayers } from "@/components/map/StyledTileLayers";
-import { endIcon, startIcon } from "@/components/map/icons";
+import { endIcon, makeEcoEventIcon, startIcon } from "@/components/map/icons";
+import type { EcoEvent } from "@/lib/eco/detect";
+import { ECO_EVENT_LABEL } from "@/lib/eco/score";
 import { useMapStyle } from "@/lib/map/tiles";
 
 function FitBounds({ points }: { points: [number, number][] }) {
@@ -24,15 +26,22 @@ export interface TripMapProps {
   start: [number, number] | null;
   end: [number, number] | null;
   trail?: SpeedSample[];
+  ecoEvents?: EcoEvent[];
 }
 
-export default function TripMap({ start, end, trail }: TripMapProps) {
+export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) {
   const [mapStyle, setMapStyle] = useMapStyle();
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const events = (ecoEvents ?? []).filter(
+    (e): e is EcoEvent & { lat: number; lng: number } =>
+      typeof e.lat === "number" && typeof e.lng === "number",
+  );
 
   const points: [number, number][] = [];
   if (start) points.push(start);
   if (end) points.push(end);
+  for (const e of events) points.push([e.lat, e.lng]);
 
   const routePoints: SpeedSample[] =
     trail && trail.length > 1
@@ -59,8 +68,27 @@ export default function TripMap({ start, end, trail }: TripMapProps) {
         {routePoints.length > 1 && <SpeedPolyline points={routePoints} />}
         {start && <Marker position={start} icon={startIcon} />}
         {end && <Marker position={end} icon={endIcon} />}
+        {events.map((e, i) => (
+          <Marker
+            key={`${e.t}-${i}`}
+            position={[e.lat, e.lng]}
+            icon={makeEcoEventIcon(e.type, e.severity)}
+          >
+            <Popup>
+              <strong>{ECO_EVENT_LABEL[e.type]}</strong>
+              {e.severity === "severe" ? " (severo)" : ""}
+              <br />
+              {new Date(e.t).toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              · {Math.round(e.speedBefore)}→{Math.round(e.speedAfter)} km/h
+            </Popup>
+          </Marker>
+        ))}
         <FitBounds points={points} />
       </MapContainer>
+
 
       <MapStyleControl value={mapStyle} onChange={setMapStyle} />
       <MapButtons containerRef={containerRef} />

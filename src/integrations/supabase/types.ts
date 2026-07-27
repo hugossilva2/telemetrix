@@ -199,6 +199,60 @@ export type Database = {
           },
         ]
       }
+      maintenance_records: {
+        Row: {
+          cost: number | null
+          created_at: string
+          file_path: string | null
+          id: string
+          interval_km: number | null
+          interval_months: number | null
+          mileage_at_service: number
+          notes: string | null
+          service_date: string
+          title: string | null
+          type: Database["public"]["Enums"]["maintenance_type"]
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+          workshop: string | null
+        }
+        Insert: {
+          cost?: number | null
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          interval_km?: number | null
+          interval_months?: number | null
+          mileage_at_service?: number
+          notes?: string | null
+          service_date?: string
+          title?: string | null
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+          workshop?: string | null
+        }
+        Update: {
+          cost?: number | null
+          created_at?: string
+          file_path?: string | null
+          id?: string
+          interval_km?: number | null
+          interval_months?: number | null
+          mileage_at_service?: number
+          notes?: string | null
+          service_date?: string
+          title?: string | null
+          type?: Database["public"]["Enums"]["maintenance_type"]
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+          workshop?: string | null
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -515,6 +569,17 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      maintenance_type:
+        | "oleo"
+        | "filtro_oleo"
+        | "filtro_ar"
+        | "filtro_combustivel"
+        | "correia"
+        | "pneus"
+        | "freios"
+        | "velas"
+        | "revisao"
+        | "outro"
       tracker_event_type:
         | "ignition_on"
         | "ignition_off"
@@ -655,6 +720,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      maintenance_type: [
+        "oleo",
+        "filtro_oleo",
+        "filtro_ar",
+        "filtro_combustivel",
+        "correia",
+        "pneus",
+        "freios",
+        "velas",
+        "revisao",
+        "outro",
+      ],
       tracker_event_type: [
         "ignition_on",
         "ignition_off",

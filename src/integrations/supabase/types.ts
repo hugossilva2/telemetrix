@@ -68,6 +68,48 @@ export type Database = {
         }
         Relationships: []
       }
+      drivers: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          license_category: string | null
+          license_expires_on: string | null
+          license_number: string | null
+          name: string
+          phone: string | null
+          photo_path: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          license_category?: string | null
+          license_expires_on?: string | null
+          license_number?: string | null
+          name: string
+          phone?: string | null
+          photo_path?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          license_category?: string | null
+          license_expires_on?: string | null
+          license_number?: string | null
+          name?: string
+          phone?: string | null
+          photo_path?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       favorite_places: {
         Row: {
           address: string
@@ -287,6 +329,7 @@ export type Database = {
           avg_speed_kmh: number | null
           created_at: string
           distance_km: number | null
+          driver_id: string | null
           end_lat: number | null
           end_lng: number | null
           end_time: string | null
@@ -306,6 +349,7 @@ export type Database = {
           avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
+          driver_id?: string | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
@@ -325,6 +369,7 @@ export type Database = {
           avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
+          driver_id?: string | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
@@ -342,6 +387,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "trips_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
@@ -349,6 +401,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vehicle_documents: {
+        Row: {
+          amount: number | null
+          created_at: string
+          expires_on: string | null
+          file_path: string | null
+          id: string
+          issuer: string | null
+          notes: string | null
+          number: string | null
+          title: string | null
+          type: Database["public"]["Enums"]["vehicle_document_type"]
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          expires_on?: string | null
+          file_path?: string | null
+          id?: string
+          issuer?: string | null
+          notes?: string | null
+          number?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["vehicle_document_type"]
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          expires_on?: string | null
+          file_path?: string | null
+          id?: string
+          issuer?: string | null
+          notes?: string | null
+          number?: string | null
+          title?: string | null
+          type?: Database["public"]["Enums"]["vehicle_document_type"]
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: []
       }
       vehicles: {
         Row: {
@@ -421,6 +521,13 @@ export type Database = {
         | "motion_off_ignition"
         | "geofence_exit"
         | "signal_lost"
+      vehicle_document_type:
+        | "crlv"
+        | "seguro"
+        | "ipva"
+        | "licenciamento"
+        | "inspecao"
+        | "outro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -554,6 +661,14 @@ export const Constants = {
         "motion_off_ignition",
         "geofence_exit",
         "signal_lost",
+      ],
+      vehicle_document_type: [
+        "crlv",
+        "seguro",
+        "ipva",
+        "licenciamento",
+        "inspecao",
+        "outro",
       ],
     },
   },

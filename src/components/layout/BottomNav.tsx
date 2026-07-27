@@ -1,14 +1,15 @@
 import { Link } from "@tanstack/react-router";
-import { Car, Fuel, MapPin, Radar, Route as RouteIcon, Settings } from "lucide-react";
+import { Car, Fuel, FolderCog, Radar, Route as RouteIcon, Settings } from "lucide-react";
 
 const items = [
   { to: "/", label: "Painel", Icon: Car, exact: true },
   { to: "/rastreador", label: "Rastreio", Icon: Radar, exact: false },
-  { to: "/lugares", label: "Lugares", Icon: MapPin, exact: false },
   { to: "/viagens", label: "Viagens", Icon: RouteIcon, exact: false },
   { to: "/abastecimento", label: "Abastecer", Icon: Fuel, exact: false },
+  { to: "/gestao", label: "Gestão", Icon: FolderCog, exact: false },
   { to: "/ajustes", label: "Ajustes", Icon: Settings, exact: false },
 ] as const;
+
 
 export function BottomNav() {
   return (

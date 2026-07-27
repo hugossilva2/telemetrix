@@ -43,7 +43,14 @@ function timeAgo(ts: number | null): string {
   return `há ${h}h`;
 }
 
-export function StatusHeader({ ignitionOn, status, lastMessageAt }: Props) {
+export function StatusHeader({
+  ignitionOn,
+  status,
+  lastMessageAt,
+  positionValid,
+  satellites,
+  hasFix,
+}: Props) {
   const on = ignitionOn === true;
   const known = ignitionOn !== undefined;
 

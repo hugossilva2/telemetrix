@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { MapContainer, Marker, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { MapStyleControl } from "@/components/map/MapStyleControl";
 import { MapButtons, ScaleControl } from "@/components/map/MapControls";
 import { SpeedPolyline, SpeedLegend, type SpeedSample } from "@/components/map/SpeedPolyline";

@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      automation_runs: {
+        Row: {
+          automation_id: string | null
+          created_at: string
+          error: string | null
+          id: string
+          manual: boolean
+          ok: boolean
+          place_id: string | null
+          status_code: number | null
+          trigger: string | null
+          user_id: string
+        }
+        Insert: {
+          automation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          manual?: boolean
+          ok?: boolean
+          place_id?: string | null
+          status_code?: number | null
+          trigger?: string | null
+          user_id: string
+        }
+        Update: {
+          automation_id?: string | null
+          created_at?: string
+          error?: string | null
+          id?: string
+          manual?: boolean
+          ok?: boolean
+          place_id?: string | null
+          status_code?: number | null
+          trigger?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "automation_runs_automation_id_fkey"
+            columns: ["automation_id"]
+            isOneToOne: false
+            referencedRelation: "place_automations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       device_trip_state: {
         Row: {
           device_id: string
@@ -306,6 +353,68 @@ export type Database = {
           workshop?: string | null
         }
         Relationships: []
+      }
+      place_automations: {
+        Row: {
+          body_json: string | null
+          cooldown_seconds: number
+          created_at: string
+          enabled: boolean
+          header_name: string | null
+          header_value: string | null
+          id: string
+          label: string | null
+          last_fired_at: string | null
+          method: string
+          place_id: string
+          trigger: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          body_json?: string | null
+          cooldown_seconds?: number
+          created_at?: string
+          enabled?: boolean
+          header_name?: string | null
+          header_value?: string | null
+          id?: string
+          label?: string | null
+          last_fired_at?: string | null
+          method?: string
+          place_id: string
+          trigger: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          body_json?: string | null
+          cooldown_seconds?: number
+          created_at?: string
+          enabled?: boolean
+          header_name?: string | null
+          header_value?: string | null
+          id?: string
+          label?: string | null
+          last_fired_at?: string | null
+          method?: string
+          place_id?: string
+          trigger?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_automations_place_id_fkey"
+            columns: ["place_id"]
+            isOneToOne: false
+            referencedRelation: "favorite_places"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
@@ -680,6 +789,7 @@ export type Database = {
         | "motion_off_ignition"
         | "geofence_exit"
         | "signal_lost"
+        | "geofence_enter"
       vehicle_document_type:
         | "crlv"
         | "seguro"
@@ -843,6 +953,7 @@ export const Constants = {
         "motion_off_ignition",
         "geofence_exit",
         "signal_lost",
+        "geofence_enter",
       ],
       vehicle_document_type: [
         "crlv",

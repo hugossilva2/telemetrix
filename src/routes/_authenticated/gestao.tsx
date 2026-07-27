@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldCheck, UserRound, Wrench } from "lucide-react";
+import { BarChart3, ChevronRight, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
@@ -20,6 +20,8 @@ export const Route = createFileRoute("/_authenticated/gestao")({
 
 const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
   { to: "/manutencao", label: "Manutenção", desc: "Óleo, filtros, correia e pneus", Icon: Wrench },
+  { to: "/despesas", label: "Despesas", desc: "Pedágio, estacionamento, multas e seguro", Icon: Wallet },
+  { to: "/relatorio", label: "Relatório mensal", desc: "Custo total, custo por km e CSV", Icon: BarChart3 },
   { to: "/motoristas", label: "Motoristas", desc: "Condutores e validade da CNH", Icon: UserRound },
   { to: "/documentos", label: "Documentos", desc: "CRLV, seguro, IPVA e licenciamento", Icon: ShieldCheck },
   { to: "/lugares", label: "Lugares", desc: "Favoritos, geofences e ETA", Icon: MapPin },

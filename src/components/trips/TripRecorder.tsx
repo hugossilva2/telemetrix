@@ -1,4 +1,5 @@
 import { useLiveTripTracker } from "@/hooks/useLiveTripTracker";
+import { useRouteDeviation } from "@/hooks/useRouteDeviation";
 
 /**
  * Mantém o estado local da viagem (tripStore) enquanto o app estiver aberto,
@@ -7,5 +8,6 @@ import { useLiveTripTracker } from "@/hooks/useLiveTripTracker";
  */
 export function TripRecorder() {
   useLiveTripTracker();
+  useRouteDeviation();
   return null;
 }

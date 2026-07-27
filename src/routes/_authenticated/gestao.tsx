@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Leaf, ChevronRight, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
+import { BarChart3, Leaf, Route as RouteIcon, ChevronRight, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
@@ -19,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/gestao")({
 });
 
 const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
+  { to: "/planejar", label: "Planejar rota", desc: "Paradas, custo estimado e desvio em tempo real", Icon: RouteIcon },
   { to: "/manutencao", label: "Manutenção", desc: "Óleo, filtros, correia e pneus", Icon: Wrench },
   { to: "/despesas", label: "Despesas", desc: "Pedágio, estacionamento, multas e seguro", Icon: Wallet },
   { to: "/eco", label: "Eco Score", desc: "Nota de direção, eventos e desperdício", Icon: Leaf },

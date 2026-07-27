@@ -1,12 +1,17 @@
 import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Leaf, Route as RouteIcon } from "lucide-react";
+import { toast } from "sonner";
+import { ChevronLeft, ChevronRight, DownloadCloud, Leaf, Loader2, Route as RouteIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { backfillTripsFromFlespi } from "@/lib/trips/backfill.functions";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
+
 
 export const Route = createFileRoute("/_authenticated/viagens")({
   head: () => ({
@@ -84,6 +89,23 @@ function ViagensPage() {
       return (data ?? []) as TripRow[];
     },
   });
+
+  const queryClient = useQueryClient();
+  const runBackfill = useServerFn(backfillTripsFromFlespi);
+  const backfill = useMutation({
+    mutationFn: () => runBackfill({ data: { days: 30 } }),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+      if (res.imported > 0) {
+        toast.success(`${res.imported} viagem(ns) importada(s) do rastreador`);
+      } else {
+        toast.info("Nenhuma viagem nova encontrada no histórico");
+      }
+    },
+    onError: (e: Error) => toast.error(e.message || "Falha ao importar histórico"),
+  });
+
+
 
   const visibleTrips = useMemo(
     () => removeOverlappingFragments(trips ?? []),
@@ -215,6 +237,24 @@ function ViagensPage() {
           value={totals.kmpl != null ? `${formatDecimal(totals.kmpl)} km/L` : "—"}
         />
       </div>
+
+      <div className="mb-4 flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={backfill.isPending}
+          onClick={() => backfill.mutate()}
+        >
+          {backfill.isPending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <DownloadCloud className="size-4" />
+          )}
+          Importar histórico do rastreador
+        </Button>
+      </div>
+
+
 
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>

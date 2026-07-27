@@ -130,6 +130,30 @@ function AbastecimentoPage() {
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from("fuel_logs").delete().eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Abastecimento excluído.");
+      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const openReceipt = useMutation({
+    mutationFn: async (path: string) => {
+      const { data, error } = await supabase.storage
+        .from("fuel-receipts")
+        .createSignedUrl(path, 60 * 5);
+      if (error) throw error;
+      return data.signedUrl;
+    },
+    onSuccess: (url) => window.open(url, "_blank", "noopener,noreferrer"),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const chartData = useMemo(() => {
     const rows: { label: string; costPerKm: number }[] = [];
     for (let i = 1; i < logs.length; i++) {

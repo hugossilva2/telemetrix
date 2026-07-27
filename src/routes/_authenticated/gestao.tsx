@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, MapPin, ShieldCheck, UserRound } from "lucide-react";
+import { ChevronRight, MapPin, ShieldCheck, UserRound, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
+import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
+
 
 export const Route = createFileRoute("/_authenticated/gestao")({
   head: () => ({
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/_authenticated/gestao")({
 });
 
 const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
+  { to: "/manutencao", label: "Manutenção", desc: "Óleo, filtros, correia e pneus", Icon: Wrench },
   { to: "/motoristas", label: "Motoristas", desc: "Condutores e validade da CNH", Icon: UserRound },
   { to: "/documentos", label: "Documentos", desc: "CRLV, seguro, IPVA e licenciamento", Icon: ShieldCheck },
   { to: "/lugares", label: "Lugares", desc: "Favoritos, geofences e ETA", Icon: MapPin },
@@ -24,8 +27,12 @@ const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
 
 function GestaoPage() {
   return (
-    <AppShell title="Gestão" subtitle="Condutores, documentos e lugares">
+    <AppShell title="Gestão" subtitle="Manutenção, condutores e documentos">
+      <MaintenanceAlertsCard />
+
       <ExpiringDocsCard />
+
+
 
       <ul className="mt-4 space-y-2">
         {links.map(({ to, label, desc, Icon }) => (

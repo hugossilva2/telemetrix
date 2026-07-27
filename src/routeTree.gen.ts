@@ -16,6 +16,7 @@ import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
 import { Route as AuthenticatedMotoristasRouteImport } from './routes/_authenticated/motoristas'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
+import { Route as AuthenticatedManutencaoRouteImport } from './routes/_authenticated/manutencao'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
@@ -57,6 +58,11 @@ const AuthenticatedMotoristasRoute = AuthenticatedMotoristasRouteImport.update({
 const AuthenticatedMapaRoute = AuthenticatedMapaRouteImport.update({
   id: '/mapa',
   path: '/mapa',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedManutencaoRoute = AuthenticatedManutencaoRouteImport.update({
+  id: '/manutencao',
+  path: '/manutencao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedLugaresRoute = AuthenticatedLugaresRouteImport.update({
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
+  '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
+  '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
+  '/_authenticated/manutencao': typeof AuthenticatedManutencaoRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
   '/_authenticated/motoristas': typeof AuthenticatedMotoristasRoute
   '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/gestao'
     | '/lugares'
+    | '/manutencao'
     | '/mapa'
     | '/motoristas'
     | '/rastreador'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/gestao'
     | '/lugares'
+    | '/manutencao'
     | '/mapa'
     | '/motoristas'
     | '/rastreador'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos'
     | '/_authenticated/gestao'
     | '/_authenticated/lugares'
+    | '/_authenticated/manutencao'
     | '/_authenticated/mapa'
     | '/_authenticated/motoristas'
     | '/_authenticated/rastreador'
@@ -260,6 +272,13 @@ declare module '@tanstack/react-router' {
       path: '/mapa'
       fullPath: '/mapa'
       preLoaderRoute: typeof AuthenticatedMapaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/manutencao': {
+      id: '/_authenticated/manutencao'
+      path: '/manutencao'
+      fullPath: '/manutencao'
+      preLoaderRoute: typeof AuthenticatedManutencaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/lugares': {
@@ -338,6 +357,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
+  AuthenticatedManutencaoRoute: typeof AuthenticatedManutencaoRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
   AuthenticatedMotoristasRoute: typeof AuthenticatedMotoristasRoute
   AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
@@ -351,6 +371,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
+  AuthenticatedManutencaoRoute: AuthenticatedManutencaoRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
   AuthenticatedMotoristasRoute: AuthenticatedMotoristasRoute,
   AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,

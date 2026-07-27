@@ -97,11 +97,20 @@ export async function callAutomation(
       body,
       signal: controller.signal,
     });
+    let detail = "";
+    if (!res.ok) {
+      try {
+        detail = (await res.text()).replace(/\s+/g, " ").trim().slice(0, 200);
+      } catch {
+        detail = "";
+      }
+    }
     return {
       ok: res.ok,
       statusCode: res.status,
-      error: res.ok ? null : `HTTP ${res.status}`,
+      error: res.ok ? null : `HTTP ${res.status}${detail ? ` — ${detail}` : ""}`,
     };
+
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { ok: false, statusCode: null, error: msg.includes("abort") ? "Tempo esgotado" : msg };

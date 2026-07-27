@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
+import { summarizeEco } from "@/lib/eco/score";
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -69,6 +70,14 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
   const estimatedCost = fuelLiters != null ? fuelLiters * price : null;
   const durationH = durationS / 3600;
 
+  const eco = summarizeEco({
+    events: trip.ecoEvents ?? [],
+    idleSeconds: trip.idleSeconds ?? 0,
+    distanceKm,
+    kmpl,
+    pricePerLiter: price,
+  });
+
   const { error } = await supabase.from("trips").insert({
     user_id: userId,
     vehicle_id: vehicle?.id ?? null,
@@ -85,6 +94,16 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     mileage_at_end: trip.lastMileage,
     fuel_liters: fuelLiters,
     estimated_cost: estimatedCost,
+    eco_score: eco.score,
+    harsh_brake_count: eco.counts.harsh_brake,
+    harsh_accel_count: eco.counts.harsh_accel,
+    harsh_corner_count: eco.counts.harsh_corner,
+    overspeed_count: eco.counts.overspeed,
+    high_rpm_count: eco.counts.high_rpm,
+    idle_seconds: eco.idleSeconds,
+    wasted_fuel_liters: eco.wastedFuelLiters,
+    wasted_cost: eco.wastedCost,
+    eco_events: (trip.ecoEvents ?? []) as unknown as never,
   });
 
   if (error) throw error;

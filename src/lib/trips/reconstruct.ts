@@ -1,5 +1,11 @@
+import { detectEcoEvents, type EcoEvent, type EcoSample } from "@/lib/eco/detect";
+
 export type FlespiMessage = {
   timestamp: number;
+  "position.direction"?: number;
+  "can.engine.rpm"?: number;
+  "can.engine.load.level"?: number;
+  "can.vehicle.speed"?: number;
   "engine.ignition.status"?: boolean;
   "vehicle.mileage"?: number;
   "position.latitude"?: number;
@@ -18,6 +24,8 @@ export type ReconstructedTrip = {
   maxSpeedKmh: number;
   mileageStart: number | null;
   mileageEnd: number | null;
+  ecoEvents: EcoEvent[];
+  idleSeconds: number;
 };
 
 const MIN_DISTANCE_KM = 0.2;
@@ -30,11 +38,23 @@ export function reconstructTrips(
 ): ReconstructedTrip[] {
   const sorted = [...messages].sort((a, b) => a.timestamp - b.timestamp);
   const trips: ReconstructedTrip[] = [];
-  let open: (ReconstructedTrip & { lastLat: number | null; lastLng: number | null }) | null = null;
+  let open:
+    | (ReconstructedTrip & {
+        lastLat: number | null;
+        lastLng: number | null;
+        samples: EcoSample[];
+      })
+    | null = null;
 
   const close = (endMs: number) => {
     if (!open) return;
-    const trip: ReconstructedTrip = { ...open, endMs };
+    const detection = detectEcoEvents(open.samples);
+    const trip: ReconstructedTrip = {
+      ...open,
+      endMs,
+      ecoEvents: detection.events,
+      idleSeconds: detection.idleSeconds,
+    };
     open = null;
     const durationS = (trip.endMs - trip.startMs) / 1000;
     const mileageDelta =
@@ -69,7 +89,11 @@ export function reconstructTrips(
           mileageEnd: mileage,
           lastLat: lat,
           lastLng: lng,
+          ecoEvents: [],
+          idleSeconds: 0,
+          samples: [],
         };
+        pushSample(open.samples, m, ts, speed, lat, lng);
       } else {
         if (lat != null && lng != null) {
           if (open.lastLat != null && open.lastLng != null) {
@@ -85,6 +109,7 @@ export function reconstructTrips(
           open.mileageEnd = mileage;
         }
         if (speed > open.maxSpeedKmh) open.maxSpeedKmh = speed;
+        pushSample(open.samples, m, ts, speed, lat, lng);
         open.endMs = ts;
       }
     } else if (ign === false && open) {
@@ -98,4 +123,23 @@ export function reconstructTrips(
   }
 
   return trips;
+}
+
+function pushSample(
+  samples: EcoSample[],
+  m: FlespiMessage,
+  ts: number,
+  speed: number,
+  lat: number | null,
+  lng: number | null,
+) {
+  samples.push({
+    t: ts,
+    speed: Number(m["can.vehicle.speed"] ?? speed) || 0,
+    heading: typeof m["position.direction"] === "number" ? m["position.direction"] : null,
+    rpm: typeof m["can.engine.rpm"] === "number" ? m["can.engine.rpm"] : null,
+    load: typeof m["can.engine.load.level"] === "number" ? m["can.engine.load.level"] : null,
+    lat,
+    lng,
+  });
 }

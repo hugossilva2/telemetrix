@@ -20,6 +20,7 @@ import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/m
 import { Route as AuthenticatedManutencaoRouteImport } from './routes/_authenticated/manutencao'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
+import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedDespesasRouteImport } from './routes/_authenticated/despesas'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
@@ -82,6 +83,11 @@ const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
   path: '/gestao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEcoRoute = AuthenticatedEcoRouteImport.update({
+  id: '/eco',
+  path: '/eco',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
   id: '/documentos',
   path: '/documentos',
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/despesas': typeof AuthenticatedDespesasRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/despesas': typeof AuthenticatedDespesasRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/despesas': typeof AuthenticatedDespesasRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
+  '/_authenticated/eco': typeof AuthenticatedEcoRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/manutencao': typeof AuthenticatedManutencaoRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/despesas'
     | '/documentos'
+    | '/eco'
     | '/gestao'
     | '/lugares'
     | '/manutencao'
@@ -206,6 +216,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/despesas'
     | '/documentos'
+    | '/eco'
     | '/gestao'
     | '/lugares'
     | '/manutencao'
@@ -226,6 +237,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ajustes'
     | '/_authenticated/despesas'
     | '/_authenticated/documentos'
+    | '/_authenticated/eco'
     | '/_authenticated/gestao'
     | '/_authenticated/lugares'
     | '/_authenticated/manutencao'
@@ -326,6 +338,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGestaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/eco': {
+      id: '/_authenticated/eco'
+      path: '/eco'
+      fullPath: '/eco'
+      preLoaderRoute: typeof AuthenticatedEcoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documentos': {
       id: '/_authenticated/documentos'
       path: '/documentos'
@@ -394,6 +413,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedDespesasRoute: typeof AuthenticatedDespesasRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
+  AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedManutencaoRoute: typeof AuthenticatedManutencaoRoute
@@ -410,6 +430,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedDespesasRoute: AuthenticatedDespesasRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
+  AuthenticatedEcoRoute: AuthenticatedEcoRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedManutencaoRoute: AuthenticatedManutencaoRoute,

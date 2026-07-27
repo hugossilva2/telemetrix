@@ -1,54 +1,63 @@
-## Objetivo
+## Reteste do Green Driving (feito agora)
 
-Fechar as lacunas de **gestão** do Telemetrix. Hoje o app cobre telemetria, mapa, rastreador, viagens, abastecimento e lugares — mas não guarda nada sobre **quem dirige**, **documentos do veículo** e **custos que não são combustível**.
+Consultei de novo a API da Flespi: **1.000 mensagens dos últimos 3 dias**, a mais recente hoje às 10:34.
 
-Entrego em 3 fases, com validação sua entre cada uma.
+**Resultado: o rastreador continua NÃO enviando Green Driving nem acelerômetro.** Nenhuma chave `green.driving.*`, `accelerometer.*`, `axis.*` ou de freada/colisão aparece nas mensagens.
+
+O que o device manda hoje (todas as chaves úteis):
+- `position.speed`, `can.vehicle.speed`, `position.direction`, `position.latitude/longitude`, `position.satellites/hdop/valid`
+- `can.engine.rpm`, `can.engine.load.level`, `can.engine.coolant.temperature`, `can.fuel.level`, `can.mil.mileage`, `can.dtc.number`
+- `engine.ignition.status`, `movement.status`, `vehicle.mileage`, `vehicle.vin`, `event.enum`
+- Amostragem com motor ligado: **mediana de 6 s** entre mensagens
+
+Para ter os eventos nativos do acelerômetro seria preciso habilitar o **Green Driving** na configuração do FMC003 (via Teltonika Configurator/FOTA), definindo os limites de freada/aceleração/curva. Enquanto isso não acontece, dá para calcular a nota muito bem com velocidade + direção + RPM + carga do motor, que já chegam. O código fica preparado para os dois casos.
 
 ---
 
-## Fase 1 — Motoristas e Documentos
+## O que vou construir
 
-**Motoristas (vários por veículo)**
-- Nova tela `/motoristas`: cadastro com nome, foto, telefone, número da CNH, categoria e validade.
-- Cada motorista pertence à sua conta; um deles pode ser marcado como "padrão".
-- Vínculo com viagens: campo "condutor" na viagem. Ao ligar o carro, se houver mais de um motorista cadastrado, o app pergunta rapidamente quem está dirigindo (com o padrão pré-selecionado); dá para corrigir depois no detalhe da viagem.
-- Filtro por condutor na lista de viagens e no relatório mensal.
+### 1. Detector de eventos de direção
+Analisa cada par de amostras da viagem (ao vivo e também no histórico importado):
 
-**Documentos do veículo**
-- Nova tela `/documentos`: CRLV, seguro, IPVA, licenciamento, inspeção e "outro".
-- Cada documento tem tipo, número/apólice, emissor, valor, data de vencimento e arquivo anexo (foto, PDF ou documento — mesmo padrão de upload já usado no abastecimento).
-- Bucket privado de storage com URL assinada para abrir/baixar.
-- Painel de vencimentos: cartões coloridos (verde / amarelo ≤30 dias / vermelho vencido), incluindo a validade da CNH de cada motorista.
-- Aviso de vencimentos próximos no Dashboard.
+- **Freada brusca** — queda de velocidade acima de ~9 km/h por segundo (moderada) e ~13 km/h/s (severa)
+- **Aceleração agressiva** — ganho acima de ~8 km/h/s, reforçado por `can.engine.load.level` alto
+- **Curva acentuada** — variação de `position.direction` combinada com a velocidade (aceleração lateral estimada acima de ~0,35 g)
+- **Excesso de giro** — RPM acima de ~3.500 sustentado
+- **Excesso de velocidade** — acima de um limite configurável (padrão 110 km/h)
+- **Marcha lenta parada** — motor ligado e parado por mais de 3 minutos
 
-## Fase 2 — Manutenção e revisões
+Se um dia chegarem `green.driving.type/value` ou os eixos do acelerômetro, o detector passa a priorizar esses eventos automaticamente.
 
-- Nova tela `/manutencao` com dois blocos:
-  - **Histórico**: serviço realizado (troca de óleo, pneus, freios, revisão, outro), data, odômetro, oficina, custo e nota fiscal anexa.
-  - **Lembretes**: regra por km e/ou por data (ex.: "óleo a cada 10.000 km ou 12 meses"). O odômetro que já chega do rastreador alimenta a barra de progresso "faltam X km".
-- Alerta no Dashboard quando um serviço está a menos de 500 km ou 30 dias do vencimento.
+### 2. Nota de 0 a 100 por viagem
+Começa em 100 e cai por penalidade ponderada **por 100 km** (viagem longa não é punida), com pesos por tipo e severidade. Faixas: 90–100 excelente, 75–89 bom, 60–74 regular, abaixo de 60 agressivo.
 
-## Fase 3 — Despesas e relatórios
+Também calculo o **desperdício estimado**: litros e reais gastos a mais por freadas, acelerações e marcha lenta, usando o consumo médio do veículo e o último preço por litro lançado.
 
-- Nova tela `/despesas` para custos fora do combustível: pedágio, estacionamento, lavagem, multa, seguro, manutenção, outros — com data, categoria, valor, observação e comprovante.
-- Multas com campo de vencimento e de motorista responsável.
-- **Relatório mensal consolidado** (evoluindo a tela de Viagens): combustível + manutenção + despesas, custo total por km, gráfico de composição por categoria e comparativo com o mês anterior.
-- Exportação em CSV do mês.
+### 3. Onde aparece
+
+**Viagem em andamento** — nota ao vivo, contador de eventos do trajeto e aviso discreto quando registra um evento severo.
+
+**Detalhe da viagem** — anel de pontuação grande, gráfico do perfil de velocidade com os eventos marcados no ponto exato, lista de eventos (tipo, horário, velocidade antes/depois), card de desperdício em litros e R$, e marcadores dos eventos no mapa da rota.
+
+**Lista de viagens** — badge com a nota em cada viagem.
+
+**Nova tela "Eco Score"** (dentro de Gestão) — nota média do mês vs. mês anterior, evolução por viagem, distribuição dos eventos por tipo, economia potencial acumulada, conquistas simples (sequência acima de 90, semana sem freada brusca, melhor viagem do mês) e nota por motorista quando houver condutor na viagem.
+
+**Ajustes** — limites configuráveis (velocidade máxima, RPM de alerta) e liga/desliga do aviso em tempo real.
 
 ---
 
 ## Detalhes técnicos
 
-Banco (Supabase, todas com RLS por `auth.uid()` e GRANTs):
-- `drivers` — nome, foto, telefone, cnh_numero, cnh_categoria, cnh_validade, is_default
-- `vehicle_documents` — vehicle_id, tipo (enum), numero, emissor, valor, vencimento, arquivo_path
-- `maintenance_logs` — vehicle_id, tipo (enum), data, odômetro, oficina, custo, arquivo_path
-- `maintenance_reminders` — vehicle_id, tipo, intervalo_km, intervalo_meses, último serviço
-- `expenses` — vehicle_id, driver_id, categoria (enum), data, valor, observação, arquivo_path
-- `trips` ganha coluna `driver_id`
+**Migração** — novas colunas em `trips`: `eco_score`, `harsh_brake_count`, `harsh_accel_count`, `harsh_corner_count`, `overspeed_count`, `high_rpm_count`, `idle_seconds`, `wasted_fuel_liters`, `wasted_cost` e `eco_events` (jsonb com tipo, horário, lat/lng, velocidade e severidade). Sem tabela nova.
 
-Storage: um bucket privado `vehicle-docs` para documentos, manutenção e despesas, com policies por pasta do usuário; leitura via URL assinada.
+**Front**
+- `src/lib/eco/detect.ts` — detecção a partir de amostras `{t, speed, heading, rpm, load, lat, lng}`
+- `src/lib/eco/score.ts` — pesos, nota, faixas de cor, desperdício estimado
+- `src/lib/flespi/parse.ts` e `types.ts` — passam a ler `position.direction`, `can.vehicle.speed`, `can.engine.load.level`, `movement.status` e, se aparecerem, `green.driving.*` / eixos do acelerômetro
+- `src/lib/trips/store.ts` — o rastro guarda direção e RPM; a viagem aberta acumula os eventos
+- `src/lib/trips/saveTrip.ts` — grava nota, contadores e eventos ao desligar o motor
+- `src/lib/trips/reconstruct.ts` + backfill — viagens importadas do histórico também ganham nota
+- Nova rota `src/routes/_authenticated/eco.tsx`, anel de nota e gráficos com recharts (já instalado), link no hub de Gestão
 
-Front: rotas em `src/routes/_authenticated/`, leitura com TanStack Query, uploads reaproveitando o componente de anexo já feito no abastecimento, navegação inferior reorganizada (as telas novas entram sob um item "Gestão" para não estourar a bottom bar mobile), tokens de cor do design system existente.
-
-Notificações push ficam de fora por ora (a tabela `push_subscriptions` já existe e pode ser ativada numa fase futura).
+**Limitação honesta:** com amostras a cada ~6 s, freadas muito curtas podem escapar — a nota é uma boa estimativa, não medição inercial. Habilitar o Green Driving no FMC003 elimina essa limitação, e o app já estará pronto para consumir esses eventos.

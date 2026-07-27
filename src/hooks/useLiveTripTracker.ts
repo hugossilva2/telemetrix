@@ -6,13 +6,19 @@ import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";
 import { saveClosedTrip } from "@/lib/trips/saveTrip";
-
+import {
+  detectBetween,
+  idleBetween,
+  type EcoSample,
+} from "@/lib/eco/detect";
+import { ECO_EVENT_LABEL } from "@/lib/eco/score";
+import { getEcoSettings } from "@/lib/eco/settings";
 
 /**
  * Mantém o estado local da viagem em andamento (tripStore) com base na
- * telemetria MQTT. NÃO grava no banco — a persistência é feita pelo
- * webhook do Flespi. Este hook só alimenta a UI (cronômetro, mini-mapa,
- * consumo em tempo real).
+ * telemetria MQTT: cronômetro, mini-mapa, consumo e agora também a detecção
+ * de eventos de direção agressiva (Eco Score). A persistência acontece ao
+ * desligar o motor (fallback do webhook do Flespi).
  */
 export function useLiveTripTracker() {
   const { telemetry } = useFlespiMqtt();
@@ -20,6 +26,7 @@ export function useLiveTripTracker() {
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);
+  const lastSample = useRef<EcoSample | null>(null);
 
   useEffect(() => {
     const ign = telemetry.ignitionOn;
@@ -32,6 +39,7 @@ export function useLiveTripTracker() {
       (prev === false && ign === true) ||
       (prev === undefined && ign === true && !tripStore.get());
     if (shouldOpen) {
+      lastSample.current = null;
       const open: OpenTrip = {
         startTime: new Date().toISOString(),
         startLat: telemetry.latitude ?? null,
@@ -41,6 +49,8 @@ export function useLiveTripTracker() {
         lastLng: telemetry.longitude ?? null,
         lastMileage: telemetry.mileageKm ?? null,
         maxSpeedKmh: telemetry.speedKmh ?? 0,
+        ecoEvents: [],
+        idleSeconds: 0,
         trail:
           typeof telemetry.latitude === "number" &&
           typeof telemetry.longitude === "number"
@@ -48,6 +58,9 @@ export function useLiveTripTracker() {
                 lat: telemetry.latitude,
                 lng: telemetry.longitude,
                 speed: telemetry.speedKmh ?? null,
+                heading: telemetry.headingDeg ?? null,
+                rpm: telemetry.engineRpm ?? null,
+                load: telemetry.engineLoad ?? null,
                 t: Date.now(),
               }]
             : [],
@@ -65,6 +78,7 @@ export function useLiveTripTracker() {
     if ((prev === true || prev === undefined) && ign === false) {
       const closing = tripStore.get();
       tripStore.set(null);
+      lastSample.current = null;
       const active = tripDestinationStore.getActive();
       if (active) {
         tripDestinationStore.setActive(null);
@@ -105,6 +119,43 @@ export function useLiveTripTracker() {
       trail: open.trail,
     };
 
+    // --- Eco Score: detecta eventos entre a amostra anterior e a atual ---
+    const settings = getEcoSettings();
+    const speedNow = telemetry.canSpeedKmh ?? telemetry.speedKmh;
+    if (typeof speedNow === "number") {
+      const sample: EcoSample = {
+        t: Date.now(),
+        speed: speedNow,
+        heading: telemetry.headingDeg ?? null,
+        rpm: telemetry.engineRpm ?? null,
+        load: telemetry.engineLoad ?? null,
+        lat: telemetry.latitude ?? null,
+        lng: telemetry.longitude ?? null,
+        greenDrivingType: telemetry.greenDrivingType ?? null,
+        greenDrivingValue: telemetry.greenDrivingValue ?? null,
+      };
+      const prevSample = lastSample.current;
+      if (prevSample && sample.t - prevSample.t >= 900) {
+        const events = detectBetween(prevSample, sample, settings.thresholds);
+        const idle = idleBetween(prevSample, sample);
+        if (events.length > 0) {
+          next.ecoEvents = [...next.ecoEvents, ...events].slice(-300);
+          if (settings.liveAlerts) {
+            const severe = events.find((e) => e.severity === "severe");
+            if (severe) {
+              toast.warning(ECO_EVENT_LABEL[severe.type], {
+                description: "Evento registrado no seu Eco Score.",
+              });
+            }
+          }
+        }
+        if (idle > 0) next.idleSeconds = next.idleSeconds + idle;
+        lastSample.current = sample;
+      } else if (!prevSample) {
+        lastSample.current = sample;
+      }
+    }
+
     // Adiciona ponto ao trail se moveu >5m desde o último
     if (
       typeof telemetry.latitude === "number" &&
@@ -115,6 +166,9 @@ export function useLiveTripTracker() {
         lat: telemetry.latitude,
         lng: telemetry.longitude,
         speed: telemetry.speedKmh ?? null,
+        heading: telemetry.headingDeg ?? null,
+        rpm: telemetry.engineRpm ?? null,
+        load: telemetry.engineLoad ?? null,
         t: Date.now(),
       };
       const shouldAppend =
@@ -133,6 +187,10 @@ export function useLiveTripTracker() {
     telemetry.longitude,
     telemetry.mileageKm,
     telemetry.speedKmh,
+    telemetry.canSpeedKmh,
+    telemetry.engineRpm,
+    telemetry.engineLoad,
+    telemetry.headingDeg,
     telemetry.ignitionOn,
   ]);
 }

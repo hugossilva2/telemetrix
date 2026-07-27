@@ -438,60 +438,90 @@ export type Database = {
           created_at: string
           distance_km: number | null
           driver_id: string | null
+          eco_events: Json
+          eco_score: number | null
           end_lat: number | null
           end_lng: number | null
           end_time: string | null
           estimated_cost: number | null
           fuel_liters: number | null
+          harsh_accel_count: number
+          harsh_brake_count: number
+          harsh_corner_count: number
+          high_rpm_count: number
           id: string
+          idle_seconds: number
           max_speed_kmh: number | null
           mileage_at_end: number | null
           mileage_at_start: number | null
+          overspeed_count: number
           start_lat: number | null
           start_lng: number | null
           start_time: string
           user_id: string
           vehicle_id: string | null
+          wasted_cost: number | null
+          wasted_fuel_liters: number | null
         }
         Insert: {
           avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
           driver_id?: string | null
+          eco_events?: Json
+          eco_score?: number | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
           estimated_cost?: number | null
           fuel_liters?: number | null
+          harsh_accel_count?: number
+          harsh_brake_count?: number
+          harsh_corner_count?: number
+          high_rpm_count?: number
           id?: string
+          idle_seconds?: number
           max_speed_kmh?: number | null
           mileage_at_end?: number | null
           mileage_at_start?: number | null
+          overspeed_count?: number
           start_lat?: number | null
           start_lng?: number | null
           start_time: string
           user_id: string
           vehicle_id?: string | null
+          wasted_cost?: number | null
+          wasted_fuel_liters?: number | null
         }
         Update: {
           avg_speed_kmh?: number | null
           created_at?: string
           distance_km?: number | null
           driver_id?: string | null
+          eco_events?: Json
+          eco_score?: number | null
           end_lat?: number | null
           end_lng?: number | null
           end_time?: string | null
           estimated_cost?: number | null
           fuel_liters?: number | null
+          harsh_accel_count?: number
+          harsh_brake_count?: number
+          harsh_corner_count?: number
+          high_rpm_count?: number
           id?: string
+          idle_seconds?: number
           max_speed_kmh?: number | null
           mileage_at_end?: number | null
           mileage_at_start?: number | null
+          overspeed_count?: number
           start_lat?: number | null
           start_lng?: number | null
           start_time?: string
           user_id?: string
           vehicle_id?: string | null
+          wasted_cost?: number | null
+          wasted_fuel_liters?: number | null
         }
         Relationships: [
           {

@@ -247,7 +247,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
             }
           }
 
-          // ---------- tracker_events: geofence exit ----------
+          // ---------- tracker_events: geofence enter/exit + automações ----------
           if (
             typeof lat === "number" &&
             typeof lng === "number"
@@ -271,10 +271,17 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                 let changed = false;
                 for (const p of places) {
                   if (typeof p.lat !== "number" || typeof p.lng !== "number") continue;
-                  const radiusKm = ((p.geofence_radius_m as number) || 150) / 1000;
+                  const radiusKm = ((p.geofence_radius_m as number) || 500) / 1000;
                   const distKm = haversineKm(p.lat, p.lng, lat, lng);
-                  const inside = distKm <= radiusKm;
                   const wasInside = placesState[p.id as string];
+                  // Histerese: entra ao cruzar o raio, só sai depois de 15% além.
+                  let inside: boolean;
+                  if (wasInside === true) {
+                    inside = distKm <= radiusKm * GEOFENCE_EXIT_HYSTERESIS;
+                  } else {
+                    inside = distKm <= radiusKm;
+                  }
+
                   if (wasInside === true && inside === false) {
                     await supabaseAdmin.from("tracker_events").insert({
                       user_id: vehicle.user_id,
@@ -283,10 +290,40 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                       lat,
                       lng,
                       place_id: p.id,
-                      metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 150 },
+                      metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 500 },
                       occurred_at: nowIso,
                     });
+                    await fireAutomationsForPlace(supabaseAdmin as never, {
+                      userId: vehicle.user_id as string,
+                      placeId: p.id as string,
+                      placeName: (p.name as string) ?? "",
+                      trigger: "exit",
+                      lat,
+                      lng,
+                      nowMs: tsMs,
+                    });
+                  } else if (wasInside === false && inside === true) {
+                    await supabaseAdmin.from("tracker_events").insert({
+                      user_id: vehicle.user_id,
+                      vehicle_id: vehicle.id,
+                      type: "geofence_enter",
+                      lat,
+                      lng,
+                      place_id: p.id,
+                      metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 500 },
+                      occurred_at: nowIso,
+                    });
+                    await fireAutomationsForPlace(supabaseAdmin as never, {
+                      userId: vehicle.user_id as string,
+                      placeId: p.id as string,
+                      placeName: (p.name as string) ?? "",
+                      trigger: "enter",
+                      lat,
+                      lng,
+                      nowMs: tsMs,
+                    });
                   }
+
                   if (nextPlaces[p.id as string] !== inside) {
                     nextPlaces[p.id as string] = inside;
                     changed = true;
@@ -307,6 +344,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               }
             }
           }
+
 
 
 

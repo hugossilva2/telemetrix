@@ -53,6 +53,9 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
           ? String(pick(data, "green.driving.type"))
           : undefined,
       greenDrivingValue: num(pick(data, "green.driving.value")),
+      positionValid: bool(pick(data, "position.valid")),
+      satellites: num(pick(data, "position.satellites")),
+      gsmSignal: num(pick(data, "gsm.signal.level")),
       timestamp: num(pick(data, "timestamp")),
     };
 

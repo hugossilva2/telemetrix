@@ -84,6 +84,9 @@ function Dashboard() {
 
       <FavoritePlacesEta />
 
+      <ExpiringDocsCard />
+
+
       <div className="mt-4 grid grid-cols-2 gap-3">
         <TelemetryCard
           label="Velocidade"

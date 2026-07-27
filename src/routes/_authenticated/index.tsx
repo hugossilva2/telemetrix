@@ -13,6 +13,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
 import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";
 import { FavoritePlacesEta } from "@/components/dashboard/FavoritePlacesEta";
+import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
+
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({

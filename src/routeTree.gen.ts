@@ -17,6 +17,7 @@ import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMotoristasRouteImport } from './routes/_authenticated/motoristas'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
+import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
@@ -63,6 +64,11 @@ const AuthenticatedLugaresRoute = AuthenticatedLugaresRouteImport.update({
   path: '/lugares',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
+  id: '/gestao',
+  path: '/gestao',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
   id: '/documentos',
   path: '/documentos',
@@ -102,6 +108,7 @@ export interface FileRoutesByFullPath {
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRoute
@@ -116,6 +123,7 @@ export interface FileRoutesByTo {
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
+  '/gestao': typeof AuthenticatedGestaoRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRoute
@@ -133,6 +141,7 @@ export interface FileRoutesById {
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
+  '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
   '/_authenticated/motoristas': typeof AuthenticatedMotoristasRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/abastecimento'
     | '/ajustes'
     | '/documentos'
+    | '/gestao'
     | '/lugares'
     | '/mapa'
     | '/motoristas'
@@ -165,6 +175,7 @@ export interface FileRouteTypes {
     | '/abastecimento'
     | '/ajustes'
     | '/documentos'
+    | '/gestao'
     | '/lugares'
     | '/mapa'
     | '/motoristas'
@@ -181,6 +192,7 @@ export interface FileRouteTypes {
     | '/_authenticated/abastecimento'
     | '/_authenticated/ajustes'
     | '/_authenticated/documentos'
+    | '/_authenticated/gestao'
     | '/_authenticated/lugares'
     | '/_authenticated/mapa'
     | '/_authenticated/motoristas'
@@ -257,6 +269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLugaresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/gestao': {
+      id: '/_authenticated/gestao'
+      path: '/gestao'
+      fullPath: '/gestao'
+      preLoaderRoute: typeof AuthenticatedGestaoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/documentos': {
       id: '/_authenticated/documentos'
       path: '/documentos'
@@ -317,6 +336,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
+  AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
   AuthenticatedMotoristasRoute: typeof AuthenticatedMotoristasRoute
@@ -329,6 +349,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
+  AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
   AuthenticatedMotoristasRoute: AuthenticatedMotoristasRoute,

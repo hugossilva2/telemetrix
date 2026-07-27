@@ -129,11 +129,21 @@ export function parseFlespiStateTopic(
         out.greenDrivingValue = num(v);
         break;
 
+      case "position.valid":
+        out.positionValid = bool(v);
+        break;
+      case "position.satellites":
+        out.satellites = num(v);
+        break;
+      case "gsm.signal.level":
+        out.gsmSignal = num(v);
+        break;
       case "timestamp":
         out.timestamp = num(v);
         break;
     }
   };
+
 
   if (key === "position" && value && typeof value === "object") {
     const o = value as Record<string, unknown>;

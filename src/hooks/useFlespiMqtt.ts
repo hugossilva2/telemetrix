@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import mqtt, { type MqttClient } from "mqtt";
 import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
 import { mergeTelemetry, parseFlespiMessage, parseFlespiStateTopic } from "@/lib/flespi/parse";
+import { fetchLastKnownTelemetry } from "@/lib/flespi/lastKnown";
+
 import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
 
 export interface UseFlespiMqttResult {
@@ -25,12 +27,29 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
   const [error, setError] = useState<string | null>(null);
   const clientRef = useRef<MqttClient | null>(null);
 
+  // Seed inicial: última mensagem conhecida via REST, para não ficar
+  // "aguardando posição" enquanto o rastreador está parado/dormindo.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+    fetchLastKnownTelemetry().then((last) => {
+      if (cancelled || !last) return;
+      const { receivedAt, ...tele } = last;
+      setTelemetry((prev) => mergeTelemetry(tele, prev));
+      setLastMessageAt((prev) => prev ?? receivedAt);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     setStatus("connecting");
     let reconnectDelay = 1000;
     const maxDelay = 30000;
+
 
     const client = mqtt.connect(FLESPI_CONFIG.brokerUrl, {
       username: FLESPI_CONFIG.token,

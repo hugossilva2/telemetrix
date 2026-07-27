@@ -4,7 +4,9 @@ import { MapStyleControl } from "@/components/map/MapStyleControl";
 import { MapButtons, ScaleControl } from "@/components/map/MapControls";
 import { SpeedPolyline, SpeedLegend, type SpeedSample } from "@/components/map/SpeedPolyline";
 import { StyledTileLayers } from "@/components/map/StyledTileLayers";
-import { endIcon, startIcon } from "@/components/map/icons";
+import { endIcon, makeEcoEventIcon, startIcon } from "@/components/map/icons";
+import type { EcoEvent } from "@/lib/eco/detect";
+import { ECO_EVENT_LABEL } from "@/lib/eco/score";
 import { useMapStyle } from "@/lib/map/tiles";
 
 function FitBounds({ points }: { points: [number, number][] }) {

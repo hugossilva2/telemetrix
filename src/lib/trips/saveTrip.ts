@@ -3,6 +3,7 @@ import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
+import { getDefaultDriverId } from "@/lib/drivers/api";
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -47,7 +48,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     .limit(1);
   if (existing && existing.length > 0) return "duplicate";
 
-  const [{ data: vehicle }, { data: lastFuel }] = await Promise.all([
+  const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     supabase
       .from("vehicles")
       .select("id,avg_consumption_kmpl")
@@ -62,6 +63,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
       .order("date", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    getDefaultDriverId(userId),
   ]);
 
   const kmpl = Number(vehicle?.avg_consumption_kmpl) || 10;
@@ -81,6 +83,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
   const { error } = await supabase.from("trips").insert({
     user_id: userId,
     vehicle_id: vehicle?.id ?? null,
+    driver_id: driverId,
     start_time: trip.startTime,
     end_time: new Date().toISOString(),
     start_lat: trip.startLat,

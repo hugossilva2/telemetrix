@@ -108,16 +108,34 @@ function AbastecimentoPage() {
         receiptUrl = path;
       }
 
-      const { error } = await supabase.from("fuel_logs").insert({
-        user_id: userData.user.id,
-        date: isoDate,
-        price_per_liter: priceNum,
-        liters_filled: totalNum / priceNum,
-        total_cost: totalNum,
-        mileage_at_fill: mileageNum,
-        receipt_url: receiptUrl,
-      });
+      const { data: inserted, error } = await supabase
+        .from("fuel_logs")
+        .insert({
+          user_id: userData.user.id,
+          date: isoDate,
+          price_per_liter: priceNum,
+          liters_filled: totalNum / priceNum,
+          total_cost: totalNum,
+          mileage_at_fill: mileageNum,
+          receipt_url: receiptUrl,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      // Espelha o abastecimento em Despesas (categoria Combustível).
+      const { error: expErr } = await supabase.from("expenses").insert({
+        user_id: userData.user.id,
+        fuel_log_id: inserted.id,
+        category: "combustivel",
+        title: `Abastecimento · ${(totalNum / priceNum).toFixed(2)} L`,
+        expense_date: isoDate.slice(0, 10),
+        amount: totalNum,
+        paid: true,
+        file_path: receiptUrl,
+        notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
+      });
+      if (expErr) throw expErr;
     },
     onSuccess: () => {
       toast.success("Abastecimento salvo!");
@@ -128,6 +146,7 @@ function AbastecimentoPage() {
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (cameraInputRef.current) cameraInputRef.current.value = "";
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+      qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -140,6 +159,7 @@ function AbastecimentoPage() {
     onSuccess: () => {
       toast.success("Abastecimento excluído.");
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+      qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

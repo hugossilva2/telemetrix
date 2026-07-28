@@ -132,7 +132,7 @@ function AbastecimentoPage() {
         expense_date: isoDate.slice(0, 10),
         amount: totalNum,
         paid: true,
-        file_path: receiptUrl,
+        place: null,
         notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
       });
       if (expErr) throw expErr;

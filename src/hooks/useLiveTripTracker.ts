@@ -90,29 +90,35 @@ export function useLiveTripTracker() {
       return;
     }
 
-    // ON -> OFF: fecha viagem local e grava no banco (fallback do webhook)
+    // ON -> OFF: agenda o encerramento. Se for só o motor morrendo e a chave
+    // for girada de novo dentro da tolerância, a viagem continua.
     if ((prev === true || prev === undefined) && ign === false) {
-      const closing = tripStore.get();
-      tripStore.set(null);
-      lastSample.current = null;
-      const active = tripDestinationStore.getActive();
-      if (active) {
-        tripDestinationStore.setActive(null);
-      }
-      if (closing) {
-        saveClosedTrip(closing)
-          .then((result) => {
-            if (result === "saved") {
-              toast.success("Viagem salva no histórico");
-              queryClient.invalidateQueries({ queryKey: ["trips-list"] });
-            }
-          })
-          .catch((err) => {
-            console.error("[trip] falha ao salvar viagem", err);
-            toast.error("Não foi possível salvar a viagem");
-          });
-      }
+      if (!tripStore.get() || closeTimer.current) return;
+      closeTimer.current = setTimeout(() => {
+        closeTimer.current = null;
+        const closing = tripStore.get();
+        tripStore.set(null);
+        lastSample.current = null;
+        const active = tripDestinationStore.getActive();
+        if (active) {
+          tripDestinationStore.setActive(null);
+        }
+        if (closing) {
+          saveClosedTrip(closing)
+            .then((result) => {
+              if (result === "saved") {
+                toast.success("Viagem salva no histórico");
+                queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+              }
+            })
+            .catch((err) => {
+              console.error("[trip] falha ao salvar viagem", err);
+              toast.error("Não foi possível salvar a viagem");
+            });
+        }
+      }, IGNITION_OFF_GRACE_MS);
     }
+
 
 
   }, [telemetry.ignitionOn, telemetry.latitude, telemetry.longitude, telemetry.mileageKm, telemetry.speedKmh]);

@@ -11,6 +11,7 @@ export const SAFE_START_STABLE_MS = 30_000; // 30s estável abaixo de 1000 rpm
 export const SAFE_START_RPM_LIMIT = 1000;
 
 const OFF_SINCE_KEY = "safeStart:offSince:v1";
+const SESSION_KEY = "safeStart:session:v1";
 
 function readOffSince(): number | null {
   if (typeof window === "undefined") return null;
@@ -23,6 +24,35 @@ function writeOffSince(v: number | null) {
   if (typeof window === "undefined") return;
   if (v == null) window.localStorage.removeItem(OFF_SINCE_KEY);
   else window.localStorage.setItem(OFF_SINCE_KEY, String(v));
+}
+
+/** Sessão de partida em andamento — sobrevive a reload / reabertura do PWA. */
+interface SafeStartSession {
+  startedAt: number | null;
+  offMinutes: number | null;
+  required: boolean;
+  stableSince: number | null;
+  ready: boolean;
+  lastRpm: number | null;
+}
+
+function readSession(): SafeStartSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as SafeStartSession;
+    if (typeof s !== "object" || s == null) return null;
+    return s;
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(s: SafeStartSession | null) {
+  if (typeof window === "undefined") return;
+  if (s == null) window.localStorage.removeItem(SESSION_KEY);
+  else window.localStorage.setItem(SESSION_KEY, JSON.stringify(s));
 }
 
 export type SafeStartPhase =
@@ -54,11 +84,39 @@ export function useSafeStart(
   const required = useRef(false);
   const stableSince = useRef<number | null>(null);
   const ready = useRef(false);
+  const lastRpm = useRef<number | null>(null);
   const prevIgnition = useRef<boolean | undefined>(undefined);
+  const hydrated = useRef(false);
 
-  if (offSince.current === null && typeof window !== "undefined") {
+  // Restaura o estado salvo (reload da página / reabertura do PWA).
+  if (!hydrated.current && typeof window !== "undefined") {
+    hydrated.current = true;
     offSince.current = readOffSince();
+    const s = readSession();
+    if (s) {
+      startedAt.current = s.startedAt ?? null;
+      offMinutes.current = s.offMinutes ?? null;
+      required.current = !!s.required;
+      stableSince.current = s.stableSince ?? null;
+      ready.current = !!s.ready;
+      lastRpm.current = s.lastRpm ?? null;
+    }
   }
+
+  const persist = () => {
+    if (startedAt.current == null) {
+      writeSession(null);
+      return;
+    }
+    writeSession({
+      startedAt: startedAt.current,
+      offMinutes: offMinutes.current,
+      required: required.current,
+      stableSince: stableSince.current,
+      ready: ready.current,
+      lastRpm: lastRpm.current,
+    });
+  };
 
   // Tick de 1s para o contador andar sem depender de novas mensagens MQTT.
   useEffect(() => {
@@ -72,7 +130,7 @@ export function useSafeStart(
     prevIgnition.current = ignitionOn;
 
     if (ignitionOn === false) {
-      if (offSince.current == null || prev === true) {
+      if (offSince.current == null || prev === true || startedAt.current != null) {
         offSince.current = Date.now();
         writeOffSince(offSince.current);
       }
@@ -81,6 +139,8 @@ export function useSafeStart(
       ready.current = false;
       required.current = false;
       offMinutes.current = null;
+      lastRpm.current = null;
+      persist();
       return;
     }
 
@@ -95,11 +155,13 @@ export function useSafeStart(
       ready.current = false;
       offSince.current = null;
       writeOffSince(null);
+      persist();
     }
   }, [ignitionOn]);
 
   // Avalia estabilidade do RPM
   useEffect(() => {
+    if (typeof engineRpm === "number") lastRpm.current = engineRpm;
     if (ignitionOn !== true || !required.current || ready.current) return;
     if (typeof engineRpm !== "number") return;
     if (engineRpm > 0 && engineRpm < SAFE_START_RPM_LIMIT) {
@@ -107,11 +169,12 @@ export function useSafeStart(
     } else if (engineRpm >= SAFE_START_RPM_LIMIT) {
       stableSince.current = null;
     }
+    persist();
   }, [engineRpm, ignitionOn]);
 
-  const rpm = typeof engineRpm === "number" ? engineRpm : null;
+  const rpm = typeof engineRpm === "number" ? engineRpm : lastRpm.current;
 
-  if (ignitionOn !== true) {
+  if (ignitionOn !== true && startedAt.current == null) {
     return { phase: "off", progress: 0, remainingSeconds: 0, offMinutes: null, rpm };
   }
   if (!required.current) {
@@ -125,7 +188,10 @@ export function useSafeStart(
   }
 
   const elapsedStable = stableSince.current != null ? Date.now() - stableSince.current : 0;
-  if (elapsedStable >= SAFE_START_STABLE_MS) ready.current = true;
+  if (elapsedStable >= SAFE_START_STABLE_MS && !ready.current) {
+    ready.current = true;
+    persist();
+  }
 
   if (ready.current) {
     return {

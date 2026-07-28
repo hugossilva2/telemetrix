@@ -86,7 +86,11 @@ function Dashboard() {
         hasFix={telemetry.latitude !== undefined && telemetry.longitude !== undefined}
       />
 
+      <SafeStartCard ignitionOn={telemetry.ignitionOn} engineRpm={telemetry.engineRpm} />
+
       <OngoingTripCard />
+
+
 
       <FavoritePlacesEta />
 

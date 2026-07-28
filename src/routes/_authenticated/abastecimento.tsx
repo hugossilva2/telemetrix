@@ -159,6 +159,7 @@ function AbastecimentoPage() {
     onSuccess: () => {
       toast.success("Abastecimento excluído.");
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+      qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

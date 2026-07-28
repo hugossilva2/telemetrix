@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { UserRound } from "lucide-react";
 import { useDriverPhoto } from "@/lib/drivers/api";
 
@@ -10,6 +11,8 @@ function initials(name: string) {
     .join("");
 }
 
+const IMAGE_EXT = /\.(png|jpe?g|webp|gif|avif|heic|bmp)$/i;
+
 export function DriverAvatar({
   name,
   photoPath,
@@ -19,15 +22,20 @@ export function DriverAvatar({
   photoPath: string | null | undefined;
   size?: number;
 }) {
-  const url = useDriverPhoto(photoPath);
+  const isImage = !!photoPath && IMAGE_EXT.test(photoPath);
+  const url = useDriverPhoto(isImage ? photoPath : null);
+  const [failed, setFailed] = useState(false);
   const style = { width: size, height: size };
 
-  if (url) {
+  useEffect(() => setFailed(false), [url]);
+
+  if (url && !failed) {
     return (
       <img
         src={url}
         alt={`Foto de ${name}`}
         style={style}
+        onError={() => setFailed(true)}
         className="shrink-0 rounded-full border border-border object-cover"
         loading="lazy"
       />

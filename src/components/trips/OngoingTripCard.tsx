@@ -11,6 +11,7 @@ import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
 import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
+import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
@@ -196,6 +197,13 @@ export function OngoingTripCard() {
           </Suspense>
         </ClientOnly>
       </div>
+
+      <DriverLiveStrip
+        ecoScore={eco.score}
+        speedKmh={telemetry.speedKmh}
+        distanceKm={distanceKm}
+      />
+
 
       {destination && remainingKm !== null && (
         <div className="flex items-center justify-between border-t border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs">

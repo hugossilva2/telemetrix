@@ -13,6 +13,7 @@ import { openDocFile, uploadDocFile } from "@/lib/docs/storage";
 import { expiryClasses, expiryLabel, expiryStatus, formatDate } from "@/lib/docs/expiry";
 import { DriverAvatar } from "@/components/drivers/DriverAvatar";
 import { DriverRanking } from "@/components/drivers/DriverRanking";
+import { DriverEditDialog } from "@/components/drivers/DriverEditDialog";
 import { backfillDriverLinks } from "@/lib/drivers/api";
 
 export const Route = createFileRoute("/_authenticated/motoristas")({
@@ -242,6 +243,8 @@ function MotoristasPage() {
                     </Link>
                   </div>
                   <div className="flex flex-col items-end gap-2">
+                    <DriverEditDialog driver={d} />
+
                     {!d.is_default && (
                       <button
                         type="button"

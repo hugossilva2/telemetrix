@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { upsertSafeStartEntry } from "./safeStartHistory";
+import { syncSafeStart } from "./safeStartRemote";
 
 /**
  * "Partida segura": depois de o carro ficar parado por mais de 60 minutos,
@@ -92,6 +93,7 @@ export function useSafeStart(
   const readyAt = useRef<number | null>(null);
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const hydrated = useRef(false);
+  const lastSynced = useRef<string | null>(null);
 
   // Restaura o estado salvo (reload da página / reabertura do PWA).
   if (!hydrated.current && typeof window !== "undefined") {

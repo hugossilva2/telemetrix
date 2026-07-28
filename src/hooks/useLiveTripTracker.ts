@@ -27,6 +27,14 @@ export function useLiveTripTracker() {
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);
   const lastSample = useRef<EcoSample | null>(null);
+  // Carro pode "morrer" (motor apaga) no meio da viagem: não encerramos na hora.
+  // Só encerramos se a ignição ficar desligada por mais que este período.
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const IGNITION_OFF_GRACE_MS = 3 * 60_000;
+
+  useEffect(() => () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  }, []);
 
   useEffect(() => {
     const ign = telemetry.ignitionOn;
@@ -34,11 +42,19 @@ export function useLiveTripTracker() {
     const prev = prevIgnition.current;
     prevIgnition.current = ign;
 
+    // Motor voltou a ligar dentro do período de tolerância: continua a mesma viagem
+    if (ign === true && closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+      if (tripStore.get()) return;
+    }
+
     // OFF -> ON: abre viagem local
     const shouldOpen =
-      (prev === false && ign === true) ||
-      (prev === undefined && ign === true && !tripStore.get());
+      ((prev === false && ign === true) ||
+        (prev === undefined && ign === true)) && !tripStore.get();
     if (shouldOpen) {
+
       lastSample.current = null;
       const open: OpenTrip = {
         startTime: new Date().toISOString(),
@@ -74,29 +90,35 @@ export function useLiveTripTracker() {
       return;
     }
 
-    // ON -> OFF: fecha viagem local e grava no banco (fallback do webhook)
+    // ON -> OFF: agenda o encerramento. Se for só o motor morrendo e a chave
+    // for girada de novo dentro da tolerância, a viagem continua.
     if ((prev === true || prev === undefined) && ign === false) {
-      const closing = tripStore.get();
-      tripStore.set(null);
-      lastSample.current = null;
-      const active = tripDestinationStore.getActive();
-      if (active) {
-        tripDestinationStore.setActive(null);
-      }
-      if (closing) {
-        saveClosedTrip(closing)
-          .then((result) => {
-            if (result === "saved") {
-              toast.success("Viagem salva no histórico");
-              queryClient.invalidateQueries({ queryKey: ["trips-list"] });
-            }
-          })
-          .catch((err) => {
-            console.error("[trip] falha ao salvar viagem", err);
-            toast.error("Não foi possível salvar a viagem");
-          });
-      }
+      if (!tripStore.get() || closeTimer.current) return;
+      closeTimer.current = setTimeout(() => {
+        closeTimer.current = null;
+        const closing = tripStore.get();
+        tripStore.set(null);
+        lastSample.current = null;
+        const active = tripDestinationStore.getActive();
+        if (active) {
+          tripDestinationStore.setActive(null);
+        }
+        if (closing) {
+          saveClosedTrip(closing)
+            .then((result) => {
+              if (result === "saved") {
+                toast.success("Viagem salva no histórico");
+                queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+              }
+            })
+            .catch((err) => {
+              console.error("[trip] falha ao salvar viagem", err);
+              toast.error("Não foi possível salvar a viagem");
+            });
+        }
+      }, IGNITION_OFF_GRACE_MS);
     }
+
 
 
   }, [telemetry.ignitionOn, telemetry.latitude, telemetry.longitude, telemetry.mileageKm, telemetry.speedKmh]);

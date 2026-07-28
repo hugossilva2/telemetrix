@@ -242,6 +242,8 @@ function MotoristasPage() {
                     </Link>
                   </div>
                   <div className="flex flex-col items-end gap-2">
+                    <DriverEditDialog driver={d} />
+
                     {!d.is_default && (
                       <button
                         type="button"

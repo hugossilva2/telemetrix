@@ -16,6 +16,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { DriverAvatar } from "@/components/drivers/DriverAvatar";
 import { DriverBadges } from "@/components/drivers/DriverBadges";
 import { DriverScoreCard } from "@/components/drivers/DriverScoreCard";
+import { DriverEditDialog } from "@/components/drivers/DriverEditDialog";
 import { EcoScoreBadge } from "@/components/eco/EcoScoreRing";
 import { useDriver, useDriverSafeStarts, useDriverTrips } from "@/lib/drivers/api";
 import { computeDriverScore, monthlyScoreSeries } from "@/lib/drivers/score";

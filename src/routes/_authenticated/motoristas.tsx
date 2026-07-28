@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { openDocFile, uploadDocFile } from "@/lib/docs/storage";
 import { expiryClasses, expiryLabel, expiryStatus, formatDate } from "@/lib/docs/expiry";
 import { DriverAvatar } from "@/components/drivers/DriverAvatar";
+import { DriverRanking } from "@/components/drivers/DriverRanking";
 import { backfillDriverLinks } from "@/lib/drivers/api";
 
 export const Route = createFileRoute("/_authenticated/motoristas")({
@@ -102,6 +103,7 @@ function MotoristasPage() {
       setPhoto(null);
       qc.invalidateQueries({ queryKey: ["drivers"] });
       qc.invalidateQueries({ queryKey: ["trips"] });
+      qc.invalidateQueries({ queryKey: ["driver-ranking"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -180,6 +182,10 @@ function MotoristasPage() {
           {save.isPending ? "Salvando…" : "Cadastrar motorista"}
         </Button>
       </form>
+
+      <div className="mt-4">
+        <DriverRanking />
+      </div>
 
       <div className="mt-4 rounded-2xl border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Condutores cadastrados</h2>

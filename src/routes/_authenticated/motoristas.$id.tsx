@@ -136,7 +136,11 @@ function DriverProfilePage() {
                 )}
               </div>
             </div>
+            <div className="ml-auto">
+              <DriverEditDialog driver={driver} />
+            </div>
           </div>
+
 
           <DriverScoreCard score={result.score} pillars={result.pillars} />
 

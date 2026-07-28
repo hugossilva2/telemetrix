@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { upsertSafeStartEntry } from "./safeStartHistory";
+import { syncSafeStart } from "./safeStartRemote";
 
 /**
  * "Partida segura": depois de o carro ficar parado por mais de 60 minutos,
@@ -92,6 +93,7 @@ export function useSafeStart(
   const readyAt = useRef<number | null>(null);
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const hydrated = useRef(false);
+  const lastSynced = useRef<string | null>(null);
 
   // Restaura o estado salvo (reload da página / reabertura do PWA).
   if (!hydrated.current && typeof window !== "undefined") {
@@ -129,7 +131,7 @@ export function useSafeStart(
 
   const logHistory = () => {
     if (startedAt.current == null) return;
-    upsertSafeStartEntry({
+    const entry = {
       id: startedAt.current,
       startedAt: startedAt.current,
       offMinutes: offMinutes.current,
@@ -137,8 +139,17 @@ export function useSafeStart(
       required: required.current,
       ready: ready.current,
       readyAt: readyAt.current,
-    });
+    };
+    upsertSafeStartEntry(entry);
+
+    // Espelha no banco apenas quando algo relevante muda (evita 1 write/segundo).
+    const signature = `${entry.id}:${entry.required}:${entry.ready}:${entry.offMinutes}`;
+    if (lastSynced.current !== signature) {
+      lastSynced.current = signature;
+      void syncSafeStart(entry);
+    }
   };
+
 
   // Tick de 1s para o contador andar sem depender de novas mensagens MQTT.
   useEffect(() => {

@@ -1,40 +1,39 @@
 ## Objetivo
 
-Transformar os locais favoritos em cercas virtuais reais (raio configurável, padrão 500 m) que, ao serem cruzadas pelo FMC003, disparam uma chamada HTTP para o seu sistema de casa inteligente (Home Assistant, Tuya, IFTTT, Alexa, portão etc.).
+Criar um **Perfil do Motorista** com foto, análise de consumo, direção segura e partida segura, consolidados em uma pontuação única (0–100) com selos de destaque.
 
-Hoje o app só detecta **saída** de cerca e apenas registra um evento na timeline. Vamos adicionar **entrada/aproximação** e a ação externa.
+## Fase 1 — Vincular viagens ao condutor (base de dados)
 
-## O que muda
+- Toda viagem nova passa a ser salva com o motorista marcado como **padrão** (o app hoje nunca preenche `driver_id` — confirmado: 37 viagens, nenhuma com condutor).
+- Vincular as 37 viagens existentes ao condutor padrão.
+- Nova tabela `safe_starts` (por usuário e motorista): data/hora, minutos parado, RPM mínimo, se exigiu partida segura e se liberou. O histórico local atual continua funcionando e passa a espelhar no banco.
+- Na tela de detalhe da viagem, permitir trocar o condutor.
 
-### 1. Banco de dados
-- `favorite_places`: novo padrão de raio 500 m para novas cercas (os locais atuais continuam com o valor deles; dá para editar na tela).
-- Novo tipo de evento `geofence_enter` (hoje só existe `geofence_exit`).
-- Nova tabela `place_automations`: por local e por gatilho (entrada ou saída), guarda a URL de destino, método (GET/POST), corpo JSON opcional, cabeçalho de autenticação opcional, se está ativa e quanto tempo de espera entre disparos (anti-repetição).
-- Nova tabela `automation_runs`: histórico dos disparos (data, local, gatilho, status HTTP, erro) para você ver o que funcionou.
-- Regras de acesso: cada usuário só vê e edita as próprias automações e o próprio histórico.
+## Fase 2 — Perfil do motorista
 
-### 2. Detecção no servidor (webhook do Flespi)
-No `src/routes/api/public/flespi-webhook.ts`:
-- Passar a detectar as duas transições: fora → dentro (`geofence_enter`) e dentro → fora (`geofence_exit`), com histerese (entra com raio, sai só depois de ~15% além do raio) para não disparar em looping quando o GPS oscila na borda.
-- Em cada transição, buscar as automações ativas daquele local + gatilho e fazer a chamada HTTP (com timeout curto, sem travar o processamento das outras mensagens), gravando o resultado em `automation_runs` e respeitando o intervalo mínimo entre disparos.
+Nova rota `/motoristas/{id}` (acessível ao tocar no condutor na lista):
 
-### 3. Tela de configuração
-Na página **Locais** (`/lugares`), cada local ganha um painel "Automação":
-- Liga/desliga a cerca e ajusta o raio (slider 100 m – 2 km, padrão 500 m).
-- Para "Ao chegar" e "Ao sair": URL, método, corpo JSON opcional, cabeçalho opcional (ex.: `Authorization: Bearer ...`), intervalo mínimo entre disparos.
-- Botão **Testar agora** que executa a chamada na hora e mostra o status retornado.
-- Lista dos últimos disparos com status (ok / erro).
+- Cabeçalho com **foto** (avatar grande, iniciais como fallback), nome, CNH/categoria e alerta de vencimento.
+- **Nota geral** em anel colorido, média ponderada de três pilares:
+  - Direção segura (60%): eco score das viagens — freada brusca, aceleração agressiva, curva, excesso de velocidade, giro alto.
+  - Eficiência de consumo (30%): km/L real do condutor comparado ao consumo de referência do veículo.
+  - Partida segura (10%): % de partidas em que respeitou a circulação do óleo.
+- **Cartões de métrica**: total de viagens, km rodados, tempo ao volante, km/L médio, custo por km, litros e reais desperdiçados, marcha lenta.
+- **Eventos de direção**: contagem por tipo com barras, e evolução da nota nos últimos meses.
+- **Destaques (selos)** concedidos automaticamente: Direção Exemplar (nota ≥ 90), Zero Freadas Bruscas no mês, Pé Leve (sem aceleração agressiva), Economia Máxima (km/L acima da referência), Partida Perfeita (100% de partidas seguras), Sem Excesso de Velocidade.
+- Lista das últimas viagens do condutor com nota individual, link para o detalhe.
 
-### 4. Timeline
-No `/rastreador`, os eventos de entrada aparecem junto com os de saída, com rótulo do local ("Chegou em Casa" / "Saiu de Casa").
+## Fase 3 — Ranking e integração
+
+- Na lista `/motoristas`: foto, nota e selo principal de cada condutor, ordenados por nota (ranking quando houver mais de um).
+- No Painel: cartão compacto do condutor padrão com nota atual.
+- Cartão de Partida Segura passa a mostrar também a taxa de acerto do condutor.
 
 ## Detalhes técnicos
 
-- A chamada externa sai do servidor (rota TanStack + service role), nunca do navegador; a URL/segredo do seu sistema fica no banco protegido por RLS e nunca é exposto ao cliente.
-- Teste manual via `createServerFn` autenticado, que valida se a URL é http(s) e bloqueia endereços internos/loopback antes de chamar.
-- Cálculo de distância continua com Haversine; o estado dentro/fora já é persistido em `device_trip_state.geofence_state`.
-- Notificação push real fica de fora desta fase (você escolheu só o webhook); se seu Home Assistant já manda push, ele cobre isso.
+- Fotos: `photo_path` já existe em `drivers`, servido por URL assinada do bucket privado `vehicle-docs` (mesmo fluxo de `openDocFile`).
+- Cálculo da pontuação em `src/lib/drivers/score.ts` (puro, testável); leitura agregada de `trips` por `driver_id` via TanStack Query.
+- Migração: `ALTER TABLE trips` não é necessária (`driver_id` já existe); criar `safe_starts` com GRANTs e RLS por `auth.uid()`; UPDATE de backfill nas viagens antigas.
+- Componentes novos: `DriverAvatar`, `DriverScoreCard`, `DriverBadges`, `DriverStats`.
 
-## Fora do escopo
-
-Push notifications nativas, integração direta com Alexa/Google Home (só via URL/webhook do seu hub).
+Entrego fase por fase, validando antes de avançar.

@@ -457,6 +457,69 @@ export type Database = {
         }
         Relationships: []
       }
+      safe_starts: {
+        Row: {
+          created_at: string
+          driver_id: string | null
+          id: string
+          local_id: number
+          min_rpm: number | null
+          off_minutes: number | null
+          ready: boolean
+          ready_at: string | null
+          required: boolean
+          started_at: string
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          local_id: number
+          min_rpm?: number | null
+          off_minutes?: number | null
+          ready?: boolean
+          ready_at?: string | null
+          required?: boolean
+          started_at: string
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          local_id?: number
+          min_rpm?: number | null
+          off_minutes?: number | null
+          ready?: boolean
+          ready_at?: string | null
+          required?: boolean
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safe_starts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safe_starts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tracker_events: {
         Row: {
           created_at: string

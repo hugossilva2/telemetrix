@@ -129,7 +129,7 @@ export function useSafeStart(
 
   const logHistory = () => {
     if (startedAt.current == null) return;
-    upsertSafeStartEntry({
+    const entry = {
       id: startedAt.current,
       startedAt: startedAt.current,
       offMinutes: offMinutes.current,
@@ -137,8 +137,17 @@ export function useSafeStart(
       required: required.current,
       ready: ready.current,
       readyAt: readyAt.current,
-    });
+    };
+    upsertSafeStartEntry(entry);
+
+    // Espelha no banco apenas quando algo relevante muda (evita 1 write/segundo).
+    const signature = `${entry.id}:${entry.required}:${entry.ready}:${entry.offMinutes}`;
+    if (lastSynced.current !== signature) {
+      lastSynced.current = signature;
+      void syncSafeStart(entry);
+    }
   };
+
 
   // Tick de 1s para o contador andar sem depender de novas mensagens MQTT.
   useEffect(() => {

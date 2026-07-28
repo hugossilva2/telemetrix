@@ -2,6 +2,7 @@ import {
   Car,
   CircleDollarSign,
   Droplets,
+  Fuel,
   Landmark,
   ParkingCircle,
   ReceiptText,

@@ -86,6 +86,8 @@ export function useSafeStart(
   const stableSince = useRef<number | null>(null);
   const ready = useRef(false);
   const lastRpm = useRef<number | null>(null);
+  const minRpm = useRef<number | null>(null);
+  const readyAt = useRef<number | null>(null);
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const hydrated = useRef(false);
 
@@ -101,6 +103,8 @@ export function useSafeStart(
       stableSince.current = s.stableSince ?? null;
       ready.current = !!s.ready;
       lastRpm.current = s.lastRpm ?? null;
+      minRpm.current = s.minRpm ?? null;
+      readyAt.current = s.readyAt ?? null;
     }
   }
 

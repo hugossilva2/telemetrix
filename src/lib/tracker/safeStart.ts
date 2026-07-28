@@ -122,6 +122,8 @@ export function useSafeStart(
       stableSince: stableSince.current,
       ready: ready.current,
       lastRpm: lastRpm.current,
+      minRpm: minRpm.current,
+      readyAt: readyAt.current,
     });
   };
 

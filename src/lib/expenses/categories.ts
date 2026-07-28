@@ -43,6 +43,7 @@ export const EXPENSE_CATEGORIES: {
   Icon: LucideIcon;
   color: string;
 }[] = [
+  { value: "combustivel", label: "Combustível", Icon: Fuel, color: "var(--chart-1)" },
   { value: "pedagio", label: "Pedágio", Icon: TrafficCone, color: "var(--chart-1)" },
   { value: "estacionamento", label: "Estacionamento", Icon: ParkingCircle, color: "var(--chart-2)" },
   { value: "lavagem", label: "Lavagem", Icon: Droplets, color: "var(--chart-3)" },

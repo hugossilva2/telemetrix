@@ -30,7 +30,7 @@ export function useLiveTripTracker() {
   // Carro pode "morrer" (motor apaga) no meio da viagem: não encerramos na hora.
   // Só encerramos se a ignição ficar desligada por mais que este período.
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const IGNITION_OFF_GRACE_MS = 3 * 60_000;
+  const IGNITION_OFF_GRACE_MS = 1 * 60_000;
 
   useEffect(() => () => {
     if (closeTimer.current) clearTimeout(closeTimer.current);

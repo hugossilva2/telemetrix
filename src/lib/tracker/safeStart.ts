@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { upsertSafeStartEntry } from "./safeStartHistory";
 
 /**
  * "Partida segura": depois de o carro ficar parado por mais de 60 minutos,
@@ -34,6 +35,8 @@ interface SafeStartSession {
   stableSince: number | null;
   ready: boolean;
   lastRpm: number | null;
+  minRpm?: number | null;
+  readyAt?: number | null;
 }
 
 function readSession(): SafeStartSession | null {
@@ -85,6 +88,8 @@ export function useSafeStart(
   const stableSince = useRef<number | null>(null);
   const ready = useRef(false);
   const lastRpm = useRef<number | null>(null);
+  const minRpm = useRef<number | null>(null);
+  const readyAt = useRef<number | null>(null);
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const hydrated = useRef(false);
 
@@ -100,6 +105,8 @@ export function useSafeStart(
       stableSince.current = s.stableSince ?? null;
       ready.current = !!s.ready;
       lastRpm.current = s.lastRpm ?? null;
+      minRpm.current = s.minRpm ?? null;
+      readyAt.current = s.readyAt ?? null;
     }
   }
 
@@ -115,6 +122,21 @@ export function useSafeStart(
       stableSince: stableSince.current,
       ready: ready.current,
       lastRpm: lastRpm.current,
+      minRpm: minRpm.current,
+      readyAt: readyAt.current,
+    });
+  };
+
+  const logHistory = () => {
+    if (startedAt.current == null) return;
+    upsertSafeStartEntry({
+      id: startedAt.current,
+      startedAt: startedAt.current,
+      offMinutes: offMinutes.current,
+      minRpm: minRpm.current,
+      required: required.current,
+      ready: ready.current,
+      readyAt: readyAt.current,
     });
   };
 
@@ -134,12 +156,15 @@ export function useSafeStart(
         offSince.current = Date.now();
         writeOffSince(offSince.current);
       }
+      logHistory();
       startedAt.current = null;
       stableSince.current = null;
       ready.current = false;
       required.current = false;
       offMinutes.current = null;
       lastRpm.current = null;
+      minRpm.current = null;
+      readyAt.current = null;
       persist();
       return;
     }
@@ -153,15 +178,27 @@ export function useSafeStart(
       required.current = elapsed != null && elapsed >= SAFE_START_OFF_THRESHOLD_MS;
       stableSince.current = null;
       ready.current = false;
+      minRpm.current = null;
+      readyAt.current = null;
       offSince.current = null;
       writeOffSince(null);
       persist();
+      logHistory();
     }
   }, [ignitionOn]);
 
   // Avalia estabilidade do RPM
   useEffect(() => {
-    if (typeof engineRpm === "number") lastRpm.current = engineRpm;
+    if (typeof engineRpm === "number") {
+      lastRpm.current = engineRpm;
+      if (
+        ignitionOn === true &&
+        engineRpm > 0 &&
+        (minRpm.current == null || engineRpm < minRpm.current)
+      ) {
+        minRpm.current = engineRpm;
+      }
+    }
     if (ignitionOn !== true || !required.current || ready.current) return;
     if (typeof engineRpm !== "number") return;
     if (engineRpm > 0 && engineRpm < SAFE_START_RPM_LIMIT) {
@@ -170,6 +207,7 @@ export function useSafeStart(
       stableSince.current = null;
     }
     persist();
+    logHistory();
   }, [engineRpm, ignitionOn]);
 
   const rpm = typeof engineRpm === "number" ? engineRpm : lastRpm.current;
@@ -190,7 +228,9 @@ export function useSafeStart(
   const elapsedStable = stableSince.current != null ? Date.now() - stableSince.current : 0;
   if (elapsedStable >= SAFE_START_STABLE_MS && !ready.current) {
     ready.current = true;
+    readyAt.current = Date.now();
     persist();
+    logHistory();
   }
 
   if (ready.current) {

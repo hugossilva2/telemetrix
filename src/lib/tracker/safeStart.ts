@@ -35,6 +35,8 @@ interface SafeStartSession {
   stableSince: number | null;
   ready: boolean;
   lastRpm: number | null;
+  minRpm?: number | null;
+  readyAt?: number | null;
 }
 
 function readSession(): SafeStartSession | null {

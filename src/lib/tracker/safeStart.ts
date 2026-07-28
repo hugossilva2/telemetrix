@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { upsertSafeStartEntry } from "./safeStartHistory";
 
 /**
  * "Partida segura": depois de o carro ficar parado por mais de 60 minutos,

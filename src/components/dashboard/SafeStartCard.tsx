@@ -1,9 +1,11 @@
-import { CheckCircle2, Gauge, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { CheckCircle2, ChevronDown, Gauge, History, ShieldAlert, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import {
   SAFE_START_RPM_LIMIT,
   useSafeStart,
 } from "@/lib/tracker/safeStart";
+import { useSafeStartHistory } from "@/lib/tracker/safeStartHistory";
 
 interface Props {
   ignitionOn?: boolean;

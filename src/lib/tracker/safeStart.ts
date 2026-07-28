@@ -118,6 +118,19 @@ export function useSafeStart(
     });
   };
 
+  const logHistory = () => {
+    if (startedAt.current == null) return;
+    upsertSafeStartEntry({
+      id: startedAt.current,
+      startedAt: startedAt.current,
+      offMinutes: offMinutes.current,
+      minRpm: minRpm.current,
+      required: required.current,
+      ready: ready.current,
+      readyAt: readyAt.current,
+    });
+  };
+
   // Tick de 1s para o contador andar sem depender de novas mensagens MQTT.
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 1000);
@@ -134,12 +147,15 @@ export function useSafeStart(
         offSince.current = Date.now();
         writeOffSince(offSince.current);
       }
+      logHistory();
       startedAt.current = null;
       stableSince.current = null;
       ready.current = false;
       required.current = false;
       offMinutes.current = null;
       lastRpm.current = null;
+      minRpm.current = null;
+      readyAt.current = null;
       persist();
       return;
     }
@@ -153,15 +169,27 @@ export function useSafeStart(
       required.current = elapsed != null && elapsed >= SAFE_START_OFF_THRESHOLD_MS;
       stableSince.current = null;
       ready.current = false;
+      minRpm.current = null;
+      readyAt.current = null;
       offSince.current = null;
       writeOffSince(null);
       persist();
+      logHistory();
     }
   }, [ignitionOn]);
 
   // Avalia estabilidade do RPM
   useEffect(() => {
-    if (typeof engineRpm === "number") lastRpm.current = engineRpm;
+    if (typeof engineRpm === "number") {
+      lastRpm.current = engineRpm;
+      if (
+        ignitionOn === true &&
+        engineRpm > 0 &&
+        (minRpm.current == null || engineRpm < minRpm.current)
+      ) {
+        minRpm.current = engineRpm;
+      }
+    }
     if (ignitionOn !== true || !required.current || ready.current) return;
     if (typeof engineRpm !== "number") return;
     if (engineRpm > 0 && engineRpm < SAFE_START_RPM_LIMIT) {
@@ -170,6 +198,7 @@ export function useSafeStart(
       stableSince.current = null;
     }
     persist();
+    logHistory();
   }, [engineRpm, ignitionOn]);
 
   const rpm = typeof engineRpm === "number" ? engineRpm : lastRpm.current;

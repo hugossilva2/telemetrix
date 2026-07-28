@@ -21,6 +21,8 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
     ignitionOn,
     engineRpm,
   );
+  const { history, clear } = useSafeStartHistory();
+  const [showHistory, setShowHistory] = useState(false);
 
   if (phase === "off" || phase === "not-required") return null;
 

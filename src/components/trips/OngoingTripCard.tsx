@@ -197,6 +197,13 @@ export function OngoingTripCard() {
         </ClientOnly>
       </div>
 
+      <DriverLiveStrip
+        ecoScore={eco.score}
+        speedKmh={telemetry.speedKmh}
+        distanceKm={distanceKm}
+      />
+
+
       {destination && remainingKm !== null && (
         <div className="flex items-center justify-between border-t border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs">
           <span className="flex items-center gap-1.5 text-emerald-500">

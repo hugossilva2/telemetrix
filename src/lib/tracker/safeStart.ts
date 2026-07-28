@@ -228,7 +228,9 @@ export function useSafeStart(
   const elapsedStable = stableSince.current != null ? Date.now() - stableSince.current : 0;
   if (elapsedStable >= SAFE_START_STABLE_MS && !ready.current) {
     ready.current = true;
+    readyAt.current = Date.now();
     persist();
+    logHistory();
   }
 
   if (ready.current) {

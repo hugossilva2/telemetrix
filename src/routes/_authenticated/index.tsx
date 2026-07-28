@@ -16,6 +16,7 @@ import { FavoritePlacesEta } from "@/components/dashboard/FavoritePlacesEta";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
 import { SafeStartCard } from "@/components/dashboard/SafeStartCard";
+import { DriverHighlightCard } from "@/components/dashboard/DriverHighlightCard";
 
 
 
@@ -96,6 +97,7 @@ function Dashboard() {
 
       <MaintenanceAlertsCard />
 
+      <DriverHighlightCard />
       <ExpiringDocsCard />
 
 

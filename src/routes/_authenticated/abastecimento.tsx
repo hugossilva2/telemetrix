@@ -146,6 +146,7 @@ function AbastecimentoPage() {
       if (fileInputRef.current) fileInputRef.current.value = "";
       if (cameraInputRef.current) cameraInputRef.current.value = "";
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
+      qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });

@@ -166,6 +166,7 @@ export type Database = {
           due_date: string | null
           expense_date: string
           file_path: string | null
+          fuel_log_id: string | null
           id: string
           notes: string | null
           paid: boolean
@@ -183,6 +184,7 @@ export type Database = {
           due_date?: string | null
           expense_date?: string
           file_path?: string | null
+          fuel_log_id?: string | null
           id?: string
           notes?: string | null
           paid?: boolean
@@ -200,6 +202,7 @@ export type Database = {
           due_date?: string | null
           expense_date?: string
           file_path?: string | null
+          fuel_log_id?: string | null
           id?: string
           notes?: string | null
           paid?: boolean
@@ -209,7 +212,15 @@ export type Database = {
           user_id?: string
           vehicle_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "expenses_fuel_log_id_fkey"
+            columns: ["fuel_log_id"]
+            isOneToOne: false
+            referencedRelation: "fuel_logs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       favorite_places: {
         Row: {
@@ -772,6 +783,7 @@ export type Database = {
         | "financiamento"
         | "acessorio"
         | "outro"
+        | "combustivel"
       maintenance_type:
         | "oleo"
         | "filtro_oleo"
@@ -934,6 +946,7 @@ export const Constants = {
         "financiamento",
         "acessorio",
         "outro",
+        "combustivel",
       ],
       maintenance_type: [
         "oleo",

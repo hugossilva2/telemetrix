@@ -11,6 +11,7 @@ import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
 import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
+import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 

@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { FileText, Star, Trash2, UserRound } from "lucide-react";
+import { ChevronRight, FileText, Star, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ import { FileAttachment } from "@/components/common/FileAttachment";
 import { supabase } from "@/integrations/supabase/client";
 import { openDocFile, uploadDocFile } from "@/lib/docs/storage";
 import { expiryClasses, expiryLabel, expiryStatus, formatDate } from "@/lib/docs/expiry";
+import { DriverAvatar } from "@/components/drivers/DriverAvatar";
+import { backfillDriverLinks } from "@/lib/drivers/api";
 
 export const Route = createFileRoute("/_authenticated/motoristas")({
   head: () => ({
@@ -36,6 +38,10 @@ interface Driver {
 }
 
 function MotoristasPage() {
+  const showingProfile = useRouterState({
+    select: (state) =>
+      state.matches.some((match) => match.routeId === "/_authenticated/motoristas/$id"),
+  });
   const qc = useQueryClient();
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -66,7 +72,10 @@ function MotoristasPage() {
 
       const photoPath = photo ? await uploadDocFile(photo, "drivers") : null;
 
-      const { error } = await supabase.from("drivers").insert({
+      const isFirst = drivers.length === 0;
+      const { data: created, error } = await supabase
+        .from("drivers")
+        .insert({
         user_id: uid,
         name: name.trim(),
         phone: phone.trim() || null,
@@ -74,9 +83,14 @@ function MotoristasPage() {
         license_number: license.trim() || null,
         license_category: category.trim() || null,
         license_expires_on: expires || null,
-        is_default: drivers.length === 0,
-      });
+        is_default: isFirst,
+        })
+        .select("id")
+        .single();
       if (error) throw error;
+
+      // Primeiro condutor assume o histórico existente (viagens e partidas sem motorista).
+      if (isFirst && created?.id) await backfillDriverLinks(uid, created.id);
     },
     onSuccess: () => {
       toast.success("Motorista cadastrado!");
@@ -87,6 +101,7 @@ function MotoristasPage() {
       setExpires("");
       setPhoto(null);
       qc.invalidateQueries({ queryKey: ["drivers"] });
+      qc.invalidateQueries({ queryKey: ["trips"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -122,6 +137,8 @@ function MotoristasPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  if (showingProfile) return <Outlet />;
 
   return (
     <AppShell title="Motoristas" subtitle="Condutores e habilitação">
@@ -176,18 +193,21 @@ function MotoristasPage() {
               const status = expiryStatus(d.license_expires_on);
               return (
                 <li key={d.id} className="flex items-start gap-3 py-3">
-                  <div className="grid size-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
-                    <UserRound className="size-5" />
-                  </div>
+                  <DriverAvatar name={d.name} photoPath={d.photo_path} size={40} />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
+                    <Link
+                      to="/motoristas/$id"
+                      params={{ id: d.id }}
+                      className="flex items-center gap-2"
+                    >
                       <p className="truncate text-sm font-medium">{d.name}</p>
                       {d.is_default && (
                         <span className="rounded-full bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium text-primary">
                           padrão
                         </span>
                       )}
-                    </div>
+                      <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
+                    </Link>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {[d.license_category && `Cat. ${d.license_category}`, d.phone].filter(Boolean).join(" · ") || "Sem dados adicionais"}
                     </p>
@@ -207,6 +227,13 @@ function MotoristasPage() {
                         <FileText className="size-3.5" /> Ver arquivo
                       </button>
                     )}
+                    <Link
+                      to="/motoristas/$id"
+                      params={{ id: d.id }}
+                      className="mt-1 block text-xs font-medium text-primary"
+                    >
+                      Ver perfil e pontuação
+                    </Link>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     {!d.is_default && (

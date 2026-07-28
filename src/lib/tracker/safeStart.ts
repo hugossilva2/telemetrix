@@ -11,6 +11,7 @@ export const SAFE_START_STABLE_MS = 30_000; // 30s estável abaixo de 1000 rpm
 export const SAFE_START_RPM_LIMIT = 1000;
 
 const OFF_SINCE_KEY = "safeStart:offSince:v1";
+const SESSION_KEY = "safeStart:session:v1";
 
 function readOffSince(): number | null {
   if (typeof window === "undefined") return null;
@@ -23,6 +24,35 @@ function writeOffSince(v: number | null) {
   if (typeof window === "undefined") return;
   if (v == null) window.localStorage.removeItem(OFF_SINCE_KEY);
   else window.localStorage.setItem(OFF_SINCE_KEY, String(v));
+}
+
+/** Sessão de partida em andamento — sobrevive a reload / reabertura do PWA. */
+interface SafeStartSession {
+  startedAt: number | null;
+  offMinutes: number | null;
+  required: boolean;
+  stableSince: number | null;
+  ready: boolean;
+  lastRpm: number | null;
+}
+
+function readSession(): SafeStartSession | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(SESSION_KEY);
+    if (!raw) return null;
+    const s = JSON.parse(raw) as SafeStartSession;
+    if (typeof s !== "object" || s == null) return null;
+    return s;
+  } catch {
+    return null;
+  }
+}
+
+function writeSession(s: SafeStartSession | null) {
+  if (typeof window === "undefined") return;
+  if (s == null) window.localStorage.removeItem(SESSION_KEY);
+  else window.localStorage.setItem(SESSION_KEY, JSON.stringify(s));
 }
 
 export type SafeStartPhase =

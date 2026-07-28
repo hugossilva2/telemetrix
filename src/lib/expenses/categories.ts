@@ -12,6 +12,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 export type ExpenseCategory =
+  | "combustivel"
   | "pedagio"
   | "estacionamento"
   | "lavagem"

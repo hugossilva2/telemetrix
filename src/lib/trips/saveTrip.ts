@@ -7,6 +7,8 @@ import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
 import { offlineQueue } from "@/lib/offline/queue";
 import { isOnline } from "@/lib/offline/sync";
+import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
+import { buildRouteData } from "@/lib/trips/routeData";
 
 
 const MIN_DISTANCE_KM = 0.2;
@@ -87,6 +89,29 @@ export async function saveClosedTrip(
     pricePerLiter: price,
   });
 
+  const source = telemetrySourceStore.get();
+
+  // Map Matching: alinha o traçado à geometria real das ruas (Google Roads API).
+  // Falha de rede/API não bloqueia o salvamento — cai para os pontos brutos.
+  let snappedPoints = null as Awaited<ReturnType<typeof snapToRoads>>["points"] | null;
+  if (isOnline() && (trip.trail?.length ?? 0) > 1) {
+    try {
+      const res = await snapToRoads({
+        data: { points: trip.trail.map((p) => ({ lat: p.lat, lng: p.lng })) },
+      });
+      if (res.snapped) snappedPoints = res.points;
+    } catch (err) {
+      console.error("[saveTrip] snapToRoads falhou, usando traçado bruto:", err);
+    }
+  }
+
+  const routeData = buildRouteData({
+    trail: trip.trail ?? [],
+    events: trip.ecoEvents ?? [],
+    source,
+    snappedPoints,
+  });
+
   const row = {
     user_id: userId,
     vehicle_id: vehicle?.id ?? null,
@@ -114,7 +139,8 @@ export async function saveClosedTrip(
     wasted_fuel_liters: eco.wastedFuelLiters,
     wasted_cost: eco.wastedCost,
     eco_events: (trip.ecoEvents ?? []) as unknown as never,
-    hardware_source: telemetrySourceStore.get(),
+    hardware_source: source,
+    route_data: (routeData ?? null) as unknown as never,
   };
 
   // Offline-first: sem rede, a viagem vai para a fila local (IndexedDB).

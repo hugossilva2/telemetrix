@@ -18,6 +18,7 @@ import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { EcoTripCard, parseEcoEvents } from "@/components/eco/EcoTripCard";
 import { EcoEventsChart } from "@/components/eco/EcoEventsChart";
+import { parseRouteData } from "@/lib/trips/routeData";
 import {
   formatDateTime,
   formatDurationBetween,
@@ -72,6 +73,7 @@ type TripDetail = {
   wasted_fuel_liters: number | null;
   wasted_cost: number | null;
   eco_events: unknown;
+  route_data: unknown;
 };
 
 type TripRow = Pick<
@@ -88,7 +90,7 @@ function TripDetailPage() {
       const { data, error } = await supabase
         .from("trips")
         .select(
-          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events",
+          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
         )
         .eq("id", id)
         .maybeSingle();
@@ -109,6 +111,18 @@ function TripDetailPage() {
       return (data ?? []) as TripRow[];
     },
   });
+
+  const routeTrail = useMemo(() => {
+    const parsed = parseRouteData(trip?.route_data);
+    if (!parsed) return undefined;
+    return parsed.points.map((p) => ({
+      lat: p.lat,
+      lng: p.lng,
+      speed: p.speed,
+      accel: p.accel,
+      t: p.t,
+    }));
+  }, [trip?.route_data]);
 
   const ecoEvents = useMemo(
     () => (trip ? parseEcoEvents(trip.eco_events) : []),
@@ -288,6 +302,7 @@ function TripDetailPage() {
                       ? [trip.end_lat, trip.end_lng]
                       : null
                   }
+                  trail={routeTrail}
                   ecoEvents={ecoEvents}
                 />
               </Suspense>

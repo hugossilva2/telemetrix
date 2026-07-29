@@ -2,7 +2,11 @@ import { useEffect, useRef } from "react";
 import { MapContainer, Marker, Popup, useMap } from "react-leaflet";
 import { MapStyleControl } from "@/components/map/MapStyleControl";
 import { MapButtons, ScaleControl } from "@/components/map/MapControls";
-import { SpeedPolyline, SpeedLegend, type SpeedSample } from "@/components/map/SpeedPolyline";
+import {
+  TelemetryPolyline,
+  TelemetryLegend,
+  type TelemetrySample,
+} from "@/components/map/TelemetryPolyline";
 import { StyledTileLayers } from "@/components/map/StyledTileLayers";
 import { endIcon, makeEcoEventIcon, startIcon } from "@/components/map/icons";
 import type { EcoEvent } from "@/lib/eco/detect";
@@ -25,7 +29,7 @@ function FitBounds({ points }: { points: [number, number][] }) {
 export interface TripMapProps {
   start: [number, number] | null;
   end: [number, number] | null;
-  trail?: SpeedSample[];
+  trail?: TelemetrySample[];
   ecoEvents?: EcoEvent[];
 }
 
@@ -41,9 +45,10 @@ export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) 
   const points: [number, number][] = [];
   if (start) points.push(start);
   if (end) points.push(end);
+  for (const p of trail ?? []) points.push([p.lat, p.lng]);
   for (const e of events) points.push([e.lat, e.lng]);
 
-  const routePoints: SpeedSample[] =
+  const routePoints: TelemetrySample[] =
     trail && trail.length > 1
       ? trail
       : start && end
@@ -65,7 +70,7 @@ export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) 
       >
         <StyledTileLayers style={mapStyle} />
         <ScaleControl />
-        {routePoints.length > 1 && <SpeedPolyline points={routePoints} />}
+        {routePoints.length > 1 && <TelemetryPolyline points={routePoints} />}
         {start && <Marker position={start} icon={startIcon} />}
         {end && <Marker position={end} icon={endIcon} />}
         {events.map((e, i) => (
@@ -92,9 +97,7 @@ export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) 
 
       <MapStyleControl value={mapStyle} onChange={setMapStyle} />
       <MapButtons containerRef={containerRef} />
-      {routePoints.length > 1 && trail && trail.some((p) => typeof p.speed === "number") && (
-        <SpeedLegend />
-      )}
+      {routePoints.length > 1 && trail && trail.length > 1 && <TelemetryLegend />}
     </div>
   );
 }

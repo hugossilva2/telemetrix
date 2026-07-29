@@ -35,7 +35,8 @@ async function snapBatch(points: SnapInput[], offset: number): Promise<SnappedPo
   if (!lovable || !gmaps) throw new Error("Google Maps connector não configurado");
 
   const path = points.map((p) => `${p.lat},${p.lng}`).join("|");
-  const url = `${GATEWAY}/v1/snapToRoads?interpolate=true&path=${encodeURIComponent(path)}`;
+  const url = `${GATEWAY}/roads/v1/snapToRoads?interpolate=true&path=${encodeURIComponent(path)}`;
+
 
   const res = await fetch(url, {
     headers: {

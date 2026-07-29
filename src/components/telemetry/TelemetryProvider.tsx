@@ -48,6 +48,8 @@ function ObdBridge({ publish }: { publish: Publish }) {
     error,
     supported,
     deviceName,
+    savedDevice,
+    forgetDevice,
     connect,
     disconnect,
   } = useOBD2Local(true);
@@ -61,13 +63,28 @@ function ObdBridge({ publish }: { publish: Publish }) {
       error,
       supported,
       deviceName,
+      savedDevice,
+      forgetDevice,
       connect,
       disconnect,
     });
-  }, [publish, status, telemetry, lastMessageAt, error, supported, deviceName, connect, disconnect]);
+  }, [
+    publish,
+    status,
+    telemetry,
+    lastMessageAt,
+    error,
+    supported,
+    deviceName,
+    savedDevice,
+    forgetDevice,
+    connect,
+    disconnect,
+  ]);
 
   return null;
 }
+
 
 export function TelemetryProvider({ children }: { children: ReactNode }) {
   const { source } = useTelemetrySource();

@@ -1,4 +1,5 @@
 import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
+import type { SavedObdDevice } from "@/lib/obd/device";
 
 /** Fonte de hardware da telemetria. */
 export type TelemetrySource = "fmc003" | "elm327";
@@ -17,7 +18,11 @@ export interface TelemetryState {
   disconnect?: () => void;
   deviceName?: string | null;
   supported?: boolean;
+  /** Adaptador memorizado (aparece mesmo desconectado). */
+  savedDevice?: SavedObdDevice | null;
+  forgetDevice?: () => void;
 }
+
 
 export const SOURCE_LABEL: Record<TelemetrySource, string> = {
   fmc003: "Equipamento dedicado (nuvem)",

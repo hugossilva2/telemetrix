@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Elm327Client, isWebBluetoothSupported } from "@/lib/obd/elm327";
+import { obdDeviceStore, type SavedObdDevice } from "@/lib/obd/device";
 import {
   FAST_PIDS,
   SLOW_PIDS,
@@ -17,11 +18,15 @@ export interface UseOBD2LocalResult {
   error: string | null;
   supported: boolean;
   deviceName: string | null;
+  /** Adaptador memorizado de pareamentos anteriores (localStorage). */
+  savedDevice: SavedObdDevice | null;
+  forgetDevice: () => void;
   /** Consumo instantâneo estimado (L/h), quando há MAF ou estimativa. */
   fuelLph: number | null;
   connect: () => Promise<void>;
   disconnect: () => void;
 }
+
 
 const POLL_INTERVAL_MS = 500;
 const IGNITION_RPM_THRESHOLD = 300;
@@ -38,6 +43,15 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
   const [error, setError] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [fuelLph, setFuelLph] = useState<number | null>(null);
+  const [savedDevice, setSavedDevice] = useState<SavedObdDevice | null>(null);
+
+  useEffect(() => {
+    setSavedDevice(obdDeviceStore.get());
+    return obdDeviceStore.subscribe(setSavedDevice);
+  }, []);
+
+  const forgetDevice = useCallback(() => obdDeviceStore.forget(), []);
+
 
   const clientRef = useRef<Elm327Client | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -146,6 +160,10 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     try {
       await client.connect();
       setDeviceName(client.deviceName);
+      if (client.deviceId) {
+        obdDeviceStore.remember({ id: client.deviceId, name: client.deviceName });
+      }
+
       setStatus("connected");
       stopPolling();
       pollRef.current = setInterval(() => void pollOnce(), POLL_INTERVAL_MS);
@@ -211,7 +229,11 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     error,
     supported,
     deviceName,
+    savedDevice,
+    forgetDevice,
     fuelLph,
+
+
     connect,
     disconnect,
   };

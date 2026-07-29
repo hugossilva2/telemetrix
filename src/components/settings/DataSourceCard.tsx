@@ -75,25 +75,44 @@ export function DataSourceCard() {
         <div className="mt-3 space-y-2 rounded-xl border border-border/70 bg-background/35 px-3 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center justify-between gap-2">
             <span className="truncate">
-              {deviceName ? `Pareado: ${deviceName}` : "Nenhum adaptador conectado"}
+              {deviceName ?? savedDevice?.name
+                ? `Adaptador: ${deviceName ?? savedDevice?.name}`
+                : "Nenhum adaptador memorizado"}
             </span>
             <Badge variant={status === "connected" ? "default" : "secondary"} className="shrink-0">
               {status === "connected" ? "Conectado" : "Desconectado"}
             </Badge>
           </div>
+          {savedDevice && (
+            <p>
+              Pareado pela primeira vez em{" "}
+              {new Date(savedDevice.firstPairedAt).toLocaleDateString("pt-BR")}.
+            </p>
+          )}
+          {!savedDevice && supported !== false && (
+            <p>Faça o primeiro pareamento pelo card do Painel para memorizar o adaptador.</p>
+          )}
           {supported === false && (
             <p className="text-warning">
               Este navegador não suporta Web Bluetooth. Use o Chrome no Android, com o app aberto
               em uma aba (não dentro do preview).
             </p>
           )}
-          {status === "connected" && disconnect && (
-            <Button type="button" size="sm" variant="outline" onClick={disconnect}>
-              Desconectar
-            </Button>
-          )}
+          <div className="flex flex-wrap gap-2">
+            {status === "connected" && disconnect && (
+              <Button type="button" size="sm" variant="outline" onClick={disconnect}>
+                Desconectar
+              </Button>
+            )}
+            {savedDevice && forgetDevice && (
+              <Button type="button" size="sm" variant="ghost" onClick={forgetDevice}>
+                Esquecer adaptador
+              </Button>
+            )}
+          </div>
         </div>
       )}
+
     </section>
   );
 }

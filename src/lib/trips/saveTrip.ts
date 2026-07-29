@@ -24,7 +24,9 @@ function trailDistanceKm(trip: OpenTrip) {
  * motor desliga. O webhook do Flespi (quando configurado) também grava; por
  * isso checamos se já existe uma viagem com o mesmo start_time antes de inserir.
  */
-export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped" | "duplicate"> {
+export async function saveClosedTrip(
+  trip: OpenTrip,
+): Promise<"saved" | "skipped" | "duplicate" | "queued"> {
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id;
   if (!userId) return "skipped";
@@ -48,6 +50,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     .lte("start_time", new Date(startMs + 3 * 60_000).toISOString())
     .limit(1);
   if (existing && existing.length > 0) return "duplicate";
+
 
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     supabase

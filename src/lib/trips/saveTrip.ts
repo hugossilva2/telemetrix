@@ -5,6 +5,9 @@ import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
+import { offlineQueue } from "@/lib/offline/queue";
+import { isOnline } from "@/lib/offline/sync";
+
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -24,7 +27,9 @@ function trailDistanceKm(trip: OpenTrip) {
  * motor desliga. O webhook do Flespi (quando configurado) também grava; por
  * isso checamos se já existe uma viagem com o mesmo start_time antes de inserir.
  */
-export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped" | "duplicate"> {
+export async function saveClosedTrip(
+  trip: OpenTrip,
+): Promise<"saved" | "skipped" | "duplicate" | "queued"> {
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id;
   if (!userId) return "skipped";
@@ -48,6 +53,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     .lte("start_time", new Date(startMs + 3 * 60_000).toISOString())
     .limit(1);
   if (existing && existing.length > 0) return "duplicate";
+
 
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     supabase
@@ -81,7 +87,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     pricePerLiter: price,
   });
 
-  const { error } = await supabase.from("trips").insert({
+  const row = {
     user_id: userId,
     vehicle_id: vehicle?.id ?? null,
     driver_id: driverId,
@@ -109,8 +115,20 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     wasted_cost: eco.wastedCost,
     eco_events: (trip.ecoEvents ?? []) as unknown as never,
     hardware_source: telemetrySourceStore.get(),
-  });
+  };
 
-  if (error) throw error;
+  // Offline-first: sem rede, a viagem vai para a fila local (IndexedDB).
+  if (!isOnline()) {
+    await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
+    return "queued";
+  }
+
+  const { error } = await supabase.from("trips").insert(row);
+
+  if (error) {
+    await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
+    return "queued";
+  }
   return "saved";
+
 }

@@ -109,6 +109,10 @@ export function useLiveTripTracker() {
               if (result === "saved") {
                 toast.success("Viagem salva no histórico");
                 queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+              } else if (result === "queued") {
+                toast.info("Sem conexão — viagem salva no aparelho", {
+                  description: "Ela será enviada automaticamente quando a internet voltar.",
+                });
               }
             })
             .catch((err) => {

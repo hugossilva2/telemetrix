@@ -43,6 +43,15 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
   const [error, setError] = useState<string | null>(null);
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [fuelLph, setFuelLph] = useState<number | null>(null);
+  const [savedDevice, setSavedDevice] = useState<SavedObdDevice | null>(null);
+
+  useEffect(() => {
+    setSavedDevice(obdDeviceStore.get());
+    return obdDeviceStore.subscribe(setSavedDevice);
+  }, []);
+
+  const forgetDevice = useCallback(() => obdDeviceStore.forget(), []);
+
 
   const clientRef = useRef<Elm327Client | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);

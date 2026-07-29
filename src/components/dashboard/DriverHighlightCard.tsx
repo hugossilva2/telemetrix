@@ -20,7 +20,7 @@ export function DriverHighlightCard() {
     <Link
       to="/motoristas/$id"
       params={{ id: driver.id }}
-      className="mt-4 flex items-center gap-3 rounded-2xl border border-border bg-card p-4"
+      className="mt-4 flex items-center gap-3 card-surface p-4"
     >
       <EcoScoreRing score={result.score} size={72} strokeWidth={7} label="nota" />
       <div className="min-w-0 flex-1">
@@ -28,7 +28,7 @@ export function DriverHighlightCard() {
           <DriverAvatar name={driver.name} photoPath={driver.photo_path} size={28} />
           <p className="truncate text-sm font-semibold">{driver.name}</p>
           {ranking.length > 1 && position > 0 && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-500">
+            <span className="inline-flex items-center gap-1 rounded-full bg-warning/10 px-1.5 py-0.5 text-[10px] font-semibold text-warning">
               <Trophy className="size-3" />
               {position}º
             </span>

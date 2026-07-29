@@ -65,7 +65,7 @@ export function StartTripDialog({ open, onOpenChange, place, etaInfo }: StartTri
               <p
                 className={
                   ignitionOn
-                    ? "text-emerald-500"
+                    ? "text-success"
                     : "text-muted-foreground"
                 }
               >

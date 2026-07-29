@@ -124,7 +124,7 @@ function AjustesPage() {
         }}
         className="space-y-4"
       >
-        <section className="rounded-2xl border border-border bg-card p-4">
+        <section className="card-surface p-4">
           <header className="mb-3 flex items-center gap-2 text-sm font-medium">
             <Car className="size-4 text-primary" />
             Perfil do veículo
@@ -194,7 +194,7 @@ function AjustesPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-border bg-card p-4">
+        <section className="card-surface p-4">
           <header className="mb-3 text-sm font-medium">Alertas</header>
           <div className="space-y-3">
             <label className="flex items-center justify-between gap-3">
@@ -219,7 +219,7 @@ function AjustesPage() {
         </Button>
       </form>
 
-      <div className="mt-4">
+      <div className="contents">
         <InstallAppCard />
       </div>
 

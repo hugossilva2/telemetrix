@@ -228,7 +228,7 @@ function RelatorioPage() {
         </Button>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+      <div className="mt-3 card-surface p-4">
         <p className="text-xs text-muted-foreground">Custo total do mês</p>
         <p className="mt-1 font-mono text-3xl font-semibold">{formatBRL(t.total)}</p>
         <div className="mt-1 flex items-center gap-1 text-xs">
@@ -255,11 +255,11 @@ function RelatorioPage() {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Km rodados</p>
           <p className="mt-1 font-mono text-xl font-semibold">{formatKm(t.km)}</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Custo por km</p>
           <p className="mt-1 font-mono text-xl font-semibold">
             {t.perKm != null ? formatBRL(t.perKm) : "—"}
@@ -268,24 +268,24 @@ function RelatorioPage() {
       </div>
 
       <div className="mt-3 grid grid-cols-3 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-3">
+        <div className="card-surface p-3">
           <Fuel className="size-4 text-primary" />
           <p className="mt-1 text-[11px] text-muted-foreground">Combustível</p>
           <p className="font-mono text-sm font-semibold">{formatBRL(t.fuel)}</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-3">
+        <div className="card-surface p-3">
           <Wrench className="size-4 text-primary" />
           <p className="mt-1 text-[11px] text-muted-foreground">Manutenção</p>
           <p className="font-mono text-sm font-semibold">{formatBRL(t.maintenance)}</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-3">
+        <div className="card-surface p-3">
           <Download className="size-4 rotate-180 text-primary" />
           <p className="mt-1 text-[11px] text-muted-foreground">Despesas</p>
           <p className="font-mono text-sm font-semibold">{formatBRL(t.expenses)}</p>
         </div>
       </div>
 
-      <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+      <div className="mt-3 card-surface p-4">
         <h2 className="text-sm font-semibold">Composição por categoria</h2>
         {loading ? (
           <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>

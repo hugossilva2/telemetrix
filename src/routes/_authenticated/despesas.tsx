@@ -174,12 +174,12 @@ function DespesasPage() {
   return (
     <AppShell title="Despesas" subtitle="Pedágio, estacionamento, multas e mais">
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Total do mês</p>
           <p className="mt-1 font-mono text-xl font-semibold">{formatBRL(monthTotal)}</p>
           <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{monthLabel(thisMonth)}</p>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-4">
+        <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Em aberto</p>
           <p className="mt-1 font-mono text-xl font-semibold text-destructive">
             {formatBRL(pending.reduce((s, e) => s + Number(e.amount || 0), 0))}
@@ -192,7 +192,7 @@ function DespesasPage() {
 
       <Link
         to="/relatorio"
-        className="mt-3 flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-accent"
+        className="mt-3 flex items-center gap-3 card-surface p-3 transition-colors hover:bg-accent"
       >
         <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
           <BarChart3 className="size-5" />
@@ -211,7 +211,7 @@ function DespesasPage() {
           e.preventDefault();
           save.mutate();
         }}
-        className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4"
+        className="mt-4 space-y-3 card-surface p-4"
       >
         <h2 className="text-sm font-semibold">Nova despesa</h2>
 
@@ -344,12 +344,12 @@ function DespesasPage() {
         {isLoading ? (
           <p className="text-xs text-muted-foreground">Carregando…</p>
         ) : expenses.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="card-surface p-4">
             <p className="text-xs text-muted-foreground">Nenhuma despesa registrada ainda.</p>
           </div>
         ) : (
           groups.map(([key, items]) => (
-            <div key={key} className="rounded-2xl border border-border bg-card p-4">
+            <div key={key} className="card-surface p-4">
               <div className="flex items-baseline justify-between">
                 <h2 className="text-sm font-semibold capitalize">{monthLabel(key)}</h2>
                 <span className="font-mono text-sm font-semibold">

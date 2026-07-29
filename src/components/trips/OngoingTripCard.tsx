@@ -76,10 +76,10 @@ export function OngoingTripCard() {
 
   if (!open && pendingDestination) {
     return (
-      <section className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 px-3 py-2">
+      <section className="mt-3 flex items-center justify-between gap-3 rounded-2xl border border-warning/30 bg-warning/5 px-3 py-2">
         <div className="flex items-center gap-2 text-xs">
-          <Navigation className="size-4 text-amber-500" />
-          <span className="text-amber-500">
+          <Navigation className="size-4 text-warning" />
+          <span className="text-warning">
             Viagem programada para <b>{pendingDestination.name}</b> — começa ao ligar o carro.
           </span>
         </div>
@@ -155,26 +155,26 @@ export function OngoingTripCard() {
   );
 
   return (
-    <section className="mt-3 overflow-hidden rounded-2xl border border-emerald-500/30 bg-emerald-500/5">
-      <div className="flex items-center justify-between border-b border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
+    <section className="mt-3 overflow-hidden rounded-2xl border border-success/30 bg-success/5">
+      <div className="flex items-center justify-between border-b border-success/20 bg-success/10 px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="relative flex size-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex size-2 rounded-full bg-emerald-500" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+            <span className="relative inline-flex size-2 rounded-full bg-success" />
           </span>
-          <span className="truncate text-xs font-semibold uppercase tracking-wide text-emerald-500">
+          <span className="truncate text-xs font-semibold uppercase tracking-wide text-success">
             {destination ? `Indo para ${destination.name}` : "Viagem em andamento"}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs tabular-nums text-emerald-500/80">
+          <span className="text-xs tabular-nums text-success/80">
             {typeof telemetry.speedKmh === "number" ? `${telemetry.speedKmh.toFixed(0)} km/h` : "—"}
           </span>
           {destination && (
             <Button
               variant="ghost"
               size="icon"
-              className="size-7 text-emerald-500 hover:text-emerald-400"
+              className="size-7 text-success hover:text-success"
               onClick={() => tripDestinationStore.setActive(null)}
               aria-label="Encerrar destino"
             >
@@ -206,8 +206,8 @@ export function OngoingTripCard() {
 
 
       {destination && remainingKm !== null && (
-        <div className="flex items-center justify-between border-t border-emerald-500/20 bg-emerald-500/5 px-3 py-1.5 text-xs">
-          <span className="flex items-center gap-1.5 text-emerald-500">
+        <div className="flex items-center justify-between border-t border-success/20 bg-success/5 px-3 py-1.5 text-xs">
+          <span className="flex items-center gap-1.5 text-success">
             <Navigation className="size-3.5" />
             {remainingKm < 1
               ? `${Math.round(remainingKm * 1000)} m restantes`
@@ -219,7 +219,7 @@ export function OngoingTripCard() {
 
 
 
-      <div className="flex items-center justify-between border-t border-emerald-500/20 px-3 py-2 text-xs">
+      <div className="flex items-center justify-between border-t border-success/20 px-3 py-2 text-xs">
         <span className="flex items-center gap-2">
           <span className="text-muted-foreground">Eco Score</span>
           <span className={`font-semibold tabular-nums ${band.color}`}>

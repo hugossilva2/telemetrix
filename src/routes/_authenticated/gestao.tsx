@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Leaf, Route as RouteIcon, ChevronRight, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
+import { BarChart3, Leaf, Route as RouteIcon, MapPin, ShieldCheck, UserRound, Wallet, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
@@ -38,25 +38,30 @@ function GestaoPage() {
 
 
 
-      <ul className="mt-4 space-y-2">
-        {links.map(({ to, label, desc, Icon }) => (
-          <li key={to}>
-            <Link
-              to={to}
-              className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-accent"
-            >
-              <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
-                <Icon className="size-5" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">{label}</p>
-                <p className="truncate text-xs text-muted-foreground">{desc}</p>
-              </div>
-              <ChevronRight className="size-4 text-muted-foreground" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <div className="card-surface p-4">
+        <h2 className="font-display text-sm font-semibold tracking-tight">Atalhos</h2>
+        <ul className="mt-3 grid grid-cols-2 gap-3">
+          {links.map(({ to, label, desc, Icon }) => (
+            <li key={to} className="min-w-0">
+              <Link
+                to={to}
+                className="flex h-full min-w-0 flex-col gap-2 rounded-xl border border-border/70 bg-background/35 p-3 transition-all hover:border-primary/50 hover:bg-accent active:scale-[0.98]"
+              >
+                <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/12 text-primary">
+                  <Icon className="size-4.5" />
+                </span>
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold">{label}</span>
+                  <span className="mt-0.5 block text-[11px] leading-snug text-muted-foreground line-clamp-2">
+                    {desc}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
     </AppShell>
   );
 }

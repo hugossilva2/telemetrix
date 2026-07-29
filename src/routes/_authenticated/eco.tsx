@@ -164,13 +164,13 @@ function EcoPage() {
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       ) : !stats ? (
-        <div className="mt-4 rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+        <div className="card-surface p-4 text-sm text-muted-foreground">
           Ainda não há viagens pontuadas. Assim que você fizer uma viagem com o
           motor ligado, a nota aparece aqui automaticamente.
         </div>
       ) : (
         <>
-          <section className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4">
+          <section className="flex items-center gap-4 card-surface p-4">
             <EcoScoreRing
               score={stats.curAvg}
               size={110}
@@ -184,7 +184,7 @@ function EcoPage() {
               {diff != null && (
                 <p
                   className={`mt-2 inline-flex items-center gap-1 text-xs font-medium ${
-                    diff >= 0 ? "text-emerald-500" : "text-red-500"
+                    diff >= 0 ? "text-success" : "text-destructive"
                   }`}
                 >
                   {diff >= 0 ? (
@@ -200,18 +200,18 @@ function EcoPage() {
           </section>
 
           <section className="mt-3 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3">
-              <p className="text-[10px] uppercase tracking-wide text-amber-500">
+            <div className="rounded-2xl border border-warning/30 bg-warning/5 p-3">
+              <p className="text-[10px] uppercase tracking-wide text-warning">
                 Desperdício do mês
               </p>
-              <p className="mt-1 text-lg font-semibold tabular-nums text-amber-500">
+              <p className="mt-1 text-lg font-semibold tabular-nums text-warning">
                 {formatBRL(stats.wastedR)}
               </p>
               <p className="text-[11px] text-muted-foreground tabular-nums">
                 {formatDecimal(stats.wastedL)} L a mais
               </p>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="card-surface p-3">
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Marcha lenta
               </p>
@@ -225,7 +225,7 @@ function EcoPage() {
           <h2 className="mb-2 mt-5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Eventos do mês
           </h2>
-          <div className="space-y-2 rounded-2xl border border-border bg-card p-4">
+          <div className="space-y-2 card-surface p-4">
             {TYPES.map((type) => (
               <div key={type}>
                 <div className="flex items-center justify-between text-xs">
@@ -299,7 +299,7 @@ function EcoPage() {
                       evento(s)
                     </p>
                   </div>
-                  <span className="shrink-0 text-[11px] tabular-nums text-amber-500">
+                  <span className="shrink-0 text-[11px] tabular-nums text-warning">
                     {formatBRL(t.wasted_cost ?? 0)}
                   </span>
                 </li>
@@ -312,7 +312,7 @@ function EcoPage() {
       <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Ajustes da pontuação
       </h2>
-      <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+      <div className="space-y-3 card-surface p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
             <Label htmlFor="live-alerts" className="text-sm">
@@ -422,7 +422,7 @@ function Achievement({
     <div
       className={`rounded-2xl border p-3 text-center ${
         active
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
+          ? "border-success/40 bg-success/10 text-success"
           : "border-border bg-card text-muted-foreground"
       }`}
     >

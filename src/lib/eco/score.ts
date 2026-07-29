@@ -30,9 +30,9 @@ export const ECO_EVENT_LABEL: Record<EcoEventType, string> = {
 };
 
 export const ECO_EVENT_COLOR: Record<EcoEventType, string> = {
-  harsh_brake: "text-red-500",
+  harsh_brake: "text-destructive",
   harsh_accel: "text-orange-500",
-  harsh_corner: "text-amber-500",
+  harsh_corner: "text-warning",
   overspeed: "text-rose-500",
   high_rpm: "text-violet-500",
 };
@@ -136,8 +136,8 @@ export function ecoBand(score: number | null | undefined): EcoBand {
   if (s >= 90) {
     return {
       label: "Excelente",
-      color: "text-emerald-500",
-      bg: "bg-emerald-500/10",
+      color: "text-success",
+      bg: "bg-success/10",
       stroke: "rgb(16 185 129)",
     };
   }
@@ -152,15 +152,15 @@ export function ecoBand(score: number | null | undefined): EcoBand {
   if (s >= 60) {
     return {
       label: "Regular",
-      color: "text-amber-500",
-      bg: "bg-amber-500/10",
+      color: "text-warning",
+      bg: "bg-warning/10",
       stroke: "rgb(245 158 11)",
     };
   }
   return {
     label: "Agressivo",
-    color: "text-red-500",
-    bg: "bg-red-500/10",
+    color: "text-destructive",
+    bg: "bg-destructive/10",
     stroke: "rgb(239 68 68)",
   };
 }

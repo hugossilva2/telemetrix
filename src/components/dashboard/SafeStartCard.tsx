@@ -33,7 +33,7 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
     <div
       className={`mt-4 rounded-2xl border p-4 transition-colors ${
         ok
-          ? "border-emerald-500/40 bg-emerald-500/10"
+          ? "border-success/40 bg-success/10"
           : "border-destructive/40 bg-destructive/10"
       }`}
     >
@@ -41,7 +41,7 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
         <span
           className={`grid size-11 place-items-center rounded-full ${
             ok
-              ? "bg-emerald-500/20 text-emerald-500"
+              ? "bg-success/20 text-success"
               : "bg-destructive/20 text-destructive animate-pulse"
           }`}
         >
@@ -51,7 +51,7 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
           <div className="text-xs uppercase tracking-wide text-muted-foreground">
             Partida segura
           </div>
-          <div className={`text-base font-semibold ${ok ? "text-emerald-500" : "text-destructive"}`}>
+          <div className={`text-base font-semibold ${ok ? "text-success" : "text-destructive"}`}>
             {ok ? "Pronto para sair" : revving ? "Reduza o acelerador" : "Aguarde o óleo circular"}
           </div>
         </div>
@@ -119,7 +119,7 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
                 <span
                   className={`ml-auto font-medium ${
                     h.ready
-                      ? "text-emerald-500"
+                      ? "text-success"
                       : h.required
                         ? "text-destructive"
                         : "text-muted-foreground"

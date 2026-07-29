@@ -38,12 +38,12 @@ export function OngoingTripBanner() {
   }
 
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-      <div className="grid size-9 place-items-center rounded-full bg-emerald-500/20 text-emerald-500">
+    <div className="mt-3 flex items-center gap-3 rounded-2xl border border-success/30 bg-success/10 p-3">
+      <div className="grid size-9 place-items-center rounded-full bg-success/20 text-success">
         <RouteIcon className="size-4" />
       </div>
       <div className="flex-1">
-        <div className="text-xs uppercase tracking-wide text-emerald-500">
+        <div className="text-xs uppercase tracking-wide text-success">
           Viagem em andamento
         </div>
         <div className="text-sm font-medium tabular-nums">

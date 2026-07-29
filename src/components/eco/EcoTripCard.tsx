@@ -47,7 +47,7 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
 
   if (trip.eco_score == null && total === 0 && !trip.idle_seconds) {
     return (
-      <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">
+      <div className="card-surface p-4 text-sm text-muted-foreground">
         Esta viagem foi registrada antes da pontuação de direção. As próximas já
         virão com o Eco Score.
       </div>
@@ -55,7 +55,7 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="card-surface p-4">
       <div className="flex items-center gap-4">
         <EcoScoreRing score={trip.eco_score} />
         <div className="min-w-0 flex-1">
@@ -67,7 +67,7 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
             {trip.idle_seconds ? ` · ${formatIdle(trip.idle_seconds)} em marcha lenta` : ""}
           </p>
           {(trip.wasted_fuel_liters ?? 0) > 0 && (
-            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-2 py-1 text-[11px] font-medium text-amber-500">
+            <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2 py-1 text-[11px] font-medium text-warning">
               <Fuel className="size-3.5" />
               {formatDecimal(trip.wasted_fuel_liters ?? 0)} L desperdiçados ·{" "}
               {formatBRL(trip.wasted_cost ?? 0)}
@@ -112,7 +112,7 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
                 <span className="truncate">
                   {ECO_EVENT_LABEL[e.type]}
                   {e.severity === "severe" && (
-                    <span className="ml-1 text-[10px] font-semibold text-red-500">severo</span>
+                    <span className="ml-1 text-[10px] font-semibold text-destructive">severo</span>
                   )}
                 </span>
               </span>

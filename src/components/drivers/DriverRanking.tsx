@@ -6,16 +6,16 @@ import { driverBadges } from "@/lib/drivers/score";
 import { ecoBand } from "@/lib/eco/score";
 import { formatKm } from "@/lib/format";
 
-const MEDAL = ["text-amber-400", "text-zinc-400", "text-orange-600"];
+const MEDAL = ["text-warning", "text-muted-foreground", "text-orange-600"];
 
 export function DriverRanking() {
   const { data = [], isLoading } = useDriverRanking();
   const scored = data.filter((r) => r.result.stats.trips > 0);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4">
+    <section className="card-surface p-4">
       <h2 className="flex items-center gap-1.5 text-sm font-semibold">
-        <Trophy className="size-4 text-amber-400" /> Ranking de condutores
+        <Trophy className="size-4 text-warning" /> Ranking de condutores
       </h2>
 
       {isLoading ? (

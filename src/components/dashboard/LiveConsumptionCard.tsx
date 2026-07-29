@@ -68,7 +68,7 @@ export function LiveConsumptionCard() {
   const cost = liters !== null ? liters * price : null;
 
   return (
-    <div className="col-span-2 rounded-2xl border border-border/60 bg-card p-4">
+    <div className="col-span-2 card-surface p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
           <Fuel className="size-3.5" />
@@ -98,7 +98,7 @@ export function LiveConsumptionCard() {
             <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
               <DollarSign className="size-3" /> Custo estimado
             </div>
-            <div className="text-xl font-semibold tabular-nums text-emerald-500">
+            <div className="text-xl font-semibold tabular-nums text-success">
               {cost !== null ? BRL.format(cost) : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">

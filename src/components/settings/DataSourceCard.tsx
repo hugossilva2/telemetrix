@@ -29,7 +29,8 @@ const OPTIONS: {
 
 export function DataSourceCard() {
   const { source, setSource } = useTelemetrySource();
-  const { status, deviceName, supported, disconnect } = useTelemetry();
+  const { status, deviceName, supported, disconnect, savedDevice, forgetDevice } = useTelemetry();
+
 
   return (
     <section className="card-surface p-4">

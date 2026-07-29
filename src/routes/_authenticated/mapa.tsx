@@ -1,8 +1,16 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import type { SpeedSample } from "@/components/map/SpeedPolyline";
+import { DestinationSearch, type DestinationPick } from "@/components/map/DestinationSearch";
+import { RoutePanel } from "@/components/map/RoutePanel";
+import type { PlannedRoute } from "@/components/map/PlannedRouteLayer";
+import { planRoute } from "@/lib/trips/planRoute.functions";
+import { decodePolyline, tripPlanStore } from "@/lib/trips/plan";
+import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
+import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 
 type TrailPoint = SpeedSample;
 
@@ -44,6 +52,16 @@ function MapaPage() {
   const prevIgnitionRef = useRef<boolean | undefined>(undefined);
   const lastKnownPosRef = useRef<TrailPoint | null>(null);
 
+  // Roteirização (destino estilo Uber)
+  const [route, setRoute] = useState<PlannedRoute | null>(null);
+  const [routing, setRouting] = useState(false);
+  const destination = useTripDestination();
+  const started =
+    !!route &&
+    (destination.active?.placeId === route.destination.name ||
+      destination.active?.lat === route.destination.lat ||
+      destination.pending?.lat === route.destination.lat);
+
   // Reset trail on ignition OFF -> ON (nova viagem).
   useEffect(() => {
     const prev = prevIgnitionRef.current;
@@ -84,7 +102,94 @@ function MapaPage() {
       ? mileageNow - mileageStart
       : gpsDistance;
 
+  const handlePick = useCallback(
+    async (dest: DestinationPick) => {
+      const origin = lastKnownPosRef.current ?? (typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null);
+      if (!origin) {
+        toast.error("Sem posição atual", {
+          description: "Aguarde o GPS para traçar a rota.",
+        });
+        return;
+      }
+      setRouting(true);
+      try {
+        const res = await planRoute({
+          data: {
+            origin: { lat: origin.lat, lng: origin.lng },
+            destination: { lat: dest.lat, lng: dest.lng },
+          },
+        });
+        setRoute({
+          path: decodePolyline(res.encodedPolyline),
+          distanceMeters: res.distanceMeters,
+          durationSeconds: res.durationSeconds,
+          destination: {
+            name: dest.name,
+            address: dest.address,
+            lat: dest.lat,
+            lng: dest.lng,
+          },
+        });
+      } catch (err) {
+        toast.error("Não foi possível traçar a rota", {
+          description: err instanceof Error ? err.message : undefined,
+        });
+      } finally {
+        setRouting(false);
+      }
+    },
+    [lat, lng],
+  );
 
+  const handleStart = useCallback(() => {
+    if (!route) return;
+    const dest = {
+      placeId: `map:${route.destination.lat.toFixed(5)},${route.destination.lng.toFixed(5)}`,
+      name: route.destination.name,
+      icon: null,
+      lat: route.destination.lat,
+      lng: route.destination.lng,
+      radiusM: 150,
+      startedAt: new Date().toISOString(),
+    };
+    const origin = lastKnownPosRef.current;
+    if (origin) {
+      const distanceKm = route.distanceMeters / 1000;
+      tripPlanStore.set({
+        createdAt: new Date().toISOString(),
+        origin: { placeId: "origin", name: "Posição atual", lat: origin.lat, lng: origin.lng },
+        stops: [],
+        destination: {
+          placeId: dest.placeId,
+          name: route.destination.name,
+          address: route.destination.address,
+          lat: route.destination.lat,
+          lng: route.destination.lng,
+        },
+        distanceKm,
+        durationSeconds: route.durationSeconds,
+        fuelLiters: distanceKm / 10,
+        cost: (distanceKm / 10) * DEFAULT_GAS_PRICE_PER_LITER,
+        path: route.path,
+        monitoring: true,
+      });
+    }
+    if (ignition === true) {
+      tripDestinationStore.setActive(dest);
+      toast.success(`Viagem iniciada — monitorando até ${dest.name}`);
+    } else {
+      tripDestinationStore.setPending(dest);
+      toast.message("Motor desligado", {
+        description: `A viagem para ${dest.name} começará ao ligar o carro.`,
+      });
+    }
+  }, [route, ignition]);
+
+  const handleCancel = useCallback(() => {
+    setRoute(null);
+    tripDestinationStore.clearAll();
+    tripPlanStore.set(null);
+  }, []);
 
   const fallback = (
     <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
@@ -103,7 +208,7 @@ function MapaPage() {
             : "Sem conexão"
       }
     >
-      <div className="h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-2xl border border-border">
+      <div className="relative h-[calc(100dvh-11rem)] min-h-[420px] overflow-hidden rounded-2xl border border-border">
         <ClientOnly fallback={fallback}>
           <Suspense fallback={fallback}>
             <VehicleMap
@@ -116,9 +221,33 @@ function MapaPage() {
               lastUpdate={lastMessageAt}
               status={status}
               parked={parked}
+              plannedRoute={route}
             />
           </Suspense>
         </ClientOnly>
+
+        {/* Busca de destino sobreposta ao mapa */}
+        <div className="pointer-events-none absolute inset-x-3 bottom-3 z-[600] space-y-2">
+          {route ? (
+            <div className="pointer-events-auto">
+              <RoutePanel
+                route={route}
+                started={started}
+                ignitionOn={ignition === true}
+                onStart={handleStart}
+                onCancel={handleCancel}
+              />
+            </div>
+          ) : (
+            <div className="pointer-events-auto">
+              <DestinationSearch
+                bias={typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null}
+                onPick={handlePick}
+                placeholder={routing ? "Calculando rota…" : "Para onde vamos?"}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </AppShell>
   );

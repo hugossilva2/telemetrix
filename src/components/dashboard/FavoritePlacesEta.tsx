@@ -3,7 +3,7 @@ import { useQueries, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { getRouteEta } from "@/lib/places.functions";
 import { iconFor } from "@/routes/_authenticated/lugares";
 import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
@@ -17,7 +17,7 @@ function formatEta(seconds: number): string {
 }
 
 export function FavoritePlacesEta() {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const eta = useServerFn(getRouteEta);
   const startTrip = useStartTripDialog();
 

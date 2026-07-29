@@ -10,7 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { tripDestinationStore, type TripDestination } from "@/lib/trips/activeDestination";
 
 interface StartTripDialogProps {
@@ -28,7 +28,7 @@ interface StartTripDialogProps {
 }
 
 export function StartTripDialog({ open, onOpenChange, place, etaInfo }: StartTripDialogProps) {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const ignitionOn = telemetry.ignitionOn === true;
 
   const handleStart = () => {

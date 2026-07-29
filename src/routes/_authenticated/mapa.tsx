@@ -1,7 +1,7 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import type { SpeedSample } from "@/components/map/SpeedPolyline";
 
 type TrailPoint = SpeedSample;
@@ -29,7 +29,7 @@ import { useParkedSpot } from "@/lib/tracker/parked";
 
 
 function MapaPage() {
-  const { telemetry, status, lastMessageAt } = useFlespiMqtt();
+  const { telemetry, status, lastMessageAt } = useTelemetry();
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
   const ignition = telemetry.ignitionOn;

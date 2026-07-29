@@ -1,54 +1,61 @@
-## Objetivo
 
-Modernizar o visual de todo o app Telemetrix: cards bem definidos, botões organizados e hierarquia de leitura clara — sem mudar nenhuma regra de negócio, cálculo ou consulta ao banco.
+# Arquitetura híbrida de telemetria: FMC003 (nuvem) + ELM327 (Bluetooth local)
 
-## Direção visual escolhida
+Hoje 13 arquivos chamam `useFlespiMqtt()` diretamente (dashboard, mapa, rastreador, planejar, manutenção, abastecimento, trip tracker, cards). Para suportar duas fontes de dados sem duplicar telas, todos passam a consumir um único contexto.
 
-- **Paleta Neon Mint (dark)**: fundo `#0d1b2a`, superfícies `#132538`/`#1b4332`, primária `#2dd4a8`, destaque `#73ffb8`
-- **Tipografia**: Space Grotesk (títulos, números/KPIs) + DM Sans (texto)
-- **Layout**: bento grid — KPIs em blocos de tamanhos variados, seções com cards definidos
+## Fase 1 — Camada de abstração (Adapter Pattern)
 
-## Etapas
+`src/lib/telemetry/types.ts`
+- `TelemetrySource = "fmc003" | "elm327"`, `TelemetryStatus`, e o estado unificado
+  `{ source, status, data: VehicleTelemetry, lastMessageAt, error }`.
+- Reaproveita a interface `VehicleTelemetry` existente (lat, lng, speedKmh, engineRpm, fuelLevel, batteryVoltage, mileageKm, ignitionOn…) — nada de novo formato para não quebrar eco-score, viagens e manutenção.
 
-### 1. Fundação de tokens (`src/styles.css`)
-- Reescrever `:root`/`.dark` com a paleta em oklch: background, card, muted, border, primary, accent, ring, chart-1..5 alinhados ao mint/teal
-- Novos tokens: `--surface-raised`, `--gradient-primary`, `--shadow-card`, `--shadow-glow`, `--ring-glow`
-- Registrar `--font-display: "Space Grotesk"` e `--font-sans: "DM Sans"` em `@theme`
-- Aumentar `--radius` para 0.875rem (cards mais definidos)
-- App passa a rodar sempre em dark (classe `dark` na raiz)
+`src/lib/telemetry/source.ts`
+- Preferência do usuário persistida em `localStorage` (`telemetrix:source`), com hook `useTelemetrySource()` e default `fmc003`.
 
-### 2. Fontes (`src/routes/__root.tsx`)
-- Adicionar `<link>` de preconnect + Google Fonts para Space Grotesk e DM Sans no `head()` (nunca `@import` de URL no CSS)
+`src/components/telemetry/TelemetryProvider.tsx`
+- Monta o adapter conforme a fonte escolhida e expõe `useTelemetry()`.
+- Como hooks não podem ser condicionais, o Provider renderiza um de dois subcomponentes "bridge" (`FlespiBridge` / `ObdBridge`) que chamam seu respectivo hook e publicam no contexto.
+- Registrado dentro de `src/routes/_authenticated/route.tsx`, envolvendo `TripRecorder` + `Outlet`.
 
-### 3. Primitivas de UI reutilizáveis
-- `src/components/ui/section-card.tsx`: card padrão com título, ícone, ação no canto e conteúdo — substitui as dezenas de `div.rounded-2xl.border.bg-card.p-4` espalhadas
-- `src/components/ui/stat-tile.tsx`: bloco de KPI (label, valor tabular, unidade, delta) para o bento
-- `src/components/ui/bento.tsx`: grade `grid-cols-2` com spans (`col-span-2`) para itens grandes
-- `src/components/ui/button.tsx`: revisar variantes (adicionar `glow` e ajustar alturas/raio); botões de ação passam a viver em barras de ação consistentes
+`src/hooks/useTelemetry.ts` — compatibilidade: retorna `{ status, telemetry, lastMessageAt }` no mesmo shape de hoje, para trocar as 13 chamadas de `useFlespiMqtt()` por `useTelemetry()` com edição mínima.
 
-### 4. Shell e navegação
-- `AppShell`: header com gradiente sutil, título em Space Grotesk, slot de ação padronizado, respiro maior
-- `BottomNav`: 6 itens com pílula ativa em mint, ícone com glow no item ativo, melhor contraste
+## Fase 2 — Modo Econômico: ELM327 via Web Bluetooth + GPS
 
-### 5. Aplicar nas rotas (todo o app)
-Passar por cada rota trocando os cards ad-hoc por `SectionCard`/`StatTile`/`Bento` e agrupando botões:
-- Painel (`index`), Rastreador, Viagens (+detalhe), Abastecimento, Gestão, Ajustes
-- Motoristas (+perfil), Eco, Despesas, Relatório, Manutenção, Documentos, Lugares, Planejar, Mapa
-- Componentes de apoio: StatusHeader, TelemetryCard, LiveConsumptionCard, SafeStartCard, DriverHighlightCard, DriverScoreCard, DriverRanking, OngoingTripCard, MaintenanceAlertsCard, ExpiringDocsCard, EcoScoreRing/EcoEventsChart
+`src/lib/obd/pids.ts` — encoders/decoders dos comandos AT e PIDs: `010C` (RPM), `010D` (velocidade), `0105` (temp. do motor), `012F` (nível de combustível), `0142` (tensão do módulo), `0104` (carga do motor).
 
-### 6. Formulários
-- Inputs/labels com altura e espaçamento uniformes (mantendo `h-11` mobile), agrupamento em grid de 2 colunas onde couber, botão primário sempre full-width no rodapé do card
+`src/lib/obd/elm327.ts` — cliente de transporte:
+- `navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [...] })` (ELM327 BLE usa UUIDs variados: 0xFFF0, 0xFFE0, serial genérico) → GATT → characteristic de write + notify.
+- Handshake `ATZ`, `ATE0`, `ATL0`, `ATS0`, `ATSP0`; fila de comandos serializada com timeout, buffer até o prompt `>`, parsing de `41 0C ...`.
+- Loop de polling (~500 ms) alternando os PIDs, com reconexão em `gattserverdisconnected`.
 
-### 7. Mapa
-- Ajustar cores dos controles, polilinhas e marcadores para a nova paleta; manter as regras de z-index do Leaflet
+`src/hooks/useOBD2Local.ts`
+- Estado de conexão + telemetria; `connect()` chama o modal nativo do navegador (precisa de gesto do usuário).
+- GPS em paralelo: `navigator.geolocation.watchPosition` (`enableHighAccuracy`) alimenta lat/lng, `heading` e velocidade GPS como fallback quando o CAN não responde.
+- `ignitionOn` derivado: motor considerado ligado quando RPM > 300 (o ELM327 só responde com a chave ligada).
+- Consumo estimado no frontend: MAF calculado a partir de RPM/carga quando disponível; caso não, estimativa por velocidade + `avg_consumption_kmpl` do veículo (mesma lógica já usada em `LiveConsumptionCard`).
+- Odômetro: OBD-II não expõe km total; a distância vem do GPS (Haversine, já existe em `src/lib/trips/geo.ts`).
 
-## Detalhes técnicos
+## Fase 3 — UI/UX
 
-- Tailwind v4: tudo via `@theme inline` em `src/styles.css`, sem `tailwind.config.js`
-- Zero cores hardcoded (`text-white`, `bg-[#...]`) — apenas tokens semânticos
-- Regra de layout responsivo mantida: `grid-cols-[minmax(0,1fr)_auto]` + `min-w-0` + `shrink-0` em linhas com texto e widgets
-- Nenhuma alteração em hooks, `lib/`, server functions, migrações ou RLS
+- **Ajustes** (`ajustes.tsx`): novo card "Fonte de dados" com Radio Group estilizado — "Equipamento dedicado (nuvem)" vs "Adaptador OBD-II (Bluetooth local)". No modo nuvem mantém o campo Device ID Flespi; no modo local mostra o dispositivo pareado e botão de desconectar.
+- **Header do Dashboard** (`StatusHeader.tsx`): badge com a fonte ativa (ícone nuvem/bluetooth) + status da conexão, reaproveitando os tokens `success`/`warning`/`destructive`.
+- **Dashboard** (`index.tsx`): quando o modo Econômico está ativo e não há conexão, exibe card com botão "Parear Bluetooth" (chama `connect()`); avisa se o navegador não suportar Web Bluetooth.
 
-## Entrega incremental
+## Fase 4 — Banco de dados e persistência
 
-Sugiro validar em dois passos: primeiro etapas 1–4 (tokens, fontes, primitivas, shell) para você aprovar a cara nova no Painel; depois a etapa 5 nas demais rotas.
+- Migração: `ALTER TABLE public.trips ADD COLUMN hardware_source text NOT NULL DEFAULT 'fmc003'` (valores `fmc003` | `elm327`, validado por trigger em vez de CHECK).
+- `src/lib/trips/saveTrip.ts` e `useLiveTripTracker.ts` passam a gravar `hardware_source` a partir do contexto; abastecimentos (`fuel_logs`) e o restante seguem inalterados.
+- `viagens.tsx` / `viagens.$id.tsx`: badge indicando a origem da rota.
+
+## Fase 5 (opcional, se você quiser) — Offline-first
+
+Buffer de pontos em IndexedDB durante a viagem e sincronização em lote quando a rede voltar. Fica para uma etapa separada, depois de validarmos o Bluetooth no carro.
+
+## Detalhes técnicos e limitações
+
+- Web Bluetooth só funciona em Chrome/Edge Android e desktop, sob HTTPS, e **não** funciona em iOS/Safari nem dentro do iframe do preview do editor sem permissão — o pareamento precisa ser testado no app publicado, aberto em aba própria no Android.
+- O webhook Flespi (`/api/public/flespi-webhook`) e o heartbeat continuam funcionando para o modo nuvem; no modo local todo o processamento é no cliente.
+- Nada é removido do modo atual: se você não trocar a chave, o comportamento fica idêntico ao de hoje.
+
+Vou implementar por fases, pausando para você validar antes de avançar. Começo pelas Fases 1 e 2 (contexto + hook OBD) e paro para revisão.

@@ -19,7 +19,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { searchPlaces, getPlaceDetails, type PlaceSuggestion } from "@/lib/places.functions";
 import { planRoute } from "@/lib/trips/planRoute.functions";
 import {
@@ -166,7 +166,7 @@ function PlaceSearch({
 }
 
 function PlanejarPage() {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const plan = useTripPlan();
   const compute = useServerFn(planRoute);
 

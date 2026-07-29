@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { distanceToPathKm, tripPlanStore, useTripPlan } from "@/lib/trips/plan";
 
 const OFF_ROUTE_KM = 0.35;
@@ -13,7 +13,7 @@ const COOLDOWN_MS = 60_000;
  */
 export function useRouteDeviation() {
   const plan = useTripPlan();
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const offRoute = useRef(false);
   const lastAlert = useRef(0);
 

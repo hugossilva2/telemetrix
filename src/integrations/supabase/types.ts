@@ -628,6 +628,7 @@ export type Database = {
           end_time: string | null
           estimated_cost: number | null
           fuel_liters: number | null
+          hardware_source: string
           harsh_accel_count: number
           harsh_brake_count: number
           harsh_corner_count: number
@@ -658,6 +659,7 @@ export type Database = {
           end_time?: string | null
           estimated_cost?: number | null
           fuel_liters?: number | null
+          hardware_source?: string
           harsh_accel_count?: number
           harsh_brake_count?: number
           harsh_corner_count?: number
@@ -688,6 +690,7 @@ export type Database = {
           end_time?: string | null
           estimated_cost?: number | null
           fuel_liters?: number | null
+          hardware_source?: string
           harsh_accel_count?: number
           harsh_brake_count?: number
           harsh_corner_count?: number

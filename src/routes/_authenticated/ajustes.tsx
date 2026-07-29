@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { InstallAppCard } from "@/components/settings/InstallAppCard";
+import { DataSourceCard } from "@/components/settings/DataSourceCard";
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({
@@ -117,6 +118,9 @@ function AjustesPage() {
 
   return (
     <AppShell title="Ajustes" subtitle="Perfil e preferências">
+      <div className="mb-4">
+        <DataSourceCard />
+      </div>
       <form
         onSubmit={(e) => {
           e.preventDefault();

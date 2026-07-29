@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
-import { Power, PowerOff, Satellite, SatelliteDish } from "lucide-react";
+import { Bluetooth, Cloud, Power, PowerOff, Satellite, SatelliteDish } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { MqttStatus } from "@/lib/flespi/types";
+import { useTelemetry } from "@/hooks/useTelemetry";
+import { SOURCE_SHORT } from "@/lib/telemetry/types";
+
 
 
 interface Props {
@@ -54,6 +57,9 @@ export function StatusHeader({
 }: Props) {
   const on = ignitionOn === true;
   const known = ignitionOn !== undefined;
+  const { source } = useTelemetry();
+  const SourceIcon = source === "elm327" ? Bluetooth : Cloud;
+
 
   // Tick a cada 1s para o "há Xs" andar mesmo sem mensagem nova.
   const [, setTick] = useState(0);
@@ -91,10 +97,17 @@ export function StatusHeader({
             </div>
           </div>
         </div>
-        <Badge variant={on ? "default" : "secondary"} className="shrink-0">
-          {on ? "ON" : known ? "OFF" : "…"}
-        </Badge>
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Badge variant="outline" className="gap-1 border-border/70">
+            <SourceIcon className="size-3" />
+            {SOURCE_SHORT[source]}
+          </Badge>
+          <Badge variant={on ? "default" : "secondary"} className="shrink-0">
+            {on ? "ON" : known ? "OFF" : "…"}
+          </Badge>
+        </div>
       </div>
+
       <div className="mt-3 space-y-1.5 rounded-xl border border-border/70 bg-background/35 px-3 py-2.5">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <span

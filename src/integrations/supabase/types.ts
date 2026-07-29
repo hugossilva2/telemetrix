@@ -639,6 +639,7 @@ export type Database = {
           mileage_at_end: number | null
           mileage_at_start: number | null
           overspeed_count: number
+          route_data: Json | null
           start_lat: number | null
           start_lng: number | null
           start_time: string
@@ -670,6 +671,7 @@ export type Database = {
           mileage_at_end?: number | null
           mileage_at_start?: number | null
           overspeed_count?: number
+          route_data?: Json | null
           start_lat?: number | null
           start_lng?: number | null
           start_time: string
@@ -701,6 +703,7 @@ export type Database = {
           mileage_at_end?: number | null
           mileage_at_start?: number | null
           overspeed_count?: number
+          route_data?: Json | null
           start_lat?: number | null
           start_lng?: number | null
           start_time?: string

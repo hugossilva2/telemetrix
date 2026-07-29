@@ -36,10 +36,20 @@ function bool(v: unknown): boolean | undefined {
 export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
   try {
     const data = JSON.parse(raw) as Record<string, unknown>;
+    const positionValid = bool(pick(data, "position.valid"));
+    const gpsSpeed = num(pick(data, "position.speed"));
+    const canSpeedKmh = num(pick(data, "can.vehicle.speed"));
+    // Sem fix de GPS o rastreador reporta position.speed = 0. Nesse caso o CAN
+    // ainda entrega a velocidade real do veículo — usamos como fallback.
+    const speedKmh =
+      positionValid !== true && typeof canSpeedKmh === "number"
+        ? canSpeedKmh
+        : (gpsSpeed ?? canSpeedKmh);
+
     return {
       latitude: num(pick(data, "position.latitude")),
       longitude: num(pick(data, "position.longitude")),
-      speedKmh: num(pick(data, "position.speed")),
+      speedKmh,
       ignitionOn: bool(pick(data, "engine.ignition.status")),
       mileageKm: num(pick(data, "vehicle.mileage")),
       batteryVoltage: num(pick(data, "battery.voltage")),
@@ -47,13 +57,13 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
       engineRpm: num(pick(data, "can.engine.rpm")),
       engineLoad: num(pick(data, "can.engine.load.level")),
       headingDeg: num(pick(data, "position.direction")),
-      canSpeedKmh: num(pick(data, "can.vehicle.speed")),
+      canSpeedKmh,
       greenDrivingType:
         pick(data, "green.driving.type") !== undefined
           ? String(pick(data, "green.driving.type"))
           : undefined,
       greenDrivingValue: num(pick(data, "green.driving.value")),
-      positionValid: bool(pick(data, "position.valid")),
+      positionValid,
       satellites: num(pick(data, "position.satellites")),
       gsmSignal: num(pick(data, "gsm.signal.level")),
       timestamp: num(pick(data, "timestamp")),
@@ -63,6 +73,7 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
     return null;
   }
 }
+
 
 /**
  * Extrai telemetria de mensagens do tópico `flespi/state/.../telemetry/<campo>`,

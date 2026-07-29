@@ -58,9 +58,13 @@ function MapaPage() {
   const destination = useTripDestination();
   const started =
     !!route &&
-    (destination.active?.placeId === route.destination.name ||
-      destination.active?.lat === route.destination.lat ||
-      destination.pending?.lat === route.destination.lat);
+    [destination.active, destination.pending].some(
+      (d) =>
+        !!d &&
+        Math.abs(d.lat - route.destination.lat) < 1e-5 &&
+        Math.abs(d.lng - route.destination.lng) < 1e-5,
+    );
+
 
   // Reset trail on ignition OFF -> ON (nova viagem).
   useEffect(() => {

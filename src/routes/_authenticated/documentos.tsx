@@ -145,7 +145,7 @@ function DocumentosPage() {
           e.preventDefault();
           save.mutate();
         }}
-        className="space-y-3 rounded-2xl border border-border bg-card p-4"
+        className="space-y-3 card-surface p-4"
       >
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -202,7 +202,7 @@ function DocumentosPage() {
         </Button>
       </form>
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Documentos cadastrados</h2>
         {isLoading ? (
           <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>
@@ -215,7 +215,7 @@ function DocumentosPage() {
               const typeLabel = DOC_TYPES.find((t) => t.value === d.type)?.label ?? d.type;
               return (
                 <li key={d.id} className="flex items-start gap-3 py-3">
-                  <div className="grid size-10 shrink-0 place-items-center rounded-full bg-sky-500/10 text-sky-500">
+                  <div className="grid size-10 shrink-0 place-items-center rounded-full bg-chart-3/10 text-chart-3">
                     <ShieldCheck className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">

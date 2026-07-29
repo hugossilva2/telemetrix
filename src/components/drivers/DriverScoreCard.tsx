@@ -23,7 +23,7 @@ export function DriverScoreCard({
 }) {
   const band = ecoBand(score);
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="card-surface p-4">
       <div className="flex items-center gap-4">
         <EcoScoreRing score={score} size={104} label={score == null ? "Sem dados" : band.label} />
         <div className="min-w-0 flex-1 space-y-2.5">

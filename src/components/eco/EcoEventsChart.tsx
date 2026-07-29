@@ -56,7 +56,7 @@ export function EcoEventsChart({ events }: { events: EcoEvent[] }) {
   }
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <div className="card-surface p-4">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
         Perfil da viagem
       </p>

@@ -134,9 +134,9 @@ export function PlaceAutomationPanel({ place }: Props) {
                 {runs.map((r) => (
                   <li key={r.id} className="flex items-center gap-2 text-xs">
                     {r.ok ? (
-                      <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
+                      <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                     ) : (
-                      <XCircle className="size-3.5 shrink-0 text-red-500" />
+                      <XCircle className="size-3.5 shrink-0 text-destructive" />
                     )}
                     <span className="text-muted-foreground">
                       {new Date(r.created_at).toLocaleString("pt-BR", {

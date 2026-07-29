@@ -86,7 +86,7 @@ function AuthPage() {
           </TabsList>
 
           <TabsContent value="signin">
-            <form onSubmit={handleSignIn} className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4">
+            <form onSubmit={handleSignIn} className="mt-4 space-y-3 card-surface p-4">
               <div className="space-y-1.5">
                 <Label htmlFor="signin-email">Email</Label>
                 <Input id="signin-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -102,7 +102,7 @@ function AuthPage() {
           </TabsContent>
 
           <TabsContent value="signup">
-            <form onSubmit={handleSignUp} className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4">
+            <form onSubmit={handleSignUp} className="mt-4 space-y-3 card-surface p-4">
               <div className="space-y-1.5">
                 <Label htmlFor="signup-email">Email</Label>
                 <Input id="signup-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

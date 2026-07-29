@@ -42,7 +42,7 @@ export function InstallAppCard() {
   };
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4">
+    <section className="card-surface p-4">
       <header className="mb-2 flex items-center gap-2 text-sm font-medium">
         <Smartphone className="size-4 text-primary" />
         Instalar aplicativo

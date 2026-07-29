@@ -112,7 +112,7 @@ function DriverProfilePage() {
 
       {driver && (
         <div className="space-y-4 pb-6">
-          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-center gap-3 card-surface p-4">
             <DriverAvatar name={driver.name} photoPath={driver.photo_path} size={64} />
             <div className="min-w-0">
               <h1 className="truncate text-lg font-semibold">{driver.name}</h1>
@@ -204,7 +204,7 @@ function DriverProfilePage() {
                 </div>
               ))}
               <div className="rounded-xl border border-border/60 bg-card p-2 text-center">
-                <div className="text-[10px] uppercase tracking-wide text-emerald-500">
+                <div className="text-[10px] uppercase tracking-wide text-success">
                   Partidas seguras
                 </div>
                 <div className="mt-1 text-base font-semibold tabular-nums">
@@ -217,7 +217,7 @@ function DriverProfilePage() {
           {series.length > 1 && (
             <section>
               <h2 className="mb-2 text-sm font-semibold">Evolução da nota</h2>
-              <div className="flex items-end gap-2 rounded-2xl border border-border bg-card p-4">
+              <div className="flex items-end gap-2 card-surface p-4">
                 {series.map((m) => (
                   <div key={m.key} className="flex flex-1 flex-col items-center gap-1">
                     <span className="text-[10px] tabular-nums text-muted-foreground">
@@ -258,7 +258,7 @@ function DriverProfilePage() {
                     <span
                       className={`ml-auto font-medium ${
                         s.ready
-                          ? "text-emerald-500"
+                          ? "text-success"
                           : s.required
                             ? "text-destructive"
                             : "text-muted-foreground"

@@ -241,11 +241,11 @@ export function driverBadges({ score, pillars, stats }: DriverScore): DriverBadg
 }
 
 export const BADGE_CLASSES: Record<DriverBadge["tone"], string> = {
-  emerald: "bg-emerald-500/10 text-emerald-500 border-emerald-500/30",
+  emerald: "bg-success/10 text-success border-success/30",
   lime: "bg-lime-500/10 text-lime-500 border-lime-500/30",
-  amber: "bg-amber-500/10 text-amber-500 border-amber-500/30",
+  amber: "bg-warning/10 text-warning border-warning/30",
   violet: "bg-violet-500/10 text-violet-500 border-violet-500/30",
-  sky: "bg-sky-500/10 text-sky-500 border-sky-500/30",
+  sky: "bg-chart-3/10 text-chart-3 border-chart-3/30",
 };
 
 export function monthlyScoreSeries(trips: DriverTripRow[]) {

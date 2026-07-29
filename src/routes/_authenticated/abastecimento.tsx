@@ -199,7 +199,7 @@ function AbastecimentoPage() {
           e.preventDefault();
           save.mutate();
         }}
-        className="space-y-3 rounded-2xl border border-border bg-card p-4"
+        className="space-y-3 card-surface p-4"
       >
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
@@ -298,7 +298,7 @@ function AbastecimentoPage() {
         </Button>
       </form>
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Abastecimentos registrados</h2>
         {logs.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">Nenhum abastecimento registrado ainda.</p>
@@ -353,7 +353,7 @@ function AbastecimentoPage() {
         )}
       </div>
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Histórico de custo (R$/km)</h2>
         {chartData.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">

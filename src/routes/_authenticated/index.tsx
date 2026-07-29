@@ -17,6 +17,8 @@ import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
 import { SafeStartCard } from "@/components/dashboard/SafeStartCard";
 import { DriverHighlightCard } from "@/components/dashboard/DriverHighlightCard";
+import { Bento, BentoItem } from "@/components/ui/bento";
+
 
 
 
@@ -87,61 +89,72 @@ function Dashboard() {
         hasFix={telemetry.latitude !== undefined && telemetry.longitude !== undefined}
       />
 
+      <Bento>
+        <BentoItem span={1}>
+          <TelemetryCard
+            label="Velocidade"
+            value={formatSpeed(speed)}
+            Icon={Gauge}
+            accent="primary"
+            className={dimmed}
+          />
+        </BentoItem>
+        <BentoItem span={1}>
+          <TelemetryCard
+            label="RPM"
+            value={formatRpm(rpm)}
+            Icon={Zap}
+            accent="amber"
+            className={dimmed}
+          />
+        </BentoItem>
+        <BentoItem span={2}>
+          <TelemetryCard
+            label="Combustível"
+            value={fuel === undefined ? "—" : formatPct(fuel)}
+            Icon={FuelIcon}
+            accent="emerald"
+            className={dimmed}
+          >
+            {fuel !== undefined ? (
+              <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
+            ) : (
+              <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
+            )}
+          </TelemetryCard>
+        </BentoItem>
+        <BentoItem span={1}>
+          <TelemetryCard
+            label="Odômetro"
+            value={formatKm(telemetry.mileageKm)}
+            Icon={RouteIcon}
+            accent="sky"
+          />
+        </BentoItem>
+        <BentoItem span={1}>
+          <TelemetryCard
+            label="Status"
+            value={ignitionOn ? "Em uso" : "Parado"}
+            Icon={Gauge}
+            accent={ignitionOn ? "emerald" : "sky"}
+          />
+        </BentoItem>
+      </Bento>
+
+      {ignitionOn && <LiveConsumptionCard />}
+
       <SafeStartCard ignitionOn={telemetry.ignitionOn} engineRpm={telemetry.engineRpm} />
 
       <OngoingTripCard />
-
-
 
       <FavoritePlacesEta />
 
       <MaintenanceAlertsCard />
 
       <DriverHighlightCard />
+
       <ExpiringDocsCard />
-
-
-
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <TelemetryCard
-          label="Velocidade"
-          value={formatSpeed(speed)}
-          Icon={Gauge}
-          accent="primary"
-          className={dimmed}
-        />
-        <TelemetryCard
-          label="Odômetro"
-          value={formatKm(telemetry.mileageKm)}
-          Icon={RouteIcon}
-          accent="sky"
-        />
-        <TelemetryCard
-          label="Combustível"
-          value={fuel === undefined ? "—" : formatPct(fuel)}
-          Icon={FuelIcon}
-          accent="emerald"
-          className={dimmed}
-        >
-          {fuel !== undefined ? (
-            <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
-          ) : (
-            <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
-          )}
-        </TelemetryCard>
-        <TelemetryCard
-          label="RPM"
-          value={formatRpm(rpm)}
-          Icon={Zap}
-          accent="amber"
-          className={dimmed}
-        />
-        {ignitionOn && (
-          <div className="col-span-2">
-            <LiveConsumptionCard />
-          </div>
-        )}
-      </div>
     </AppShell>
   );
 }
+

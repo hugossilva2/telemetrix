@@ -62,7 +62,7 @@ export function FavoritePlacesEta() {
 
   if (places.length === 0) {
     return (
-      <section className="mt-4">
+      <section className="contents">
         <Link
           to="/lugares"
           className="flex items-center justify-between rounded-2xl border border-dashed border-border bg-card/60 p-3 text-sm"
@@ -78,7 +78,7 @@ export function FavoritePlacesEta() {
   }
 
   return (
-    <section className="mt-4">
+    <section className="contents">
       <div className="flex items-center justify-between px-1 pb-1.5">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Ir para
@@ -111,7 +111,7 @@ export function FavoritePlacesEta() {
                       geofence_radius_m: (p as { geofence_radius_m?: number }).geofence_radius_m ?? 150,
                     })
                   }
-                  className="flex min-w-[140px] flex-col gap-1 rounded-2xl border border-border bg-card p-3 text-left transition active:scale-[0.98] hover:border-primary/50"
+                  className="flex min-w-[140px] flex-col gap-1 card-surface p-3 text-left transition active:scale-[0.98] hover:border-primary/50"
                 >
                   <div className="flex items-center gap-2">
                     <div className="grid size-8 place-items-center rounded-full bg-primary/10 text-primary">

@@ -99,7 +99,7 @@ function PlaceSearch({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className="card-surface p-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
         {onUseCurrent && !value && (
@@ -333,7 +333,7 @@ function PlanejarPage() {
       </div>
 
       {plan && (
-        <section className="mt-4 rounded-2xl border border-border bg-card p-3">
+        <section className="card-surface p-3">
           <div className="grid grid-cols-2 gap-2">
             <Metric
               icon={<RouteIcon className="size-4 text-primary" />}
@@ -346,12 +346,12 @@ function PlanejarPage() {
               value={formatDurationSeconds(plan.durationSeconds)}
             />
             <Metric
-              icon={<Fuel className="size-4 text-amber-500" />}
+              icon={<Fuel className="size-4 text-warning" />}
               label="Combustível"
               value={`${formatDecimal(plan.fuelLiters)} L`}
             />
             <Metric
-              icon={<Wallet className="size-4 text-emerald-500" />}
+              icon={<Wallet className="size-4 text-success" />}
               label="Custo estimado"
               value={formatBRL(plan.cost)}
             />

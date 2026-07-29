@@ -159,7 +159,7 @@ function ManutencaoPage() {
       }
     >
       {/* Próximas manutenções */}
-      <div className="rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Próximas manutenções</h2>
         {upcoming.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">
@@ -198,7 +198,7 @@ function ManutencaoPage() {
           e.preventDefault();
           save.mutate();
         }}
-        className="mt-4 space-y-3 rounded-2xl border border-border bg-card p-4"
+        className="mt-4 space-y-3 card-surface p-4"
       >
         <h2 className="text-sm font-semibold">Registrar serviço</h2>
 
@@ -269,7 +269,7 @@ function ManutencaoPage() {
       </form>
 
       {/* Histórico */}
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Histórico</h2>
         {isLoading ? (
           <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>

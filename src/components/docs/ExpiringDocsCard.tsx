@@ -72,9 +72,9 @@ export function ExpiringDocsCard() {
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-4">
+    <div className="mt-4 rounded-2xl border border-warning/30 bg-warning/5 p-4">
       <div className="flex items-center gap-2">
-        <AlertTriangle className="size-4 text-amber-500" />
+        <AlertTriangle className="size-4 text-warning" />
         <h2 className="text-sm font-semibold">Vencimentos próximos</h2>
       </div>
       <ul className="mt-2 space-y-1.5">

@@ -1,39 +1,54 @@
 ## Objetivo
 
-Criar um **Perfil do Motorista** com foto, análise de consumo, direção segura e partida segura, consolidados em uma pontuação única (0–100) com selos de destaque.
+Modernizar o visual de todo o app Telemetrix: cards bem definidos, botões organizados e hierarquia de leitura clara — sem mudar nenhuma regra de negócio, cálculo ou consulta ao banco.
 
-## Fase 1 — Vincular viagens ao condutor (base de dados)
+## Direção visual escolhida
 
-- Toda viagem nova passa a ser salva com o motorista marcado como **padrão** (o app hoje nunca preenche `driver_id` — confirmado: 37 viagens, nenhuma com condutor).
-- Vincular as 37 viagens existentes ao condutor padrão.
-- Nova tabela `safe_starts` (por usuário e motorista): data/hora, minutos parado, RPM mínimo, se exigiu partida segura e se liberou. O histórico local atual continua funcionando e passa a espelhar no banco.
-- Na tela de detalhe da viagem, permitir trocar o condutor.
+- **Paleta Neon Mint (dark)**: fundo `#0d1b2a`, superfícies `#132538`/`#1b4332`, primária `#2dd4a8`, destaque `#73ffb8`
+- **Tipografia**: Space Grotesk (títulos, números/KPIs) + DM Sans (texto)
+- **Layout**: bento grid — KPIs em blocos de tamanhos variados, seções com cards definidos
 
-## Fase 2 — Perfil do motorista
+## Etapas
 
-Nova rota `/motoristas/{id}` (acessível ao tocar no condutor na lista):
+### 1. Fundação de tokens (`src/styles.css`)
+- Reescrever `:root`/`.dark` com a paleta em oklch: background, card, muted, border, primary, accent, ring, chart-1..5 alinhados ao mint/teal
+- Novos tokens: `--surface-raised`, `--gradient-primary`, `--shadow-card`, `--shadow-glow`, `--ring-glow`
+- Registrar `--font-display: "Space Grotesk"` e `--font-sans: "DM Sans"` em `@theme`
+- Aumentar `--radius` para 0.875rem (cards mais definidos)
+- App passa a rodar sempre em dark (classe `dark` na raiz)
 
-- Cabeçalho com **foto** (avatar grande, iniciais como fallback), nome, CNH/categoria e alerta de vencimento.
-- **Nota geral** em anel colorido, média ponderada de três pilares:
-  - Direção segura (60%): eco score das viagens — freada brusca, aceleração agressiva, curva, excesso de velocidade, giro alto.
-  - Eficiência de consumo (30%): km/L real do condutor comparado ao consumo de referência do veículo.
-  - Partida segura (10%): % de partidas em que respeitou a circulação do óleo.
-- **Cartões de métrica**: total de viagens, km rodados, tempo ao volante, km/L médio, custo por km, litros e reais desperdiçados, marcha lenta.
-- **Eventos de direção**: contagem por tipo com barras, e evolução da nota nos últimos meses.
-- **Destaques (selos)** concedidos automaticamente: Direção Exemplar (nota ≥ 90), Zero Freadas Bruscas no mês, Pé Leve (sem aceleração agressiva), Economia Máxima (km/L acima da referência), Partida Perfeita (100% de partidas seguras), Sem Excesso de Velocidade.
-- Lista das últimas viagens do condutor com nota individual, link para o detalhe.
+### 2. Fontes (`src/routes/__root.tsx`)
+- Adicionar `<link>` de preconnect + Google Fonts para Space Grotesk e DM Sans no `head()` (nunca `@import` de URL no CSS)
 
-## Fase 3 — Ranking e integração
+### 3. Primitivas de UI reutilizáveis
+- `src/components/ui/section-card.tsx`: card padrão com título, ícone, ação no canto e conteúdo — substitui as dezenas de `div.rounded-2xl.border.bg-card.p-4` espalhadas
+- `src/components/ui/stat-tile.tsx`: bloco de KPI (label, valor tabular, unidade, delta) para o bento
+- `src/components/ui/bento.tsx`: grade `grid-cols-2` com spans (`col-span-2`) para itens grandes
+- `src/components/ui/button.tsx`: revisar variantes (adicionar `glow` e ajustar alturas/raio); botões de ação passam a viver em barras de ação consistentes
 
-- Na lista `/motoristas`: foto, nota e selo principal de cada condutor, ordenados por nota (ranking quando houver mais de um).
-- No Painel: cartão compacto do condutor padrão com nota atual.
-- Cartão de Partida Segura passa a mostrar também a taxa de acerto do condutor.
+### 4. Shell e navegação
+- `AppShell`: header com gradiente sutil, título em Space Grotesk, slot de ação padronizado, respiro maior
+- `BottomNav`: 6 itens com pílula ativa em mint, ícone com glow no item ativo, melhor contraste
+
+### 5. Aplicar nas rotas (todo o app)
+Passar por cada rota trocando os cards ad-hoc por `SectionCard`/`StatTile`/`Bento` e agrupando botões:
+- Painel (`index`), Rastreador, Viagens (+detalhe), Abastecimento, Gestão, Ajustes
+- Motoristas (+perfil), Eco, Despesas, Relatório, Manutenção, Documentos, Lugares, Planejar, Mapa
+- Componentes de apoio: StatusHeader, TelemetryCard, LiveConsumptionCard, SafeStartCard, DriverHighlightCard, DriverScoreCard, DriverRanking, OngoingTripCard, MaintenanceAlertsCard, ExpiringDocsCard, EcoScoreRing/EcoEventsChart
+
+### 6. Formulários
+- Inputs/labels com altura e espaçamento uniformes (mantendo `h-11` mobile), agrupamento em grid de 2 colunas onde couber, botão primário sempre full-width no rodapé do card
+
+### 7. Mapa
+- Ajustar cores dos controles, polilinhas e marcadores para a nova paleta; manter as regras de z-index do Leaflet
 
 ## Detalhes técnicos
 
-- Fotos: `photo_path` já existe em `drivers`, servido por URL assinada do bucket privado `vehicle-docs` (mesmo fluxo de `openDocFile`).
-- Cálculo da pontuação em `src/lib/drivers/score.ts` (puro, testável); leitura agregada de `trips` por `driver_id` via TanStack Query.
-- Migração: `ALTER TABLE trips` não é necessária (`driver_id` já existe); criar `safe_starts` com GRANTs e RLS por `auth.uid()`; UPDATE de backfill nas viagens antigas.
-- Componentes novos: `DriverAvatar`, `DriverScoreCard`, `DriverBadges`, `DriverStats`.
+- Tailwind v4: tudo via `@theme inline` em `src/styles.css`, sem `tailwind.config.js`
+- Zero cores hardcoded (`text-white`, `bg-[#...]`) — apenas tokens semânticos
+- Regra de layout responsivo mantida: `grid-cols-[minmax(0,1fr)_auto]` + `min-w-0` + `shrink-0` em linhas com texto e widgets
+- Nenhuma alteração em hooks, `lib/`, server functions, migrações ou RLS
 
-Entrego fase por fase, validando antes de avançar.
+## Entrega incremental
+
+Sugiro validar em dois passos: primeiro etapas 1–4 (tokens, fontes, primitivas, shell) para você aprovar a cara nova no Painel; depois a etapa 5 nas demais rotas.

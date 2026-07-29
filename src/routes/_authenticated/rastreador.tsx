@@ -41,25 +41,25 @@ const EVENT_META: Record<
   TrackerEvent["type"],
   { label: string; Icon: typeof LogIn; color: string; bg: string }
 > = {
-  ignition_on: { label: "Motor ligado", Icon: LogIn, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-  ignition_off: { label: "Motor desligado", Icon: LogOut, color: "text-slate-400", bg: "bg-slate-500/10" },
+  ignition_on: { label: "Motor ligado", Icon: LogIn, color: "text-success", bg: "bg-success/10" },
+  ignition_off: { label: "Motor desligado", Icon: LogOut, color: "text-muted-foreground", bg: "bg-muted" },
   motion_off_ignition: {
     label: "Movimento suspeito",
     Icon: ShieldAlert,
-    color: "text-red-500",
-    bg: "bg-red-500/10",
+    color: "text-destructive",
+    bg: "bg-destructive/10",
   },
   geofence_enter: {
     label: "Chegou na cerca",
     Icon: LogIn,
-    color: "text-sky-500",
-    bg: "bg-sky-500/10",
+    color: "text-chart-3",
+    bg: "bg-chart-3/10",
   },
   geofence_exit: {
     label: "Saiu da cerca",
     Icon: AlertTriangle,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
+    color: "text-warning",
+    bg: "bg-warning/10",
   },
 
   signal_lost: { label: "Sinal perdido", Icon: MapPinOff, color: "text-orange-500", bg: "bg-orange-500/10" },
@@ -213,7 +213,7 @@ function RastreadorPage() {
         </Button>
       </div>
 
-      <section className="mt-4">
+      <section className="contents">
         <h2 className="px-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
           Eventos recentes
         </h2>

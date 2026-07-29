@@ -150,7 +150,7 @@ function MotoristasPage() {
           e.preventDefault();
           save.mutate();
         }}
-        className="space-y-3 rounded-2xl border border-border bg-card p-4"
+        className="space-y-3 card-surface p-4"
       >
         <div className="space-y-1.5">
           <Label htmlFor="name">Nome</Label>
@@ -184,11 +184,11 @@ function MotoristasPage() {
         </Button>
       </form>
 
-      <div className="mt-4">
+      <div className="contents">
         <DriverRanking />
       </div>
 
-      <div className="mt-4 rounded-2xl border border-border bg-card p-4">
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Condutores cadastrados</h2>
         {isLoading ? (
           <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>

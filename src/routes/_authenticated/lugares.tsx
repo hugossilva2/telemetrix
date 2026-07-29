@@ -135,7 +135,7 @@ function LugaresPage() {
 
   return (
     <AppShell title="Locais" subtitle="Casa, trabalho, academia…">
-      <section className="mt-3 space-y-3 rounded-2xl border border-border bg-card p-4">
+      <section className="mt-3 space-y-3 card-surface p-4">
         <div className="flex items-center gap-2 text-sm font-semibold">
           <Plus className="size-4" /> Adicionar local
         </div>

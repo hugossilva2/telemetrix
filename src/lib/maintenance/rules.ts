@@ -117,8 +117,8 @@ export function computeStatus(
 }
 
 export const maintenanceClasses: Record<MaintenanceStatus, string> = {
-  ok: "bg-emerald-500/10 text-emerald-500 border-emerald-500/25",
-  soon: "bg-amber-500/10 text-amber-500 border-amber-500/25",
+  ok: "bg-success/10 text-success border-success/25",
+  soon: "bg-warning/10 text-warning border-warning/25",
   overdue: "bg-destructive/10 text-destructive border-destructive/25",
   unknown: "bg-muted text-muted-foreground border-border",
 };

@@ -25,12 +25,13 @@ const statusText: Record<MqttStatus, string> = {
 
 const statusDot: Record<MqttStatus, string> = {
   idle: "bg-muted-foreground",
-  connecting: "bg-yellow-500 animate-pulse",
-  connected: "bg-emerald-500 animate-pulse",
-  reconnecting: "bg-yellow-500 animate-pulse",
+  connecting: "bg-warning animate-pulse",
+  connected: "bg-primary animate-pulse",
+  reconnecting: "bg-warning animate-pulse",
   offline: "bg-muted-foreground",
   error: "bg-destructive",
 };
+
 
 function timeAgo(ts: number | null): string {
   if (!ts) return "aguardando dados";
@@ -69,58 +70,67 @@ export function StatusHeader({
   const stale = secsSince != null && secsSince > 30;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+    <div className={`card-surface p-4 ${on ? "card-glow" : ""}`}>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <div className="flex min-w-0 items-center gap-3">
           <div
-            className={`grid size-11 place-items-center rounded-full ${
-              on ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground"
+            className={`grid size-11 shrink-0 place-items-center rounded-2xl ${
+              on
+                ? "bg-primary/15 text-primary shadow-[0_0_24px_-8px_var(--primary)]"
+                : "bg-muted text-muted-foreground"
             }`}
           >
             {on ? <Power className="size-5" /> : <PowerOff className="size-5" />}
           </div>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground">Motor</div>
-            <div className="text-base font-semibold">
+          <div className="min-w-0">
+            <div className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+              Motor
+            </div>
+            <div className="font-display truncate text-lg font-semibold">
               {!known ? "—" : on ? "Ligado" : "Desligado"}
             </div>
           </div>
         </div>
-        <Badge variant={on ? "default" : "secondary"} className={on ? "bg-emerald-500 hover:bg-emerald-500" : ""}>
+        <Badge variant={on ? "default" : "secondary"} className="shrink-0">
           {on ? "ON" : known ? "OFF" : "…"}
         </Badge>
       </div>
-      <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
-        <span
-          className={`inline-block size-2 rounded-full ${
-            stale && status === "connected" ? "bg-yellow-500 animate-pulse" : statusDot[status]
-          }`}
-        />
-        <span>{stale && status === "connected" ? "Sinal atrasado" : statusText[status]}</span>
-        <span aria-hidden>•</span>
-        <span>{timeAgo(lastMessageAt)}</span>
-      </div>
-      <div className="mt-1.5 flex items-center gap-2 text-xs text-muted-foreground">
-        {hasFix ? (
-          <SatelliteDish className="size-3.5 text-emerald-500" />
-        ) : (
-          <Satellite className="size-3.5 text-yellow-500" />
-        )}
-        <span>
-          {hasFix
-            ? "GPS com sinal"
-            : positionValid === false || satellites === 0
-              ? "GPS sem fix — rastreador conectado, mas sem satélites"
-              : "GPS aguardando posição"}
-        </span>
-        {satellites !== undefined && (
-          <>
-            <span aria-hidden>•</span>
-            <span className="tabular-nums">{satellites} sat.</span>
-          </>
-        )}
+      <div className="mt-3 space-y-1.5 rounded-xl border border-border/70 bg-background/35 px-3 py-2.5">
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span
+            className={`inline-block size-2 shrink-0 rounded-full ${
+              stale && status === "connected" ? "bg-warning animate-pulse" : statusDot[status]
+            }`}
+          />
+          <span className="truncate">
+            {stale && status === "connected" ? "Sinal atrasado" : statusText[status]}
+          </span>
+          <span aria-hidden>•</span>
+          <span className="shrink-0">{timeAgo(lastMessageAt)}</span>
+        </div>
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          {hasFix ? (
+            <SatelliteDish className="size-3.5 shrink-0 text-primary" />
+          ) : (
+            <Satellite className="size-3.5 shrink-0 text-warning" />
+          )}
+          <span className="truncate">
+            {hasFix
+              ? "GPS com sinal"
+              : positionValid === false || satellites === 0
+                ? "GPS sem fix — sem satélites"
+                : "GPS aguardando posição"}
+          </span>
+          {satellites !== undefined && (
+            <>
+              <span aria-hidden>•</span>
+              <span className="num shrink-0">{satellites} sat.</span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
 

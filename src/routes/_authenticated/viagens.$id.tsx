@@ -268,7 +268,7 @@ function TripDetailPage() {
       ) : (
         <>
           {analysis?.better && (
-            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full bg-success/10 px-2.5 py-1 text-xs font-medium text-success">
               <Leaf className="size-3.5" /> Viagem eficiente
             </div>
           )}
@@ -295,7 +295,7 @@ function TripDetailPage() {
 
           {/* Início x Fim */}
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="card-surface p-3">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Início
               </div>
@@ -309,7 +309,7 @@ function TripDetailPage() {
                   : "—"}
               </div>
             </div>
-            <div className="rounded-2xl border border-border bg-card p-3">
+            <div className="card-surface p-3">
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Fim
               </div>
@@ -387,7 +387,7 @@ function TripDetailPage() {
 
           {/* Comparativo com viagens similares */}
           <SectionTitle>Comparativo com viagens similares</SectionTitle>
-          <div className="rounded-2xl border border-border bg-card p-4">
+          <div className="card-surface p-4">
             {!analysis || analysis.similarCount === 0 ? (
               <p className="text-sm text-muted-foreground">
                 Sem viagens de distância similar ainda para comparar.
@@ -434,7 +434,7 @@ function TripDetailPage() {
               <SectionTitle>
                 Posição em <span className="capitalize">{analysis.monthLabel}</span>
               </SectionTitle>
-              <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
+              <div className="space-y-3 card-surface p-4">
                 <ShareBar
                   label="Distância do mês"
                   pct={analysis.kmSharePct}
@@ -459,7 +459,7 @@ function TripDetailPage() {
                   Projeção do mês
                 </span>
               </SectionTitle>
-              <div className="rounded-2xl border border-border bg-card p-4">
+              <div className="card-surface p-4">
                 {!analysis.isCurrentMonth ? (
                   <p className="text-sm text-muted-foreground">
                     Mês encerrado — totais consolidados:{" "}
@@ -529,14 +529,14 @@ function Stat({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className="card-surface p-3">
       <div className="flex items-center gap-2 text-xs uppercase tracking-wide text-muted-foreground">
         <Icon className="size-3.5" />
         {label}
       </div>
       <div
         className={`mt-1 text-lg font-semibold tabular-nums ${
-          highlight ? "text-emerald-500" : ""
+          highlight ? "text-success" : ""
         }`}
       >
         {value}
@@ -568,7 +568,7 @@ function CompareRow({
     good === null
       ? "text-muted-foreground"
       : good
-        ? "text-emerald-500"
+        ? "text-success"
         : "text-rose-500";
   const Icon =
     good === null ? null : good ? TrendingUp : TrendingDown;
@@ -606,7 +606,7 @@ function ShareBar({
   accent?: "primary" | "emerald";
 }) {
   const clamped = Math.max(0, Math.min(100, pct));
-  const barColor = accent === "emerald" ? "bg-emerald-500" : "bg-primary";
+  const barColor = accent === "emerald" ? "bg-success" : "bg-primary";
   return (
     <div>
       <div className="mb-1 flex items-baseline justify-between gap-2">
@@ -642,7 +642,7 @@ function MiniStat({
       </div>
       <div
         className={`mt-0.5 text-base font-semibold tabular-nums ${
-          highlight ? "text-emerald-500" : ""
+          highlight ? "text-success" : ""
         }`}
       >
         {value}

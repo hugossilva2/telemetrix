@@ -203,7 +203,7 @@ function ViagensPage() {
   return (
     <AppShell title="Viagens" subtitle="Relatório mensal">
       {/* Seletor de mês */}
-      <div className="mb-3 flex items-center justify-between rounded-2xl border border-border bg-card px-2 py-1.5">
+      <div className="mb-3 flex items-center justify-between card-surface px-2 py-1.5">
         <button
           type="button"
           onClick={() => {
@@ -285,7 +285,7 @@ function ViagensPage() {
                 <Link
                   to="/viagens/$id"
                   params={{ id: t.id }}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-accent"
+                  className="flex items-center gap-3 card-surface p-3 transition-colors hover:bg-accent"
                 >
                   <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
                     <RouteIcon className="size-4" />
@@ -313,7 +313,7 @@ function ViagensPage() {
                       <EcoScoreBadge score={t.eco_score} />
                       {eff?.better && eff.sampleSize > 0 && (
                         <span
-                          className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500"
+                          className="inline-flex items-center gap-1 rounded-full bg-success/10 px-1.5 py-0.5 text-[10px] font-medium text-success"
                           title={`Consumo melhor que a média em ${eff.sampleSize} viagem(ns) de distância similar`}
                         >
                           <Leaf className="size-3" /> eficiente
@@ -342,13 +342,13 @@ function Kpi({
   highlight?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-3">
+    <div className="card-surface p-3">
       <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
       <div
         className={`mt-0.5 text-lg font-semibold tabular-nums ${
-          highlight ? "text-emerald-500" : ""
+          highlight ? "text-success" : ""
         }`}
       >
         {value}

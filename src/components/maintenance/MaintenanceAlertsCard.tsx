@@ -77,11 +77,11 @@ export function MaintenanceAlertsCard() {
   return (
     <div
       className={`mt-4 rounded-2xl border p-4 ${
-        hasOverdue ? "border-destructive/30 bg-destructive/5" : "border-amber-500/30 bg-amber-500/5"
+        hasOverdue ? "border-destructive/30 bg-destructive/5" : "border-warning/30 bg-warning/5"
       }`}
     >
       <div className="flex items-center gap-2">
-        <Wrench className={`size-4 ${hasOverdue ? "text-destructive" : "text-amber-500"}`} />
+        <Wrench className={`size-4 ${hasOverdue ? "text-destructive" : "text-warning"}`} />
         <h2 className="text-sm font-semibold">Manutenção</h2>
       </div>
       <ul className="mt-2 space-y-1.5">

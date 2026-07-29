@@ -20,7 +20,7 @@ export function TelemetryDiagnosticsCard() {
   const present = new Set(keys.map((k) => k.key));
 
   return (
-    <section className="mt-3 space-y-3 rounded-2xl border border-border bg-card p-4">
+    <section className="mt-3 space-y-3 card-surface p-4">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
           <p className="flex items-center gap-2 text-sm font-semibold">
@@ -59,7 +59,7 @@ export function TelemetryDiagnosticsCard() {
             >
               <span className="flex min-w-0 items-center gap-2 text-xs">
                 {ok ? (
-                  <CheckCircle2 className="size-3.5 shrink-0 text-emerald-500" />
+                  <CheckCircle2 className="size-3.5 shrink-0 text-success" />
                 ) : (
                   <XCircle className="size-3.5 shrink-0 text-muted-foreground" />
                 )}

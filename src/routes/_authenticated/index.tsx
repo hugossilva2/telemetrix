@@ -7,7 +7,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { Progress } from "@/components/ui/progress";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
@@ -18,6 +18,7 @@ import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlert
 import { SafeStartCard } from "@/components/dashboard/SafeStartCard";
 import { DriverHighlightCard } from "@/components/dashboard/DriverHighlightCard";
 import { Bento, BentoItem } from "@/components/ui/bento";
+import { BluetoothPairCard } from "@/components/dashboard/BluetoothPairCard";
 
 
 
@@ -35,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function Dashboard() {
-  const { status, telemetry, lastMessageAt } = useFlespiMqtt();
+  const { status, telemetry, lastMessageAt } = useTelemetry();
   const ignitionOn = telemetry.ignitionOn === true;
 
   // Quando desligado, força tudo em estado "off" (evita mostrar cache do último pacote).
@@ -140,6 +141,8 @@ function Dashboard() {
           />
         </BentoItem>
       </Bento>
+
+      <BluetoothPairCard />
 
       {ignitionOn && <LiveConsumptionCard />}
 

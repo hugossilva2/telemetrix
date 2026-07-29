@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { FileAttachment } from "@/components/common/FileAttachment";
 import { supabase } from "@/integrations/supabase/client";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { openDocFile, uploadDocFile } from "@/lib/docs/storage";
 import { formatBRL } from "@/lib/format";
 import { formatDate } from "@/lib/docs/expiry";
@@ -48,7 +48,7 @@ function todayInput() {
 
 function ManutencaoPage() {
   const qc = useQueryClient();
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const currentMileage = telemetry.mileageKm ?? null;
 
   const [type, setType] = useState<MaintenanceType>("oleo");

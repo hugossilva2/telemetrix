@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/lib/trips/geo";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
 import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
@@ -17,7 +17,7 @@ const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
 export function OngoingTripCard() {
   const open = useOpenTrip();
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 

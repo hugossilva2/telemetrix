@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 
 export const Route = createFileRoute("/_authenticated/abastecimento")({
   head: () => ({
@@ -39,7 +39,7 @@ function toLocalDatetimeInput(d: Date) {
 }
 
 function AbastecimentoPage() {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const qc = useQueryClient();
 
   const [price, setPrice] = useState("");

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronRight, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   computeStatus,
   latestByType,
@@ -35,7 +35,7 @@ function alreadyNotifiedToday(key: string) {
  * calculados a partir do odômetro em tempo real.
  */
 export function MaintenanceAlertsCard() {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const currentMileage = telemetry.mileageKm ?? null;
 
   const { data: records = [] } = useQuery<MaintenanceRecord[]>({

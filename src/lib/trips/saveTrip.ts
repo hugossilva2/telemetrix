@@ -4,6 +4,7 @@ import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getDefaultDriverId } from "@/lib/drivers/api";
+import { telemetrySourceStore } from "@/lib/telemetry/source";
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -107,6 +108,7 @@ export async function saveClosedTrip(trip: OpenTrip): Promise<"saved" | "skipped
     wasted_fuel_liters: eco.wastedFuelLiters,
     wasted_cost: eco.wastedCost,
     eco_events: (trip.ecoEvents ?? []) as unknown as never,
+    hardware_source: telemetrySourceStore.get(),
   });
 
   if (error) throw error;

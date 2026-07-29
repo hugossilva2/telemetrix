@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useFlespiMqtt } from "@/hooks/useFlespiMqtt";
+import { useTelemetry } from "@/hooks/useTelemetry";
 import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";
@@ -21,7 +21,7 @@ import { getEcoSettings } from "@/lib/eco/settings";
  * desligar o motor (fallback do webhook do Flespi).
  */
 export function useLiveTripTracker() {
-  const { telemetry } = useFlespiMqtt();
+  const { telemetry } = useTelemetry();
   const queryClient = useQueryClient();
 
   const prevIgnition = useRef<boolean | undefined>(undefined);

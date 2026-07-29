@@ -119,3 +119,23 @@ export function makeEcoEventIcon(type: string, severity?: string) {
     iconAnchor: [size / 2, size / 2],
   });
 }
+
+export const destinationIcon = L.divIcon({
+  className: "destination-marker",
+  html: `
+    <div style="position:relative;width:30px;height:38px;">
+      <div style="
+        position:absolute;left:50%;top:0;transform:translateX(-50%);
+        width:28px;height:28px;border-radius:50% 50% 50% 0;
+        rotate:-45deg;background:#7dd3fc;border:3px solid #0b1220;
+        box-shadow:0 2px 6px rgba(0,0,0,0.4);"></div>
+      <div style="
+        position:absolute;left:50%;top:5px;transform:translateX(-50%);
+        width:18px;height:18px;border-radius:50%;
+        background:#0b1220;font-size:10px;
+        display:flex;align-items:center;justify-content:center;">🏁</div>
+    </div>
+  `,
+  iconSize: [30, 38],
+  iconAnchor: [15, 36],
+});

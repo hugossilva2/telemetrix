@@ -2,7 +2,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
 import { MapStyleControl } from "./MapStyleControl";
 import { MapButtons, ScaleControl } from "./MapControls";
-import { SpeedLegend, SpeedPolyline, type SpeedSample } from "./SpeedPolyline";
+import { type SpeedSample } from "./SpeedPolyline";
+import { TelemetryLegend, TelemetryPolyline } from "./TelemetryPolyline";
+import { PlannedRouteLayer, type PlannedRoute } from "./PlannedRouteLayer";
 import { StyledTileLayers } from "./StyledTileLayers";
 import { detectStops, formatStopDuration } from "@/lib/map/stops";
 import { useMapStyle } from "@/lib/map/tiles";
@@ -40,6 +42,7 @@ export interface VehicleMapProps {
   lastUpdate?: number | null;
   status?: string;
   parked?: { lat: number; lng: number; at: number } | null;
+  plannedRoute?: PlannedRoute | null;
 }
 
 export default function VehicleMap({
@@ -52,6 +55,7 @@ export default function VehicleMap({
   lastUpdate,
   status,
   parked,
+  plannedRoute,
 }: VehicleMapProps) {
   const [mapStyle, setMapStyle] = useMapStyle();
   const [follow, setFollow] = useState(true);
@@ -100,7 +104,9 @@ export default function VehicleMap({
         <ScaleControl />
         <ImperativeCenter bind={(fn) => (recenterRef.current = fn)} />
 
-        <SpeedPolyline points={trail} />
+        {plannedRoute && <PlannedRouteLayer route={plannedRoute} />}
+
+        <TelemetryPolyline points={trail} />
 
         {start && (
           <Marker position={[start.lat, start.lng]} icon={startIcon}>
@@ -231,7 +237,7 @@ export default function VehicleMap({
         }
       />
 
-      {trail.length > 1 && <SpeedLegend />}
+      {trail.length > 1 && <TelemetryLegend />}
     </div>
   );
 }

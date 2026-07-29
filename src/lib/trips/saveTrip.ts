@@ -5,6 +5,9 @@ import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
+import { offlineQueue } from "@/lib/offline/queue";
+import { isOnline } from "@/lib/offline/sync";
+
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -84,7 +87,7 @@ export async function saveClosedTrip(
     pricePerLiter: price,
   });
 
-  const { error } = await supabase.from("trips").insert({
+  const row = {
     user_id: userId,
     vehicle_id: vehicle?.id ?? null,
     driver_id: driverId,
@@ -112,8 +115,20 @@ export async function saveClosedTrip(
     wasted_cost: eco.wastedCost,
     eco_events: (trip.ecoEvents ?? []) as unknown as never,
     hardware_source: telemetrySourceStore.get(),
-  });
+  };
 
-  if (error) throw error;
+  // Offline-first: sem rede, a viagem vai para a fila local (IndexedDB).
+  if (!isOnline()) {
+    await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
+    return "queued";
+  }
+
+  const { error } = await supabase.from("trips").insert(row);
+
+  if (error) {
+    await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
+    return "queued";
+  }
   return "saved";
+
 }

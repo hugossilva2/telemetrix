@@ -787,6 +787,9 @@ export type Database = {
           flespi_device_id: string | null
           id: string
           name: string
+          obd_device_id: string | null
+          obd_device_name: string | null
+          obd_first_paired_at: string | null
           plate: string
           signal_lost_notified_at: string | null
           tracker_mode: boolean
@@ -805,6 +808,9 @@ export type Database = {
           flespi_device_id?: string | null
           id?: string
           name: string
+          obd_device_id?: string | null
+          obd_device_name?: string | null
+          obd_first_paired_at?: string | null
           plate: string
           signal_lost_notified_at?: string | null
           tracker_mode?: boolean
@@ -823,6 +829,9 @@ export type Database = {
           flespi_device_id?: string | null
           id?: string
           name?: string
+          obd_device_id?: string | null
+          obd_device_name?: string | null
+          obd_first_paired_at?: string | null
           plate?: string
           signal_lost_notified_at?: string | null
           tracker_mode?: boolean

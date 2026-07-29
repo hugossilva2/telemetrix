@@ -160,6 +160,10 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     try {
       await client.connect();
       setDeviceName(client.deviceName);
+      if (client.deviceId) {
+        obdDeviceStore.remember({ id: client.deviceId, name: client.deviceName });
+      }
+
       setStatus("connected");
       stopPolling();
       pollRef.current = setInterval(() => void pollOnce(), POLL_INTERVAL_MS);

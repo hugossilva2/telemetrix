@@ -1,5 +1,6 @@
 import { useTelemetryContext } from "@/components/telemetry/TelemetryProvider";
 import type { VehicleTelemetry } from "@/lib/flespi/types";
+import type { SavedObdDevice } from "@/lib/obd/device";
 import type { TelemetrySource, TelemetryStatus } from "@/lib/telemetry/types";
 
 export interface UseTelemetryResult {
@@ -11,6 +12,8 @@ export interface UseTelemetryResult {
   source: TelemetrySource;
   supported?: boolean;
   deviceName?: string | null;
+  savedDevice?: SavedObdDevice | null;
+  forgetDevice?: () => void;
   connect?: () => Promise<void>;
   disconnect?: () => void;
 }
@@ -29,7 +32,10 @@ export function useTelemetry(): UseTelemetryResult {
     source: state.source,
     supported: state.supported,
     deviceName: state.deviceName,
+    savedDevice: state.savedDevice,
+    forgetDevice: state.forgetDevice,
     connect: state.connect,
     disconnect: state.disconnect,
   };
 }
+

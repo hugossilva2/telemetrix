@@ -227,6 +227,8 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     deviceName,
     savedDevice,
     forgetDevice,
+    fuelLph,
+
 
     connect,
     disconnect,

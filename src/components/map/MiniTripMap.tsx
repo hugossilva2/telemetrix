@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { MapContainer, Marker, useMap } from "react-leaflet";
-import { SpeedPolyline, type SpeedSample } from "./SpeedPolyline";
+import { TelemetryPolyline } from "./TelemetryPolyline";
+import { type SpeedSample } from "./SpeedPolyline";
 import { StyledTileLayers } from "./StyledTileLayers";
 import { makeCarIcon, startIcon } from "./icons";
 import { useMapStyle } from "@/lib/map/tiles";
@@ -55,7 +56,7 @@ export default function MiniTripMap({ trail, start, current, moving = false }: M
         keyboard={false}
       >
         <StyledTileLayers style={mapStyle} />
-        {trail.length > 1 && <SpeedPolyline points={trail} />}
+        {trail.length > 1 && <TelemetryPolyline points={trail} weight={4} />}
         {start && <Marker position={start} icon={startIcon} />}
         {current && <Marker position={current} icon={carIcon} />}
         <AutoFit points={bounds} follow={moving ? current : null} />

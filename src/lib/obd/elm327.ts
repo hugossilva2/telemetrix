@@ -101,6 +101,11 @@ export class Elm327Client {
     return this.device?.name ?? null;
   }
 
+  get deviceId(): string | null {
+    return this.device?.id ?? null;
+  }
+
+
   get connected(): boolean {
     return !!this.device?.gatt?.connected && !!this.writeChar;
   }

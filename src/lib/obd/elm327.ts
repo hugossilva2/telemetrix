@@ -57,15 +57,26 @@ function getBluetooth(): BluetoothApi | null {
 }
 
 const KNOWN_SERVICES: BluetoothServiceUUID[] = [
-
   0xfff0,
   0xffe0,
-  0xfd00,
   0xffe5,
+  0xfff1,
+  0xfd00,
+  0xfee7,
+  0xff00,
+  0xff10,
+  0xffb0,
+  0x18f0,
+  0xabf0,
   "0000fff0-0000-1000-8000-00805f9b34fb",
   "0000ffe0-0000-1000-8000-00805f9b34fb",
+  "0000ffe5-0000-1000-8000-00805f9b34fb",
+  "0000fff1-0000-1000-8000-00805f9b34fb",
+  "000018f0-0000-1000-8000-00805f9b34fb",
   "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART
+  "0000abf0-0000-1000-8000-00805f9b34fb",
   "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+  "00001101-0000-1000-8000-00805f9b34fb", // SPP (clássico, só p/ diagnóstico)
 ];
 
 const PROMPT = ">";
@@ -74,11 +85,14 @@ export interface Elm327Events {
   onStatus?: (s: "connecting" | "connected" | "disconnected" | "error") => void;
   onError?: (message: string) => void;
   onRaw?: (line: string) => void;
+  /** Passo atual do handshake, para feedback na UI. */
+  onProgress?: (step: string) => void;
 }
 
 export function isWebBluetoothSupported(): boolean {
   return typeof navigator !== "undefined" && "bluetooth" in navigator;
 }
+
 
 export class Elm327Client {
   private device: BluetoothDevice | null = null;

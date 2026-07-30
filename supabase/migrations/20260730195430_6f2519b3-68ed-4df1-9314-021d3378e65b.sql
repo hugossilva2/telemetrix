@@ -1,0 +1,1 @@
+ALTER TABLE public.vehicle_shares ADD COLUMN IF NOT EXISTS viewer_last_seen_at timestamp with time zone;

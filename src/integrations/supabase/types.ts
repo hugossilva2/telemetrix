@@ -788,6 +788,7 @@ export type Database = {
           revoked_at: string | null
           updated_at: string
           vehicle_id: string
+          viewer_last_seen_at: string | null
           viewer_user_id: string | null
         }
         Insert: {
@@ -800,6 +801,7 @@ export type Database = {
           revoked_at?: string | null
           updated_at?: string
           vehicle_id: string
+          viewer_last_seen_at?: string | null
           viewer_user_id?: string | null
         }
         Update: {
@@ -812,6 +814,7 @@ export type Database = {
           revoked_at?: string | null
           updated_at?: string
           vehicle_id?: string
+          viewer_last_seen_at?: string | null
           viewer_user_id?: string | null
         }
         Relationships: [

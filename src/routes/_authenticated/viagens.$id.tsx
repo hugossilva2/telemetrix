@@ -1,4 +1,4 @@
-import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import { ClientOnly, createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useMemo } from "react";
 import {
@@ -24,6 +24,7 @@ import {
   formatDurationBetween,
   formatTime,
 } from "@/lib/trips/format";
+import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 
 const TripMap = lazy(() => import("@/components/trips/TripMap"));
 
@@ -83,6 +84,7 @@ type TripRow = Pick<
 
 function TripDetailPage() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
 
   const { data: trip, isLoading } = useQuery({
     queryKey: ["trip", id],

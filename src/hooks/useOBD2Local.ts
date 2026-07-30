@@ -20,6 +20,8 @@ export interface UseOBD2LocalResult {
   deviceName: string | null;
   /** Adaptador memorizado de pareamentos anteriores (localStorage). */
   savedDevice: SavedObdDevice | null;
+  /** Passo atual do pareamento, para feedback na UI. */
+  progress: string | null;
   forgetDevice: () => void;
   /** Consumo instantâneo estimado (L/h), quando há MAF ou estimativa. */
   fuelLph: number | null;
@@ -44,6 +46,8 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
   const [deviceName, setDeviceName] = useState<string | null>(null);
   const [fuelLph, setFuelLph] = useState<number | null>(null);
   const [savedDevice, setSavedDevice] = useState<SavedObdDevice | null>(null);
+  const [progress, setProgress] = useState<string | null>(null);
+
 
   useEffect(() => {
     setSavedDevice(obdDeviceStore.get());

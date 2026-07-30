@@ -13,6 +13,7 @@ export interface UseTelemetryResult {
   supported?: boolean;
   deviceName?: string | null;
   savedDevice?: SavedObdDevice | null;
+  progress?: string | null;
   forgetDevice?: () => void;
   connect?: () => Promise<void>;
   disconnect?: () => void;

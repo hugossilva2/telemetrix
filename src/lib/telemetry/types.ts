@@ -20,6 +20,8 @@ export interface TelemetryState {
   supported?: boolean;
   /** Adaptador memorizado (aparece mesmo desconectado). */
   savedDevice?: SavedObdDevice | null;
+  /** Passo atual do pareamento Bluetooth. */
+  progress?: string | null;
   forgetDevice?: () => void;
 }
 

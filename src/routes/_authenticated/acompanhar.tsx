@@ -178,7 +178,8 @@ function FollowPage() {
   const { data: state } = useQuery({
     queryKey: ["shared-state", vehicleId],
     enabled: !!vehicleId,
-    refetchInterval: 15000,
+    refetchInterval: (query) => (query.state.data?.ignition_on ? 5000 : 20000),
+
     queryFn: async () => {
       const { data, error } = await supabase
         .from("device_trip_state")

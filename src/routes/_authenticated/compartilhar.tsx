@@ -34,8 +34,15 @@ type ShareRow = {
   invited_email: string;
   label: string | null;
   accepted_at: string | null;
+  viewer_last_seen_at: string | null;
   created_at: string;
 };
+
+/** Observador é considerado online se enviou sinal nos últimos 90 segundos. */
+const ONLINE_WINDOW_MS = 90_000;
+function isOnline(iso: string | null) {
+  return !!iso && Date.now() - new Date(iso).getTime() < ONLINE_WINDOW_MS;
+}
 
 const dtf = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
@@ -70,10 +77,11 @@ function SharePage() {
   const { data: shares, isLoading } = useQuery({
     queryKey: ["vehicle-shares", vehicle?.id],
     enabled: !!vehicle?.id,
+    refetchInterval: 20000,
     queryFn: async (): Promise<ShareRow[]> => {
       const { data, error } = await supabase
         .from("vehicle_shares")
-        .select("id,vehicle_id,invited_email,label,accepted_at,created_at")
+        .select("id,vehicle_id,invited_email,label,accepted_at,viewer_last_seen_at,created_at")
         .eq("vehicle_id", vehicle!.id)
         .is("revoked_at", null)
         .order("created_at", { ascending: false });
@@ -225,17 +233,32 @@ function SharePage() {
                   )}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium">
-                    {s.label || s.invited_email}
+                  <div className="flex items-center gap-2">
+                    <span className="truncate text-sm font-medium">
+                      {s.label || s.invited_email}
+                    </span>
+                    {isOnline(s.viewer_last_seen_at) && (
+                      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-success">
+                        <span className="relative grid size-2 place-items-center">
+                          <span className="absolute inset-0 animate-ping rounded-full bg-success/60" />
+                          <span className="size-1.5 rounded-full bg-success" />
+                        </span>
+                        acompanhando
+                      </span>
+                    )}
                   </div>
                   <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-[11px] text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <Mail className="size-3" /> {s.invited_email}
                     </span>
                     <span>
-                      {s.accepted_at
-                        ? `ativo desde ${dtf.format(new Date(s.accepted_at))}`
-                        : "aguardando primeiro acesso"}
+                      {isOnline(s.viewer_last_seen_at)
+                        ? "online agora"
+                        : s.viewer_last_seen_at
+                          ? `visto ${dtf.format(new Date(s.viewer_last_seen_at))}`
+                          : s.accepted_at
+                            ? `ativo desde ${dtf.format(new Date(s.accepted_at))}`
+                            : "aguardando primeiro acesso"}
                     </span>
                   </div>
                 </div>

@@ -161,6 +161,27 @@ function FollowPage() {
     })();
   }, [share]);
 
+  // Heartbeat: avisa a conta principal que o observador está acompanhando agora.
+  useEffect(() => {
+    if (!share?.id) return;
+    let stopped = false;
+    const beat = async () => {
+      if (stopped || document.visibilityState === "hidden") return;
+      await supabase
+        .from("vehicle_shares")
+        .update({ viewer_last_seen_at: new Date().toISOString() })
+        .eq("id", share.id);
+    };
+    beat();
+    const id = setInterval(beat, 30_000);
+    document.addEventListener("visibilitychange", beat);
+    return () => {
+      stopped = true;
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", beat);
+    };
+  }, [share?.id]);
+
   const { data: vehicle } = useQuery({
     queryKey: ["shared-vehicle", vehicleId],
     enabled: !!vehicleId,

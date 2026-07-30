@@ -198,7 +198,7 @@ function FollowPage() {
   const { data: pings } = useQuery({
     queryKey: ["shared-pings", vehicleId],
     enabled: !!vehicleId,
-    refetchInterval: 15000,
+    refetchInterval: state?.ignition_on ? 5000 : 20000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tracker_pings")

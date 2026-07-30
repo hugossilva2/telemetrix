@@ -132,6 +132,7 @@ export class Elm327Client {
     }
     this.closed = false;
     this.events.onStatus?.("connecting");
+    this.events.onProgress?.("Escolha o adaptador na lista do navegador…");
 
     const device = await bluetooth.requestDevice({
       acceptAllDevices: true,
@@ -140,10 +141,43 @@ export class Elm327Client {
     this.device = device;
     device.addEventListener("gattserverdisconnected", this.handleDisconnect);
 
-    const server = await device.gatt?.connect();
-    if (!server) throw new Error("Não foi possível abrir o GATT do adaptador.");
+    this.events.onProgress?.(`Conectando em ${device.name ?? "adaptador"}…`);
+    let server: BluetoothRemoteGATTServer | undefined;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        server = await device.gatt?.connect();
+        if (server?.connected) break;
+      } catch (e) {
+        if (attempt === 3) {
+          throw new Error(
+            `Não foi possível abrir a conexão GATT (${(e as Error).message}). ` +
+              "Se o adaptador estiver pareado nas configurações do Android, remova o pareamento e tente de novo.",
+          );
+        }
+        await new Promise((r) => setTimeout(r, 700));
+      }
+    }
+    if (!server?.connected) {
+      throw new Error("Não foi possível abrir o GATT do adaptador.");
+    }
 
-    const services = await server.getPrimaryServices();
+    this.events.onProgress?.("Procurando porta serial do adaptador…");
+    let services: BluetoothRemoteGATTService[] = [];
+    try {
+      services = await server.getPrimaryServices();
+    } catch (e) {
+      throw new Error(
+        `Não foi possível listar os serviços do adaptador (${(e as Error).message}).`,
+      );
+    }
+
+    if (services.length === 0) {
+      throw new Error(
+        "Nenhum serviço BLE compatível foi encontrado. Este adaptador provavelmente é Bluetooth Clássico (SPP), " +
+          "que o navegador não consegue acessar. Use um ELM327 BLE 4.0/5.0.",
+      );
+    }
+
     for (const service of services) {
       const chars: BluetoothRemoteGATTCharacteristic[] = await service
         .getCharacteristics()
@@ -161,15 +195,21 @@ export class Elm327Client {
     }
 
     if (!this.writeChar || !this.notifyChar) {
-      throw new Error("Adaptador sem porta serial compatível (ELM327 BLE).");
+      throw new Error(
+        `Adaptador sem porta serial compatível (serviços vistos: ${services
+          .map((s) => s.uuid)
+          .join(", ")}). Provavelmente é um ELM327 Bluetooth Clássico, não BLE.`,
+      );
     }
 
     await this.notifyChar.startNotifications();
     this.notifyChar.addEventListener("characteristicvaluechanged", this.handleValue);
 
+    this.events.onProgress?.("Inicializando ELM327…");
     await this.handshake();
     this.events.onStatus?.("connected");
   }
+
 
   private handleDisconnect = () => {
     this.writeChar = null;

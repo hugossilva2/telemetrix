@@ -34,6 +34,7 @@ export function useTelemetry(): UseTelemetryResult {
     supported: state.supported,
     deviceName: state.deviceName,
     savedDevice: state.savedDevice,
+    progress: state.progress,
     forgetDevice: state.forgetDevice,
     connect: state.connect,
     disconnect: state.disconnect,

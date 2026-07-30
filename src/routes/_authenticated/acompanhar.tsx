@@ -248,6 +248,36 @@ function FollowPage() {
   const speed = latest?.speed_kmh != null ? Number(latest.speed_kmh) : null;
   const lastSeen = state?.last_message_at ?? latest?.recorded_at ?? null;
 
+  const tripActive = !!(ignitionOn && state?.start_time);
+  const now = useNow(tripActive);
+  const startMs = state?.start_time ? new Date(state.start_time).getTime() : null;
+
+  // Métricas da viagem em andamento, calculadas a partir dos pings desde a partida.
+  const live = useMemo(() => {
+    if (!tripActive || !startMs) return null;
+    const pts = (pings ?? [])
+      .filter((p) => new Date(p.recorded_at).getTime() >= startMs - 60_000)
+      .slice()
+      .reverse();
+    let distance = 0;
+    let max = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const s = pts[i].speed_kmh != null ? Number(pts[i].speed_kmh) : 0;
+      if (s > max) max = s;
+      if (i > 0) distance += haversineKm(pts[i - 1], pts[i]);
+    }
+    const elapsedMs = now - startMs;
+    const hours = elapsedMs / 3_600_000;
+    return {
+      distance,
+      maxSpeed: Math.max(max, Number(state?.max_speed_kmh ?? 0)),
+      avgSpeed: hours > 0.002 ? distance / hours : 0,
+      elapsedMs,
+      points: pts.length,
+    };
+  }, [tripActive, startMs, pings, now, state?.max_speed_kmh]);
+
+
   if (isLoading) {
     return (
       <AppShell title="Acompanhar" subtitle="Modo observador">

@@ -1,22 +1,26 @@
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Car,
+  Clock,
   Eye,
   Gauge,
   LogIn,
   LogOut,
   MapPinOff,
   Radar,
+  Route as RouteIcon,
   ShieldAlert,
+  Zap,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
+
 
 export const Route = createFileRoute("/_authenticated/acompanhar")({
   head: () => ({
@@ -89,6 +93,42 @@ function relative(iso: string | null | undefined) {
   return dtf.format(new Date(iso));
 }
 
+function haversineKm(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+) {
+  const R = 6371;
+  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
+  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
+  const la1 = (a.lat * Math.PI) / 180;
+  const la2 = (b.lat * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+function formatDuration(ms: number) {
+  const total = Math.max(0, Math.floor(ms / 1000));
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+}
+
+/** Relógio de 1s usado apenas quando há viagem em andamento. */
+function useNow(active: boolean) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    if (!active) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [active]);
+  return now;
+}
+
+
+
 function FollowPage() {
   const { data: share, isLoading } = useQuery({
     queryKey: ["my-share"],
@@ -138,7 +178,8 @@ function FollowPage() {
   const { data: state } = useQuery({
     queryKey: ["shared-state", vehicleId],
     enabled: !!vehicleId,
-    refetchInterval: 15000,
+    refetchInterval: (query) => (query.state.data?.ignition_on ? 5000 : 20000),
+
     queryFn: async () => {
       const { data, error } = await supabase
         .from("device_trip_state")
@@ -157,7 +198,7 @@ function FollowPage() {
   const { data: pings } = useQuery({
     queryKey: ["shared-pings", vehicleId],
     enabled: !!vehicleId,
-    refetchInterval: 15000,
+    refetchInterval: state?.ignition_on ? 5000 : 20000,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("tracker_pings")
@@ -206,6 +247,36 @@ function FollowPage() {
   const ignitionOn = state?.ignition_on ?? null;
   const speed = latest?.speed_kmh != null ? Number(latest.speed_kmh) : null;
   const lastSeen = state?.last_message_at ?? latest?.recorded_at ?? null;
+
+  const tripActive = !!(ignitionOn && state?.start_time);
+  const now = useNow(tripActive);
+  const startMs = state?.start_time ? new Date(state.start_time).getTime() : null;
+
+  // Métricas da viagem em andamento, calculadas a partir dos pings desde a partida.
+  const live = useMemo(() => {
+    if (!tripActive || !startMs) return null;
+    const pts = (pings ?? [])
+      .filter((p) => new Date(p.recorded_at).getTime() >= startMs - 60_000)
+      .slice()
+      .reverse();
+    let distance = 0;
+    let max = 0;
+    for (let i = 0; i < pts.length; i++) {
+      const s = pts[i].speed_kmh != null ? Number(pts[i].speed_kmh) : 0;
+      if (s > max) max = s;
+      if (i > 0) distance += haversineKm(pts[i - 1], pts[i]);
+    }
+    const elapsedMs = now - startMs;
+    const hours = elapsedMs / 3_600_000;
+    return {
+      distance,
+      maxSpeed: Math.max(max, Number(state?.max_speed_kmh ?? 0)),
+      avgSpeed: hours > 0.002 ? distance / hours : 0,
+      elapsedMs,
+      points: pts.length,
+    };
+  }, [tripActive, startMs, pings, now, state?.max_speed_kmh]);
+
 
   if (isLoading) {
     return (
@@ -257,10 +328,57 @@ function FollowPage() {
         />
         <Tile
           label="Viagem"
-          value={ignitionOn && state?.start_time ? relative(state.start_time) : "parado"}
+          value={live ? formatDuration(live.elapsedMs) : "parado"}
+          tone={live ? "success" : "muted"}
           Icon={Radar}
         />
       </div>
+
+      {live && (
+        <div className="card-surface relative overflow-hidden p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2 font-display text-sm font-semibold tracking-tight">
+              <span className="relative grid size-2.5 place-items-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-success/60" />
+                <span className="size-2 rounded-full bg-success" />
+              </span>
+              Viagem em andamento
+            </h2>
+            <span className="text-[11px] text-muted-foreground">
+              início {dtf.format(new Date(state!.start_time!))}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <LiveStat
+              label="Duração"
+              value={formatDuration(live.elapsedMs)}
+              Icon={Clock}
+            />
+            <LiveStat
+              label="Distância"
+              value={`${live.distance.toFixed(1)} km`}
+              Icon={RouteIcon}
+            />
+            <LiveStat
+              label="Média"
+              value={`${Math.round(live.avgSpeed)} km/h`}
+              Icon={Gauge}
+            />
+            <LiveStat
+              label="Máxima"
+              value={`${Math.round(live.maxSpeed)} km/h`}
+              Icon={Zap}
+            />
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            {live.points} pontos recebidos · última posição {relative(lastSeen)}
+          </p>
+        </div>
+      )}
+
+
 
       <div className="overflow-hidden rounded-2xl border border-border/70">
         <div className="h-[52vh] w-full">
@@ -336,6 +454,25 @@ function Tile({
       >
         {value}
       </div>
+    </div>
+  );
+}
+
+function LiveStat({
+  label,
+  value,
+  Icon,
+}: {
+  label: string;
+  value: string;
+  Icon: typeof Car;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/30 p-2.5">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <Icon className="size-3" /> {label}
+      </div>
+      <div className="mt-0.5 font-display text-base font-semibold tabular-nums">{value}</div>
     </div>
   );
 }

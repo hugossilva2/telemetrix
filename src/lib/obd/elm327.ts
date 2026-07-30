@@ -263,14 +263,23 @@ export class Elm327Client {
 
   private async handshake() {
     const init = ["ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0"];
+    let answered = 0;
     for (const cmd of init) {
       try {
-        await this.send(cmd, 6000);
+        const res = await this.send(cmd, 6000);
+        if (res.length > 0) answered += 1;
       } catch (e) {
         this.events.onError?.((e as Error).message);
       }
     }
+    if (answered === 0) {
+      throw new Error(
+        "O adaptador conectou mas não respondeu aos comandos ELM327. " +
+          "Confirme que ele está plugado na porta OBD-II com a ignição ligada e tente novamente.",
+      );
+    }
   }
+
 
   disconnect() {
     this.closed = true;

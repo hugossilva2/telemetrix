@@ -12,6 +12,8 @@ import { formatBRL, formatDecimal } from "@/lib/format";
 import { EcoScoreBadge } from "@/components/eco/EcoScoreRing";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
+import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
+
 
 
 export const Route = createFileRoute("/_authenticated/viagens")({

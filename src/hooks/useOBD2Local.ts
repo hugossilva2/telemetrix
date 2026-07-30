@@ -139,11 +139,13 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
 
   const connect = useCallback(async () => {
     if (!supported) {
-      setError("Web Bluetooth não é suportado neste navegador (use o Chrome no Android).");
+      const msg = "Web Bluetooth não é suportado neste navegador (use o Chrome no Android).";
+      setError(msg);
       setStatus("error");
-      return;
+      throw new Error(msg);
     }
     setError(null);
+    setProgress("Abrindo a lista de dispositivos…");
     setStatus("connecting");
     const client = new Elm327Client({
       onStatus: (s) => {
@@ -155,6 +157,7 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
         if (s === "error") setStatus("error");
       },
       onError: (m) => setError(m),
+      onProgress: (step) => setProgress(step),
     });
     clientRef.current = client;
     try {
@@ -164,16 +167,25 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
         obdDeviceStore.remember({ id: client.deviceId, name: client.deviceName });
       }
 
+      setError(null);
+      setProgress(null);
       setStatus("connected");
       stopPolling();
       pollRef.current = setInterval(() => void pollOnce(), POLL_INTERVAL_MS);
     } catch (e) {
       const msg = (e as Error).message || "Falha ao conectar no adaptador.";
-      setError(msg);
-      setStatus(/cancel|User cancelled|chooser/i.test(msg) ? "offline" : "error");
+      const cancelled = /cancel|User cancelled|chooser|NotFoundError/i.test(msg);
+      setProgress(null);
+      setError(cancelled ? null : msg);
+      setStatus(cancelled ? "offline" : "error");
+      clientRef.current?.disconnect();
       clientRef.current = null;
+      throw new Error(
+        cancelled ? "Nenhum adaptador foi selecionado. Toque novamente para tentar." : msg,
+      );
     }
   }, [pollOnce, stopPolling, supported]);
+
 
   // GPS do celular: posição, velocidade e rumo enquanto o modo estiver ativo.
   useEffect(() => {

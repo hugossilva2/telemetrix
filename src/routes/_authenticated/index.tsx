@@ -163,6 +163,8 @@ function Dashboard() {
 
       <OngoingTripCard />
 
+      <FavoritePlacesEta />
+
       {tripMode && (
         <div className="mt-1 flex justify-center">
           <Button
@@ -192,8 +194,6 @@ function Dashboard() {
             ignitionOn={telemetry.ignitionOn}
             engineRpm={telemetry.engineRpm}
           />
-
-          <FavoritePlacesEta />
 
           <MaintenanceAlertsCard />
 

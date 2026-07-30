@@ -1,4 +1,4 @@
-import { ClientOnly, createFileRoute, Link } from "@tanstack/react-router";
+import { ClientOnly, createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { lazy, Suspense, useMemo } from "react";
 import {
@@ -24,6 +24,7 @@ import {
   formatDurationBetween,
   formatTime,
 } from "@/lib/trips/format";
+import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 
 const TripMap = lazy(() => import("@/components/trips/TripMap"));
 
@@ -83,6 +84,7 @@ type TripRow = Pick<
 
 function TripDetailPage() {
   const { id } = Route.useParams();
+  const navigate = useNavigate();
 
   const { data: trip, isLoading } = useQuery({
     queryKey: ["trip", id],
@@ -267,12 +269,22 @@ function TripDetailPage() {
       title="Viagem"
       subtitle={trip ? formatDateTime(trip.start_time) : "Detalhe"}
     >
-      <Link
-        to="/viagens"
-        className="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" /> Voltar
-      </Link>
+      <div className="mb-3 flex items-center justify-between">
+        <Link
+          to="/viagens"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" /> Voltar
+        </Link>
+        {trip && (
+          <DeleteTripButton
+            tripId={trip.id}
+            variant="button"
+            onDeleted={() => navigate({ to: "/viagens" })}
+          />
+        )}
+      </div>
+
 
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>

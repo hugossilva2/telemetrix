@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Gauge, Fuel as FuelIcon, Route as RouteIcon, Zap } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
@@ -19,6 +19,9 @@ import { SafeStartCard } from "@/components/dashboard/SafeStartCard";
 import { DriverHighlightCard } from "@/components/dashboard/DriverHighlightCard";
 import { Bento, BentoItem } from "@/components/ui/bento";
 import { BluetoothPairCard } from "@/components/dashboard/BluetoothPairCard";
+import { useOpenTrip } from "@/lib/trips/store";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 
 
@@ -79,8 +82,22 @@ function Dashboard() {
 
   const dimmed = !ignitionOn ? "opacity-60" : "";
 
+  // Modo viagem: motor ligado + viagem em andamento => painel focado no tempo real.
+  const openTrip = useOpenTrip();
+  const tripMode = ignitionOn && openTrip !== null;
+  const [showAll, setShowAll] = useState(false);
+  const showSecondary = !tripMode || showAll;
+
+  // Ao encerrar a viagem, volta ao painel completo automaticamente.
+  useEffect(() => {
+    if (!tripMode) setShowAll(false);
+  }, [tripMode]);
+
   return (
-    <AppShell title="Painel" subtitle="Telemetria em tempo real">
+    <AppShell
+      title="Painel"
+      subtitle={tripMode ? "Viagem em andamento · tempo real" : "Telemetria em tempo real"}
+    >
       <StatusHeader
         ignitionOn={telemetry.ignitionOn}
         status={status}
@@ -142,21 +159,49 @@ function Dashboard() {
         </BentoItem>
       </Bento>
 
-      <BluetoothPairCard />
-
       {ignitionOn && <LiveConsumptionCard />}
-
-      <SafeStartCard ignitionOn={telemetry.ignitionOn} engineRpm={telemetry.engineRpm} />
 
       <OngoingTripCard />
 
       <FavoritePlacesEta />
 
-      <MaintenanceAlertsCard />
+      {tripMode && (
+        <div className="mt-1 flex justify-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-muted-foreground"
+            onClick={() => setShowAll((v) => !v)}
+          >
+            {showAll ? (
+              <>
+                <ChevronUp className="size-3.5" /> Focar na viagem
+              </>
+            ) : (
+              <>
+                <ChevronDown className="size-3.5" /> Ver tudo
+              </>
+            )}
+          </Button>
+        </div>
+      )}
 
-      <DriverHighlightCard />
+      {showSecondary && (
+        <>
+          <BluetoothPairCard />
 
-      <ExpiringDocsCard />
+          <SafeStartCard
+            ignitionOn={telemetry.ignitionOn}
+            engineRpm={telemetry.engineRpm}
+          />
+
+          <MaintenanceAlertsCard />
+
+          <DriverHighlightCard />
+
+          <ExpiringDocsCard />
+        </>
+      )}
     </AppShell>
   );
 }

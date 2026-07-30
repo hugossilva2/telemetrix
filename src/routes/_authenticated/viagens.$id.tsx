@@ -267,12 +267,22 @@ function TripDetailPage() {
       title="Viagem"
       subtitle={trip ? formatDateTime(trip.start_time) : "Detalhe"}
     >
-      <Link
-        to="/viagens"
-        className="mb-3 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="size-3.5" /> Voltar
-      </Link>
+      <div className="mb-3 flex items-center justify-between">
+        <Link
+          to="/viagens"
+          className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-3.5" /> Voltar
+        </Link>
+        {trip && (
+          <DeleteTripButton
+            tripId={trip.id}
+            variant="button"
+            onDeleted={() => navigate({ to: "/viagens" })}
+          />
+        )}
+      </div>
+
 
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>

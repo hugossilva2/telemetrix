@@ -1,22 +1,26 @@
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, useMemo } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
   Car,
+  Clock,
   Eye,
   Gauge,
   LogIn,
   LogOut,
   MapPinOff,
   Radar,
+  Route as RouteIcon,
   ShieldAlert,
+  Zap,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
+
 
 export const Route = createFileRoute("/_authenticated/acompanhar")({
   head: () => ({

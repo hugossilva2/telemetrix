@@ -777,6 +777,53 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_shares: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          invited_email: string
+          label: string | null
+          owner_id: string
+          revoked_at: string | null
+          updated_at: string
+          vehicle_id: string
+          viewer_user_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_email: string
+          label?: string | null
+          owner_id: string
+          revoked_at?: string | null
+          updated_at?: string
+          vehicle_id: string
+          viewer_user_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_email?: string
+          label?: string | null
+          owner_id?: string
+          revoked_at?: string | null
+          updated_at?: string
+          vehicle_id?: string
+          viewer_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_shares_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           alert_engine_on: boolean
@@ -848,7 +895,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
     }
     Enums: {
       expense_category:

@@ -49,6 +49,7 @@ function ObdBridge({ publish }: { publish: Publish }) {
     supported,
     deviceName,
     savedDevice,
+    progress,
     forgetDevice,
     connect,
     disconnect,
@@ -64,6 +65,7 @@ function ObdBridge({ publish }: { publish: Publish }) {
       supported,
       deviceName,
       savedDevice,
+      progress,
       forgetDevice,
       connect,
       disconnect,
@@ -77,6 +79,7 @@ function ObdBridge({ publish }: { publish: Publish }) {
     supported,
     deviceName,
     savedDevice,
+    progress,
     forgetDevice,
     connect,
     disconnect,
@@ -84,6 +87,7 @@ function ObdBridge({ publish }: { publish: Publish }) {
 
   return null;
 }
+
 
 
 export function TelemetryProvider({ children }: { children: ReactNode }) {

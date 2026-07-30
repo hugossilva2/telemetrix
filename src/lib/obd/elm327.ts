@@ -57,15 +57,26 @@ function getBluetooth(): BluetoothApi | null {
 }
 
 const KNOWN_SERVICES: BluetoothServiceUUID[] = [
-
   0xfff0,
   0xffe0,
-  0xfd00,
   0xffe5,
+  0xfff1,
+  0xfd00,
+  0xfee7,
+  0xff00,
+  0xff10,
+  0xffb0,
+  0x18f0,
+  0xabf0,
   "0000fff0-0000-1000-8000-00805f9b34fb",
   "0000ffe0-0000-1000-8000-00805f9b34fb",
+  "0000ffe5-0000-1000-8000-00805f9b34fb",
+  "0000fff1-0000-1000-8000-00805f9b34fb",
+  "000018f0-0000-1000-8000-00805f9b34fb",
   "6e400001-b5a3-f393-e0a9-e50e24dcca9e", // Nordic UART
+  "0000abf0-0000-1000-8000-00805f9b34fb",
   "e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+  "00001101-0000-1000-8000-00805f9b34fb", // SPP (clássico, só p/ diagnóstico)
 ];
 
 const PROMPT = ">";
@@ -74,11 +85,14 @@ export interface Elm327Events {
   onStatus?: (s: "connecting" | "connected" | "disconnected" | "error") => void;
   onError?: (message: string) => void;
   onRaw?: (line: string) => void;
+  /** Passo atual do handshake, para feedback na UI. */
+  onProgress?: (step: string) => void;
 }
 
 export function isWebBluetoothSupported(): boolean {
   return typeof navigator !== "undefined" && "bluetooth" in navigator;
 }
+
 
 export class Elm327Client {
   private device: BluetoothDevice | null = null;
@@ -118,6 +132,7 @@ export class Elm327Client {
     }
     this.closed = false;
     this.events.onStatus?.("connecting");
+    this.events.onProgress?.("Escolha o adaptador na lista do navegador…");
 
     const device = await bluetooth.requestDevice({
       acceptAllDevices: true,
@@ -126,10 +141,43 @@ export class Elm327Client {
     this.device = device;
     device.addEventListener("gattserverdisconnected", this.handleDisconnect);
 
-    const server = await device.gatt?.connect();
-    if (!server) throw new Error("Não foi possível abrir o GATT do adaptador.");
+    this.events.onProgress?.(`Conectando em ${device.name ?? "adaptador"}…`);
+    let server: BluetoothRemoteGATTServer | undefined;
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        server = await device.gatt?.connect();
+        if (server?.connected) break;
+      } catch (e) {
+        if (attempt === 3) {
+          throw new Error(
+            `Não foi possível abrir a conexão GATT (${(e as Error).message}). ` +
+              "Se o adaptador estiver pareado nas configurações do Android, remova o pareamento e tente de novo.",
+          );
+        }
+        await new Promise((r) => setTimeout(r, 700));
+      }
+    }
+    if (!server?.connected) {
+      throw new Error("Não foi possível abrir o GATT do adaptador.");
+    }
 
-    const services = await server.getPrimaryServices();
+    this.events.onProgress?.("Procurando porta serial do adaptador…");
+    let services: BluetoothRemoteGATTService[] = [];
+    try {
+      services = await server.getPrimaryServices();
+    } catch (e) {
+      throw new Error(
+        `Não foi possível listar os serviços do adaptador (${(e as Error).message}).`,
+      );
+    }
+
+    if (services.length === 0) {
+      throw new Error(
+        "Nenhum serviço BLE compatível foi encontrado. Este adaptador provavelmente é Bluetooth Clássico (SPP), " +
+          "que o navegador não consegue acessar. Use um ELM327 BLE 4.0/5.0.",
+      );
+    }
+
     for (const service of services) {
       const chars: BluetoothRemoteGATTCharacteristic[] = await service
         .getCharacteristics()
@@ -147,15 +195,21 @@ export class Elm327Client {
     }
 
     if (!this.writeChar || !this.notifyChar) {
-      throw new Error("Adaptador sem porta serial compatível (ELM327 BLE).");
+      throw new Error(
+        `Adaptador sem porta serial compatível (serviços vistos: ${services
+          .map((s) => s.uuid)
+          .join(", ")}). Provavelmente é um ELM327 Bluetooth Clássico, não BLE.`,
+      );
     }
 
     await this.notifyChar.startNotifications();
     this.notifyChar.addEventListener("characteristicvaluechanged", this.handleValue);
 
+    this.events.onProgress?.("Inicializando ELM327…");
     await this.handshake();
     this.events.onStatus?.("connected");
   }
+
 
   private handleDisconnect = () => {
     this.writeChar = null;
@@ -209,14 +263,23 @@ export class Elm327Client {
 
   private async handshake() {
     const init = ["ATZ", "ATE0", "ATL0", "ATS0", "ATH0", "ATSP0"];
+    let answered = 0;
     for (const cmd of init) {
       try {
-        await this.send(cmd, 6000);
+        const res = await this.send(cmd, 6000);
+        if (res.length > 0) answered += 1;
       } catch (e) {
         this.events.onError?.((e as Error).message);
       }
     }
+    if (answered === 0) {
+      throw new Error(
+        "O adaptador conectou mas não respondeu aos comandos ELM327. " +
+          "Confirme que ele está plugado na porta OBD-II com a ignição ligada e tente novamente.",
+      );
+    }
   }
+
 
   disconnect() {
     this.closed = true;

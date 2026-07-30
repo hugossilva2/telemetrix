@@ -26,6 +26,7 @@ import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authentic
 import { Route as AuthenticatedDespesasRouteImport } from './routes/_authenticated/despesas'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedAcompanharRouteImport } from './routes/_authenticated/acompanhar'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
 import { Route as ApiPublicTrackerHeartbeatRouteImport } from './routes/api/public/tracker-heartbeat'
 import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/flespi-webhook'
@@ -117,6 +118,11 @@ const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
   path: '/ajustes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAcompanharRoute = AuthenticatedAcompanharRouteImport.update({
+  id: '/acompanhar',
+  path: '/acompanhar',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAbastecimentoRoute =
   AuthenticatedAbastecimentoRouteImport.update({
     id: '/abastecimento',
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/despesas': typeof AuthenticatedDespesasRoute
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/despesas': typeof AuthenticatedDespesasRoute
@@ -197,6 +205,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
+  '/_authenticated/acompanhar': typeof AuthenticatedAcompanharRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/despesas': typeof AuthenticatedDespesasRoute
@@ -223,6 +232,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/abastecimento'
+    | '/acompanhar'
     | '/ajustes'
     | '/compartilhar'
     | '/despesas'
@@ -245,6 +255,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/abastecimento'
+    | '/acompanhar'
     | '/ajustes'
     | '/compartilhar'
     | '/despesas'
@@ -269,6 +280,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/_authenticated/abastecimento'
+    | '/_authenticated/acompanhar'
     | '/_authenticated/ajustes'
     | '/_authenticated/compartilhar'
     | '/_authenticated/despesas'
@@ -418,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAjustesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/acompanhar': {
+      id: '/_authenticated/acompanhar'
+      path: '/acompanhar'
+      fullPath: '/acompanhar'
+      preLoaderRoute: typeof AuthenticatedAcompanharRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/abastecimento': {
       id: '/_authenticated/abastecimento'
       path: '/abastecimento'
@@ -483,6 +502,7 @@ const AuthenticatedViagensRouteWithChildren =
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
+  AuthenticatedAcompanharRoute: typeof AuthenticatedAcompanharRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedDespesasRoute: typeof AuthenticatedDespesasRoute
@@ -502,6 +522,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
+  AuthenticatedAcompanharRoute: AuthenticatedAcompanharRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedDespesasRoute: AuthenticatedDespesasRoute,

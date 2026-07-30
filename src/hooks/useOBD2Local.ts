@@ -246,6 +246,7 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     supported,
     deviceName,
     savedDevice,
+    progress,
     forgetDevice,
     fuelLph,
 

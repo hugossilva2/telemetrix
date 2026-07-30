@@ -281,11 +281,11 @@ function ViagensPage() {
               fuelLiters: t.fuel_liters,
             });
             return (
-              <li key={t.id}>
+              <li key={t.id} className="relative">
                 <Link
                   to="/viagens/$id"
                   params={{ id: t.id }}
-                  className="flex items-center gap-3 card-surface p-3 transition-colors hover:bg-accent"
+                  className="flex items-center gap-3 card-surface p-3 pr-12 transition-colors hover:bg-accent"
                 >
                   <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
                     <RouteIcon className="size-4" />
@@ -321,10 +321,13 @@ function ViagensPage() {
                       )}
                     </div>
                   </div>
-                  <ChevronRight className="size-4 text-muted-foreground" />
                 </Link>
+                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                  <DeleteTripButton tripId={t.id} />
+                </div>
               </li>
             );
+
           })}
         </ul>
       )}

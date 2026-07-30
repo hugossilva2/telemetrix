@@ -328,10 +328,57 @@ function FollowPage() {
         />
         <Tile
           label="Viagem"
-          value={ignitionOn && state?.start_time ? relative(state.start_time) : "parado"}
+          value={live ? formatDuration(live.elapsedMs) : "parado"}
+          tone={live ? "success" : "muted"}
           Icon={Radar}
         />
       </div>
+
+      {live && (
+        <div className="card-surface relative overflow-hidden p-4">
+          <div className="flex items-center justify-between">
+            <h2 className="inline-flex items-center gap-2 font-display text-sm font-semibold tracking-tight">
+              <span className="relative grid size-2.5 place-items-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-success/60" />
+                <span className="size-2 rounded-full bg-success" />
+              </span>
+              Viagem em andamento
+            </h2>
+            <span className="text-[11px] text-muted-foreground">
+              início {dtf.format(new Date(state!.start_time!))}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            <LiveStat
+              label="Duração"
+              value={formatDuration(live.elapsedMs)}
+              Icon={Clock}
+            />
+            <LiveStat
+              label="Distância"
+              value={`${live.distance.toFixed(1)} km`}
+              Icon={RouteIcon}
+            />
+            <LiveStat
+              label="Média"
+              value={`${Math.round(live.avgSpeed)} km/h`}
+              Icon={Gauge}
+            />
+            <LiveStat
+              label="Máxima"
+              value={`${Math.round(live.maxSpeed)} km/h`}
+              Icon={Zap}
+            />
+          </div>
+
+          <p className="mt-3 text-[11px] text-muted-foreground">
+            {live.points} pontos recebidos · última posição {relative(lastSeen)}
+          </p>
+        </div>
+      )}
+
+
 
       <div className="overflow-hidden rounded-2xl border border-border/70">
         <div className="h-[52vh] w-full">

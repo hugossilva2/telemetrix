@@ -2,6 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { TripRecorder } from "@/components/trips/TripRecorder";
 import { TelemetryProvider } from "@/components/telemetry/TelemetryProvider";
+import { ObserverGate } from "@/components/layout/ObserverGate";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -14,9 +15,11 @@ export const Route = createFileRoute("/_authenticated")({
   },
   component: () => (
     <TelemetryProvider>
+      <ObserverGate />
       <TripRecorder />
       <Outlet />
     </TelemetryProvider>
   ),
 });
+
 

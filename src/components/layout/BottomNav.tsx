@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Car, Fuel, FolderCog, Radar, Route as RouteIcon, Settings } from "lucide-react";
+import { Car, Eye, Fuel, FolderCog, Radar, Route as RouteIcon, Settings } from "lucide-react";
+import { useIsObserver } from "@/lib/shares/observer";
 
 const items = [
   { to: "/", label: "Painel", Icon: Car, exact: true },
@@ -10,14 +11,26 @@ const items = [
   { to: "/ajustes", label: "Ajustes", Icon: Settings, exact: false },
 ] as const;
 
+const observerItems = [
+  { to: "/acompanhar", label: "Rastreio", Icon: Eye, exact: false },
+] as const;
+
 export function BottomNav() {
+  const { isObserver } = useIsObserver();
+  const navItems = isObserver ? observerItems : items;
+
   return (
     <nav
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border/70 bg-card/85 backdrop-blur-xl"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto grid max-w-md grid-cols-6 px-1 py-1">
-        {items.map(({ to, label, Icon, exact }) => (
+      <ul
+        className={`mx-auto grid max-w-md px-1 py-1 ${
+          isObserver ? "grid-cols-1" : "grid-cols-6"
+        }`}
+      >
+        {navItems.map(({ to, label, Icon, exact }) => (
+
           <li key={to}>
             <Link
               to={to}

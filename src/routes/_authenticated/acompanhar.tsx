@@ -457,3 +457,22 @@ function Tile({
     </div>
   );
 }
+
+function LiveStat({
+  label,
+  value,
+  Icon,
+}: {
+  label: string;
+  value: string;
+  Icon: typeof Car;
+}) {
+  return (
+    <div className="rounded-xl border border-border/60 bg-muted/30 p-2.5">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
+        <Icon className="size-3" /> {label}
+      </div>
+      <div className="mt-0.5 font-display text-base font-semibold tabular-nums">{value}</div>
+    </div>
+  );
+}

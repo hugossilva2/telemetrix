@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { InstallAppCard } from "@/components/settings/InstallAppCard";
 import { DataSourceCard } from "@/components/settings/DataSourceCard";
 import { OfflineQueueCard } from "@/components/settings/OfflineQueueCard";
+import { PushNotificationsCard } from "@/components/settings/PushNotificationsCard";
 
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
@@ -122,6 +123,7 @@ function AjustesPage() {
     <AppShell title="Ajustes" subtitle="Perfil e preferências">
       <div className="mb-4 space-y-4">
         <DataSourceCard />
+        <PushNotificationsCard />
         <OfflineQueueCard />
       </div>
 

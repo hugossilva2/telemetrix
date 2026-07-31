@@ -43,7 +43,7 @@ export async function sendPushToUser(
     subs.map(async (s) => {
       try {
         const req = await buildPushPayload(
-          { data: payload, options: { ttl: 60 * 60, urgency: "high", topic: payload.tag } },
+          { data: { ...payload } as Record<string, string | undefined>, options: { ttl: 60 * 60, urgency: "high", topic: payload.tag } },
           {
             endpoint: s.endpoint,
             expirationTime: null,

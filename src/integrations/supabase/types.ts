@@ -729,6 +729,60 @@ export type Database = {
           },
         ]
       }
+      vehicle_checkups: {
+        Row: {
+          checked_at: string
+          created_at: string
+          driver_id: string | null
+          id: string
+          item: string
+          mileage_km: number | null
+          notes: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          checked_at?: string
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          item: string
+          mileage_km?: number | null
+          notes?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          checked_at?: string
+          created_at?: string
+          driver_id?: string | null
+          id?: string
+          item?: string
+          mileage_km?: number | null
+          notes?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_checkups_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_checkups_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_documents: {
         Row: {
           amount: number | null

@@ -15,6 +15,7 @@ import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard"
 import { FavoritePlacesEta } from "@/components/dashboard/FavoritePlacesEta";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
+import { VehicleHealthCard } from "@/components/health/VehicleHealthCard";
 import { SafeStartCard } from "@/components/dashboard/SafeStartCard";
 import { DriverHighlightCard } from "@/components/dashboard/DriverHighlightCard";
 import { Bento, BentoItem } from "@/components/ui/bento";
@@ -194,6 +195,8 @@ function Dashboard() {
             ignitionOn={telemetry.ignitionOn}
             engineRpm={telemetry.engineRpm}
           />
+
+          <VehicleHealthCard />
 
           <MaintenanceAlertsCard />
 

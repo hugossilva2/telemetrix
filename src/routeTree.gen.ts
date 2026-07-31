@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
+import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
 import { Route as AuthenticatedRelatorioRouteImport } from './routes/_authenticated/relatorio'
 import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
 import { Route as AuthenticatedPlanejarRouteImport } from './routes/_authenticated/planejar'
@@ -50,6 +51,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
   id: '/viagens',
   path: '/viagens',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRotinasRoute = AuthenticatedRotinasRouteImport.update({
+  id: '/rotinas',
+  path: '/rotinas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRelatorioRoute = AuthenticatedRelatorioRouteImport.update({
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/planejar': typeof AuthenticatedPlanejarRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
+  '/rotinas': typeof AuthenticatedRotinasRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
@@ -193,6 +200,7 @@ export interface FileRoutesByTo {
   '/planejar': typeof AuthenticatedPlanejarRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
+  '/rotinas': typeof AuthenticatedRotinasRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -219,6 +227,7 @@ export interface FileRoutesById {
   '/_authenticated/planejar': typeof AuthenticatedPlanejarRoute
   '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
   '/_authenticated/relatorio': typeof AuthenticatedRelatorioRoute
+  '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/planejar'
     | '/rastreador'
     | '/relatorio'
+    | '/rotinas'
     | '/viagens'
     | '/motoristas/$id'
     | '/viagens/$id'
@@ -269,6 +279,7 @@ export interface FileRouteTypes {
     | '/planejar'
     | '/rastreador'
     | '/relatorio'
+    | '/rotinas'
     | '/viagens'
     | '/'
     | '/motoristas/$id'
@@ -294,6 +305,7 @@ export interface FileRouteTypes {
     | '/_authenticated/planejar'
     | '/_authenticated/rastreador'
     | '/_authenticated/relatorio'
+    | '/_authenticated/rotinas'
     | '/_authenticated/viagens'
     | '/_authenticated/'
     | '/_authenticated/motoristas/$id'
@@ -337,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/viagens'
       fullPath: '/viagens'
       preLoaderRoute: typeof AuthenticatedViagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rotinas': {
+      id: '/_authenticated/rotinas'
+      path: '/rotinas'
+      fullPath: '/rotinas'
+      preLoaderRoute: typeof AuthenticatedRotinasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/relatorio': {
@@ -516,6 +535,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPlanejarRoute: typeof AuthenticatedPlanejarRoute
   AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
   AuthenticatedRelatorioRoute: typeof AuthenticatedRelatorioRoute
+  AuthenticatedRotinasRoute: typeof AuthenticatedRotinasRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -536,6 +556,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPlanejarRoute: AuthenticatedPlanejarRoute,
   AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,
   AuthenticatedRelatorioRoute: AuthenticatedRelatorioRoute,
+  AuthenticatedRotinasRoute: AuthenticatedRotinasRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
@@ -552,13 +573,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

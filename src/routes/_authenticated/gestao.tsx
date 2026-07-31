@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BarChart3, Eye, Leaf, Route as RouteIcon, MapPin, ShieldCheck, UserRound, Users, Wallet, Wrench } from "lucide-react";
+import { BarChart3, ClipboardCheck, Eye, Leaf, Route as RouteIcon, MapPin, ShieldCheck, UserRound, Users, Wallet, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
@@ -20,10 +20,11 @@ export const Route = createFileRoute("/_authenticated/gestao")({
 
 const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
   { to: "/planejar", label: "Planejar rota", desc: "Paradas, custo estimado e desvio em tempo real", Icon: RouteIcon },
+  { to: "/rotinas", label: "Rotinas", desc: "Óleo, arrefecimento, pneus, faróis e lavagem", Icon: ClipboardCheck },
   { to: "/manutencao", label: "Manutenção", desc: "Óleo, filtros, correia e pneus", Icon: Wrench },
   { to: "/despesas", label: "Despesas", desc: "Pedágio, estacionamento, multas e seguro", Icon: Wallet },
   { to: "/eco", label: "Eco Score", desc: "Nota de direção, eventos e desperdício", Icon: Leaf },
-  { to: "/relatorio", label: "Relatório mensal", desc: "Custo total, custo por km e CSV", Icon: BarChart3 },
+  { to: "/relatorio", label: "Relatório", desc: "Semanal e mensal, custo por km e CSV", Icon: BarChart3 },
   { to: "/motoristas", label: "Motoristas", desc: "Condutores e validade da CNH", Icon: UserRound },
   { to: "/documentos", label: "Documentos", desc: "CRLV, seguro, IPVA e licenciamento", Icon: ShieldCheck },
   { to: "/compartilhar", label: "Observadores", desc: "Compartilhar rastreamento somente leitura", Icon: Users },

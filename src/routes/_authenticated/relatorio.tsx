@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import { ArrowDownRight, ArrowUpRight, Download, Fuel, Minus, Wrench } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WeeklyReport } from "@/components/reports/WeeklyReport";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -136,9 +138,11 @@ function lastMonths(n: number): string[] {
 }
 
 function RelatorioPage() {
+  const [view, setView] = useState<"mensal" | "semanal">("mensal");
   const options = useMemo(() => lastMonths(12), []);
   const [month, setMonth] = useState(options[0]);
   const prev = previousMonth(month);
+
 
   const current = useMonthData(month);
   const previous = useMonthData(prev);
@@ -209,8 +213,24 @@ function RelatorioPage() {
   const loading = current.isLoading;
 
   return (
-    <AppShell title="Relatório mensal" subtitle="Custo consolidado do veículo">
-      <div className="flex items-center gap-2">
+    <AppShell
+      title="Relatório"
+      subtitle={view === "mensal" ? "Custo consolidado do veículo" : "Desempenho da semana"}
+    >
+      <Tabs value={view} onValueChange={(v) => setView(v as "mensal" | "semanal")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="semanal">Semanal</TabsTrigger>
+          <TabsTrigger value="mensal">Mensal</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      {view === "semanal" ? (
+        <div className="mt-3">
+          <WeeklyReport />
+        </div>
+      ) : (
+        <>
+      <div className="mt-3 flex items-center gap-2">
         <Select value={month} onValueChange={setMonth}>
           <SelectTrigger className="h-11 flex-1 text-base capitalize">
             <SelectValue />
@@ -336,6 +356,8 @@ function RelatorioPage() {
           </>
         )}
       </div>
+        </>
+      )}
     </AppShell>
   );
 }

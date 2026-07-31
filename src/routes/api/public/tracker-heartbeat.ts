@@ -29,6 +29,7 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"
         );
+        const { sendTrackerEventPush } = await import("@/lib/push/send.server");
 
         const cutoffMs = Date.now() - SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
         const cutoffIso = new Date(cutoffMs).toISOString();
@@ -73,6 +74,8 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             .from("vehicles")
             .update({ signal_lost_notified_at: new Date().toISOString() })
             .eq("id", v.id);
+
+          await sendTrackerEventPush(v.user_id as string, "signal_lost");
 
           flagged++;
         }

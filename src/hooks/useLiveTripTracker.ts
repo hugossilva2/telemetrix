@@ -13,6 +13,7 @@ import {
 } from "@/lib/eco/detect";
 import { ECO_EVENT_LABEL } from "@/lib/eco/score";
 import { getEcoSettings } from "@/lib/eco/settings";
+import { notifyTrackerEvent } from "@/lib/push/push.functions";
 
 /**
  * Mantém o estado local da viagem em andamento (tripStore) com base na
@@ -82,6 +83,9 @@ export function useLiveTripTracker() {
             : [],
       };
       tripStore.set(open);
+      if (prev === false) {
+        void notifyTrackerEvent({ data: { type: "ignition_on" } }).catch(() => {});
+      }
       // Se havia destino pendente, promove para ativo agora que o motor ligou
       const promoted = tripDestinationStore.promotePending();
       if (promoted) {
@@ -98,6 +102,7 @@ export function useLiveTripTracker() {
         closeTimer.current = null;
         const closing = tripStore.get();
         tripStore.set(null);
+        void notifyTrackerEvent({ data: { type: "ignition_off" } }).catch(() => {});
         lastSample.current = null;
         const active = tripDestinationStore.getActive();
         if (active) {

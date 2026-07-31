@@ -136,9 +136,11 @@ function lastMonths(n: number): string[] {
 }
 
 function RelatorioPage() {
+  const [view, setView] = useState<"mensal" | "semanal">("mensal");
   const options = useMemo(() => lastMonths(12), []);
   const [month, setMonth] = useState(options[0]);
   const prev = previousMonth(month);
+
 
   const current = useMonthData(month);
   const previous = useMonthData(prev);

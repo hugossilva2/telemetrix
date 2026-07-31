@@ -1,5 +1,13 @@
 // Guarded PWA service worker registration.
 // Only registers on the published production origin.
+async function registerPublishedServiceWorker() {
+  try {
+    await navigator.serviceWorker.register("/sw.js", { scope: "/" });
+  } catch {
+    // A tela de Ajustes informa quando o registro não estiver disponível.
+  }
+}
+
 export function registerServiceWorker() {
   if (typeof window === "undefined") return;
   if (!("serviceWorker" in navigator)) return;
@@ -36,7 +44,10 @@ export function registerServiceWorker() {
     return;
   }
 
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  });
+  if (document.readyState === "complete") {
+    void registerPublishedServiceWorker();
+    return;
+  }
+
+  window.addEventListener("load", () => void registerPublishedServiceWorker(), { once: true });
 }

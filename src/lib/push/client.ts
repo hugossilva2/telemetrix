@@ -26,10 +26,14 @@ export function pushSupport(): PushSupport {
 
 async function readyRegistration(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) return null;
-  const existing = await navigator.serviceWorker.getRegistration();
+  const existing = await navigator.serviceWorker.getRegistration("/");
   if (existing) return existing;
-  // Em preview/dev o service worker não é registrado (guarda do PWA).
-  return null;
+
+  // O primeiro acesso após instalar pode acontecer enquanto o worker ainda ativa.
+  // A espera limitada evita informar incorretamente que o app não está instalado.
+  const ready = navigator.serviceWorker.ready;
+  const timeout = new Promise<null>((resolve) => window.setTimeout(() => resolve(null), 5_000));
+  return Promise.race([ready, timeout]);
 }
 
 /** Retorna true se este dispositivo já está inscrito para receber push. */

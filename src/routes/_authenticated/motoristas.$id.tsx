@@ -20,6 +20,7 @@ import { DriverEditDialog } from "@/components/drivers/DriverEditDialog";
 import { EcoScoreBadge } from "@/components/eco/EcoScoreRing";
 import { useDriver, useDriverSafeStarts, useDriverTrips } from "@/lib/drivers/api";
 import { computeDriverScore, monthlyScoreSeries } from "@/lib/drivers/score";
+import { getFuelKind } from "@/lib/eco/settings";
 import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, formatIdle } from "@/lib/eco/score";
 import type { EcoEventType } from "@/lib/eco/detect";
 import { formatBRL, formatDecimal, formatKm, formatSpeed } from "@/lib/format";
@@ -92,7 +93,7 @@ function DriverProfilePage() {
   const { data: trips = [] } = useDriverTrips(id);
   const { data: safeStarts = [] } = useDriverSafeStarts(id);
 
-  const result = useMemo(() => computeDriverScore(trips, safeStarts), [trips, safeStarts]);
+  const result = useMemo(() => computeDriverScore(trips, safeStarts, { fuel: getFuelKind() }), [trips, safeStarts]);
   const series = useMemo(() => monthlyScoreSeries(trips), [trips]);
   const { stats } = result;
 

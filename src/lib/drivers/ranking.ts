@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { computeDriverScore, type DriverScore } from "./score";
+import { getFuelKind } from "@/lib/eco/settings";
 import type { DriverSafeStartRow, DriverTripRow } from "./score";
 import { DRIVER_COLUMNS, type DriverRow } from "./api";
 
@@ -56,7 +57,7 @@ export function useDriverRanking() {
       return ((drivers.data ?? []) as DriverRow[])
         .map((driver) => ({
           driver,
-          result: computeDriverScore(tripsBy.get(driver.id) ?? [], startsBy.get(driver.id) ?? []),
+          result: computeDriverScore(tripsBy.get(driver.id) ?? [], startsBy.get(driver.id) ?? [], { fuel: getFuelKind() }),
         }))
         .sort((a, b) => {
           const sa = a.result.score ?? -1;

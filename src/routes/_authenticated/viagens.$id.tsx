@@ -25,6 +25,7 @@ import {
   formatTime,
 } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
+import { TripCoachCard } from "@/components/coach/TripCoachCard";
 
 const TripMap = lazy(() => import("@/components/trips/TripMap"));
 

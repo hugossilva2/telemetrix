@@ -12,6 +12,9 @@ import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDest
 import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
 import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
+import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
+import { getFuelKind } from "@/lib/eco/settings";
+
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 

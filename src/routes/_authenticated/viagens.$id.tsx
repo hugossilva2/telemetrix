@@ -420,6 +420,10 @@ function TripDetailPage() {
             </div>
           )}
 
+          {/* Coach de direção com IA */}
+          <SectionTitle>Coach de direção (IA)</SectionTitle>
+          <TripCoachCard tripId={trip.id} />
+
           {/* Comparativo com viagens similares */}
           <SectionTitle>Comparativo com viagens similares</SectionTitle>
           <div className="card-surface p-4">

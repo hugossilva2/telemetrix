@@ -615,6 +615,56 @@ export type Database = {
           },
         ]
       }
+      trip_coachings: {
+        Row: {
+          comparison: string | null
+          created_at: string
+          grade: string
+          headline: string
+          highlight: string | null
+          id: string
+          model: string | null
+          summary: string
+          tips: Json
+          trip_id: string
+          user_id: string
+        }
+        Insert: {
+          comparison?: string | null
+          created_at?: string
+          grade: string
+          headline: string
+          highlight?: string | null
+          id?: string
+          model?: string | null
+          summary: string
+          tips?: Json
+          trip_id: string
+          user_id: string
+        }
+        Update: {
+          comparison?: string | null
+          created_at?: string
+          grade?: string
+          headline?: string
+          highlight?: string | null
+          id?: string
+          model?: string | null
+          summary?: string
+          tips?: Json
+          trip_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trip_coachings_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: true
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           avg_speed_kmh: number | null

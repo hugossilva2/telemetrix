@@ -310,9 +310,37 @@ function EcoPage() {
       )}
 
       <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Ficha técnica do veículo
+      </h2>
+      <VehicleSpecCard fuel={settings.fuel} />
+
+      <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Ajustes da pontuação
       </h2>
       <div className="space-y-3 card-surface p-4">
+        <div>
+          <Label className="text-sm">Combustível em uso</Label>
+          <p className="text-[11px] text-muted-foreground">
+            Define a meta de consumo (Inmetro) usada nos scores.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(["etanol", "gasolina", "misto"] as FuelKind[]).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setSettings({ ...settings, fuel: f })}
+                className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${
+                  settings.fuel === f
+                    ? "border-primary/50 bg-primary/12 text-primary"
+                    : "border-border bg-background/35 text-muted-foreground"
+                }`}
+              >
+                {fuelLabel(f)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <Label htmlFor="live-alerts" className="text-sm">
@@ -328,6 +356,7 @@ function EcoPage() {
             onCheckedChange={(v) => setSettings({ ...settings, liveAlerts: v })}
           />
         </div>
+
 
         <div className="grid grid-cols-2 gap-3">
           <div>

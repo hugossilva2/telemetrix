@@ -428,9 +428,10 @@ function EcoPage() {
         </div>
 
         <p className="text-[11px] text-muted-foreground">
-          O rastreador ainda não envia os eventos nativos de Green Driving, então a
-          nota é calculada a partir da velocidade, do rumo, do RPM e da carga do
-          motor recebidos a cada ~6 segundos.
+          A nota é calculada a partir da velocidade, do rumo, do RPM e da carga do
+          motor, com os limites calibrados pela ficha técnica do veículo: aceleração
+          de fábrica (0-100 em 11,5 s), faixa econômica de 1.500-2.500 rpm e as metas
+          de consumo Inmetro do combustível selecionado.
         </p>
       </div>
 

@@ -23,5 +23,18 @@ export const notifyTrackerEvent = createServerFn({ method: "POST" })
   .inputValidator((input: { type: string; placeName?: string | null; vehicleId?: string | null }) => input)
   .handler(async ({ data, context }) => {
     const { sendTrackerEventPush } = await import("./send.server");
-    return sendTrackerEventPush(context.userId, data.type, { placeName: data.placeName ?? null, vehicleId: data.vehicleId ?? null });
+    let vehicleId = data.vehicleId ?? null;
+    if (!vehicleId) {
+      const { data: v } = await context.supabase
+        .from("vehicles")
+        .select("id")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      vehicleId = v?.id ?? null;
+    }
+    return sendTrackerEventPush(context.userId, data.type, {
+      placeName: data.placeName ?? null,
+      vehicleId,
+    });
   });

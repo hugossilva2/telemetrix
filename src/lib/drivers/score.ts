@@ -185,8 +185,12 @@ export function computeDriverScore(
       drivingSeconds,
       liters,
       cost,
-      kmPerLiter: liters > 0 ? distanceKm / liters : null,
+      kmPerLiter,
+      targetKmPerLiter,
+      consumptionRatio,
+      avgSpeedKmh,
       costPerKm: distanceKm > 0 ? cost / distanceKm : null,
+
       wastedLiters,
       wastedCost,
       idleSeconds,

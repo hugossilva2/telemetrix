@@ -233,14 +233,7 @@ function AjustesPage() {
         <InstallAppCard />
       </div>
 
-      <Button
-        onClick={handleSignOut}
-        variant="outline"
-        className="mt-4 w-full"
-      >
-        <LogOut className="mr-2 size-4" />
-        Sair da conta
-      </Button>
+      <SignOutButton className="mt-4 w-full" />
     </AppShell>
   );
 }

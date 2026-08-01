@@ -1,5 +1,5 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { LogOut, Save, Car } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Save, Car } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -13,6 +13,7 @@ import { InstallAppCard } from "@/components/settings/InstallAppCard";
 import { DataSourceCard } from "@/components/settings/DataSourceCard";
 import { OfflineQueueCard } from "@/components/settings/OfflineQueueCard";
 import { PushNotificationsCard } from "@/components/settings/PushNotificationsCard";
+import { SignOutButton } from "@/components/auth/SignOutButton";
 
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
@@ -38,7 +39,6 @@ type VehicleRow = {
 };
 
 function AjustesPage() {
-  const navigate = useNavigate();
   const qc = useQueryClient();
 
   const { data: vehicle, isLoading } = useQuery({
@@ -110,14 +110,6 @@ function AjustesPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
-  async function handleSignOut() {
-    await qc.cancelQueries();
-    qc.clear();
-    await supabase.auth.signOut();
-    toast.success("Você saiu.");
-    navigate({ to: "/auth", replace: true });
-  }
 
   return (
     <AppShell title="Ajustes" subtitle="Perfil e preferências">
@@ -233,14 +225,7 @@ function AjustesPage() {
         <InstallAppCard />
       </div>
 
-      <Button
-        onClick={handleSignOut}
-        variant="outline"
-        className="mt-4 w-full"
-      >
-        <LogOut className="mr-2 size-4" />
-        Sair da conta
-      </Button>
+      <SignOutButton className="mt-4 w-full" />
     </AppShell>
   );
 }

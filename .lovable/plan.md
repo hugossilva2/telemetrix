@@ -1,58 +1,36 @@
 ## Objetivo
 
-Adicionar (1) um relatório semanal com médias de distância, velocidade, RPM e gasto de combustível, (2) botões de rotinas rápidas de conferência (óleo, arrefecimento, faróis, pneus, lavagem, água do limpador) com periodicidade própria, e (3) um indicador de Saúde do Veículo que mostra o que está pendente/atrasado.
+Dar autonomia à conta observadora: poder sair do app e ter mais informação útil enquanto acompanha o veículo à distância.
 
-## 1. Banco de dados (nova migração)
+## 1. Botão "Sair" acessível ao observador (bug)
 
-Tabela `vehicle_checkups` — registro de cada vez que o usuário confere um item:
-- item (texto: oleo, arrefecimento, farois, pneus, lavagem, agua_limpador)
-- veículo, motorista opcional, data/hora da checagem, odômetro no momento, observação
-- Acesso: cada usuário vê e gerencia apenas os próprios registros (RLS + grants).
+Hoje o único `signOut` do app está em `/ajustes`, rota bloqueada pelo `ObserverGate` — logo o observador fica preso na conta.
 
-Sem tabela de configuração: as periodicidades ficam como padrão no código (editáveis depois se você quiser).
+- Extrair a lógica de logout para um componente reutilizável `SignOutButton` (cancelar queries → limpar cache → `supabase.auth.signOut()` → `navigate("/auth", { replace: true })`).
+- Usar esse componente em `/ajustes` (mesmo comportamento de hoje) e no header de `/acompanhar`, junto ao e-mail da conta logada, para que o observador sempre consiga sair.
 
-Periodicidades propostas:
-| Rotina | Período |
-|---|---|
-| Óleo (nível) | semanal (7 dias) |
-| Arrefecimento | semanal |
-| Pneus (pressão) | semanal |
-| Faróis / lanternas | mensal (30 dias) |
-| Água do limpador | mensal |
-| Lavagem | mensal |
+## 2. Endereço atual + abrir/compartilhar no Maps
 
-Regra de status: em dia (verde) → a vencer nos últimos 20% do período (amarelo) → **pendente** quando passa do período (vermelho). Item nunca conferido entra como pendente.
+- Nova server function que faz geocodificação reversa da última posição pelo gateway do Google Maps (chave de servidor, nunca no navegador), com cache curto.
+- Em `/acompanhar`: linha com o endereço aproximado abaixo do status, botão **Abrir no Google Maps** (link `google.com/maps?q=lat,lng`) e botão **Compartilhar** usando `navigator.share` com fallback de copiar link.
 
-## 2. Rotinas rápidas (nova aba/rota `/rotinas`)
+## 3. Histórico de viagens somente leitura
 
-- Grade de botões grandes, um por rotina, cada um com selo de status e “conferido há X dias”.
-- Um toque registra a checagem agora (usa o odômetro da telemetria quando disponível) com confirmação em toast e desfazer.
-- Toque longo / ícone abre um campo de observação opcional.
-- Lista do histórico recente das checagens, com opção de excluir.
+- Migração: adicionar política de leitura em `trips` para veículos compartilhados (usa a função existente `can_view_vehicle`), mantendo as demais operações restritas ao dono.
+- Em `/acompanhar`, seção "Últimas viagens" (10 mais recentes do veículo compartilhado): data/hora, duração, distância, velocidade média e máxima; ao tocar, expande um mini-mapa com o traçado da viagem. Nenhuma ação de editar ou excluir para o observador.
 
-## 3. Saúde do Veículo
+## 4. Notificações push para o observador
 
-- Card no Painel: anel/barra de 0–100 combinando rotinas pendentes, alertas de manutenção (já existentes) e documentos vencendo.
-- Cálculo: começa em 100; cada rotina a vencer −4, cada rotina pendente −10, cada manutenção próxima −6, vencida −12, documento vencido −10 (limitado a 0).
-- Lista compacta “Pendências” com atalho para `/rotinas`, `/manutencao` ou `/documentos`.
-- Rotinas pendentes também geram um toast por dia (mesmo padrão já usado nos alertas de manutenção).
-
-## 4. Relatório semanal
-
-Na tela de Relatório, adicionar um seletor Mensal | Semanal (mantendo tudo que já existe no mensal). Na visão semanal (segunda a domingo, com navegação semana anterior/próxima):
-- Distância total e média por dia/viagem
-- Velocidade média e máxima
-- RPM médio e máximo (a partir dos dados de viagem/eco já gravados; exibe “—” quando o hardware não enviou RPM)
-- Litros e gasto de combustível, custo por km
-- Comparativo com a semana anterior (setas de alta/baixa, como já existe no mensal)
-- Resumo das rotinas conferidas na semana e das pendentes
-- Exportação CSV da semana
+- O observador já pode registrar o próprio dispositivo (`push_subscriptions` é por usuário); reaproveitar o `PushNotificationsCard` num bloco compacto dentro de `/acompanhar` (sem o botão de teste do dono, mas com o "Testar" próprio).
+- No envio de eventos (`send.server.ts`), além do dono do veículo, buscar em `vehicle_shares` os observadores ativos (`revoked_at IS NULL`, `viewer_user_id` preenchido) daquele veículo e enviar a mesma notificação para eles. Eventos cobertos: ignição ON/OFF, movimento suspeito, entrada/saída de cerca, perda de sinal.
 
 ## Detalhes técnicos
 
-- Nova migração para `vehicle_checkups` com GRANTs e RLS por `auth.uid()`.
-- `src/lib/checkups/rules.ts`: catálogo de rotinas, períodos, cálculo de status e score de saúde (espelhando o padrão de `src/lib/maintenance/rules.ts`).
-- `src/components/health/VehicleHealthCard.tsx` no Painel; `src/components/checkups/CheckupButtons.tsx`.
-- Nova rota `src/routes/_authenticated/rotinas.tsx` com `head()` próprio, entrada na navegação e bloqueio para observadores via `ObserverGate`.
-- Relatório: `src/lib/reports/week.ts` com `weekKey`/`weekRange`/`previousWeek`, reutilizando os agregadores existentes; métricas de RPM vindas das colunas de trips/eco.
-- Também vou corrigir, sem alterar comportamento, o erro de hidratação que aparece hoje na rota de autenticação.
+- `src/components/auth/SignOutButton.tsx` novo; `ajustes.tsx` e `acompanhar.tsx` passam a consumi-lo.
+- `src/lib/geo/reverse.functions.ts`: `createServerFn` + `requireSupabaseAuth`, gateway `maps/api/geocode/json`, tratamento explícito de 403 (`API_KEY_HTTP_REFERRER_BLOCKED` / `API_KEY_SERVICE_BLOCKED`).
+- `send.server.ts`: nova função `resolveRecipients(vehicleId, ownerId)` retornando dono + observadores; `sendTrackerEventPush` itera sobre ela.
+- `/acompanhar` cresce; extrair os blocos novos em `src/components/observer/*` (`ObserverAddressCard`, `ObserverTripsList`) para manter a rota legível.
+
+## Fora de escopo
+
+Locais salvos/ETA para o observador (fica para uma fase seguinte, se você quiser).

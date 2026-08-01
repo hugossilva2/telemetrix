@@ -125,18 +125,35 @@ export function computeDriverScore(
 
   const safety = ecoWeight > 0 ? Math.round(ecoWeighted / ecoWeight) : null;
 
+  const kmPerLiter = liters > 0 ? distanceKm / liters : null;
+  const avgSpeedKmh = drivingSeconds > 0 ? (distanceKm / drivingSeconds) * 3600 : null;
+  const targetKmPerLiter = expectedKmpl({ fuel: options.fuel ?? "misto", avgSpeedKmh });
+  const consumptionRatio = kmPerLiter != null ? kmPerLiter / targetKmPerLiter : null;
+
   const wasteShare = liters > 0 ? wastedLiters / liters : null;
-  const efficiency =
+  const wasteScore =
     wasteShare == null
       ? null
-      : Math.round(
-          Math.max(0, Math.min(100, 100 - (wasteShare / MAX_WASTE_SHARE) * 100)),
-        );
+      : Math.max(0, Math.min(100, 100 - (wasteShare / MAX_WASTE_SHARE) * 100));
+
+  // Consumo real x meta Inmetro do veículo: bater a meta = 100.
+  const consumptionScore =
+    consumptionRatio == null
+      ? null
+      : Math.max(0, Math.min(100, 50 + (consumptionRatio - 1) * 250));
+
+  const efficiencyParts = [wasteScore, consumptionScore].filter(
+    (v): v is number => v != null,
+  );
+  const efficiency = efficiencyParts.length
+    ? Math.round(efficiencyParts.reduce((a, b) => a + b, 0) / efficiencyParts.length)
+    : null;
 
   const safeStart =
     safeStartsRequired > 0 ? Math.round((safeStartsReady / safeStartsRequired) * 100) : null;
 
   const pillars: DriverPillars = { safety, efficiency, safeStart };
+
 
   let sum = 0;
   let weight = 0;

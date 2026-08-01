@@ -25,6 +25,7 @@ import {
   formatTime,
 } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
+import { TripCoachCard } from "@/components/coach/TripCoachCard";
 
 const TripMap = lazy(() => import("@/components/trips/TripMap"));
 
@@ -419,6 +420,10 @@ function TripDetailPage() {
               <EcoEventsChart events={ecoEvents} />
             </div>
           )}
+
+          {/* Coach de direção com IA */}
+          <SectionTitle>Coach de direção (IA)</SectionTitle>
+          <TripCoachCard tripId={trip.id} />
 
           {/* Comparativo com viagens similares */}
           <SectionTitle>Comparativo com viagens similares</SectionTitle>

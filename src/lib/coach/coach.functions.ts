@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
 import type { FuelKind } from "@/lib/vehicles/specs";
 import { normalizeGrade, parseTips, type TripCoaching } from "@/lib/coach/types";
 

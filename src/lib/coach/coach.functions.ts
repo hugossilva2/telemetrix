@@ -131,7 +131,7 @@ export const analyzeTripCoaching = createServerFn({ method: "POST" })
           grade: result.grade,
           headline: result.headline,
           summary: result.summary,
-          tips: result.tips,
+          tips: result.tips.map((t) => ({ title: t.title, detail: t.detail })),
           comparison: result.comparison,
           highlight: result.highlight,
           model: result.model,

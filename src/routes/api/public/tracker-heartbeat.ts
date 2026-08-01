@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             .update({ signal_lost_notified_at: new Date().toISOString() })
             .eq("id", v.id);
 
-          await sendTrackerEventPush(v.user_id as string, "signal_lost");
+          await sendTrackerEventPush(v.user_id as string, "signal_lost", { vehicleId: v.id as string });
 
           flagged++;
         }

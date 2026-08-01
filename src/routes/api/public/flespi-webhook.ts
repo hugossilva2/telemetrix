@@ -204,7 +204,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               lng: lng ?? null,
               occurred_at: nowIso,
             });
-            await sendTrackerEventPush(vehicle.user_id as string, "ignition_on");
+            await sendTrackerEventPush(vehicle.user_id as string, "ignition_on", { vehicleId: vehicle.id as string });
           } else if (ign === false && prevIgn === true) {
             await supabaseAdmin.from("tracker_events").insert({
               user_id: vehicle.user_id,
@@ -214,7 +214,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
               lng: lng ?? null,
               occurred_at: nowIso,
             });
-            await sendTrackerEventPush(vehicle.user_id as string, "ignition_off");
+            await sendTrackerEventPush(vehicle.user_id as string, "ignition_off", { vehicleId: vehicle.id as string });
           }
 
           // ---------- tracker_events: movimento com motor desligado ----------
@@ -237,7 +237,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                 metadata: { speed_kmh: speed },
                 occurred_at: nowIso,
               });
-              await sendTrackerEventPush(vehicle.user_id as string, "motion_off_ignition");
+              await sendTrackerEventPush(vehicle.user_id as string, "motion_off_ignition", { vehicleId: vehicle.id as string });
               // persistir cooldown no geofence_state
               const nextGeo = {
                 ...((state?.geofence_state as any) ?? {}),
@@ -301,7 +301,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                       metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 500 },
                       occurred_at: nowIso,
                     });
-                    await sendTrackerEventPush(vehicle.user_id as string, "geofence_exit", { placeName: (p.name as string) ?? null });
+                    await sendTrackerEventPush(vehicle.user_id as string, "geofence_exit", { placeName: (p.name as string) ?? null, vehicleId: vehicle.id as string });
                     await fireAutomationsForPlace(supabaseAdmin as never, {
                       userId: vehicle.user_id as string,
                       placeId: p.id as string,
@@ -322,7 +322,7 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
                       metadata: { place_name: p.name, radius_m: p.geofence_radius_m ?? 500 },
                       occurred_at: nowIso,
                     });
-                    await sendTrackerEventPush(vehicle.user_id as string, "geofence_enter", { placeName: (p.name as string) ?? null });
+                    await sendTrackerEventPush(vehicle.user_id as string, "geofence_enter", { placeName: (p.name as string) ?? null, vehicleId: vehicle.id as string });
                     await fireAutomationsForPlace(supabaseAdmin as never, {
                       userId: vehicle.user_id as string,
                       placeId: p.id as string,

@@ -72,16 +72,24 @@ export function summarizeEco({
   events,
   idleSeconds,
   distanceKm,
-  kmpl = 10,
+  kmpl,
   pricePerLiter = 5.89,
+  fuel,
+  avgSpeedKmh,
 }: {
   events: EcoEvent[];
   idleSeconds: number;
   distanceKm: number;
   kmpl?: number;
   pricePerLiter?: number;
+  /** combustível em uso, para a meta Inmetro do veículo */
+  fuel?: FuelKind;
+  /** velocidade média da viagem, para escolher ciclo urbano/rodoviário */
+  avgSpeedKmh?: number | null;
 }): EcoSummary {
   const counts = countEvents(events);
+  const reference = expectedKmpl({ fuel: fuel ?? "misto", avgSpeedKmh });
+  const effectiveKmpl = kmpl && kmpl > 0 ? kmpl : reference;
 
   let penalty = 0;
   let wasted = 0;
@@ -90,6 +98,13 @@ export function summarizeEco({
     const w = WASTE_L[e.type];
     if (p) penalty += p[e.severity] ?? p.moderate;
     if (w) wasted += w[e.severity] ?? w.moderate;
+
+    // Giro alto: penalidade proporcional à distância da faixa econômica.
+    if (e.type === "high_rpm" && Number.isFinite(e.value)) {
+      const over = Math.max(0, Number(e.value) - ECO_RPM_MAX) / 1000;
+      penalty += over * 1.5;
+      wasted += over * 0.02;
+    }
   }
 
   // Marcha lenta: 1 ponto a cada 5 min parado com motor ligado
@@ -103,8 +118,9 @@ export function summarizeEco({
   const score = Math.round(Math.min(100, Math.max(0, 100 - penaltyPer100)));
 
   // Combustível extra pelo estilo, limitado a 25% do consumo da viagem.
-  const tripLiters = kmpl > 0 ? km / kmpl : 0;
+  const tripLiters = effectiveKmpl > 0 ? km / effectiveKmpl : 0;
   const wastedFuelLiters = Math.min(wasted, tripLiters * 0.25);
+
 
   return {
     score,

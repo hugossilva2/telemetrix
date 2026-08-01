@@ -211,6 +211,9 @@ export function OngoingTripCard() {
         distanceKm={distanceKm}
       />
 
+      <LivePerformanceBadge />
+
+
 
       {destination && remainingKm !== null && (
         <div className="flex items-center justify-between border-t border-success/20 bg-success/5 px-3 py-1.5 text-xs">

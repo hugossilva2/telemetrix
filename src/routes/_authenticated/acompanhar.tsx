@@ -18,6 +18,10 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
+import { SignOutButton } from "@/components/auth/SignOutButton";
+import { ObserverAddressCard } from "@/components/observer/ObserverAddressCard";
+import { ObserverTripsList } from "@/components/observer/ObserverTripsList";
+import { PushNotificationsCard } from "@/components/settings/PushNotificationsCard";
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 
@@ -301,7 +305,7 @@ function FollowPage() {
 
   if (isLoading) {
     return (
-      <AppShell title="Acompanhar" subtitle="Modo observador">
+      <AppShell title="Acompanhar" subtitle="Modo observador" actions={<SignOutButton iconOnly />}>
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       </AppShell>
     );
@@ -309,7 +313,7 @@ function FollowPage() {
 
   if (!share) {
     return (
-      <AppShell title="Acompanhar" subtitle="Modo observador">
+      <AppShell title="Acompanhar" subtitle="Modo observador" actions={<SignOutButton iconOnly />}>
         <div className="card-surface p-5 text-center">
           <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-muted text-muted-foreground">
             <Eye className="size-5" />
@@ -334,6 +338,7 @@ function FollowPage() {
           <Eye className="size-3" /> somente leitura · atualizado {relative(lastSeen)}
         </span>
       }
+      actions={<SignOutButton iconOnly />}
     >
       <div className="grid grid-cols-3 gap-2">
         <Tile
@@ -418,6 +423,12 @@ function FollowPage() {
           </ClientOnly>
         </div>
       </div>
+
+      <ObserverAddressCard lat={lat} lng={lng} vehicleName={vehicle?.name ?? null} />
+
+      <PushNotificationsCard />
+
+      <ObserverTripsList vehicleId={vehicleId} />
 
       <div className="card-surface p-4">
         <h2 className="font-display text-sm font-semibold tracking-tight">

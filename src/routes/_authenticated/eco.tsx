@@ -11,6 +11,7 @@ import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, ecoBand, formatIdle } from "@/lib/eco
 import type { EcoEventType } from "@/lib/eco/detect";
 import {
   DEFAULT_ECO_SETTINGS,
+
   getEcoSettings,
   saveEcoSettings,
 } from "@/lib/eco/settings";

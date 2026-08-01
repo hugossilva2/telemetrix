@@ -305,7 +305,7 @@ function FollowPage() {
 
   if (isLoading) {
     return (
-      <AppShell title="Acompanhar" subtitle="Modo observador" actions={<SignOutButton iconOnly />}>
+      <AppShell title="Acompanhar" subtitle="Modo observador" action={<SignOutButton iconOnly />}>
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       </AppShell>
     );
@@ -313,7 +313,7 @@ function FollowPage() {
 
   if (!share) {
     return (
-      <AppShell title="Acompanhar" subtitle="Modo observador" actions={<SignOutButton iconOnly />}>
+      <AppShell title="Acompanhar" subtitle="Modo observador" action={<SignOutButton iconOnly />}>
         <div className="card-surface p-5 text-center">
           <span className="mx-auto grid size-11 place-items-center rounded-2xl bg-muted text-muted-foreground">
             <Eye className="size-5" />
@@ -338,7 +338,7 @@ function FollowPage() {
           <Eye className="size-3" /> somente leitura · atualizado {relative(lastSeen)}
         </span>
       }
-      actions={<SignOutButton iconOnly />}
+      action={<SignOutButton iconOnly />}
     >
       <div className="grid grid-cols-3 gap-2">
         <Tile

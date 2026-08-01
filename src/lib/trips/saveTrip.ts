@@ -3,6 +3,9 @@ import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
+import { getFuelKind } from "@/lib/eco/settings";
+import { expectedKmpl } from "@/lib/vehicles/specs";
+
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
 import { offlineQueue } from "@/lib/offline/queue";

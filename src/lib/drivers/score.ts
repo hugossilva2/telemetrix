@@ -260,6 +260,14 @@ export function driverBadges({ score, pillars, stats }: DriverScore): DriverBadg
       tone: "emerald",
     });
   }
+  if (stats.consumptionRatio != null && stats.consumptionRatio >= 1) {
+    badges.push({
+      id: "inmetro",
+      label: "Meta Inmetro batida",
+      description: `Consumo real acima de ${stats.targetKmPerLiter.toFixed(1)} km/l`,
+      tone: "lime",
+    });
+  }
   if (pillars.safeStart === 100 && stats.safeStartsRequired > 0) {
     badges.push({
       id: "safe-start",

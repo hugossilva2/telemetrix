@@ -6,7 +6,14 @@
 // chegam a cada ~6 s. Se um dia as chaves nativas aparecerem, o parser
 // preenche `greenDrivingType/Value` e a detecção nativa tem prioridade.
 
+import {
+  ACTIVE_SPEC,
+  referenceAccelKmhPerS,
+  type VehicleSpec,
+} from "@/lib/vehicles/specs";
+
 export type EcoEventType =
+
   | "harsh_brake"
   | "harsh_accel"
   | "harsh_corner"

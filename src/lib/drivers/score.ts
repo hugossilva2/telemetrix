@@ -1,4 +1,6 @@
 import type { EcoEventType } from "@/lib/eco/detect";
+import { expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+
 
 export interface DriverTripRow {
   id: string;

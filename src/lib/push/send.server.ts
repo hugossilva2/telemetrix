@@ -95,11 +95,29 @@ const EVENT_COPY: Record<string, { title: string; body: string; url: string }> =
   },
 };
 
+/** Observadores ativos (não revogados) de um veículo. */
+async function observerIdsForVehicle(vehicleId: string): Promise<string[]> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("vehicle_shares")
+    .select("viewer_user_id")
+    .eq("vehicle_id", vehicleId)
+    .is("revoked_at", null)
+    .not("viewer_user_id", "is", null);
+  if (error) {
+    console.error("observadores do veículo:", error.message);
+    return [];
+  }
+  return Array.from(
+    new Set((data ?? []).map((r) => r.viewer_user_id as string).filter(Boolean)),
+  );
+}
+
 /** Notificação padronizada para um evento do rastreador. */
 export async function sendTrackerEventPush(
   userId: string,
   type: string,
-  extra?: { placeName?: string | null },
+  extra?: { placeName?: string | null; vehicleId?: string | null },
 ) {
   const copy = EVENT_COPY[type];
   if (!copy) return { sent: 0, failed: 0, removed: 0 };
@@ -110,10 +128,31 @@ export async function sendTrackerEventPush(
         ? `O veículo chegou em ${place}.`
         : `O veículo saiu de ${place}.`
       : copy.body;
-  return sendPushToUser(userId, {
+
+  const result = await sendPushToUser(userId, {
     title: `Telemetrix · ${copy.title}`,
     body,
     url: copy.url,
     tag: type,
   });
+
+  // Espelha o alerta para as contas observadoras do veículo (somente leitura).
+  if (extra?.vehicleId) {
+    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter(
+      (id) => id !== userId,
+    );
+    for (const observerId of observers) {
+      const r = await sendPushToUser(observerId, {
+        title: `Telemetrix · ${copy.title}`,
+        body,
+        url: "/acompanhar",
+        tag: type,
+      });
+      result.sent += r.sent;
+      result.failed += r.failed;
+      result.removed += r.removed;
+    }
+  }
+
+  return result;
 }

@@ -1,4 +1,6 @@
 import type { EcoEventType } from "@/lib/eco/detect";
+import { expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+
 
 export interface DriverTripRow {
   id: string;
@@ -42,7 +44,13 @@ export interface DriverStats {
   liters: number;
   cost: number;
   kmPerLiter: number | null;
+  /** meta de consumo (km/l) da ficha técnica para o perfil de velocidade */
+  targetKmPerLiter: number;
+  /** consumo real ÷ meta (1 = bateu a meta Inmetro) */
+  consumptionRatio: number | null;
+  avgSpeedKmh: number | null;
   costPerKm: number | null;
+
   wastedLiters: number;
   wastedCost: number;
   idleSeconds: number;
@@ -70,7 +78,9 @@ export const PILLAR_WEIGHTS = { safety: 0.6, efficiency: 0.3, safeStart: 0.1 };
 export function computeDriverScore(
   trips: DriverTripRow[],
   safeStarts: DriverSafeStartRow[],
+  options: { fuel?: FuelKind } = {},
 ): DriverScore {
+
   const counts: Record<EcoEventType, number> = {
     harsh_brake: 0,
     harsh_accel: 0,
@@ -125,18 +135,35 @@ export function computeDriverScore(
 
   const safety = ecoWeight > 0 ? Math.round(ecoWeighted / ecoWeight) : null;
 
+  const kmPerLiter = liters > 0 ? distanceKm / liters : null;
+  const avgSpeedKmh = drivingSeconds > 0 ? (distanceKm / drivingSeconds) * 3600 : null;
+  const targetKmPerLiter = expectedKmpl({ fuel: options.fuel ?? "misto", avgSpeedKmh });
+  const consumptionRatio = kmPerLiter != null ? kmPerLiter / targetKmPerLiter : null;
+
   const wasteShare = liters > 0 ? wastedLiters / liters : null;
-  const efficiency =
+  const wasteScore =
     wasteShare == null
       ? null
-      : Math.round(
-          Math.max(0, Math.min(100, 100 - (wasteShare / MAX_WASTE_SHARE) * 100)),
-        );
+      : Math.max(0, Math.min(100, 100 - (wasteShare / MAX_WASTE_SHARE) * 100));
+
+  // Consumo real x meta Inmetro do veículo: bater a meta = 100.
+  const consumptionScore =
+    consumptionRatio == null
+      ? null
+      : Math.max(0, Math.min(100, 50 + (consumptionRatio - 1) * 250));
+
+  const efficiencyParts = [wasteScore, consumptionScore].filter(
+    (v): v is number => v != null,
+  );
+  const efficiency = efficiencyParts.length
+    ? Math.round(efficiencyParts.reduce((a, b) => a + b, 0) / efficiencyParts.length)
+    : null;
 
   const safeStart =
     safeStartsRequired > 0 ? Math.round((safeStartsReady / safeStartsRequired) * 100) : null;
 
   const pillars: DriverPillars = { safety, efficiency, safeStart };
+
 
   let sum = 0;
   let weight = 0;
@@ -158,8 +185,12 @@ export function computeDriverScore(
       drivingSeconds,
       liters,
       cost,
-      kmPerLiter: liters > 0 ? distanceKm / liters : null,
+      kmPerLiter,
+      targetKmPerLiter,
+      consumptionRatio,
+      avgSpeedKmh,
       costPerKm: distanceKm > 0 ? cost / distanceKm : null,
+
       wastedLiters,
       wastedCost,
       idleSeconds,
@@ -227,6 +258,14 @@ export function driverBadges({ score, pillars, stats }: DriverScore): DriverBadg
       label: "Economia máxima",
       description: "Praticamente zero combustível desperdiçado",
       tone: "emerald",
+    });
+  }
+  if (stats.consumptionRatio != null && stats.consumptionRatio >= 1) {
+    badges.push({
+      id: "inmetro",
+      label: "Meta Inmetro batida",
+      description: `Consumo real acima de ${stats.targetKmPerLiter.toFixed(1)} km/l`,
+      tone: "lime",
     });
   }
   if (pillars.safeStart === 100 && stats.safeStartsRequired > 0) {

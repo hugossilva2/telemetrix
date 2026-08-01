@@ -11,9 +11,13 @@ import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, ecoBand, formatIdle } from "@/lib/eco
 import type { EcoEventType } from "@/lib/eco/detect";
 import {
   DEFAULT_ECO_SETTINGS,
+
   getEcoSettings,
   saveEcoSettings,
 } from "@/lib/eco/settings";
+import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
+import { fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
+
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { formatDateTime } from "@/lib/trips/format";
 import { Input } from "@/components/ui/input";
@@ -310,9 +314,37 @@ function EcoPage() {
       )}
 
       <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        Ficha técnica do veículo
+      </h2>
+      <VehicleSpecCard fuel={settings.fuel} />
+
+      <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Ajustes da pontuação
       </h2>
       <div className="space-y-3 card-surface p-4">
+        <div>
+          <Label className="text-sm">Combustível em uso</Label>
+          <p className="text-[11px] text-muted-foreground">
+            Define a meta de consumo (Inmetro) usada nos scores.
+          </p>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            {(["etanol", "gasolina", "misto"] as FuelKind[]).map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setSettings({ ...settings, fuel: f })}
+                className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${
+                  settings.fuel === f
+                    ? "border-primary/50 bg-primary/12 text-primary"
+                    : "border-border bg-background/35 text-muted-foreground"
+                }`}
+              >
+                {fuelLabel(f)}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <div className="flex items-center justify-between gap-3">
           <div>
             <Label htmlFor="live-alerts" className="text-sm">
@@ -328,6 +360,7 @@ function EcoPage() {
             onCheckedChange={(v) => setSettings({ ...settings, liveAlerts: v })}
           />
         </div>
+
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -395,9 +428,10 @@ function EcoPage() {
         </div>
 
         <p className="text-[11px] text-muted-foreground">
-          O rastreador ainda não envia os eventos nativos de Green Driving, então a
-          nota é calculada a partir da velocidade, do rumo, do RPM e da carga do
-          motor recebidos a cada ~6 segundos.
+          A nota é calculada a partir da velocidade, do rumo, do RPM e da carga do
+          motor, com os limites calibrados pela ficha técnica do veículo: aceleração
+          de fábrica (0-100 em 11,5 s), faixa econômica de 1.500-2.500 rpm e as metas
+          de consumo Inmetro do combustível selecionado.
         </p>
       </div>
 

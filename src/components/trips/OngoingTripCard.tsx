@@ -12,6 +12,9 @@ import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDest
 import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
 import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
+import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
+import { getFuelKind } from "@/lib/eco/settings";
+
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
@@ -125,13 +128,17 @@ export function OngoingTripCard() {
   const liters = kmpl > 0 ? distanceKm / kmpl : 0;
   const cost = liters * price;
 
+  const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
   const eco = summarizeEco({
     events: open.ecoEvents ?? [],
     idleSeconds: open.idleSeconds ?? 0,
     distanceKm,
     kmpl,
     pricePerLiter: price,
+    fuel: getFuelKind(),
+    avgSpeedKmh,
   });
+
   const band = ecoBand(eco.score);
 
   const start: [number, number] | null =
@@ -203,6 +210,9 @@ export function OngoingTripCard() {
         speedKmh={telemetry.speedKmh}
         distanceKm={distanceKm}
       />
+
+      <LivePerformanceBadge />
+
 
 
       {destination && remainingKm !== null && (

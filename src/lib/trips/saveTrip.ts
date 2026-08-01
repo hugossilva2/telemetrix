@@ -3,6 +3,9 @@ import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
+import { getFuelKind } from "@/lib/eco/settings";
+import { expectedKmpl } from "@/lib/vehicles/specs";
+
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
 import { offlineQueue } from "@/lib/offline/queue";
@@ -75,11 +78,15 @@ export async function saveClosedTrip(
     getDefaultDriverId(userId),
   ]);
 
-  const kmpl = Number(vehicle?.avg_consumption_kmpl) || 10;
+  const durationH = durationS / 3600;
+  const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
+  const fuel = getFuelKind();
+  // Sem consumo cadastrado, usa a meta Inmetro da ficha técnica do veículo.
+  const kmpl =
+    Number(vehicle?.avg_consumption_kmpl) || expectedKmpl({ fuel, avgSpeedKmh });
   const price = Number(lastFuel?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER;
   const fuelLiters = kmpl > 0 ? distanceKm / kmpl : null;
   const estimatedCost = fuelLiters != null ? fuelLiters * price : null;
-  const durationH = durationS / 3600;
 
   const eco = summarizeEco({
     events: trip.ecoEvents ?? [],
@@ -87,7 +94,10 @@ export async function saveClosedTrip(
     distanceKm,
     kmpl,
     pricePerLiter: price,
+    fuel,
+    avgSpeedKmh,
   });
+
 
   const source = telemetrySourceStore.get();
 

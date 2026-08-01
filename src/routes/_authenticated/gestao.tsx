@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
+import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
 
 
 export const Route = createFileRoute("/_authenticated/gestao")({
@@ -38,6 +39,8 @@ function GestaoPage() {
       <MaintenanceAlertsCard />
 
       <ExpiringDocsCard />
+
+      <VehicleSpecCard />
 
 
 

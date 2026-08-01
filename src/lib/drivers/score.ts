@@ -44,7 +44,13 @@ export interface DriverStats {
   liters: number;
   cost: number;
   kmPerLiter: number | null;
+  /** meta de consumo (km/l) da ficha técnica para o perfil de velocidade */
+  targetKmPerLiter: number;
+  /** consumo real ÷ meta (1 = bateu a meta Inmetro) */
+  consumptionRatio: number | null;
+  avgSpeedKmh: number | null;
   costPerKm: number | null;
+
   wastedLiters: number;
   wastedCost: number;
   idleSeconds: number;
@@ -72,7 +78,9 @@ export const PILLAR_WEIGHTS = { safety: 0.6, efficiency: 0.3, safeStart: 0.1 };
 export function computeDriverScore(
   trips: DriverTripRow[],
   safeStarts: DriverSafeStartRow[],
+  options: { fuel?: FuelKind } = {},
 ): DriverScore {
+
   const counts: Record<EcoEventType, number> = {
     harsh_brake: 0,
     harsh_accel: 0,

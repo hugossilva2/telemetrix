@@ -52,16 +52,29 @@ export interface EcoThresholds {
   maxRpm: number;
 }
 
-export const DEFAULT_ECO_THRESHOLDS: EcoThresholds = {
-  brakeModerate: 9,
-  brakeSevere: 13,
-  accelModerate: 8,
-  accelSevere: 11,
-  lateralG: 0.35,
-  lateralGSevere: 0.5,
-  maxSpeedKmh: 110,
-  maxRpm: 3500,
-};
+/**
+ * Limites derivados da ficha técnica do veículo ativo.
+ * - aceleração: 100 km/h ÷ 11,5 s ≈ 8,7 km/h/s é o máximo de fábrica; 70%
+ *   disso já é uma arrancada agressiva para um 1.3 Firefly.
+ * - freada: traseira a tambor pede antecipação, então 8 / 12 km/h/s.
+ * - giro: acima da faixa econômica (1.500-2.500 rpm) o consumo dispara.
+ */
+export function thresholdsFromSpec(spec: VehicleSpec = ACTIVE_SPEC): EcoThresholds {
+  const refAccel = referenceAccelKmhPerS(spec);
+  return {
+    brakeModerate: 8,
+    brakeSevere: 12,
+    accelModerate: Number((refAccel * 0.7).toFixed(1)),
+    accelSevere: Number(refAccel.toFixed(1)),
+    lateralG: 0.35,
+    lateralGSevere: 0.5,
+    maxSpeedKmh: 110,
+    maxRpm: Math.round(spec.ecoRpm.max + 700),
+  };
+}
+
+export const DEFAULT_ECO_THRESHOLDS: EcoThresholds = thresholdsFromSpec();
+
 
 const MIN_DT_S = 1;
 const MAX_DT_S = 30;

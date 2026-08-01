@@ -15,6 +15,9 @@ import {
   getEcoSettings,
   saveEcoSettings,
 } from "@/lib/eco/settings";
+import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
+import { fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
+
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { formatDateTime } from "@/lib/trips/format";
 import { Input } from "@/components/ui/input";

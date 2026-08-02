@@ -139,3 +139,18 @@ export const destinationIcon = L.divIcon({
   iconSize: [30, 38],
   iconAnchor: [15, 36],
 });
+
+/** Marcador da minha posição (GPS do celular). */
+export const myLocationIcon = L.divIcon({
+  className: "me-marker",
+  html: `
+    <div style="position:relative;width:22px;height:22px;">
+      <div style="
+        position:absolute;inset:0;border-radius:50%;
+        background:#38bdf8;border:3px solid #0b1220;
+        box-shadow:0 0 0 5px rgba(56,189,248,0.28);"></div>
+    </div>
+  `,
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});

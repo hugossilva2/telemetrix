@@ -453,6 +453,17 @@ function PlanejarPage() {
           )}
         </section>
       )}
+
+      {plan && longTrip?.isLong && (
+        <LongTripCard
+          summary={longTrip}
+          distanceKm={plan.distanceKm}
+          fuelPercent={fuelPercent}
+          fuelFromTelemetry={telemetryFuel != null}
+          onFuelPercentChange={(v) => tripPlanStore.set({ ...plan, fuelPercent: v })}
+        />
+      )}
+
     </AppShell>
   );
 }

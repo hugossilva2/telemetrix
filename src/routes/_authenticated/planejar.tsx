@@ -388,10 +388,29 @@ function PlanejarPage() {
                   origin={[plan.origin.lat, plan.origin.lng]}
                   destination={[plan.destination.lat, plan.destination.lng]}
                   current={currentPos}
+                  restStops={
+                    longTrip?.isLong
+                      ? longTrip.rests.map((s) => ({
+                          lat: s.lat,
+                          lng: s.lng,
+                          label: `Descanso ${s.index} · ~${formatDecimal(s.km)} km`,
+                        }))
+                      : []
+                  }
+                  refuel={
+                    longTrip?.isLong && longTrip.refuel
+                      ? {
+                          lat: longTrip.refuel.lat,
+                          lng: longTrip.refuel.lng,
+                          label: `Reabastecer · ~${formatDecimal(longTrip.refuel.km)} km`,
+                        }
+                      : null
+                  }
                 />
               </Suspense>
             </ClientOnly>
           </div>
+
 
           <div className="mt-3 flex gap-2">
             {plan.monitoring ? (

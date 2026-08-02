@@ -24,7 +24,10 @@ export interface TripPlan {
   path: Array<[number, number]>;
   /** Monitoramento de desvio ativo */
   monitoring: boolean;
+  /** Nível do tanque (%) informado manualmente, quando não há leitura do veículo. */
+  fuelPercent?: number | null;
 }
+
 
 const KEY = "tripPlan:v1";
 

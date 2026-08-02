@@ -18,6 +18,7 @@ import {
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useParkedSpot } from "@/lib/tracker/parked";
 import { DistanceToCarCard } from "@/components/tracker/DistanceToCarCard";
+import { useMyLocation } from "@/hooks/useMyLocation";
 
 
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +79,7 @@ function RastreadorPage() {
   const { telemetry, status, lastMessageAt } = useTelemetry();
   const parked = useParkedSpot(telemetry.latitude, telemetry.longitude, telemetry.ignitionOn);
   const qc = useQueryClient();
+  const { position: myPos } = useMyLocation();
 
 
   const { data: events = [] } = useQuery({
@@ -161,6 +163,7 @@ function RastreadorPage() {
               lastUpdate={lastMessageAt}
               status={status}
               parked={parked}
+              me={myPos}
             />
 
           </Suspense>

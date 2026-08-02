@@ -17,5 +17,6 @@ export function TripRecorder() {
   useRouteDeviation();
   useOfflineSync();
   useLivePublish();
+  useLongTripMonitor();
   return null;
 }

@@ -165,7 +165,16 @@ function RastreadorPage() {
         </ClientOnly>
       </section>
 
+      <div className="mt-3">
+        <DistanceToCarCard
+          carLat={typeof telemetry.latitude === "number" ? telemetry.latitude : parked?.lat}
+          carLng={typeof telemetry.longitude === "number" ? telemetry.longitude : parked?.lng}
+          usingParked={typeof telemetry.latitude !== "number" && !!parked}
+        />
+      </div>
+
       <div className="mt-3 grid grid-cols-2 gap-2">
+
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="h-11">

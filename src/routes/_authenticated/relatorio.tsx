@@ -6,6 +6,10 @@ import { ArrowDownRight, ArrowUpRight, Download, Fuel, Minus, Wrench } from "luc
 import { AppShell } from "@/components/layout/AppShell";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WeeklyReport } from "@/components/reports/WeeklyReport";
+import { TrendsDashboard } from "@/components/reports/TrendsDashboard";
+
+type ReportView = "mensal" | "semanal" | "evolucao";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,

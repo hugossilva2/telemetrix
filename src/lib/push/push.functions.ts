@@ -38,3 +38,39 @@ export const notifyTrackerEvent = createServerFn({ method: "POST" })
       vehicleId,
     });
   });
+
+/** Envia um alerta do Modo Viagem Longa para o dono e para os observadores. */
+export const notifyLongTripAlert = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator(
+    (input: {
+      kind: string;
+      key: string;
+      title: string;
+      description: string;
+      vehicleId?: string | null;
+    }) => input,
+  )
+  .handler(async ({ data, context }) => {
+    const { sendLongTripAlertPush } = await import("./send.server");
+    let vehicleId = data.vehicleId ?? null;
+    if (!vehicleId) {
+      const { data: v } = await context.supabase
+        .from("vehicles")
+        .select("id")
+        .order("created_at", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      vehicleId = v?.id ?? null;
+    }
+    return sendLongTripAlertPush(
+      context.userId,
+      {
+        kind: data.kind,
+        key: data.key,
+        title: data.title,
+        description: data.description,
+      },
+      { vehicleId },
+    );
+  });

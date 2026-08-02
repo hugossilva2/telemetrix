@@ -156,3 +156,40 @@ export async function sendTrackerEventPush(
 
   return result;
 }
+
+/**
+ * Alerta do Modo Viagem Longa (fadiga/combustível) para o dono do veículo e,
+ * em espelho, para as contas observadoras.
+ */
+export async function sendLongTripAlertPush(
+  userId: string,
+  alert: { kind: string; key: string; title: string; description: string },
+  extra?: { vehicleId?: string | null },
+) {
+  const tag = `viagem-longa:${alert.kind}`;
+  const result = await sendPushToUser(userId, {
+    title: `Telemetrix · ${alert.title}`,
+    body: alert.description,
+    url: "/planejar",
+    tag,
+  });
+
+  if (extra?.vehicleId) {
+    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter(
+      (id) => id !== userId,
+    );
+    for (const observerId of observers) {
+      const r = await sendPushToUser(observerId, {
+        title: `Telemetrix · ${alert.title}`,
+        body: alert.description,
+        url: "/acompanhar",
+        tag,
+      });
+      result.sent += r.sent;
+      result.failed += r.failed;
+      result.removed += r.removed;
+    }
+  }
+
+  return result;
+}

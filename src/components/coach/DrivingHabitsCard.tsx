@@ -94,7 +94,7 @@ export function DrivingHabitsCard({ limit = 20 }: { limit?: number }) {
               label="Consumo"
               value={
                 result.stats.avgKmpl != null
-                  ? `${formatDecimal(result.stats.avgKmpl, 1)} km/l`
+                  ? `${formatDecimal(result.stats.avgKmpl)} km/l`
                   : "—"
               }
             />

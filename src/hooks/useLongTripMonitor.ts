@@ -1,5 +1,8 @@
 import { useEffect, useMemo, useRef } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { notifyLongTripAlert } from "@/lib/push/push.functions";
 import { toast } from "sonner";
+
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useOpenTrip } from "@/lib/trips/store";
 import { remainingPathKm, useTripPlan } from "@/lib/trips/plan";
@@ -85,6 +88,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
 export function useLongTripMonitor() {
   const live = useLongTripLive();
   const shown = useRef(new Set<string>());
+  const notify = useServerFn(notifyLongTripAlert);
 
   const { active, elapsedSeconds, remainingKm, autonomyKm: autonomy } = live;
 
@@ -99,6 +103,15 @@ export function useLongTripMonitor() {
       shown.current.add(alert.key);
       const fn = alert.kind === "combustivel-critico" ? toast.error : toast.warning;
       fn(alert.title, { description: alert.description, duration: 10_000 });
+      void notify({
+        data: {
+          kind: alert.kind,
+          key: alert.key,
+          title: alert.title,
+          description: alert.description,
+        },
+      }).catch((err: unknown) => console.warn("[viagem-longa] push falhou", err));
     }
-  }, [active, elapsedSeconds, remainingKm, autonomy]);
+  }, [active, elapsedSeconds, remainingKm, autonomy, notify]);
 }
+

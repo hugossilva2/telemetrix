@@ -32,8 +32,11 @@ import {
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
+import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
+import { getFuelKind } from "@/lib/eco/settings";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
+
 
 export const Route = createFileRoute("/_authenticated/planejar")({
   head: () => ({
@@ -267,6 +270,20 @@ function PlanejarPage() {
     });
   };
 
+  // Nível do tanque: leitura do veículo quando disponível, senão valor manual no plano.
+  const telemetryFuel =
+    typeof telemetry.fuelLevel === "number" && Number.isFinite(telemetry.fuelLevel)
+      ? telemetry.fuelLevel
+      : null;
+  const fuelPercent = telemetryFuel ?? plan?.fuelPercent ?? 50;
+  const longTrip = useLongTripSummary({
+    plan,
+    fuelPercent,
+    kmpl,
+    fuel: getFuelKind(),
+  });
+
+
   return (
     <AppShell title="Planejar rota" subtitle="Paradas, custo estimado e desvio em tempo real">
       <div className="space-y-3">
@@ -371,10 +388,29 @@ function PlanejarPage() {
                   origin={[plan.origin.lat, plan.origin.lng]}
                   destination={[plan.destination.lat, plan.destination.lng]}
                   current={currentPos}
+                  restStops={
+                    longTrip?.isLong
+                      ? longTrip.rests.map((s) => ({
+                          lat: s.lat,
+                          lng: s.lng,
+                          label: `Descanso ${s.index} · ~${formatDecimal(s.km)} km`,
+                        }))
+                      : []
+                  }
+                  refuel={
+                    longTrip?.isLong && longTrip.refuel
+                      ? {
+                          lat: longTrip.refuel.lat,
+                          lng: longTrip.refuel.lng,
+                          label: `Reabastecer · ~${formatDecimal(longTrip.refuel.km)} km`,
+                        }
+                      : null
+                  }
                 />
               </Suspense>
             </ClientOnly>
           </div>
+
 
           <div className="mt-3 flex gap-2">
             {plan.monitoring ? (
@@ -417,6 +453,17 @@ function PlanejarPage() {
           )}
         </section>
       )}
+
+      {plan && longTrip?.isLong && (
+        <LongTripCard
+          summary={longTrip}
+          distanceKm={plan.distanceKm}
+          fuelPercent={fuelPercent}
+          fuelFromTelemetry={telemetryFuel != null}
+          onFuelPercentChange={(v) => tripPlanStore.set({ ...plan, fuelPercent: v })}
+        />
+      )}
+
     </AppShell>
   );
 }

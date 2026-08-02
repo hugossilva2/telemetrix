@@ -270,6 +270,20 @@ function PlanejarPage() {
     });
   };
 
+  // Nível do tanque: leitura do veículo quando disponível, senão valor manual no plano.
+  const telemetryFuel =
+    typeof telemetry.fuelLevel === "number" && Number.isFinite(telemetry.fuelLevel)
+      ? telemetry.fuelLevel
+      : null;
+  const fuelPercent = telemetryFuel ?? plan?.fuelPercent ?? 50;
+  const longTrip = useLongTripSummary({
+    plan,
+    fuelPercent,
+    kmpl,
+    fuel: getFuelKind(),
+  });
+
+
   return (
     <AppShell title="Planejar rota" subtitle="Paradas, custo estimado e desvio em tempo real">
       <div className="space-y-3">

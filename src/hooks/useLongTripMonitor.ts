@@ -110,7 +110,7 @@ export function useLongTripMonitor() {
           title: alert.title,
           description: alert.description,
         },
-      }).catch((err) => console.warn("[viagem-longa] push falhou", err));
+      }).catch((err: unknown) => console.warn("[viagem-longa] push falhou", err));
     }
   }, [active, elapsedSeconds, remainingKm, autonomy, notify]);
 }

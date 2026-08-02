@@ -85,6 +85,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
 export function useLongTripMonitor() {
   const live = useLongTripLive();
   const shown = useRef(new Set<string>());
+  const notify = useServerFn(notifyLongTripAlert);
 
   const { active, elapsedSeconds, remainingKm, autonomyKm: autonomy } = live;
 
@@ -99,6 +100,15 @@ export function useLongTripMonitor() {
       shown.current.add(alert.key);
       const fn = alert.kind === "combustivel-critico" ? toast.error : toast.warning;
       fn(alert.title, { description: alert.description, duration: 10_000 });
+      void notify({
+        data: {
+          kind: alert.kind,
+          key: alert.key,
+          title: alert.title,
+          description: alert.description,
+        },
+      }).catch((err) => console.warn("[viagem-longa] push falhou", err));
     }
-  }, [active, elapsedSeconds, remainingKm, autonomy]);
+  }, [active, elapsedSeconds, remainingKm, autonomy, notify]);
 }
+

@@ -6,6 +6,10 @@ import { ArrowDownRight, ArrowUpRight, Download, Fuel, Minus, Wrench } from "luc
 import { AppShell } from "@/components/layout/AppShell";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WeeklyReport } from "@/components/reports/WeeklyReport";
+import { TrendsDashboard } from "@/components/reports/TrendsDashboard";
+
+type ReportView = "mensal" | "semanal" | "evolucao";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -138,7 +142,7 @@ function lastMonths(n: number): string[] {
 }
 
 function RelatorioPage() {
-  const [view, setView] = useState<"mensal" | "semanal">("mensal");
+  const [view, setView] = useState<ReportView>("evolucao");
   const options = useMemo(() => lastMonths(12), []);
   const [month, setMonth] = useState(options[0]);
   const prev = previousMonth(month);
@@ -215,20 +219,32 @@ function RelatorioPage() {
   return (
     <AppShell
       title="Relatório"
-      subtitle={view === "mensal" ? "Custo consolidado do veículo" : "Desempenho da semana"}
+      subtitle={
+        view === "mensal"
+          ? "Custo consolidado do veículo"
+          : view === "semanal"
+            ? "Desempenho da semana"
+            : "Evolução semana a semana"
+      }
     >
-      <Tabs value={view} onValueChange={(v) => setView(v as "mensal" | "semanal")}>
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs value={view} onValueChange={(v) => setView(v as ReportView)}>
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="evolucao">Evolução</TabsTrigger>
           <TabsTrigger value="semanal">Semanal</TabsTrigger>
           <TabsTrigger value="mensal">Mensal</TabsTrigger>
         </TabsList>
       </Tabs>
 
-      {view === "semanal" ? (
+      {view === "evolucao" ? (
+        <div className="mt-3">
+          <TrendsDashboard />
+        </div>
+      ) : view === "semanal" ? (
         <div className="mt-3">
           <WeeklyReport />
         </div>
       ) : (
+
         <>
       <div className="mt-3 flex items-center gap-2">
         <Select value={month} onValueChange={setMonth}>

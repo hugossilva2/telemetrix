@@ -6,6 +6,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { EcoScoreRing } from "@/components/eco/EcoScoreRing";
 import { TelemetryDiagnosticsCard } from "@/components/eco/TelemetryDiagnosticsCard";
+import { DrivingHabitsCard } from "@/components/coach/DrivingHabitsCard";
 
 import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, ecoBand, formatIdle } from "@/lib/eco/score";
 import type { EcoEventType } from "@/lib/eco/detect";
@@ -435,6 +436,7 @@ function EcoPage() {
         </p>
       </div>
 
+      <DrivingHabitsCard limit={20} />
       <TelemetryDiagnosticsCard />
     </AppShell>
 

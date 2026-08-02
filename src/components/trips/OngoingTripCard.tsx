@@ -14,6 +14,7 @@ import { summarizeEco, ecoBand } from "@/lib/eco/score";
 import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { getFuelKind } from "@/lib/eco/settings";
+import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
@@ -212,6 +213,8 @@ export function OngoingTripCard() {
       />
 
       <LivePerformanceBadge />
+
+      <LongTripLiveStrip />
 
 
 

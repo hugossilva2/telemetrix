@@ -32,8 +32,11 @@ import {
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
+import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
+import { getFuelKind } from "@/lib/eco/settings";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
+
 
 export const Route = createFileRoute("/_authenticated/planejar")({
   head: () => ({

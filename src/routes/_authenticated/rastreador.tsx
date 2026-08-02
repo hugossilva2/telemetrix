@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/dialog";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useParkedSpot } from "@/lib/tracker/parked";
+import { DistanceToCarCard } from "@/components/tracker/DistanceToCarCard";
+
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";

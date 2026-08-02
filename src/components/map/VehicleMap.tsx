@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, Marker, Popup, CircleMarker, useMap } from "react-leaflet";
+import { MapContainer, Marker, Popup, CircleMarker, Circle, Polyline, useMap } from "react-leaflet";
 import { MapStyleControl } from "./MapStyleControl";
 import { MapButtons, ScaleControl } from "./MapControls";
 import { type SpeedSample } from "./SpeedPolyline";
@@ -8,7 +8,8 @@ import { PlannedRouteLayer, type PlannedRoute } from "./PlannedRouteLayer";
 import { StyledTileLayers } from "./StyledTileLayers";
 import { detectStops, formatStopDuration } from "@/lib/map/stops";
 import { useMapStyle } from "@/lib/map/tiles";
-import { makeCarIcon, maxSpeedIcon, parkedIcon, startIcon, stopIcon } from "./icons";
+import { makeCarIcon, maxSpeedIcon, myLocationIcon, parkedIcon, startIcon, stopIcon } from "./icons";
+import { haversineKm } from "@/lib/trips/geo";
 
 export type TrailPoint = [number, number];
 
@@ -43,6 +44,8 @@ export interface VehicleMapProps {
   status?: string;
   parked?: { lat: number; lng: number; at: number } | null;
   plannedRoute?: PlannedRoute | null;
+  /** Minha posição (GPS do celular). */
+  me?: { lat: number; lng: number; accuracyM?: number } | null;
 }
 
 export default function VehicleMap({
@@ -56,6 +59,7 @@ export default function VehicleMap({
   status,
   parked,
   plannedRoute,
+  me,
 }: VehicleMapProps) {
   const [mapStyle, setMapStyle] = useMapStyle();
   const [follow, setFollow] = useState(true);
@@ -165,6 +169,52 @@ export default function VehicleMap({
               </div>
             </Popup>
           </Marker>
+        )}
+
+        {me && (
+          <>
+            {me.accuracyM ? (
+              <Circle
+                center={[me.lat, me.lng]}
+                radius={me.accuracyM}
+                pathOptions={{ color: "#38bdf8", weight: 1, opacity: 0.4, fillOpacity: 0.08 }}
+              />
+            ) : null}
+            {hasPosition && (
+              <Polyline
+                positions={[
+                  [me.lat, me.lng],
+                  [lat!, lng!],
+                ]}
+                pathOptions={{ color: "#38bdf8", weight: 2, opacity: 0.7, dashArray: "6 8" }}
+              />
+            )}
+            <Marker position={[me.lat, me.lng]} icon={myLocationIcon}>
+              <Popup>
+                <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                  <strong>📍 Você está aqui</strong>
+                  <br />
+                  {me.lat.toFixed(5)}, {me.lng.toFixed(5)}
+                  {me.accuracyM ? (
+                    <>
+                      <br />
+                      Precisão: ±{Math.round(me.accuracyM)} m
+                    </>
+                  ) : null}
+                  {hasPosition ? (
+                    <>
+                      <br />
+                      Distância até o carro:{" "}
+                      {(() => {
+                        const km = haversineKm(me.lat, me.lng, lat as number, lng as number);
+                        return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(2)} km`;
+                      })()}
+                    </>
+                  ) : null}
+                </div>
+              </Popup>
+            </Marker>
+          </>
         )}
 
         {hasPosition && (

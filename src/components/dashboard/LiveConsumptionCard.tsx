@@ -76,9 +76,7 @@ export function LiveConsumptionCard() {
       </div>
 
       {!open ? (
-        <p className="mt-3 text-sm text-muted-foreground">
-          Aguardando o início de uma viagem…
-        </p>
+        <p className="mt-3 text-sm text-muted-foreground">Aguardando o início de uma viagem…</p>
       ) : (
         <div className="mt-3 grid grid-cols-2 gap-3">
           <div>
@@ -98,7 +96,9 @@ export function LiveConsumptionCard() {
               {cost !== null ? BRL.format(cost) : "—"}
             </div>
             <div className="text-[10px] text-muted-foreground">
-              {usingFallbackPrice ? "preço padrão — cadastre um abastecimento" : "com base no último preço"}
+              {usingFallbackPrice
+                ? "preço padrão — cadastre um abastecimento"
+                : "com base no último preço"}
             </div>
           </div>
         </div>

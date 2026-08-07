@@ -132,7 +132,9 @@ export function LongTripCard({
 
       {summary.refuel && (
         <p className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs">
-          <span className="font-semibold">Reabasteça em ~{formatDecimal(summary.refuel.km)} km</span>{" "}
+          <span className="font-semibold">
+            Reabasteça em ~{formatDecimal(summary.refuel.km)} km
+          </span>{" "}
           — o tanque atual não cobre o trajeto inteiro (faltam{" "}
           {formatDecimal(Math.max(0, distanceKm - summary.refuel.km))} km depois desse ponto).
         </p>

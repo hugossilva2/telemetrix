@@ -41,12 +41,8 @@ export function VehicleSpecCard({ fuel = "misto" }: { fuel?: FuelKind }) {
           <p className="text-[10px] leading-tight text-muted-foreground">cv (E/G)</p>
         </div>
         <div className="rounded-xl border border-border/70 bg-background/35 p-2">
-          <p className="text-sm font-semibold tabular-nums">
-            {spec.torqueKgfmEthanol.toFixed(1)}
-          </p>
-          <p className="text-[10px] leading-tight text-muted-foreground">
-            kgfm @ {spec.torqueRpm}
-          </p>
+          <p className="text-sm font-semibold tabular-nums">{spec.torqueKgfmEthanol.toFixed(1)}</p>
+          <p className="text-[10px] leading-tight text-muted-foreground">kgfm @ {spec.torqueRpm}</p>
         </div>
         <div className="rounded-xl border border-border/70 bg-background/35 p-2">
           <p className="text-sm font-semibold tabular-nums">{spec.zeroTo100S}s</p>
@@ -68,10 +64,7 @@ export function VehicleSpecCard({ fuel = "misto" }: { fuel?: FuelKind }) {
           <Gauge className="size-3.5" /> Faixas usadas nos scores
         </p>
         <Row label="Giro econômico" value={`${spec.ecoRpm.min}-${spec.ecoRpm.max} rpm`} />
-        <Row
-          label="Aceleração de fábrica"
-          value={`${(100 / spec.zeroTo100S).toFixed(1)} km/h/s`}
-        />
+        <Row label="Aceleração de fábrica" value={`${(100 / spec.zeroTo100S).toFixed(1)} km/h/s`} />
         <Row label="Velocidade máxima" value={`${spec.topSpeedKmh} km/h`} />
       </div>
 
@@ -80,14 +73,14 @@ export function VehicleSpecCard({ fuel = "misto" }: { fuel?: FuelKind }) {
           <Settings2 className="size-3.5" /> Mecânica e dimensões
         </p>
         <Row label="Freios" value={`${spec.brakesFront} / ${spec.brakesRear}`} />
-        <Row label="Suspensão" value={`${spec.suspensionFront.split(" com")[0]} / eixo de torção`} />
-        <Row label="Pneus" value={`${spec.tires} (aro ${spec.wheels.split("x ")[1] ?? "15\""})`} />
+        <Row
+          label="Suspensão"
+          value={`${spec.suspensionFront.split(" com")[0]} / eixo de torção`}
+        />
+        <Row label="Pneus" value={`${spec.tires} (aro ${spec.wheels.split("x ")[1] ?? '15"'})`} />
         <Row label="Peso em ordem de marcha" value={`${spec.curbWeightKg} kg`} />
         <Row label="Porta-malas" value={`${spec.trunkL} L`} />
-        <Row
-          label="Dimensões"
-          value={`${spec.lengthMm} × ${spec.widthMm} × ${spec.heightMm} mm`}
-        />
+        <Row label="Dimensões" value={`${spec.lengthMm} × ${spec.widthMm} × ${spec.heightMm} mm`} />
       </div>
     </div>
   );

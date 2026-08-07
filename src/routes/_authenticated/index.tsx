@@ -25,9 +25,6 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 
-
-
-
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
     meta: [
@@ -56,10 +53,7 @@ function Dashboard() {
 
   useEffect(() => {
     if (!alerts?.engine) return;
-    if (
-      prevIgnition.current === false &&
-      telemetry.ignitionOn === true
-    ) {
+    if (prevIgnition.current === false && telemetry.ignitionOn === true) {
       toast.warning("Motor ligado", {
         description: "A ignição do veículo foi acionada.",
       });
@@ -179,10 +173,7 @@ function Dashboard() {
         <>
           <BluetoothPairCard />
 
-          <SafeStartCard
-            ignitionOn={telemetry.ignitionOn}
-            engineRpm={telemetry.engineRpm}
-          />
+          <SafeStartCard ignitionOn={telemetry.ignitionOn} engineRpm={telemetry.engineRpm} />
 
           <VehicleHealthCard />
 
@@ -196,4 +187,3 @@ function Dashboard() {
     </AppShell>
   );
 }
-

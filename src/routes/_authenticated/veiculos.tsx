@@ -15,11 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  useActiveVehicle,
-  useInvalidateVehicles,
-  type VehicleRecord,
-} from "@/lib/vehicles/active";
+import { useActiveVehicle, useInvalidateVehicles, type VehicleRecord } from "@/lib/vehicles/active";
 
 export const Route = createFileRoute("/_authenticated/veiculos")({
   head: () => ({
@@ -120,11 +116,7 @@ function VeiculosPage() {
         if (error) throw error;
         return editing.id;
       }
-      const { data, error } = await supabase
-        .from("vehicles")
-        .insert(payload)
-        .select("id")
-        .single();
+      const { data, error } = await supabase.from("vehicles").insert(payload).select("id").single();
       if (error) throw error;
       return data.id as string;
     },
@@ -173,10 +165,7 @@ function VeiculosPage() {
         {vehicles.map((v) => {
           const active = v.id === vehicle?.id;
           return (
-            <section
-              key={v.id}
-              className={`card-surface p-4 ${active ? "border-primary/50" : ""}`}
-            >
+            <section key={v.id} className={`card-surface p-4 ${active ? "border-primary/50" : ""}`}>
               <div className="flex items-start gap-3">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
                   <Car className="size-4" />

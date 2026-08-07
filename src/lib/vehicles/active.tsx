@@ -128,7 +128,7 @@ export function ActiveVehicleProvider({ children }: { children: ReactNode }) {
       loading: isLoading,
       setVehicleId,
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
     [vehicles, vehicle, isLoading],
   );
 

@@ -68,7 +68,6 @@ export interface LivePerf {
   hint: string | null;
 }
 
-
 /**
  * Nota instantânea de desempenho, calibrada pela ficha do veículo:
  * faixa econômica de giro, aceleração máxima de fábrica e limite de velocidade.

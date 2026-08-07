@@ -38,7 +38,6 @@ import { useActiveVehicle } from "@/lib/vehicles/active";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
 
-
 export const Route = createFileRoute("/_authenticated/planejar")({
   head: () => ({
     meta: [
@@ -278,7 +277,6 @@ function PlanejarPage() {
     fuel: getFuelKind(),
   });
 
-
   return (
     <AppShell title="Planejar rota" subtitle="Paradas, custo estimado e desvio em tempo real">
       <div className="space-y-3">
@@ -374,9 +372,7 @@ function PlanejarPage() {
           </p>
 
           <div className="mt-3 h-56 overflow-hidden rounded-xl border border-border">
-            <ClientOnly
-              fallback={<div className="h-full w-full animate-pulse bg-muted" />}
-            >
+            <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
               <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
                 <PlanMap
                   path={plan.path}
@@ -405,7 +401,6 @@ function PlanejarPage() {
               </Suspense>
             </ClientOnly>
           </div>
-
 
           <div className="mt-3 flex gap-2">
             {plan.monitoring ? (
@@ -458,20 +453,11 @@ function PlanejarPage() {
           onFuelPercentChange={(v) => tripPlanStore.set({ ...plan, fuelPercent: v })}
         />
       )}
-
     </AppShell>
   );
 }
 
-function Metric({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-background/40 p-2">
       <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">

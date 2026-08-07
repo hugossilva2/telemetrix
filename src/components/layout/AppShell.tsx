@@ -21,9 +21,7 @@ export function AppShell({ title, subtitle, action, children }: AppShellProps) {
         <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
           <div className="min-w-0">
             <h1 className="truncate font-display text-xl font-bold tracking-tight">{title}</h1>
-            {subtitle && (
-              <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
-            )}
+            {subtitle && <div className="truncate text-xs text-muted-foreground">{subtitle}</div>}
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <VehicleSwitcher />

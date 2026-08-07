@@ -38,10 +38,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
   const now = nowMs ?? Date.now();
 
   return useMemo(() => {
-    const active =
-      Boolean(open) &&
-      Boolean(plan?.monitoring) &&
-      Boolean(plan?.path?.length);
+    const active = Boolean(open) && Boolean(plan?.monitoring) && Boolean(plan?.path?.length);
 
     const elapsedSeconds = open
       ? Math.max(0, Math.floor((now - new Date(open.startTime).getTime()) / 1000))
@@ -67,7 +64,9 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
         : (plan?.fuelPercent ?? null);
 
     const autonomy =
-      pct != null && kmpl != null ? autonomyKm({ fuelPercent: pct, kmpl, tankL: spec.tankL }) : null;
+      pct != null && kmpl != null
+        ? autonomyKm({ fuelPercent: pct, kmpl, tankL: spec.tankL })
+        : null;
 
     const state: LongTripLiveState = {
       elapsedSeconds,
@@ -117,4 +116,3 @@ export function useLongTripMonitor() {
     }
   }, [active, elapsedSeconds, remainingKm, autonomy, notify]);
 }
-

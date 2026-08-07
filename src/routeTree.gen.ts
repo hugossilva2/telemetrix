@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
+import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
 import { Route as AuthenticatedRelatorioRouteImport } from './routes/_authenticated/relatorio'
 import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
@@ -51,6 +52,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
   id: '/viagens',
   path: '/viagens',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedVeiculosRoute = AuthenticatedVeiculosRouteImport.update({
+  id: '/veiculos',
+  path: '/veiculos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRotinasRoute = AuthenticatedRotinasRouteImport.update({
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
   '/rotinas': typeof AuthenticatedRotinasRoute
+  '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
@@ -201,6 +208,7 @@ export interface FileRoutesByTo {
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
   '/rotinas': typeof AuthenticatedRotinasRoute
+  '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/': typeof AuthenticatedIndexRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
   '/_authenticated/relatorio': typeof AuthenticatedRelatorioRoute
   '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
+  '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/rastreador'
     | '/relatorio'
     | '/rotinas'
+    | '/veiculos'
     | '/viagens'
     | '/motoristas/$id'
     | '/viagens/$id'
@@ -280,6 +290,7 @@ export interface FileRouteTypes {
     | '/rastreador'
     | '/relatorio'
     | '/rotinas'
+    | '/veiculos'
     | '/viagens'
     | '/'
     | '/motoristas/$id'
@@ -306,6 +317,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rastreador'
     | '/_authenticated/relatorio'
     | '/_authenticated/rotinas'
+    | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
     | '/_authenticated/'
     | '/_authenticated/motoristas/$id'
@@ -349,6 +361,13 @@ declare module '@tanstack/react-router' {
       path: '/viagens'
       fullPath: '/viagens'
       preLoaderRoute: typeof AuthenticatedViagensRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/veiculos': {
+      id: '/_authenticated/veiculos'
+      path: '/veiculos'
+      fullPath: '/veiculos'
+      preLoaderRoute: typeof AuthenticatedVeiculosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rotinas': {
@@ -536,6 +555,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
   AuthenticatedRelatorioRoute: typeof AuthenticatedRelatorioRoute
   AuthenticatedRotinasRoute: typeof AuthenticatedRotinasRoute
+  AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
@@ -557,6 +577,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,
   AuthenticatedRelatorioRoute: AuthenticatedRelatorioRoute,
   AuthenticatedRotinasRoute: AuthenticatedRotinasRoute,
+  AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
@@ -573,13 +594,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

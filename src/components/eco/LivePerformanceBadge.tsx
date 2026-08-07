@@ -3,6 +3,7 @@ import { Gauge } from "lucide-react";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { gradeLive, bandFromScore } from "@/lib/eco/live";
 import { getEcoSettings } from "@/lib/eco/settings";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 /**
  * Nota de desempenho ao vivo (Ótimo/Bom/Regular/Péssimo) calibrada pela ficha
@@ -11,6 +12,7 @@ import { getEcoSettings } from "@/lib/eco/settings";
  */
 export function LivePerformanceBadge() {
   const { telemetry } = useTelemetry();
+  const { spec } = useActiveVehicle();
   const speed = telemetry.canSpeedKmh ?? telemetry.speedKmh ?? null;
   const rpm = telemetry.engineRpm ?? null;
   const load = telemetry.engineLoad ?? null;
@@ -37,13 +39,14 @@ export function LivePerformanceBadge() {
       speedKmh: speed,
       accelKmhPerS: accel,
       load,
+      spec,
       maxSpeedKmh: th.maxSpeedKmh,
     });
 
     acc.current.sum += score;
     acc.current.n += 1;
     setState({ score, hint, avg: acc.current.sum / acc.current.n });
-  }, [speed, rpm, load]);
+  }, [speed, rpm, load, spec]);
 
   const band = bandFromScore(state.score);
   const avgBand = bandFromScore(state.avg == null ? null : Math.round(state.avg));

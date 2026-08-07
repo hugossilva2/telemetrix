@@ -14,6 +14,7 @@ import {
   type LongTripLiveState,
 } from "@/lib/trips/longTripAlerts";
 import { getFuelKind } from "@/lib/eco/settings";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 export interface LongTripLive extends LongTripLiveState {
   active: boolean;
@@ -29,6 +30,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
   const plan = useTripPlan();
   const open = useOpenTrip();
   const { telemetry } = useTelemetry();
+  const { spec } = useActiveVehicle();
 
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
@@ -36,10 +38,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
   const now = nowMs ?? Date.now();
 
   return useMemo(() => {
-    const active =
-      Boolean(open) &&
-      Boolean(plan?.monitoring) &&
-      Boolean(plan?.path?.length);
+    const active = Boolean(open) && Boolean(plan?.monitoring) && Boolean(plan?.path?.length);
 
     const elapsedSeconds = open
       ? Math.max(0, Math.floor((now - new Date(open.startTime).getTime()) / 1000))
@@ -55,6 +54,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
           distanceKm: plan.distanceKm,
           durationSeconds: plan.durationSeconds,
           fuel: getFuelKind(),
+          spec,
         })
       : null;
 
@@ -64,7 +64,9 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
         : (plan?.fuelPercent ?? null);
 
     const autonomy =
-      pct != null && kmpl != null ? autonomyKm({ fuelPercent: pct, kmpl }) : null;
+      pct != null && kmpl != null
+        ? autonomyKm({ fuelPercent: pct, kmpl, tankL: spec.tankL })
+        : null;
 
     const state: LongTripLiveState = {
       elapsedSeconds,
@@ -78,7 +80,7 @@ export function useLongTripLive(nowMs?: number): LongTripLive {
       secondsToRest: secondsToNextRest(elapsedSeconds),
       fuel: fuelStatus(state),
     };
-  }, [plan, open, lat, lng, fuelLevel, now]);
+  }, [plan, open, lat, lng, fuelLevel, now, spec]);
 }
 
 /**
@@ -114,4 +116,3 @@ export function useLongTripMonitor() {
     }
   }, [active, elapsedSeconds, remainingKm, autonomy, notify]);
 }
-

@@ -15,13 +15,14 @@ import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { getFuelKind } from "@/lib/eco/settings";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
-
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
 export function OngoingTripCard() {
   const open = useOpenTrip();
   const { telemetry } = useTelemetry();
+  const { vehicle } = useActiveVehicle();
   const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 
@@ -32,19 +33,12 @@ export function OngoingTripCard() {
   }, [open]);
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["ongoing-trip-vehicle"],
+    queryKey: ["ongoing-trip-vehicle", vehicle?.id ?? null],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: v }, { data: f }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("avg_consumption_kmpl")
-          .eq("user_id", uid)
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: f }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -54,7 +48,7 @@ export function OngoingTripCard() {
           .maybeSingle(),
       ]);
       return {
-        kmpl: Number(v?.avg_consumption_kmpl) || 10,
+        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },
@@ -102,11 +96,7 @@ export function OngoingTripCard() {
 
   if (!open) return null;
 
-
-  const durationS = Math.max(
-    0,
-    Math.floor((now - new Date(open.startTime).getTime()) / 1000),
-  );
+  const durationS = Math.max(0, Math.floor((now - new Date(open.startTime).getTime()) / 1000));
 
   let distanceKm = 0;
   if (
@@ -192,31 +182,19 @@ export function OngoingTripCard() {
         </div>
       </div>
 
-
       <div className="h-44 w-full">
         <ClientOnly fallback={mapFallback}>
           <Suspense fallback={mapFallback}>
-            <MiniTripMap
-              trail={open.trail}
-              start={start}
-              current={current}
-              moving={moving}
-            />
+            <MiniTripMap trail={open.trail} start={start} current={current} moving={moving} />
           </Suspense>
         </ClientOnly>
       </div>
 
-      <DriverLiveStrip
-        ecoScore={eco.score}
-        speedKmh={telemetry.speedKmh}
-        distanceKm={distanceKm}
-      />
+      <DriverLiveStrip ecoScore={eco.score} speedKmh={telemetry.speedKmh} distanceKm={distanceKm} />
 
       <LivePerformanceBadge />
 
       <LongTripLiveStrip />
-
-
 
       {destination && remainingKm !== null && (
         <div className="flex items-center justify-between border-t border-success/20 bg-success/5 px-3 py-1.5 text-xs">
@@ -230,8 +208,6 @@ export function OngoingTripCard() {
         </div>
       )}
 
-
-
       <div className="flex items-center justify-between border-t border-success/20 px-3 py-2 text-xs">
         <span className="flex items-center gap-2">
           <span className="text-muted-foreground">Eco Score</span>
@@ -239,9 +215,7 @@ export function OngoingTripCard() {
             {eco.score} · {band.label}
           </span>
         </span>
-        <span className="text-muted-foreground tabular-nums">
-          {eco.totalEvents} evento(s)
-        </span>
+        <span className="text-muted-foreground tabular-nums">{eco.totalEvents} evento(s)</span>
       </div>
 
       <div className="grid grid-cols-4 gap-2 p-3">
@@ -254,15 +228,7 @@ export function OngoingTripCard() {
   );
 }
 
-function KpiTile({
-  Icon,
-  label,
-  value,
-}: {
-  Icon: typeof Clock;
-  label: string;
-  value: string;
-}) {
+function KpiTile({ Icon, label, value }: { Icon: typeof Clock; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-card/40 p-2">
       <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">

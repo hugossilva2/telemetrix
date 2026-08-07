@@ -23,9 +23,7 @@ import { BluetoothPairCard } from "@/components/dashboard/BluetoothPairCard";
 import { useOpenTrip } from "@/lib/trips/store";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-
-
-
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 export const Route = createFileRoute("/_authenticated/")({
   head: () => ({
@@ -40,6 +38,7 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function Dashboard() {
+  const { vehicle: activeVehicle } = useActiveVehicle();
   const { status, telemetry, lastMessageAt } = useTelemetry();
   const ignitionOn = telemetry.ignitionOn === true;
 
@@ -48,30 +47,13 @@ function Dashboard() {
   const rpm = ignitionOn ? telemetry.engineRpm : 0;
   const fuel = ignitionOn ? telemetry.fuelLevel : undefined;
 
-  const { data: alerts } = useQuery({
-    queryKey: ["vehicle-alerts"],
-    queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-      if (!uid) return { engine: false };
-      const { data } = await supabase
-        .from("vehicles")
-        .select("alert_engine_on")
-        .eq("user_id", uid)
-        .limit(1)
-        .maybeSingle();
-      return { engine: !!data?.alert_engine_on };
-    },
-  });
+  const alerts = { engine: !!activeVehicle?.alert_engine_on };
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
 
   useEffect(() => {
     if (!alerts?.engine) return;
-    if (
-      prevIgnition.current === false &&
-      telemetry.ignitionOn === true
-    ) {
+    if (prevIgnition.current === false && telemetry.ignitionOn === true) {
       toast.warning("Motor ligado", {
         description: "A ignição do veículo foi acionada.",
       });
@@ -191,10 +173,7 @@ function Dashboard() {
         <>
           <BluetoothPairCard />
 
-          <SafeStartCard
-            ignitionOn={telemetry.ignitionOn}
-            engineRpm={telemetry.engineRpm}
-          />
+          <SafeStartCard ignitionOn={telemetry.ignitionOn} engineRpm={telemetry.engineRpm} />
 
           <VehicleHealthCard />
 
@@ -208,4 +187,3 @@ function Dashboard() {
     </AppShell>
   );
 }
-

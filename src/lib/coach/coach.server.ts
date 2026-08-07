@@ -1,4 +1,4 @@
-import { ACTIVE_SPEC, expectedKmpl, fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, expectedKmpl, fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
 import { normalizeGrade, parseTips, type CoachGrade, type CoachTip } from "@/lib/coach/types";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
@@ -54,7 +54,7 @@ export function buildCoachPrompt({
   history: CoachHistoryInput;
   fuel: FuelKind;
 }) {
-  const spec = ACTIVE_SPEC;
+  const spec = DEFAULT_SPEC;
   const target = expectedKmpl({ fuel, avgSpeedKmh: trip.avgSpeedKmh });
   const kmpl =
     trip.distanceKm && trip.fuelLiters && trip.fuelLiters > 0

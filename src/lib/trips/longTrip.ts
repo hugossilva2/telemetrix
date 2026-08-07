@@ -3,7 +3,7 @@
  * Módulo puro (sem React/DOM), calculado sobre o plano de rota já existente.
  */
 import { haversineKm } from "./geo";
-import { ACTIVE_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, expectedKmpl, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
 
 /** Acima destes valores a viagem é considerada "longa". */
 export const LONG_TRIP_MIN_KM = 150;
@@ -26,7 +26,7 @@ export function isLongTrip(distanceKm: number, durationSeconds: number): boolean
 export function autonomyKm({
   fuelPercent,
   kmpl,
-  tankL = ACTIVE_SPEC.tankL,
+  tankL = DEFAULT_SPEC.tankL,
   reserve = FUEL_RESERVE_RATIO,
 }: {
   fuelPercent: number;
@@ -47,16 +47,18 @@ export function planKmpl({
   durationSeconds,
   fuel = "misto",
   fallbackKmpl,
+  spec = DEFAULT_SPEC,
 }: {
   distanceKm: number;
   durationSeconds: number;
   fuel?: FuelKind;
   fallbackKmpl?: number | null;
+  spec?: VehicleSpec;
 }): number {
   if (fallbackKmpl && fallbackKmpl > 0) return fallbackKmpl;
   const hours = durationSeconds / 3600;
   const avgSpeedKmh = hours > 0 ? distanceKm / hours : null;
-  return expectedKmpl({ fuel, avgSpeedKmh });
+  return expectedKmpl({ fuel, avgSpeedKmh, spec });
 }
 
 /** Distância acumulada (km) ao longo do path, índice a índice. */
@@ -208,6 +210,7 @@ export function buildLongTripSummary({
   kmpl,
   fuel = "misto",
   departureISO,
+  spec = DEFAULT_SPEC,
 }: {
   path: Array<[number, number]>;
   distanceKm: number;
@@ -216,15 +219,19 @@ export function buildLongTripSummary({
   kmpl?: number | null;
   fuel?: FuelKind;
   departureISO?: string | null;
+  spec?: VehicleSpec;
 }): LongTripSummary {
   const effectiveKmpl = planKmpl({
     distanceKm,
     durationSeconds,
     fuel,
     fallbackKmpl: kmpl ?? null,
+    spec,
   });
   const autonomy =
-    fuelPercent == null ? null : autonomyKm({ fuelPercent, kmpl: effectiveKmpl });
+    fuelPercent == null
+      ? null
+      : autonomyKm({ fuelPercent, kmpl: effectiveKmpl, tankL: spec.tankL });
   return {
     isLong: isLongTrip(distanceKm, durationSeconds),
     kmpl: effectiveKmpl,

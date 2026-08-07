@@ -34,9 +34,9 @@ import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
 import { getFuelKind } from "@/lib/eco/settings";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
-
 
 export const Route = createFileRoute("/_authenticated/planejar")({
   head: () => ({
@@ -170,6 +170,7 @@ function PlaceSearch({
 
 function PlanejarPage() {
   const { telemetry } = useTelemetry();
+  const { vehicle } = useActiveVehicle();
   const plan = useTripPlan();
   const compute = useServerFn(planRoute);
 
@@ -184,19 +185,12 @@ function PlanejarPage() {
       : undefined;
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["plan-vehicle"],
+    queryKey: ["plan-vehicle", vehicle?.id ?? null],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: v }, { data: f }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("avg_consumption_kmpl")
-          .eq("user_id", uid)
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: f }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -206,7 +200,7 @@ function PlanejarPage() {
           .maybeSingle(),
       ]);
       return {
-        kmpl: Number(v?.avg_consumption_kmpl) || 10,
+        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },
@@ -282,7 +276,6 @@ function PlanejarPage() {
     kmpl,
     fuel: getFuelKind(),
   });
-
 
   return (
     <AppShell title="Planejar rota" subtitle="Paradas, custo estimado e desvio em tempo real">
@@ -379,9 +372,7 @@ function PlanejarPage() {
           </p>
 
           <div className="mt-3 h-56 overflow-hidden rounded-xl border border-border">
-            <ClientOnly
-              fallback={<div className="h-full w-full animate-pulse bg-muted" />}
-            >
+            <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
               <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
                 <PlanMap
                   path={plan.path}
@@ -410,7 +401,6 @@ function PlanejarPage() {
               </Suspense>
             </ClientOnly>
           </div>
-
 
           <div className="mt-3 flex gap-2">
             {plan.monitoring ? (
@@ -463,20 +453,11 @@ function PlanejarPage() {
           onFuelPercentChange={(v) => tripPlanStore.set({ ...plan, fuelPercent: v })}
         />
       )}
-
     </AppShell>
   );
 }
 
-function Metric({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Metric({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-background/40 p-2">
       <div className="flex items-center gap-1 text-[10px] uppercase tracking-wide text-muted-foreground">

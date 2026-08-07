@@ -12,6 +12,7 @@ import { offlineQueue } from "@/lib/offline/queue";
 import { isOnline } from "@/lib/offline/sync";
 import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
 import { buildRouteData } from "@/lib/trips/routeData";
+import { getActiveVehicleId } from "@/lib/vehicles/active";
 
 
 const MIN_DISTANCE_KM = 0.2;
@@ -61,13 +62,13 @@ export async function saveClosedTrip(
 
 
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
-    supabase
-      .from("vehicles")
-      .select("id,avg_consumption_kmpl")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
+    (() => {
+      const activeId = getActiveVehicleId();
+      const q = supabase.from("vehicles").select("id,avg_consumption_kmpl").eq("user_id", userId);
+      return activeId
+        ? q.eq("id", activeId).maybeSingle()
+        : q.order("created_at", { ascending: true }).limit(1).maybeSingle();
+    })(),
     supabase
       .from("fuel_logs")
       .select("price_per_liter")

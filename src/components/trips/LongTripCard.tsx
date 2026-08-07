@@ -9,7 +9,7 @@ import {
   buildLongTripSummary,
   type LongTripSummary,
 } from "@/lib/trips/longTrip";
-import { ACTIVE_SPEC } from "@/lib/vehicles/specs";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 import type { TripPlan } from "@/lib/trips/plan";
 import type { FuelKind } from "@/lib/vehicles/specs";
 
@@ -24,6 +24,7 @@ export function useLongTripSummary({
   kmpl?: number | null;
   fuel?: FuelKind;
 }): LongTripSummary | null {
+  const { spec } = useActiveVehicle();
   return useMemo(() => {
     if (!plan) return null;
     return buildLongTripSummary({
@@ -34,8 +35,9 @@ export function useLongTripSummary({
       kmpl: kmpl ?? null,
       fuel: fuel ?? "misto",
       departureISO: new Date().toISOString(),
+      spec,
     });
-  }, [plan, fuelPercent, kmpl, fuel]);
+  }, [plan, fuelPercent, kmpl, fuel, spec]);
 }
 
 /** Card de viagem longa: autonomia, reabastecimento e paradas de descanso. */
@@ -52,7 +54,8 @@ export function LongTripCard({
   fuelFromTelemetry: boolean;
   onFuelPercentChange: (value: number) => void;
 }) {
-  const liters = fuelPercent != null ? (fuelPercent / 100) * ACTIVE_SPEC.tankL : null;
+  const { spec } = useActiveVehicle();
+  const liters = fuelPercent != null ? (fuelPercent / 100) * spec.tankL : null;
 
   return (
     <section className="card-surface p-4">
@@ -108,7 +111,7 @@ export function LongTripCard({
         </div>
         {fuelFromTelemetry ? (
           <p className="mt-1 text-[11px] text-muted-foreground">
-            Lido do veículo em tempo real ({ACTIVE_SPEC.tankL} L de tanque).
+            Lido do veículo em tempo real ({spec.tankL} L de tanque).
           </p>
         ) : (
           <>
@@ -129,7 +132,9 @@ export function LongTripCard({
 
       {summary.refuel && (
         <p className="mt-3 rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-xs">
-          <span className="font-semibold">Reabasteça em ~{formatDecimal(summary.refuel.km)} km</span>{" "}
+          <span className="font-semibold">
+            Reabasteça em ~{formatDecimal(summary.refuel.km)} km
+          </span>{" "}
           — o tanque atual não cobre o trajeto inteiro (faltam{" "}
           {formatDecimal(Math.max(0, distanceKm - summary.refuel.km))} km depois desse ponto).
         </p>

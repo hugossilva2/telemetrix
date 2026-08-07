@@ -1,4 +1,4 @@
-import { ACTIVE_SPEC, expectedKmpl, fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, expectedKmpl, fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
 import { normalizeGrade, type CoachGrade } from "@/lib/coach/types";
 import type { DrivingRecommendation, HabitsAnalysis } from "@/lib/coach/habits.types";
 
@@ -45,7 +45,7 @@ export function buildHabitsPrompt({
   agg: HabitsAggregate;
   fuel: FuelKind;
 }) {
-  const spec = ACTIVE_SPEC;
+  const spec = DEFAULT_SPEC;
   const target = expectedKmpl({ fuel, avgSpeedKmh: agg.avgSpeedKmh });
   return [
     `Veículo: ${spec.name} ${spec.year} (${spec.engine}, ${spec.powerCvEthanol} cv etanol / ${spec.powerCvGasoline} cv gasolina, ${spec.gearbox}).`,

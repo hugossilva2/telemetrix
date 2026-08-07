@@ -939,19 +939,31 @@ export type Database = {
           alert_motion_off: boolean
           alert_signal_lost: boolean
           avg_consumption_kmpl: number
+          consumption_ethanol_highway: number
+          consumption_ethanol_urban: number
+          consumption_gasoline_highway: number
+          consumption_gasoline_urban: number
           created_at: string
           current_mileage: number
+          eco_rpm_max: number
+          eco_rpm_min: number
+          engine: string | null
           flespi_device_id: string | null
+          fuel_kind: string
+          gearbox: string | null
           id: string
+          model_year: number | null
           name: string
           obd_device_id: string | null
           obd_device_name: string | null
           obd_first_paired_at: string | null
           plate: string
           signal_lost_notified_at: string | null
+          tank_l: number
           tracker_mode: boolean
           updated_at: string
           user_id: string
+          zero_to_100_s: number
         }
         Insert: {
           alert_engine_on?: boolean
@@ -960,19 +972,31 @@ export type Database = {
           alert_motion_off?: boolean
           alert_signal_lost?: boolean
           avg_consumption_kmpl?: number
+          consumption_ethanol_highway?: number
+          consumption_ethanol_urban?: number
+          consumption_gasoline_highway?: number
+          consumption_gasoline_urban?: number
           created_at?: string
           current_mileage?: number
+          eco_rpm_max?: number
+          eco_rpm_min?: number
+          engine?: string | null
           flespi_device_id?: string | null
+          fuel_kind?: string
+          gearbox?: string | null
           id?: string
+          model_year?: number | null
           name: string
           obd_device_id?: string | null
           obd_device_name?: string | null
           obd_first_paired_at?: string | null
           plate: string
           signal_lost_notified_at?: string | null
+          tank_l?: number
           tracker_mode?: boolean
           updated_at?: string
           user_id: string
+          zero_to_100_s?: number
         }
         Update: {
           alert_engine_on?: boolean
@@ -981,19 +1005,31 @@ export type Database = {
           alert_motion_off?: boolean
           alert_signal_lost?: boolean
           avg_consumption_kmpl?: number
+          consumption_ethanol_highway?: number
+          consumption_ethanol_urban?: number
+          consumption_gasoline_highway?: number
+          consumption_gasoline_urban?: number
           created_at?: string
           current_mileage?: number
+          eco_rpm_max?: number
+          eco_rpm_min?: number
+          engine?: string | null
           flespi_device_id?: string | null
+          fuel_kind?: string
+          gearbox?: string | null
           id?: string
+          model_year?: number | null
           name?: string
           obd_device_id?: string | null
           obd_device_name?: string | null
           obd_first_paired_at?: string | null
           plate?: string
           signal_lost_notified_at?: string | null
+          tank_l?: number
           tracker_mode?: boolean
           updated_at?: string
           user_id?: string
+          zero_to_100_s?: number
         }
         Relationships: []
       }

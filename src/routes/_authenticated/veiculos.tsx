@@ -83,7 +83,7 @@ function fromRecord(v: VehicleRecord): FormState {
   };
 }
 
-const num = (s: string) => (s.trim() === "" ? null : Number(s));
+const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
 
 function VeiculosPage() {
   const { vehicles, vehicle, setVehicleId, loading } = useActiveVehicle();
@@ -108,8 +108,8 @@ function VeiculosPage() {
         current_mileage: Number(form.mileage) || 0,
         avg_consumption_kmpl: Number(form.consumption) > 0 ? Number(form.consumption) : 10,
         model_year: num(form.modelYear),
-        engine: form.engine.trim() || null,
-        gearbox: form.gearbox.trim() || null,
+        engine: form.engine.trim() || undefined,
+        gearbox: form.gearbox.trim() || undefined,
         tank_l: num(form.tankL),
         eco_rpm_min: num(form.ecoRpmMin),
         eco_rpm_max: num(form.ecoRpmMax),

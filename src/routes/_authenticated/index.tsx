@@ -41,6 +41,7 @@ export const Route = createFileRoute("/_authenticated/")({
 });
 
 function Dashboard() {
+  const { vehicle: activeVehicle } = useActiveVehicle();
   const { status, telemetry, lastMessageAt } = useTelemetry();
   const ignitionOn = telemetry.ignitionOn === true;
 

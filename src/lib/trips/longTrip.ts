@@ -3,7 +3,7 @@
  * Módulo puro (sem React/DOM), calculado sobre o plano de rota já existente.
  */
 import { haversineKm } from "./geo";
-import { ACTIVE_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, expectedKmpl, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
 
 /** Acima destes valores a viagem é considerada "longa". */
 export const LONG_TRIP_MIN_KM = 150;

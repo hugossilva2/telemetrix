@@ -30,7 +30,7 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/", replace: true });
+      if (data.user) navigate({ to: "/inicio", replace: true });
     });
   }, [navigate]);
 
@@ -44,7 +44,7 @@ function AuthPage() {
       return;
     }
     toast.success("Bem-vindo!");
-    navigate({ to: "/", replace: true });
+    navigate({ to: "/inicio", replace: true });
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -62,7 +62,7 @@ function AuthPage() {
     }
     if (data.session) {
       toast.success("Conta criada!");
-      navigate({ to: "/", replace: true });
+      navigate({ to: "/inicio", replace: true });
     } else {
       toast.success("Confira seu email para confirmar a conta.");
     }

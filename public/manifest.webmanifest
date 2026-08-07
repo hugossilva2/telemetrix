@@ -3,7 +3,7 @@
   "name": "Telemetrix",
   "short_name": "Telemetrix",
   "description": "Telemetrix — telemetria veicular em tempo real via Flespi.",
-  "start_url": "/",
+  "start_url": "/inicio",
   "scope": "/",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],

@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
-import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
@@ -23,6 +22,7 @@ import { Route as AuthenticatedMotoristasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedManutencaoRouteImport } from './routes/_authenticated/manutencao'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
+import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
@@ -44,11 +44,6 @@ const AuthRoute = AuthRouteImport.update({
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
   id: '/viagens',
@@ -103,6 +98,11 @@ const AuthenticatedManutencaoRoute = AuthenticatedManutencaoRouteImport.update({
 const AuthenticatedLugaresRoute = AuthenticatedLugaresRouteImport.update({
   id: '/lugares',
   path: '/lugares',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
+  id: '/inicio',
+  path: '/inicio',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
@@ -171,7 +171,7 @@ const AuthenticatedMotoristasIdRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedIndexRoute
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -181,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
+  '/inicio': typeof AuthenticatedInicioRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
@@ -198,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -207,6 +209,7 @@ export interface FileRoutesByTo {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
+  '/inicio': typeof AuthenticatedInicioRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
@@ -218,7 +221,6 @@ export interface FileRoutesByTo {
   '/rotinas': typeof AuthenticatedRotinasRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
-  '/': typeof AuthenticatedIndexRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -236,6 +238,7 @@ export interface FileRoutesById {
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/eco': typeof AuthenticatedEcoRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
+  '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/manutencao': typeof AuthenticatedManutencaoRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
@@ -247,7 +250,6 @@ export interface FileRoutesById {
   '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
-  '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -266,6 +268,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/eco'
     | '/gestao'
+    | '/inicio'
     | '/lugares'
     | '/manutencao'
     | '/mapa'
@@ -283,6 +286,7 @@ export interface FileRouteTypes {
     | '/api/public/tracker-heartbeat'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/auth'
     | '/abastecimento'
     | '/acompanhar'
@@ -292,6 +296,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/eco'
     | '/gestao'
+    | '/inicio'
     | '/lugares'
     | '/manutencao'
     | '/mapa'
@@ -303,7 +308,6 @@ export interface FileRouteTypes {
     | '/rotinas'
     | '/veiculos'
     | '/viagens'
-    | '/'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -320,6 +324,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos'
     | '/_authenticated/eco'
     | '/_authenticated/gestao'
+    | '/_authenticated/inicio'
     | '/_authenticated/lugares'
     | '/_authenticated/manutencao'
     | '/_authenticated/mapa'
@@ -331,7 +336,6 @@ export interface FileRouteTypes {
     | '/_authenticated/rotinas'
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
-    | '/_authenticated/'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -360,13 +364,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/': {
-      id: '/_authenticated/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AuthenticatedIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/viagens': {
       id: '/_authenticated/viagens'
@@ -443,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/lugares'
       fullPath: '/lugares'
       preLoaderRoute: typeof AuthenticatedLugaresRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/inicio': {
+      id: '/_authenticated/inicio'
+      path: '/inicio'
+      fullPath: '/inicio'
+      preLoaderRoute: typeof AuthenticatedInicioRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/gestao': {
@@ -566,6 +570,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
+  AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedManutencaoRoute: typeof AuthenticatedManutencaoRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
@@ -577,7 +582,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRotinasRoute: typeof AuthenticatedRotinasRoute
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
-  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -589,6 +593,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEcoRoute: AuthenticatedEcoRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
+  AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedManutencaoRoute: AuthenticatedManutencaoRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
@@ -600,7 +605,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRotinasRoute: AuthenticatedRotinasRoute,
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
-  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
@@ -615,13 +619,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

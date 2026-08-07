@@ -1,7 +1,7 @@
 import type { EcoEvent, EcoEventType, EcoSeverity } from "./detect";
-import { ACTIVE_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
 
-const ECO_RPM_MAX = ACTIVE_SPEC.ecoRpm.max;
+const ECO_RPM_MAX = DEFAULT_SPEC.ecoRpm.max;
 
 
 /** Penalidade por evento (pontos por 100 km). */

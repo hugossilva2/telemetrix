@@ -7,7 +7,7 @@
 // preenche `greenDrivingType/Value` e a detecção nativa tem prioridade.
 
 import {
-  ACTIVE_SPEC,
+  DEFAULT_SPEC,
   referenceAccelKmhPerS,
   type VehicleSpec,
 } from "@/lib/vehicles/specs";
@@ -66,7 +66,7 @@ export interface EcoThresholds {
  * - freada: traseira a tambor pede antecipação, então 8 / 12 km/h/s.
  * - giro: acima da faixa econômica (1.500-2.500 rpm) o consumo dispara.
  */
-export function thresholdsFromSpec(spec: VehicleSpec = ACTIVE_SPEC): EcoThresholds {
+export function thresholdsFromSpec(spec: VehicleSpec = DEFAULT_SPEC): EcoThresholds {
   const refAccel = referenceAccelKmhPerS(spec);
   return {
     brakeModerate: 8,

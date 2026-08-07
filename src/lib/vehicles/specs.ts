@@ -87,8 +87,67 @@ export const CRONOS_1_3_2022: VehicleSpec = {
   ecoRpm: { min: 1500, max: 2500 },
 };
 
-/** Perfil ativo do app (hoje um único veículo). */
-export const ACTIVE_SPEC = CRONOS_1_3_2022;
+/** Ficha padrão usada quando o veículo ativo ainda não tem dados próprios. */
+export const DEFAULT_SPEC = CRONOS_1_3_2022;
+
+/** @deprecated use o veículo ativo (`useActiveVehicle().spec`). */
+export const ACTIVE_SPEC = DEFAULT_SPEC;
+
+/** Colunas de ficha técnica gravadas na tabela `vehicles`. */
+export interface VehicleSpecRow {
+  name?: string | null;
+  model_year?: number | null;
+  engine?: string | null;
+  gearbox?: string | null;
+  fuel_kind?: string | null;
+  tank_l?: number | string | null;
+  eco_rpm_min?: number | null;
+  eco_rpm_max?: number | null;
+  zero_to_100_s?: number | string | null;
+  consumption_ethanol_urban?: number | string | null;
+  consumption_ethanol_highway?: number | string | null;
+  consumption_gasoline_urban?: number | string | null;
+  consumption_gasoline_highway?: number | string | null;
+}
+
+function num(value: unknown, fallback: number): number {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+export function parseFuelKind(value: unknown): FuelKind {
+  return value === "etanol" || value === "gasolina" ? value : "misto";
+}
+
+/** Converte uma linha de `vehicles` na ficha técnica usada pelos cálculos. */
+export function specFromVehicleRow(row: VehicleSpecRow | null | undefined): VehicleSpec {
+  if (!row) return DEFAULT_SPEC;
+  const d = DEFAULT_SPEC;
+  return {
+    ...d,
+    name: row.name?.trim() || d.name,
+    year: row.model_year ?? d.year,
+    engine: row.engine?.trim() || d.engine,
+    gearbox: row.gearbox?.trim() || d.gearbox,
+    tankL: num(row.tank_l, d.tankL),
+    zeroTo100S: num(row.zero_to_100_s, d.zeroTo100S),
+    consumption: {
+      etanol: {
+        urban: num(row.consumption_ethanol_urban, d.consumption.etanol.urban),
+        highway: num(row.consumption_ethanol_highway, d.consumption.etanol.highway),
+      },
+      gasolina: {
+        urban: num(row.consumption_gasoline_urban, d.consumption.gasolina.urban),
+        highway: num(row.consumption_gasoline_highway, d.consumption.gasolina.highway),
+      },
+    },
+    ecoRpm: {
+      min: row.eco_rpm_min ?? d.ecoRpm.min,
+      max: row.eco_rpm_max ?? d.ecoRpm.max,
+    },
+  };
+}
+
 
 /**
  * Aceleração máxima "de fábrica": 100 km/h em 11,5 s ≈ 8,7 km/h/s.

@@ -1,4 +1,4 @@
-import { Car, ChevronDown, Plus } from "lucide-react";
+import { Car, ChevronDown, Crown, Plus } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import {
   DropdownMenu,

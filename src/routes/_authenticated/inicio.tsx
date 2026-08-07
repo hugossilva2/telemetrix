@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Gauge, Fuel as FuelIcon, Route as RouteIcon, Zap } from "lucide-react";
+import { Gauge, Route as RouteIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";

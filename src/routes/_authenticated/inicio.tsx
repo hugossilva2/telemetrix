@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Gauge, Fuel as FuelIcon, Route as RouteIcon, Zap } from "lucide-react";
+import { Gauge, Route as RouteIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
-import { Progress } from "@/components/ui/progress";
+import { GaugeCluster } from "@/components/dashboard/GaugeCluster";
+
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
+import { formatKm } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
 import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";
@@ -90,40 +91,18 @@ function Dashboard() {
         hasFix={telemetry.latitude !== undefined && telemetry.longitude !== undefined}
       />
 
+      <GaugeCluster
+        speedKmh={telemetry.canSpeedKmh ?? speed}
+        rpm={rpm}
+        fuelPct={fuel}
+        tankLiters={activeVehicle?.tank_l ?? null}
+        ecoRpmMin={activeVehicle?.eco_rpm_min ?? null}
+        ecoRpmMax={activeVehicle?.eco_rpm_max ?? null}
+        ignitionOn={ignitionOn}
+      />
+
       <Bento>
-        <BentoItem span={1}>
-          <TelemetryCard
-            label="Velocidade"
-            value={formatSpeed(speed)}
-            Icon={Gauge}
-            accent="primary"
-            className={dimmed}
-          />
-        </BentoItem>
-        <BentoItem span={1}>
-          <TelemetryCard
-            label="RPM"
-            value={formatRpm(rpm)}
-            Icon={Zap}
-            accent="amber"
-            className={dimmed}
-          />
-        </BentoItem>
-        <BentoItem span={2}>
-          <TelemetryCard
-            label="Combustível"
-            value={fuel === undefined ? "—" : formatPct(fuel)}
-            Icon={FuelIcon}
-            accent="emerald"
-            className={dimmed}
-          >
-            {fuel !== undefined ? (
-              <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
-            ) : (
-              <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
-            )}
-          </TelemetryCard>
-        </BentoItem>
+
         <BentoItem span={1}>
           <TelemetryCard
             label="Odômetro"

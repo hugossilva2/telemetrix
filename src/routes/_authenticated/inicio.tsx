@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { AppShell } from "@/components/layout/AppShell";
 import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
-import { Progress } from "@/components/ui/progress";
+import { GaugeCluster } from "@/components/dashboard/GaugeCluster";
+
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";

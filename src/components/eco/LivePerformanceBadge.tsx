@@ -46,7 +46,7 @@ export function LivePerformanceBadge() {
     acc.current.sum += score;
     acc.current.n += 1;
     setState({ score, hint, avg: acc.current.sum / acc.current.n });
-  }, [speed, rpm, load]);
+  }, [speed, rpm, load, spec]);
 
   const band = bandFromScore(state.score);
   const avgBand = bandFromScore(state.avg == null ? null : Math.round(state.avg));

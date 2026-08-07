@@ -217,7 +217,23 @@ function ViagensPage() {
 
   return (
     <AppShell title="Viagens" subtitle="Relatório mensal">
+      {hiddenTripCount > 0 && (
+        <section className="mb-3 card-surface border-primary/40 p-3">
+          <p className="text-sm font-semibold">
+            {hiddenTripCount} viagem(ns) fora do histórico do plano {plan.toUpperCase()}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            O plano atual mostra os últimos {limits.historyDays} dias. Faça upgrade para ver o
+            histórico completo.
+          </p>
+          <Button asChild size="sm" className="mt-3">
+            <Link to="/planos">Ver planos</Link>
+          </Button>
+        </section>
+      )}
+
       {/* Seletor de mês */}
+
       <div className="mb-3 flex items-center justify-between card-surface px-2 py-1.5">
         <button
           type="button"

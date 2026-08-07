@@ -13,6 +13,7 @@ import { EcoScoreBadge } from "@/components/eco/EcoScoreRing";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
+import { useSubscription } from "@/lib/billing/subscription";
 
 
 
@@ -81,6 +82,11 @@ function ViagensPage() {
       state.matches.some((match) => match.routeId === "/_authenticated/viagens/$id"),
   });
 
+  const { limits, plan } = useSubscription();
+  const historyCutoffMs = Number.isFinite(limits.historyDays)
+    ? Date.now() - limits.historyDays * 86_400_000
+    : null;
+
   const { data: trips, isLoading } = useQuery({
     queryKey: ["trips-list"],
     queryFn: async (): Promise<TripRow[]> => {
@@ -111,10 +117,17 @@ function ViagensPage() {
 
 
 
+  const allTrips = useMemo(() => removeOverlappingFragments(trips ?? []), [trips]);
+
+  // Plano Free vê apenas os últimos dias de histórico.
   const visibleTrips = useMemo(
-    () => removeOverlappingFragments(trips ?? []),
-    [trips],
+    () =>
+      historyCutoffMs == null
+        ? allTrips
+        : allTrips.filter((t) => getTripStartMs(t) >= historyCutoffMs),
+    [allTrips, historyCutoffMs],
   );
+  const hiddenTripCount = allTrips.length - visibleTrips.length;
 
   // Mês selecionado: chave "YYYY-MM"
   const [monthKey, setMonthKey] = useState<string>(() => {
@@ -204,7 +217,23 @@ function ViagensPage() {
 
   return (
     <AppShell title="Viagens" subtitle="Relatório mensal">
+      {hiddenTripCount > 0 && (
+        <section className="mb-3 card-surface border-primary/40 p-3">
+          <p className="text-sm font-semibold">
+            {hiddenTripCount} viagem(ns) fora do histórico do plano {plan.toUpperCase()}
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            O plano atual mostra os últimos {limits.historyDays} dias. Faça upgrade para ver o
+            histórico completo.
+          </p>
+          <Button asChild size="sm" className="mt-3">
+            <Link to="/planos">Ver planos</Link>
+          </Button>
+        </section>
+      )}
+
       {/* Seletor de mês */}
+
       <div className="mb-3 flex items-center justify-between card-surface px-2 py-1.5">
         <button
           type="button"

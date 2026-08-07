@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Car, Check, Plus, Trash2 } from "lucide-react";
@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveVehicle, useInvalidateVehicles, type VehicleRecord } from "@/lib/vehicles/active";
+import { useSubscription } from "@/lib/billing/subscription";
 
 export const Route = createFileRoute("/_authenticated/veiculos")({
   head: () => ({
@@ -84,6 +85,8 @@ const num = (s: string) => (s.trim() === "" ? undefined : Number(s));
 function VeiculosPage() {
   const { vehicles, vehicle, setVehicleId, loading } = useActiveVehicle();
   const invalidate = useInvalidateVehicles();
+  const { plan, limits } = useSubscription();
+  const atLimit = vehicles.length >= limits.maxVehicles;
   const [editing, setEditing] = useState<VehicleRecord | "new" | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
 
@@ -146,11 +149,27 @@ function VeiculosPage() {
       title="Meus veículos"
       subtitle="Escolha o veículo monitorado e edite a ficha técnica"
       action={
-        <Button size="sm" onClick={() => setEditing("new")}>
+        <Button size="sm" onClick={() => setEditing("new")} disabled={atLimit}>
           <Plus className="size-4" /> Novo
         </Button>
       }
     >
+      {atLimit && (
+        <section className="card-surface border-primary/40 p-4">
+          <p className="text-sm font-semibold">
+            Limite do plano {plan.toUpperCase()} atingido
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Seu plano permite {limits.maxVehicles}{" "}
+            {limits.maxVehicles === 1 ? "veículo" : "veículos"}. Faça upgrade para monitorar mais
+            carros na mesma conta.
+          </p>
+          <Button asChild size="sm" className="mt-3">
+            <Link to="/planos">Ver planos</Link>
+          </Button>
+        </section>
+      )}
+
       {loading && vehicles.length === 0 && (
         <p className="text-sm text-muted-foreground">Carregando…</p>
       )}

@@ -779,6 +779,48 @@ export type Database = {
           },
         ]
       }
+      user_subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          id: string
+          plan: Database["public"]["Enums"]["app_plan"]
+          provider: string | null
+          provider_customer_id: string | null
+          provider_subscription_id: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["app_plan"]
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_period_end?: string | null
+          id?: string
+          plan?: Database["public"]["Enums"]["app_plan"]
+          provider?: string | null
+          provider_customer_id?: string | null
+          provider_subscription_id?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vehicle_checkups: {
         Row: {
           checked_at: string
@@ -1039,8 +1081,13 @@ export type Database = {
     }
     Functions: {
       can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
+      current_plan: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_plan"]
+      }
     }
     Enums: {
+      app_plan: "free" | "pro" | "frota"
       expense_category:
         | "pedagio"
         | "estacionamento"
@@ -1063,6 +1110,7 @@ export type Database = {
         | "velas"
         | "revisao"
         | "outro"
+      subscription_status: "active" | "trialing" | "canceled" | "past_due"
       tracker_event_type:
         | "ignition_on"
         | "ignition_off"
@@ -1204,6 +1252,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_plan: ["free", "pro", "frota"],
       expense_category: [
         "pedagio",
         "estacionamento",
@@ -1228,6 +1277,7 @@ export const Constants = {
         "revisao",
         "outro",
       ],
+      subscription_status: ["active", "trialing", "canceled", "past_due"],
       tracker_event_type: [
         "ignition_on",
         "ignition_off",

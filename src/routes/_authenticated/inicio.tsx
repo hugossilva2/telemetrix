@@ -90,40 +90,18 @@ function Dashboard() {
         hasFix={telemetry.latitude !== undefined && telemetry.longitude !== undefined}
       />
 
+      <GaugeCluster
+        speedKmh={telemetry.canSpeedKmh ?? speed}
+        rpm={rpm}
+        fuelPct={fuel}
+        tankLiters={activeVehicle?.tank_l ?? null}
+        ecoRpmMin={activeVehicle?.eco_rpm_min ?? null}
+        ecoRpmMax={activeVehicle?.eco_rpm_max ?? null}
+        ignitionOn={ignitionOn}
+      />
+
       <Bento>
-        <BentoItem span={1}>
-          <TelemetryCard
-            label="Velocidade"
-            value={formatSpeed(speed)}
-            Icon={Gauge}
-            accent="primary"
-            className={dimmed}
-          />
-        </BentoItem>
-        <BentoItem span={1}>
-          <TelemetryCard
-            label="RPM"
-            value={formatRpm(rpm)}
-            Icon={Zap}
-            accent="amber"
-            className={dimmed}
-          />
-        </BentoItem>
-        <BentoItem span={2}>
-          <TelemetryCard
-            label="Combustível"
-            value={fuel === undefined ? "—" : formatPct(fuel)}
-            Icon={FuelIcon}
-            accent="emerald"
-            className={dimmed}
-          >
-            {fuel !== undefined ? (
-              <Progress value={Math.max(0, Math.min(100, fuel))} className="h-2" />
-            ) : (
-              <p className="text-xs text-muted-foreground">Disponível com o motor ligado.</p>
-            )}
-          </TelemetryCard>
-        </BentoItem>
+
         <BentoItem span={1}>
           <TelemetryCard
             label="Odômetro"

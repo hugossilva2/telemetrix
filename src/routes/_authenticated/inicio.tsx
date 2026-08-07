@@ -9,7 +9,7 @@ import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { GaugeCluster } from "@/components/dashboard/GaugeCluster";
 
 import { useTelemetry } from "@/hooks/useTelemetry";
-import { formatKm, formatPct, formatRpm, formatSpeed } from "@/lib/format";
+import { formatKm } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { OngoingTripCard } from "@/components/trips/OngoingTripCard";
 import { LiveConsumptionCard } from "@/components/dashboard/LiveConsumptionCard";

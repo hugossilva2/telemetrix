@@ -140,7 +140,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const showNav = pathname !== "/auth";
+  const showNav = pathname !== "/auth" && pathname !== "/";
 
   useEffect(() => {
     registerServiceWorker();

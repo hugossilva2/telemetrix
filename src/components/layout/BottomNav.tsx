@@ -3,7 +3,7 @@ import { Car, Eye, Fuel, FolderCog, Radar, Route as RouteIcon, Settings } from "
 import { useIsObserver } from "@/lib/shares/observer";
 
 const items = [
-  { to: "/", label: "Painel", Icon: Car, exact: true },
+  { to: "/inicio", label: "Painel", Icon: Car, exact: true },
   { to: "/rastreador", label: "Rastreio", Icon: Radar, exact: false },
   { to: "/viagens", label: "Viagens", Icon: RouteIcon, exact: false },
   { to: "/abastecimento", label: "Abastecer", Icon: Fuel, exact: false },

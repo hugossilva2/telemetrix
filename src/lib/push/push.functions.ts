@@ -9,7 +9,7 @@ export const sendTestPush = createServerFn({ method: "POST" })
     return sendPushToUser(context.userId, {
       title: "Telemetrix",
       body: "Notificações ativadas com sucesso.",
-      url: "/",
+      url: "/inicio",
       tag: "test",
     });
   });

@@ -25,7 +25,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 
-export const Route = createFileRoute("/_authenticated/")({
+export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
     meta: [
       { title: "Painel · Telemetrix" },

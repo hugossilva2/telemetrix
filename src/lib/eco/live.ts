@@ -1,4 +1,4 @@
-import { ACTIVE_SPEC, referenceAccelKmhPerS } from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, referenceAccelKmhPerS, type VehicleSpec } from "@/lib/vehicles/specs";
 
 export type PerfGrade = "otimo" | "bom" | "regular" | "pessimo";
 
@@ -56,6 +56,8 @@ export interface LivePerfInput {
   accelKmhPerS?: number | null;
   load?: number | null;
   maxSpeedKmh?: number;
+  /** ficha técnica do veículo ativo */
+  spec?: VehicleSpec;
 }
 
 export interface LivePerf {
@@ -66,7 +68,6 @@ export interface LivePerf {
   hint: string | null;
 }
 
-const { ecoRpm, gearbox } = ACTIVE_SPEC;
 
 /**
  * Nota instantânea de desempenho, calibrada pela ficha do veículo:
@@ -78,10 +79,12 @@ export function gradeLive({
   accelKmhPerS,
   load,
   maxSpeedKmh = 110,
+  spec = DEFAULT_SPEC,
 }: LivePerfInput): LivePerf {
+  const { ecoRpm, gearbox } = spec;
   let penalty = 0;
   let hint: string | null = null;
-  const refAccel = referenceAccelKmhPerS();
+  const refAccel = referenceAccelKmhPerS(spec);
   const v = Number(speedKmh) || 0;
 
   if (typeof rpm === "number" && rpm > 0) {
@@ -91,7 +94,7 @@ export function gradeLive({
       if (rpm > ecoRpm.max + 1000) {
         hint = `Giro em ${Math.round(rpm)} rpm — troque de marcha (${gearbox.toLowerCase()})`;
       } else {
-        hint = "Giro acima da faixa econômica (1.500-2.500 rpm)";
+        hint = `Giro acima da faixa econômica (${ecoRpm.min}-${ecoRpm.max} rpm)`;
       }
     } else if (rpm < ecoRpm.min - 300 && v > 20) {
       penalty += 12;
@@ -103,7 +106,7 @@ export function gradeLive({
   if (Number.isFinite(a)) {
     if (a >= refAccel * 0.7) {
       penalty += Math.min(40, ((a - refAccel * 0.7) / refAccel) * 60 + 15);
-      hint = hint ?? "Aceleração acima do que o 1.3 entrega com eficiência";
+      hint = hint ?? `Aceleração acima do que o ${spec.engine} entrega com eficiência`;
     } else if (a <= -8) {
       penalty += Math.min(35, (Math.abs(a) - 8) * 4 + 12);
       hint = hint ?? "Freada forte — antecipe mais (freio traseiro a tambor)";

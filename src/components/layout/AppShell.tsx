@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { VehicleSwitcher } from "@/components/vehicles/VehicleSwitcher";
 
 interface AppShellProps {
   title: string;
@@ -24,7 +25,10 @@ export function AppShell({ title, subtitle, action, children }: AppShellProps) {
               <div className="truncate text-xs text-muted-foreground">{subtitle}</div>
             )}
           </div>
-          {action ? <div className="flex shrink-0 items-center gap-2">{action}</div> : <span />}
+          <div className="flex shrink-0 items-center gap-2">
+            <VehicleSwitcher />
+            {action}
+          </div>
         </div>
       </header>
       <main className="flex-1 space-y-3 px-4 py-4">{children}</main>

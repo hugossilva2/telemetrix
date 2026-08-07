@@ -23,6 +23,7 @@ const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 export function OngoingTripCard() {
   const open = useOpenTrip();
   const { telemetry } = useTelemetry();
+  const { vehicle } = useActiveVehicle();
   const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 

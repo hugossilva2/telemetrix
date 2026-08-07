@@ -171,6 +171,7 @@ function PlaceSearch({
 
 function PlanejarPage() {
   const { telemetry } = useTelemetry();
+  const { vehicle } = useActiveVehicle();
   const plan = useTripPlan();
   const compute = useServerFn(planRoute);
 

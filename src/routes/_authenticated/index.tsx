@@ -23,6 +23,7 @@ import { BluetoothPairCard } from "@/components/dashboard/BluetoothPairCard";
 import { useOpenTrip } from "@/lib/trips/store";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 
 
@@ -48,21 +49,7 @@ function Dashboard() {
   const rpm = ignitionOn ? telemetry.engineRpm : 0;
   const fuel = ignitionOn ? telemetry.fuelLevel : undefined;
 
-  const { data: alerts } = useQuery({
-    queryKey: ["vehicle-alerts"],
-    queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-      if (!uid) return { engine: false };
-      const { data } = await supabase
-        .from("vehicles")
-        .select("alert_engine_on")
-        .eq("user_id", uid)
-        .limit(1)
-        .maybeSingle();
-      return { engine: !!data?.alert_engine_on };
-    },
-  });
+  const alerts = { engine: !!activeVehicle?.alert_engine_on };
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
 

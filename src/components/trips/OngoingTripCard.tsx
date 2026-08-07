@@ -15,6 +15,7 @@ import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { getFuelKind } from "@/lib/eco/settings";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
@@ -32,19 +33,12 @@ export function OngoingTripCard() {
   }, [open]);
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["ongoing-trip-vehicle"],
+    queryKey: ["ongoing-trip-vehicle", vehicle?.id ?? null],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: v }, { data: f }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("avg_consumption_kmpl")
-          .eq("user_id", uid)
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: f }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -54,7 +48,7 @@ export function OngoingTripCard() {
           .maybeSingle(),
       ]);
       return {
-        kmpl: Number(v?.avg_consumption_kmpl) || 10,
+        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },

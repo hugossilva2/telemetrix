@@ -34,6 +34,7 @@ import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
 import { getFuelKind } from "@/lib/eco/settings";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
 
@@ -184,19 +185,12 @@ function PlanejarPage() {
       : undefined;
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["plan-vehicle"],
+    queryKey: ["plan-vehicle", vehicle?.id ?? null],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: v }, { data: f }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("avg_consumption_kmpl")
-          .eq("user_id", uid)
-          .order("created_at", { ascending: true })
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: f }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -206,7 +200,7 @@ function PlanejarPage() {
           .maybeSingle(),
       ]);
       return {
-        kmpl: Number(v?.avg_consumption_kmpl) || 10,
+        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },

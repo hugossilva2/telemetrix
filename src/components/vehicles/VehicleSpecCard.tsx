@@ -1,7 +1,6 @@
 import { Gauge, Car, Fuel, Settings2 } from "lucide-react";
-import { ACTIVE_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
-
-const spec = ACTIVE_SPEC;
+import { expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 function Row({ label, value }: { label: string; value: string }) {
   return (
@@ -14,8 +13,9 @@ function Row({ label, value }: { label: string; value: string }) {
 
 /** Ficha técnica que calibra os scores, limites de evento e metas de consumo. */
 export function VehicleSpecCard({ fuel = "misto" }: { fuel?: FuelKind }) {
-  const urbanTarget = expectedKmpl({ fuel, avgSpeedKmh: 30 });
-  const highwayTarget = expectedKmpl({ fuel, avgSpeedKmh: 90 });
+  const { spec } = useActiveVehicle();
+  const urbanTarget = expectedKmpl({ fuel, avgSpeedKmh: 30, spec });
+  const highwayTarget = expectedKmpl({ fuel, avgSpeedKmh: 90, spec });
 
   return (
     <div className="card-surface p-4">

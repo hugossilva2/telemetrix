@@ -44,6 +44,12 @@ export function VehicleSwitcher() {
             <Plus className="size-3.5" /> Gerenciar veículos
           </Link>
         </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/planos" className="flex items-center gap-2">
+            <Crown className="size-3.5" /> Planos e limites
+          </Link>
+        </DropdownMenuItem>
+
       </DropdownMenuContent>
     </DropdownMenu>
   );

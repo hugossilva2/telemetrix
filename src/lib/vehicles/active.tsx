@@ -35,6 +35,15 @@ export interface VehicleRecord {
   consumption_gasoline_highway: number | null;
 }
 
+/** Lê o veículo ativo fora do React (ex.: salvamento de viagem). */
+export function getActiveVehicleId(): string | null {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
 export const VEHICLE_SELECT =
   "id,name,plate,current_mileage,avg_consumption_kmpl,flespi_device_id,obd_device_name,tracker_mode,alert_engine_on,model_year,engine,gearbox,fuel_kind,tank_l,eco_rpm_min,eco_rpm_max,zero_to_100_s,consumption_ethanol_urban,consumption_ethanol_highway,consumption_gasoline_urban,consumption_gasoline_highway";
 

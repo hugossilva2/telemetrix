@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useOpenTrip } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { supabase } from "@/integrations/supabase/client";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -11,20 +12,15 @@ const BRL = new Intl.NumberFormat("pt-BR", {
 
 export function LiveConsumptionCard() {
   const open = useOpenTrip();
+  const { vehicle } = useActiveVehicle();
 
   const { data } = useQuery({
-    queryKey: ["live-consumption-refs"],
+    queryKey: ["live-consumption-refs", vehicle?.id ?? null],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
       if (!uid) return { pricePerLiter: null, kmpl: 10 };
-      const [{ data: vehicle }, { data: lastFuel }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("avg_consumption_kmpl")
-          .eq("user_id", uid)
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: lastFuel }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")

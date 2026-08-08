@@ -26,6 +26,14 @@ export interface TripPlan {
   monitoring: boolean;
   /** Nível do tanque (%) informado manualmente, quando não há leitura do veículo. */
   fuelPercent?: number | null;
+  /** Considerar ida e volta na estimativa de gastos. */
+  roundTrip?: boolean;
+  /** Pedágios informados manualmente (R$). */
+  tollCost?: number | null;
+  /** Preço do litro usado na estimativa (R$/L). */
+  pricePerLiter?: number | null;
+  /** Consumo usado na estimativa (km/L). */
+  kmpl?: number | null;
 }
 
 

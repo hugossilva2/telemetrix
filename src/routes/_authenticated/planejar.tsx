@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -29,7 +29,8 @@ import {
   type PlanStop,
   type TripPlan,
 } from "@/lib/trips/plan";
-import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
+import { DEFAULT_GAS_PRICE_PER_LITER, estimatePlanCost } from "@/lib/trips/cost";
+import { TripCostCard } from "@/components/trips/TripCostCard";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
@@ -210,6 +211,9 @@ function PlanejarPage() {
   const kmpl = vehicleInfo?.kmpl ?? 10;
   const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
 
+  const prevPlanRef = useRef<TripPlan | null>(plan);
+  prevPlanRef.current = plan;
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!origin || !destination) throw new Error("Escolha origem e destino");
@@ -220,8 +224,11 @@ function PlanejarPage() {
           stops: stops.map((s) => ({ lat: s.lat, lng: s.lng })),
         },
       });
+      const previous = prevPlanRef.current;
       const distanceKm = result.distanceMeters / 1000;
-      const fuelLiters = kmpl > 0 ? distanceKm / kmpl : 0;
+      const usedKmpl = previous?.kmpl ?? kmpl;
+      const usedPrice = previous?.pricePerLiter ?? price;
+      const fuelLiters = usedKmpl > 0 ? distanceKm / usedKmpl : 0;
       const next: TripPlan = {
         createdAt: new Date().toISOString(),
         origin,
@@ -230,17 +237,61 @@ function PlanejarPage() {
         distanceKm,
         durationSeconds: result.durationSeconds,
         fuelLiters: Number(fuelLiters.toFixed(2)),
-        cost: Number((fuelLiters * price).toFixed(2)),
+        cost: Number((fuelLiters * usedPrice).toFixed(2)),
         path: decodePolyline(result.encodedPolyline),
-        monitoring: false,
+        monitoring: previous?.monitoring ?? false,
+        fuelPercent: previous?.fuelPercent ?? null,
+        roundTrip: previous?.roundTrip ?? false,
+        tollCost: previous?.tollCost ?? 0,
+        pricePerLiter: usedPrice,
+        kmpl: usedKmpl,
       };
       tripPlanStore.set(next);
       return next;
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Não foi possível calcular a rota"),
-    onSuccess: () => toast.success("Rota calculada"),
   });
+
+  // Recalcula automaticamente quando origem, destino ou paradas mudam.
+  const routeKey = useMemo(
+    () =>
+      origin && destination
+        ? [
+            `${origin.lat},${origin.lng}`,
+            ...stops.map((s) => `${s.lat},${s.lng}`),
+            `${destination.lat},${destination.lng}`,
+          ].join("|")
+        : null,
+    [origin, destination, stops],
+  );
+  const mutateRef = useRef(mutation.mutate);
+  mutateRef.current = mutation.mutate;
+
+  useEffect(() => {
+    if (!routeKey) return;
+    const id = window.setTimeout(() => mutateRef.current(), 600);
+    return () => window.clearTimeout(id);
+  }, [routeKey]);
+
+  const roundTrip = plan?.roundTrip ?? false;
+  const tollCost = plan?.tollCost ?? 0;
+  const planPrice = plan?.pricePerLiter ?? price;
+  const planKmpl = plan?.kmpl ?? kmpl;
+
+  const costEstimate = estimatePlanCost({
+    distanceKm: plan?.distanceKm,
+    kmpl: planKmpl,
+    pricePerLiter: planPrice,
+    roundTrip,
+    tollCost,
+  });
+
+  const patchPlan = (patch: Partial<TripPlan>) => {
+    if (!plan) return;
+    tripPlanStore.set({ ...plan, ...patch });
+  };
+
 
   const currentPos = useMemo(
     () =>
@@ -330,6 +381,7 @@ function PlanejarPage() {
 
         <Button
           className="w-full"
+          variant={plan ? "outline" : "default"}
           onClick={() => mutation.mutate()}
           disabled={!origin || !destination || mutation.isPending}
         >
@@ -338,7 +390,7 @@ function PlanejarPage() {
           ) : (
             <RouteIcon className="mr-1 size-4" />
           )}
-          Calcular rota
+          {mutation.isPending ? "Calculando…" : plan ? "Recalcular rota" : "Calcular rota"}
         </Button>
       </div>
 
@@ -347,29 +399,32 @@ function PlanejarPage() {
           <div className="grid grid-cols-2 gap-2">
             <Metric
               icon={<RouteIcon className="size-4 text-primary" />}
-              label="Distância"
-              value={`${formatDecimal(plan.distanceKm)} km`}
+              label={roundTrip ? "Distância (ida e volta)" : "Distância"}
+              value={`${formatDecimal(costEstimate.distanceKm)} km`}
             />
             <Metric
               icon={<Timer className="size-4 text-primary" />}
               label="Tempo estimado"
-              value={formatDurationSeconds(plan.durationSeconds)}
+              value={formatDurationSeconds(
+                roundTrip ? plan.durationSeconds * 2 : plan.durationSeconds,
+              )}
             />
             <Metric
               icon={<Fuel className="size-4 text-warning" />}
               label="Combustível"
-              value={`${formatDecimal(plan.fuelLiters)} L`}
+              value={`${formatDecimal(costEstimate.fuelLiters)} L`}
             />
             <Metric
               icon={<Wallet className="size-4 text-success" />}
-              label="Custo estimado"
-              value={formatBRL(plan.cost)}
+              label="Custo total"
+              value={formatBRL(costEstimate.total)}
             />
           </div>
 
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Base: {formatDecimal(kmpl)} km/L · {formatBRL(price)}/L
+            Base: {formatDecimal(planKmpl)} km/L · {formatBRL(planPrice)}/L
           </p>
+
 
           <div className="mt-3 h-56 overflow-hidden rounded-xl border border-border">
             <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
@@ -443,6 +498,24 @@ function PlanejarPage() {
           )}
         </section>
       )}
+
+      {plan && (
+        <TripCostCard
+          cost={costEstimate}
+          roundTrip={roundTrip}
+          onRoundTripChange={(v) => patchPlan({ roundTrip: v })}
+          tollCost={tollCost}
+          onTollCostChange={(v) => patchPlan({ tollCost: v })}
+          pricePerLiter={planPrice}
+          onPricePerLiterChange={(v) => patchPlan({ pricePerLiter: v })}
+          kmpl={planKmpl}
+          onKmplChange={(v) => patchPlan({ kmpl: v })}
+          canReset={planPrice !== price || planKmpl !== kmpl || tollCost !== 0}
+          onReset={() => patchPlan({ pricePerLiter: price, kmpl, tollCost: 0 })}
+        />
+      )}
+
+
 
       {plan && longTrip?.isLong && (
         <LongTripCard

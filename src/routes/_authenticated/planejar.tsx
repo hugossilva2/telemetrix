@@ -211,6 +211,9 @@ function PlanejarPage() {
   const kmpl = vehicleInfo?.kmpl ?? 10;
   const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
 
+  const prevPlanRef = useRef<TripPlan | null>(plan);
+  prevPlanRef.current = plan;
+
   const mutation = useMutation({
     mutationFn: async () => {
       if (!origin || !destination) throw new Error("Escolha origem e destino");
@@ -221,8 +224,11 @@ function PlanejarPage() {
           stops: stops.map((s) => ({ lat: s.lat, lng: s.lng })),
         },
       });
+      const previous = prevPlanRef.current;
       const distanceKm = result.distanceMeters / 1000;
-      const fuelLiters = kmpl > 0 ? distanceKm / kmpl : 0;
+      const usedKmpl = previous?.kmpl ?? kmpl;
+      const usedPrice = previous?.pricePerLiter ?? price;
+      const fuelLiters = usedKmpl > 0 ? distanceKm / usedKmpl : 0;
       const next: TripPlan = {
         createdAt: new Date().toISOString(),
         origin,
@@ -231,17 +237,61 @@ function PlanejarPage() {
         distanceKm,
         durationSeconds: result.durationSeconds,
         fuelLiters: Number(fuelLiters.toFixed(2)),
-        cost: Number((fuelLiters * price).toFixed(2)),
+        cost: Number((fuelLiters * usedPrice).toFixed(2)),
         path: decodePolyline(result.encodedPolyline),
-        monitoring: false,
+        monitoring: previous?.monitoring ?? false,
+        fuelPercent: previous?.fuelPercent ?? null,
+        roundTrip: previous?.roundTrip ?? false,
+        tollCost: previous?.tollCost ?? 0,
+        pricePerLiter: usedPrice,
+        kmpl: usedKmpl,
       };
       tripPlanStore.set(next);
       return next;
     },
     onError: (err) =>
       toast.error(err instanceof Error ? err.message : "Não foi possível calcular a rota"),
-    onSuccess: () => toast.success("Rota calculada"),
   });
+
+  // Recalcula automaticamente quando origem, destino ou paradas mudam.
+  const routeKey = useMemo(
+    () =>
+      origin && destination
+        ? [
+            `${origin.lat},${origin.lng}`,
+            ...stops.map((s) => `${s.lat},${s.lng}`),
+            `${destination.lat},${destination.lng}`,
+          ].join("|")
+        : null,
+    [origin, destination, stops],
+  );
+  const mutateRef = useRef(mutation.mutate);
+  mutateRef.current = mutation.mutate;
+
+  useEffect(() => {
+    if (!routeKey) return;
+    const id = window.setTimeout(() => mutateRef.current(), 600);
+    return () => window.clearTimeout(id);
+  }, [routeKey]);
+
+  const roundTrip = plan?.roundTrip ?? false;
+  const tollCost = plan?.tollCost ?? 0;
+  const planPrice = plan?.pricePerLiter ?? price;
+  const planKmpl = plan?.kmpl ?? kmpl;
+
+  const costEstimate = estimatePlanCost({
+    distanceKm: plan?.distanceKm,
+    kmpl: planKmpl,
+    pricePerLiter: planPrice,
+    roundTrip,
+    tollCost,
+  });
+
+  const patchPlan = (patch: Partial<TripPlan>) => {
+    if (!plan) return;
+    tripPlanStore.set({ ...plan, ...patch });
+  };
+
 
   const currentPos = useMemo(
     () =>

@@ -499,6 +499,24 @@ function PlanejarPage() {
         </section>
       )}
 
+      {plan && (
+        <TripCostCard
+          cost={costEstimate}
+          roundTrip={roundTrip}
+          onRoundTripChange={(v) => patchPlan({ roundTrip: v })}
+          tollCost={tollCost}
+          onTollCostChange={(v) => patchPlan({ tollCost: v })}
+          pricePerLiter={planPrice}
+          onPricePerLiterChange={(v) => patchPlan({ pricePerLiter: v })}
+          kmpl={planKmpl}
+          onKmplChange={(v) => patchPlan({ kmpl: v })}
+          canReset={planPrice !== price || planKmpl !== kmpl || tollCost !== 0}
+          onReset={() => patchPlan({ pricePerLiter: price, kmpl, tollCost: 0 })}
+        />
+      )}
+
+
+
       {plan && longTrip?.isLong && (
         <LongTripCard
           summary={longTrip}

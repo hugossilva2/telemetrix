@@ -381,6 +381,7 @@ function PlanejarPage() {
 
         <Button
           className="w-full"
+          variant={plan ? "outline" : "default"}
           onClick={() => mutation.mutate()}
           disabled={!origin || !destination || mutation.isPending}
         >
@@ -389,7 +390,7 @@ function PlanejarPage() {
           ) : (
             <RouteIcon className="mr-1 size-4" />
           )}
-          Calcular rota
+          {mutation.isPending ? "Calculando…" : plan ? "Recalcular rota" : "Calcular rota"}
         </Button>
       </div>
 
@@ -398,29 +399,32 @@ function PlanejarPage() {
           <div className="grid grid-cols-2 gap-2">
             <Metric
               icon={<RouteIcon className="size-4 text-primary" />}
-              label="Distância"
-              value={`${formatDecimal(plan.distanceKm)} km`}
+              label={roundTrip ? "Distância (ida e volta)" : "Distância"}
+              value={`${formatDecimal(costEstimate.distanceKm)} km`}
             />
             <Metric
               icon={<Timer className="size-4 text-primary" />}
               label="Tempo estimado"
-              value={formatDurationSeconds(plan.durationSeconds)}
+              value={formatDurationSeconds(
+                roundTrip ? plan.durationSeconds * 2 : plan.durationSeconds,
+              )}
             />
             <Metric
               icon={<Fuel className="size-4 text-warning" />}
               label="Combustível"
-              value={`${formatDecimal(plan.fuelLiters)} L`}
+              value={`${formatDecimal(costEstimate.fuelLiters)} L`}
             />
             <Metric
               icon={<Wallet className="size-4 text-success" />}
-              label="Custo estimado"
-              value={formatBRL(plan.cost)}
+              label="Custo total"
+              value={formatBRL(costEstimate.total)}
             />
           </div>
 
           <p className="mt-2 text-[11px] text-muted-foreground">
-            Base: {formatDecimal(kmpl)} km/L · {formatBRL(price)}/L
+            Base: {formatDecimal(planKmpl)} km/L · {formatBRL(planPrice)}/L
           </p>
+
 
           <div className="mt-3 h-56 overflow-hidden rounded-xl border border-border">
             <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>

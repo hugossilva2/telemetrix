@@ -29,7 +29,8 @@ import {
   type PlanStop,
   type TripPlan,
 } from "@/lib/trips/plan";
-import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
+import { DEFAULT_GAS_PRICE_PER_LITER, estimatePlanCost } from "@/lib/trips/cost";
+import { TripCostCard } from "@/components/trips/TripCostCard";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";

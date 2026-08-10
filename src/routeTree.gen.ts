@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RecursosRouteImport } from './routes/recursos'
+import { Route as PrecosRouteImport } from './routes/precos'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CasosDeUsoSlugRouteImport } from './routes/casos-de-uso.$slug'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
@@ -44,6 +47,16 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecursosRoute = RecursosRouteImport.update({
+  id: '/recursos',
+  path: '/recursos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrecosRoute = PrecosRouteImport.update({
+  id: '/precos',
+  path: '/precos',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DemoRoute = DemoRouteImport.update({
   id: '/demo',
   path: '/demo',
@@ -61,6 +74,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasosDeUsoSlugRoute = CasosDeUsoSlugRouteImport.update({
+  id: '/casos-de-uso/$slug',
+  path: '/casos-de-uso/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
@@ -192,6 +210,8 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/precos': typeof PrecosRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -213,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/rotinas': typeof AuthenticatedRotinasRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -222,6 +243,8 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/precos': typeof PrecosRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -243,6 +266,7 @@ export interface FileRoutesByTo {
   '/rotinas': typeof AuthenticatedRotinasRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -254,6 +278,8 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/precos': typeof PrecosRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -275,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -286,6 +313,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/demo'
+    | '/precos'
+    | '/recursos'
     | '/sitemap.xml'
     | '/abastecimento'
     | '/acompanhar'
@@ -307,6 +336,7 @@ export interface FileRouteTypes {
     | '/rotinas'
     | '/veiculos'
     | '/viagens'
+    | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -316,6 +346,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/demo'
+    | '/precos'
+    | '/recursos'
     | '/sitemap.xml'
     | '/abastecimento'
     | '/acompanhar'
@@ -337,6 +369,7 @@ export interface FileRouteTypes {
     | '/rotinas'
     | '/veiculos'
     | '/viagens'
+    | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -347,6 +380,8 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/demo'
+    | '/precos'
+    | '/recursos'
     | '/sitemap.xml'
     | '/_authenticated/abastecimento'
     | '/_authenticated/acompanhar'
@@ -368,6 +403,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rotinas'
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
+    | '/casos-de-uso/$slug'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -379,7 +415,10 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
+  PrecosRoute: typeof PrecosRoute
+  RecursosRoute: typeof RecursosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  CasosDeUsoSlugRoute: typeof CasosDeUsoSlugRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
   ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -391,6 +430,20 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recursos': {
+      id: '/recursos'
+      path: '/recursos'
+      fullPath: '/recursos'
+      preLoaderRoute: typeof RecursosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/precos': {
+      id: '/precos'
+      path: '/precos'
+      fullPath: '/precos'
+      preLoaderRoute: typeof PrecosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -419,6 +472,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casos-de-uso/$slug': {
+      id: '/casos-de-uso/$slug'
+      path: '/casos-de-uso/$slug'
+      fullPath: '/casos-de-uso/$slug'
+      preLoaderRoute: typeof CasosDeUsoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/viagens': {
@@ -671,10 +731,23 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
+  PrecosRoute: PrecosRoute,
+  RecursosRoute: RecursosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  CasosDeUsoSlugRoute: CasosDeUsoSlugRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
   ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

@@ -25,13 +25,25 @@ export function SiteFooter() {
         </nav>
         <nav className="flex flex-col gap-1.5 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">Casos de uso</span>
-          <Link to="/casos-de-uso/$slug" params={{ slug: "motorista" }} className="hover:text-foreground">
+          <Link
+            to="/casos-de-uso/$slug"
+            params={{ slug: "motorista" }}
+            className="hover:text-foreground"
+          >
             Motorista do dia a dia
           </Link>
-          <Link to="/casos-de-uso/$slug" params={{ slug: "familia" }} className="hover:text-foreground">
+          <Link
+            to="/casos-de-uso/$slug"
+            params={{ slug: "familia" }}
+            className="hover:text-foreground"
+          >
             Família
           </Link>
-          <Link to="/casos-de-uso/$slug" params={{ slug: "frota" }} className="hover:text-foreground">
+          <Link
+            to="/casos-de-uso/$slug"
+            params={{ slug: "frota" }}
+            className="hover:text-foreground"
+          >
             Pequena frota
           </Link>
         </nav>

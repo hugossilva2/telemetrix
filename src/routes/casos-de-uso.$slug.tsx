@@ -19,7 +19,10 @@ export const Route = createFileRoute("/casos-de-uso/$slug")({
     const url = `${SITE_URL}/casos-de-uso/${params.slug}`;
     if (!loaderData) {
       return {
-        meta: [{ title: "Caso de uso indisponível — Telemetrix" }, { name: "robots", content: "noindex" }],
+        meta: [
+          { title: "Caso de uso indisponível — Telemetrix" },
+          { name: "robots", content: "noindex" },
+        ],
       };
     }
     const { useCase } = loaderData;
@@ -120,7 +123,9 @@ function UseCasePage() {
 
         <section className="px-4 py-10">
           <div className="mx-auto max-w-3xl">
-            <h2 className="font-display text-2xl font-bold tracking-tight">O que costuma incomodar</h2>
+            <h2 className="font-display text-2xl font-bold tracking-tight">
+              O que costuma incomodar
+            </h2>
             <ul className="mt-5 space-y-3">
               {useCase.pain.map((p) => (
                 <li key={p} className="card-surface flex gap-3 p-4 text-sm">
@@ -153,7 +158,9 @@ function UseCasePage() {
 
         <section className="px-4 py-10">
           <div className="mx-auto max-w-5xl">
-            <h2 className="font-display text-2xl font-bold tracking-tight">Telas que você mais usa</h2>
+            <h2 className="font-display text-2xl font-bold tracking-tight">
+              Telas que você mais usa
+            </h2>
             <div className="mt-6 grid gap-6 sm:grid-cols-3">
               {useCase.screens.map((id) => (
                 <ScreenShot key={id} screen={SCREENSHOT_BY_ID[id]} />

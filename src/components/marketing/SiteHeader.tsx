@@ -13,7 +13,10 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
-        <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
+        <Link
+          to="/"
+          className="flex items-center gap-2 font-display text-lg font-bold tracking-tight"
+        >
           <span className="grid size-8 place-items-center rounded-xl bg-primary/15 text-primary">
             <Activity className="size-4" />
           </span>

@@ -22,7 +22,6 @@ import { ScreenShot } from "@/components/marketing/ScreenShot";
 import { SiteHeader } from "@/components/marketing/SiteHeader";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
 
-
 const SITE = "https://telemetrix.lovable.app";
 const TITLE = "Telemetrix — telemetria e rastreamento do seu carro";
 const DESCRIPTION =
@@ -40,7 +39,6 @@ export const Route = createFileRoute("/")({
       { property: "og:image", content: OG_SCREENSHOT.absoluteUrl },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_SCREENSHOT.absoluteUrl },
-
     ],
     links: [{ rel: "canonical", href: SITE }],
     scripts: [
@@ -236,7 +234,6 @@ function LandingPage() {
           </div>
         </section>
 
-
         <section className="px-4 py-12" id="recursos">
           <div className="mx-auto max-w-5xl">
             <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
@@ -311,11 +308,7 @@ function LandingPage() {
                       </li>
                     ))}
                   </ul>
-                  <Button
-                    asChild
-                    className="mt-5"
-                    variant={plan.highlight ? "default" : "outline"}
-                  >
+                  <Button asChild className="mt-5" variant={plan.highlight ? "default" : "outline"}>
                     <Link to="/auth">
                       {plan.priceMonthly > 0 ? `Assinar ${plan.name}` : "Começar grátis"}
                     </Link>
@@ -363,7 +356,6 @@ function LandingPage() {
       </main>
 
       <SiteFooter />
-
     </div>
   );
 }

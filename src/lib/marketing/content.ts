@@ -126,7 +126,7 @@ export const USE_CASES: Record<UseCase["slug"], UseCase> = {
     description:
       "Compartilhe a viagem com a família, receba avisos de chegada e saiba onde o carro está estacionado sem ligar para perguntar.",
     pain: [
-      "Ligações de \"já chegou?\" no meio da viagem",
+      'Ligações de "já chegou?" no meio da viagem',
       "Ninguém sabe onde o carro ficou estacionado no shopping ou no aeroporto",
       "Viagens longas sem controle de descanso e de combustível",
     ],

@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLANS, priceLabel } from "@/lib/billing/plans";
+import { OG_SCREENSHOT } from "@/lib/demo/screens";
+
 import mockupPainel from "@/assets/mockup-painel.png";
 import mockupRastreador from "@/assets/mockup-rastreador.png";
 

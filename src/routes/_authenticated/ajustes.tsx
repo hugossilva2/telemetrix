@@ -36,6 +36,11 @@ type VehicleRow = {
   alert_engine_on: boolean;
   avg_consumption_kmpl: number;
   flespi_device_id: string | null;
+  tracker_mode: boolean;
+  alert_ignition: boolean;
+  alert_motion_off: boolean;
+  alert_geofence: boolean;
+  alert_signal_lost: boolean;
 };
 
 function AjustesPage() {
@@ -49,7 +54,9 @@ function AjustesPage() {
       if (!userId) return null;
       const { data, error } = await supabase
         .from("vehicles")
-        .select("id,name,plate,current_mileage,alert_engine_on,avg_consumption_kmpl,flespi_device_id")
+        .select(
+          "id,name,plate,current_mileage,alert_engine_on,avg_consumption_kmpl,flespi_device_id,tracker_mode,alert_ignition,alert_motion_off,alert_geofence,alert_signal_lost",
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: true })
         .limit(1)
@@ -65,6 +72,11 @@ function AjustesPage() {
   const [consumption, setConsumption] = useState("10");
   const [deviceId, setDeviceId] = useState("");
   const [alertEngine, setAlertEngine] = useState(false);
+  const [trackerMode, setTrackerMode] = useState(false);
+  const [alertIgnition, setAlertIgnition] = useState(true);
+  const [alertMotionOff, setAlertMotionOff] = useState(true);
+  const [alertGeofence, setAlertGeofence] = useState(true);
+  const [alertSignalLost, setAlertSignalLost] = useState(true);
 
   useEffect(() => {
     if (vehicle) {
@@ -74,6 +86,11 @@ function AjustesPage() {
       setConsumption(String(vehicle.avg_consumption_kmpl ?? 10));
       setDeviceId(vehicle.flespi_device_id ?? "");
       setAlertEngine(vehicle.alert_engine_on);
+      setTrackerMode(vehicle.tracker_mode);
+      setAlertIgnition(vehicle.alert_ignition);
+      setAlertMotionOff(vehicle.alert_motion_off);
+      setAlertGeofence(vehicle.alert_geofence);
+      setAlertSignalLost(vehicle.alert_signal_lost);
     }
   }, [vehicle]);
 
@@ -91,6 +108,11 @@ function AjustesPage() {
         avg_consumption_kmpl: Number(consumption) > 0 ? Number(consumption) : 10,
         flespi_device_id: deviceId.trim() || null,
         alert_engine_on: alertEngine,
+        tracker_mode: trackerMode,
+        alert_ignition: alertIgnition,
+        alert_motion_off: alertMotionOff,
+        alert_geofence: alertGeofence,
+        alert_signal_lost: alertSignalLost,
       };
 
       if (vehicle?.id) {
@@ -199,6 +221,16 @@ function AjustesPage() {
         <section className="card-surface p-4">
           <header className="mb-3 text-sm font-medium">Alertas</header>
           <div className="space-y-3">
+            <label className="flex items-start justify-between gap-3">
+              <span className="text-sm">
+                Modo rastreador (monitoramento 24h)
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  Mantém o servidor acompanhando o veículo e avisa se o rastreador
+                  ficar sem sinal, mesmo com o app fechado.
+                </span>
+              </span>
+              <Switch checked={trackerMode} onCheckedChange={setTrackerMode} />
+            </label>
             <label className="flex items-center justify-between gap-3">
               <span className="text-sm">
                 Alertar quando o motor for ligado
@@ -207,6 +239,22 @@ function AjustesPage() {
                 checked={alertEngine}
                 onCheckedChange={setAlertEngine}
               />
+            </label>
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm">Notificar motor ligado/desligado</span>
+              <Switch checked={alertIgnition} onCheckedChange={setAlertIgnition} />
+            </label>
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm">Movimento com o motor desligado</span>
+              <Switch checked={alertMotionOff} onCheckedChange={setAlertMotionOff} />
+            </label>
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm">Entrada e saída de cercas virtuais</span>
+              <Switch checked={alertGeofence} onCheckedChange={setAlertGeofence} />
+            </label>
+            <label className="flex items-center justify-between gap-3">
+              <span className="text-sm">Rastreador sem sinal</span>
+              <Switch checked={alertSignalLost} onCheckedChange={setAlertSignalLost} />
             </label>
           </div>
         </section>

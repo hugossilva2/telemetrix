@@ -127,8 +127,15 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
     smoothed.current = on ? smooth(smoothed.current, raw) : smoothed.current;
     const kmpl = smoothed.current ?? raw;
 
-    const pct =
+    const obdPct =
       typeof fuelLevel === "number" && Number.isFinite(fuelLevel) ? fuelLevel : null;
+    const estimatedPct =
+      typeof fallbackFuelPct === "number" && Number.isFinite(fallbackFuelPct)
+        ? Math.max(0, Math.min(100, fallbackFuelPct))
+        : null;
+    const pct = obdPct ?? estimatedPct;
+    const fuelSource: "obd" | "abastecimento" | null =
+      obdPct != null ? "obd" : estimatedPct != null ? "abastecimento" : null;
     const liters = pct != null ? (pct / 100) * tankL : null;
     const autonomy = liveAutonomyKm({ fuelPct: pct, kmpl, tankL });
     const stage = fuelStage(pct);
@@ -137,6 +144,7 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
       kmpl,
       source: measured != null ? ("medido" as const) : ("estimado" as const),
       fuelPct: pct,
+      fuelSource,
       liters,
       autonomyKm: autonomy,
       stage,
@@ -147,6 +155,7 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
   }, [
     ignitionOn,
     fuelLevel,
+    fallbackFuelPct,
     mileageKm,
     latitude,
     longitude,
@@ -157,4 +166,5 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
     spec,
     fuel,
   ]);
+
 }

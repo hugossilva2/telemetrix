@@ -1,9 +1,10 @@
 import { GaugeRing } from "./GaugeRing";
+import { useTankEstimate } from "@/hooks/useTankEstimate";
 
 interface Props {
   speedKmh?: number;
   rpm?: number;
-  /** Nível de combustível em % (0-100). */
+  /** Nível de combustível em % (0-100) lido do OBD/tracker. */
   fuelPct?: number;
   /** Capacidade do tanque, para estimar litros. */
   tankLiters?: number | null;
@@ -27,15 +28,26 @@ export function GaugeCluster({
   ignitionOn,
 }: Props) {
   const off = !ignitionOn;
+  const tank = useTankEstimate();
   const speed = off ? undefined : speedKmh;
   const revs = off ? undefined : rpm;
-  const fuel = off ? undefined : fuelPct;
+
+  // Prioriza o sensor real; sem ele, usa o nível estimado pelos abastecimentos.
+  const sensorFuel = off ? undefined : fuelPct;
+  const estimated = tank.estimate?.pct;
+  const fuel = sensorFuel ?? (off ? undefined : estimated);
+  const fuelEstimated = sensorFuel === undefined && fuel !== undefined;
 
   const liters =
-    fuel !== undefined && tankLiters ? (tankLiters * Math.max(0, Math.min(100, fuel))) / 100 : null;
+    fuelEstimated && tank.estimate
+      ? tank.estimate.liters
+      : fuel !== undefined && tankLiters
+        ? (tankLiters * Math.max(0, Math.min(100, fuel))) / 100
+        : null;
 
   const ecoFrom = ecoRpmMin ?? 1500;
   const ecoTo = ecoRpmMax ?? 2500;
+
 
   return (
     <section className="card-surface p-4">

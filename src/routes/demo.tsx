@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { PhoneFrame } from "@/components/marketing/PhoneFrame";
 import { DEMO_SCREENS, DemoScreen, type DemoScreenId } from "@/components/demo/DemoScreens";
 import { DEMO_VEHICLES } from "@/lib/demo/data";
+import { OG_SCREENSHOT } from "@/lib/demo/screens";
+
 import { cn } from "@/lib/utils";
 
 const SITE = "https://telemetrix.lovable.app";

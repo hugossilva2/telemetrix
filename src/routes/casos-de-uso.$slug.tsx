@@ -69,7 +69,7 @@ function UseCaseNotFound() {
 }
 
 function UseCasePage() {
-  const { useCase } = Route.useLoaderData();
+  const { useCase } = Route.useLoaderData() as { useCase: UseCase };
   const plan = PLAN_BY_ID[useCase.plan];
 
   return (

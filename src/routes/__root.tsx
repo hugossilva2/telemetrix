@@ -140,7 +140,9 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const showNav = pathname !== "/auth" && pathname !== "/";
+  // Rotas públicas de marketing e login não usam a navegação do app.
+  const publicPaths = ["/", "/auth", "/demo", "/recursos", "/precos"];
+  const showNav = !publicPaths.includes(pathname) && !pathname.startsWith("/casos-de-uso");
 
   useEffect(() => {
     registerServiceWorker();

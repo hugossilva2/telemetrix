@@ -15,7 +15,7 @@ const PING_MIN_INTERVAL_MS = 20 * 1000; // grava ping no máximo a cada 20s
 const GEOFENCE_EXIT_HYSTERESIS = 1.15; // só considera "saiu" a 15% além do raio
 
 
-type FlespiMessage = Record<string, unknown> & {
+export type FlespiMessage = Record<string, unknown> & {
   "device.id"?: number | string;
   ident?: number | string;
   cid?: number | string;

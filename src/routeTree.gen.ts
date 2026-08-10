@@ -39,6 +39,7 @@ import { Route as AuthenticatedAcompanharRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
 import { Route as ApiPublicTrackerHeartbeatRouteImport } from './routes/api/public/tracker-heartbeat'
 import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/flespi-webhook'
+import { Route as ApiPublicFlespiPollRouteImport } from './routes/api/public/flespi-poll'
 import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 import { Route as AuthenticatedMotoristasIdRouteImport } from './routes/_authenticated/motoristas.$id'
 
@@ -194,6 +195,11 @@ const ApiPublicFlespiWebhookRoute = ApiPublicFlespiWebhookRouteImport.update({
   path: '/api/public/flespi-webhook',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicFlespiPollRoute = ApiPublicFlespiPollRouteImport.update({
+  id: '/api/public/flespi-poll',
+  path: '/api/public/flespi-poll',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedViagensIdRoute = AuthenticatedViagensIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -236,6 +242,7 @@ export interface FileRoutesByFullPath {
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
   '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -269,6 +276,7 @@ export interface FileRoutesByTo {
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
   '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
+  '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
   '/api/public/tracker-heartbeat': typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -339,6 +348,7 @@ export interface FileRouteTypes {
     | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
+    | '/api/public/flespi-poll'
     | '/api/public/flespi-webhook'
     | '/api/public/tracker-heartbeat'
   fileRoutesByTo: FileRoutesByTo
@@ -372,6 +382,7 @@ export interface FileRouteTypes {
     | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
+    | '/api/public/flespi-poll'
     | '/api/public/flespi-webhook'
     | '/api/public/tracker-heartbeat'
   id:
@@ -406,6 +417,7 @@ export interface FileRouteTypes {
     | '/casos-de-uso/$slug'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
+    | '/api/public/flespi-poll'
     | '/api/public/flespi-webhook'
     | '/api/public/tracker-heartbeat'
   fileRoutesById: FileRoutesById
@@ -419,6 +431,7 @@ export interface RootRouteChildren {
   RecursosRoute: typeof RecursosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CasosDeUsoSlugRoute: typeof CasosDeUsoSlugRoute
+  ApiPublicFlespiPollRoute: typeof ApiPublicFlespiPollRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
   ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -635,6 +648,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicFlespiWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/flespi-poll': {
+      id: '/api/public/flespi-poll'
+      path: '/api/public/flespi-poll'
+      fullPath: '/api/public/flespi-poll'
+      preLoaderRoute: typeof ApiPublicFlespiPollRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/viagens/$id': {
       id: '/_authenticated/viagens/$id'
       path: '/$id'
@@ -735,9 +755,20 @@ const rootRouteChildren: RootRouteChildren = {
   RecursosRoute: RecursosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CasosDeUsoSlugRoute: CasosDeUsoSlugRoute,
+  ApiPublicFlespiPollRoute: ApiPublicFlespiPollRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
   ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

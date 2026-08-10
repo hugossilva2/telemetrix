@@ -147,24 +147,7 @@ const faq = [
 function LandingPage() {
   return (
     <div className="min-h-[100dvh] bg-background">
-      <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-          <span className="flex items-center gap-2 font-display text-lg font-bold tracking-tight">
-            <span className="grid size-8 place-items-center rounded-xl bg-primary/15 text-primary">
-              <Activity className="size-4" />
-            </span>
-            Telemetrix
-          </span>
-          <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/auth">Entrar</Link>
-            </Button>
-            <Button asChild size="sm">
-              <Link to="/auth">Criar conta</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         <section className="relative overflow-hidden px-4 py-14 sm:py-20">
@@ -189,32 +172,67 @@ function LandingPage() {
                   <Link to="/auth">Começar grátis</Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <a href="#planos">Ver planos</a>
+                  <Link to="/demo">
+                    Ver demonstração <ArrowRight className="ml-1 size-4" />
+                  </Link>
                 </Button>
               </div>
               <p className="mt-3 text-xs text-muted-foreground">
                 Plano Free para sempre · sem cartão de crédito
               </p>
             </div>
-            <div className="flex justify-center gap-4">
-              <img
-                src={mockupPainel}
-                alt="Painel do Telemetrix mostrando velocidade, RPM, combustível e Eco Score"
-                width={720}
-                height={1280}
-                className="w-40 max-w-full drop-shadow-2xl sm:w-52"
-              />
-              <img
-                src={mockupRastreador}
-                alt="Tela de rastreamento do Telemetrix com rota no mapa e ponto estacionado"
-                width={720}
-                height={1280}
-                loading="lazy"
-                className="mt-8 w-40 max-w-full drop-shadow-2xl sm:w-52"
-              />
+            <ScreenShot screen={SCREENSHOT_BY_ID.painel} priority />
+          </div>
+        </section>
+
+        <section className="px-4 py-12" id="telas">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              As telas reais do app
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Prints do Telemetrix rodando com uma frota de exemplo — Onix, City, Hilux e Strada.
+            </p>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {SCREENSHOTS.filter((s) => s.id !== "painel").map((s) => (
+                <ScreenShot key={s.id} screen={s} />
+              ))}
+            </div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild variant="outline">
+                <Link to="/recursos">Tour completo dos recursos</Link>
+              </Button>
+              <Button asChild variant="ghost">
+                <Link to="/demo">Navegar na demonstração</Link>
+              </Button>
             </div>
           </div>
         </section>
+
+        <section className="px-4 py-12" id="casos-de-uso">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              Para quem é o Telemetrix
+            </h2>
+            <div className="mt-6 grid gap-3 md:grid-cols-3">
+              {USE_CASE_LIST.map((u) => (
+                <Link
+                  key={u.slug}
+                  to="/casos-de-uso/$slug"
+                  params={{ slug: u.slug }}
+                  className="card-surface flex flex-col p-5 transition-colors hover:border-primary/50"
+                >
+                  <h3 className="font-display text-lg font-bold">{u.label}</h3>
+                  <p className="mt-2 flex-1 text-sm text-muted-foreground">{u.description}</p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-primary">
+                    Ver detalhes <ArrowRight className="size-4" />
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
 
         <section className="px-4 py-12" id="recursos">
           <div className="mx-auto max-w-5xl">

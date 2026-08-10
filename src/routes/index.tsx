@@ -195,11 +195,12 @@ function LandingPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Prints do Telemetrix rodando com uma frota de exemplo — Onix, City, Hilux e Strada.
             </p>
-            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {SCREENSHOTS.filter((s) => s.id !== "painel").map((s) => (
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+              {SCREENSHOTS.map((s) => (
                 <ScreenShot key={s.id} screen={s} />
               ))}
             </div>
+
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild variant="outline">
                 <Link to="/recursos">Tour completo dos recursos</Link>

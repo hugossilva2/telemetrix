@@ -350,23 +350,20 @@ function LandingPage() {
             <p className="mt-2 text-sm text-muted-foreground">
               Crie a conta em menos de um minuto e conecte seu veículo hoje.
             </p>
-            <Button asChild size="lg" className="mt-5">
-              <Link to="/auth">Criar conta grátis</Link>
-            </Button>
+            <div className="mt-5 flex flex-wrap justify-center gap-3">
+              <Button asChild size="lg">
+                <Link to="/auth">Criar conta grátis</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link to="/precos">Ver preços</Link>
+              </Button>
+            </div>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-border/70 px-4 py-8">
-        <div className="mx-auto flex max-w-5xl flex-col gap-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>© {new Date().getFullYear()} Telemetrix. Todos os direitos reservados.</span>
-          <span className="flex gap-4">
-            <a href="#recursos">Recursos</a>
-            <a href="#planos">Planos</a>
-            <Link to="/auth">Entrar</Link>
-          </span>
-        </div>
-      </footer>
+      <SiteFooter />
+
     </div>
   );
 }

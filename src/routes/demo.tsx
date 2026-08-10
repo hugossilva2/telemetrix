@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { PhoneFrame } from "@/components/marketing/PhoneFrame";
 import { DEMO_SCREENS, DemoScreen, type DemoScreenId } from "@/components/demo/DemoScreens";
 import { DEMO_VEHICLES } from "@/lib/demo/data";
+import { OG_SCREENSHOT } from "@/lib/demo/screens";
+
 import { cn } from "@/lib/utils";
 
 const SITE = "https://telemetrix.lovable.app";
@@ -21,7 +23,10 @@ export const Route = createFileRoute("/demo")({
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:url", content: `${SITE}/demo` },
+      { property: "og:image", content: OG_SCREENSHOT.absoluteUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_SCREENSHOT.absoluteUrl },
+
     ],
     links: [{ rel: "canonical", href: `${SITE}/demo` }],
   }),

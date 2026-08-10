@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLANS, priceLabel } from "@/lib/billing/plans";
+import { OG_SCREENSHOT } from "@/lib/demo/screens";
+
 import mockupPainel from "@/assets/mockup-painel.png";
 import mockupRastreador from "@/assets/mockup-rastreador.png";
 
@@ -32,7 +34,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE },
+      { property: "og:image", content: OG_SCREENSHOT.absoluteUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_SCREENSHOT.absoluteUrl },
+
     ],
     links: [{ rel: "canonical", href: SITE }],
     scripts: [

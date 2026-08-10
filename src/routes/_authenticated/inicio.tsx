@@ -101,6 +101,9 @@ function Dashboard() {
         ignitionOn={ignitionOn}
       />
 
+      <AutonomyCard />
+
+
       <Bento>
 
         <BentoItem span={1}>

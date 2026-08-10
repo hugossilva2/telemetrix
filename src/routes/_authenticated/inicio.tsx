@@ -7,6 +7,8 @@ import { AppShell } from "@/components/layout/AppShell";
 import { StatusHeader } from "@/components/dashboard/StatusHeader";
 import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { GaugeCluster } from "@/components/dashboard/GaugeCluster";
+import { AutonomyCard } from "@/components/dashboard/AutonomyCard";
+
 
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { formatKm } from "@/lib/format";
@@ -100,6 +102,9 @@ function Dashboard() {
         ecoRpmMax={activeVehicle?.eco_rpm_max ?? null}
         ignitionOn={ignitionOn}
       />
+
+      <AutonomyCard />
+
 
       <Bento>
 

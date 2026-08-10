@@ -9,11 +9,12 @@ import { PLAN_BY_ID, priceLabel } from "@/lib/billing/plans";
 import { SCREENSHOT_BY_ID, SITE_URL } from "@/lib/demo/screens";
 
 export const Route = createFileRoute("/casos-de-uso/$slug")({
-  loader: ({ params }) => {
+  loader: ({ params }): { useCase: UseCase } => {
     const useCase = USE_CASES[params.slug as UseCase["slug"]];
     if (!useCase) throw notFound();
     return { useCase };
   },
+
   head: ({ params, loaderData }) => {
     const url = `${SITE_URL}/casos-de-uso/${params.slug}`;
     if (!loaderData) {

@@ -16,6 +16,7 @@ import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CasosDeUsoSlugRouteImport } from './routes/casos-de-uso.$slug'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
 import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
@@ -73,6 +74,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CasosDeUsoSlugRoute = CasosDeUsoSlugRouteImport.update({
+  id: '/casos-de-uso/$slug',
+  path: '/casos-de-uso/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
@@ -227,6 +233,7 @@ export interface FileRoutesByFullPath {
   '/rotinas': typeof AuthenticatedRotinasRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/rotinas': typeof AuthenticatedRotinasRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -293,6 +301,7 @@ export interface FileRoutesById {
   '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
+  '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-webhook': typeof ApiPublicFlespiWebhookRoute
@@ -327,6 +336,7 @@ export interface FileRouteTypes {
     | '/rotinas'
     | '/veiculos'
     | '/viagens'
+    | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -359,6 +369,7 @@ export interface FileRouteTypes {
     | '/rotinas'
     | '/veiculos'
     | '/viagens'
+    | '/casos-de-uso/$slug'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -392,6 +403,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rotinas'
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
+    | '/casos-de-uso/$slug'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-webhook'
@@ -406,6 +418,7 @@ export interface RootRouteChildren {
   PrecosRoute: typeof PrecosRoute
   RecursosRoute: typeof RecursosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  CasosDeUsoSlugRoute: typeof CasosDeUsoSlugRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
   ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
 }
@@ -459,6 +472,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/casos-de-uso/$slug': {
+      id: '/casos-de-uso/$slug'
+      path: '/casos-de-uso/$slug'
+      fullPath: '/casos-de-uso/$slug'
+      preLoaderRoute: typeof CasosDeUsoSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/viagens': {
@@ -714,6 +734,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrecosRoute: PrecosRoute,
   RecursosRoute: RecursosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  CasosDeUsoSlugRoute: CasosDeUsoSlugRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
   ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,
 }

@@ -18,6 +18,8 @@ export interface LiveAutonomy {
   kmpl: number | null;
   source: "medido" | "estimado";
   fuelPct: number | null;
+  /** De onde veio o nível do tanque. */
+  fuelSource: "obd" | "abastecimento" | null;
   liters: number | null;
   autonomyKm: number | null;
   stage: FuelStage;
@@ -33,8 +35,12 @@ const MAX_SAMPLES = 60;
  * Autonomia em tempo real: mede o consumo real da viagem atual (queda do nível
  * do tanque por km rodado) e cai no consumo da ficha técnica ajustado pelo
  * estilo de condução enquanto não houver dados suficientes.
+ *
+ * `fallbackFuelPct` cobre veículos sem o PID de nível de combustível (o nível
+ * estimado pelos abastecimentos entra no lugar da leitura do OBD).
  */
-export function useLiveAutonomy(): LiveAutonomy {
+export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
+
   const { telemetry } = useTelemetry();
   const { spec, fuel } = useActiveVehicle();
 
@@ -121,8 +127,15 @@ export function useLiveAutonomy(): LiveAutonomy {
     smoothed.current = on ? smooth(smoothed.current, raw) : smoothed.current;
     const kmpl = smoothed.current ?? raw;
 
-    const pct =
+    const obdPct =
       typeof fuelLevel === "number" && Number.isFinite(fuelLevel) ? fuelLevel : null;
+    const estimatedPct =
+      typeof fallbackFuelPct === "number" && Number.isFinite(fallbackFuelPct)
+        ? Math.max(0, Math.min(100, fallbackFuelPct))
+        : null;
+    const pct = obdPct ?? estimatedPct;
+    const fuelSource: "obd" | "abastecimento" | null =
+      obdPct != null ? "obd" : estimatedPct != null ? "abastecimento" : null;
     const liters = pct != null ? (pct / 100) * tankL : null;
     const autonomy = liveAutonomyKm({ fuelPct: pct, kmpl, tankL });
     const stage = fuelStage(pct);
@@ -131,6 +144,7 @@ export function useLiveAutonomy(): LiveAutonomy {
       kmpl,
       source: measured != null ? ("medido" as const) : ("estimado" as const),
       fuelPct: pct,
+      fuelSource,
       liters,
       autonomyKm: autonomy,
       stage,
@@ -141,6 +155,7 @@ export function useLiveAutonomy(): LiveAutonomy {
   }, [
     ignitionOn,
     fuelLevel,
+    fallbackFuelPct,
     mileageKm,
     latitude,
     longitude,
@@ -151,4 +166,5 @@ export function useLiveAutonomy(): LiveAutonomy {
     spec,
     fuel,
   ]);
+
 }

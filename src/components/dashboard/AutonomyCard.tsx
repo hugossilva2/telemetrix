@@ -1,11 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Fuel, Gauge, MapPin, Navigation } from "lucide-react";
+import { Fuel, Gauge, MapPin, Navigation, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useLiveAutonomy } from "@/hooks/useLiveAutonomy";
+import { useTankEstimate } from "@/hooks/useTankEstimate";
+import { useOdometerSync } from "@/hooks/useOdometerSync";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 import { getRouteEta, nearbyGasStations } from "@/lib/places.functions";
 import {
   FUEL_STAGE_CLASS,
@@ -30,10 +35,16 @@ function mapsUrl(lat: number, lng: number, placeId: string) {
  * atual, com aviso e lista de postos próximos um pouco antes da reserva.
  */
 export function AutonomyCard() {
-  const live = useLiveAutonomy();
+  useOdometerSync();
+  const tank = useTankEstimate();
+  const live = useLiveAutonomy(tank.estimate?.pct ?? null);
+  const { spec } = useActiveVehicle();
   const { telemetry } = useTelemetry();
   const stations = useServerFn(nearbyGasStations);
   const eta = useServerFn(getRouteEta);
+  const [calibrating, setCalibrating] = useState(false);
+  const [pctDraft, setPctDraft] = useState(50);
+
 
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
@@ -123,9 +134,84 @@ export function AutonomyCard() {
           </div>
           <div className="text-[10px] text-muted-foreground">
             {live.liters != null ? `${live.liters.toFixed(0)} L` : "sem dado"}
+            {live.fuelSource === "abastecimento" && " · pelos abastecimentos"}
+            {live.fuelSource === "obd" && " · sensor do carro"}
           </div>
         </div>
       </div>
+
+      <div className="mt-3 border-t border-border/60 pt-3">
+        {live.fuelSource !== "obd" && !tank.anchor && (
+          <p className="text-[11px] text-muted-foreground">
+            Seu carro não informa o nível de combustível. Diga quanto tem no tanque agora
+            para o app acompanhar pelos km rodados.
+          </p>
+        )}
+
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <Button
+            size="sm"
+            variant="secondary"
+            className="h-7 px-2 text-[11px]"
+            onClick={() => {
+              tank.calibrate(spec.tankL);
+              toast.success("Tanque marcado como cheio");
+            }}
+            disabled={tank.odometerKm == null}
+          >
+            <Fuel className="mr-1 size-3" /> Enchi o tanque
+          </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 px-2 text-[11px]"
+            onClick={() => {
+              setPctDraft(Math.round(tank.estimate?.pct ?? live.fuelPct ?? 50));
+              setCalibrating((v) => !v);
+            }}
+            disabled={tank.odometerKm == null}
+          >
+            <SlidersHorizontal className="mr-1 size-3" /> Ajustar nível
+          </Button>
+          {tank.odometerKm != null && (
+            <span className="text-[10px] text-muted-foreground">
+              odômetro {Math.round(tank.odometerKm).toLocaleString("pt-BR")} km ·{" "}
+              {tank.kmpl.toFixed(1)} km/L{" "}
+              {tank.kmplSource === "abastecimentos" ? "(seus abastecimentos)" : "(ficha)"}
+            </span>
+          )}
+        </div>
+
+        {calibrating && (
+          <div className="mt-3 space-y-2">
+            <Slider
+              value={[pctDraft]}
+              min={0}
+              max={100}
+              step={1}
+              onValueChange={(v) => setPctDraft(v[0] ?? 0)}
+            />
+            <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+              <span className="num">
+                {pctDraft}% · {((pctDraft / 100) * spec.tankL).toFixed(0)} L de{" "}
+                {spec.tankL.toFixed(0)} L
+              </span>
+              <Button
+                size="sm"
+                className="h-7 px-3 text-[11px]"
+                onClick={() => {
+                  tank.calibrate((pctDraft / 100) * spec.tankL);
+                  setCalibrating(false);
+                  toast.success("Nível do tanque atualizado");
+                }}
+              >
+                Salvar
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+
 
       {live.needsRefuel && (
         <div className="mt-4 border-t border-border/60 pt-3">

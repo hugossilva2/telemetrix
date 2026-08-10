@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import heroVideo from "@/assets/video/telemetrix-hero.mp4.asset.json";
+import heroVideoWebm from "@/assets/video/telemetrix-hero.webm.asset.json";
 import { SCREENSHOT_BY_ID } from "@/lib/demo/screens";
 
 interface Props {

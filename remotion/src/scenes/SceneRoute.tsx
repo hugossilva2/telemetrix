@@ -83,6 +83,7 @@ export const SceneRoute = () => {
             fontSize: 66,
             margin: "10px 0 22px",
             color: C.fg,
+            letterSpacing: "0.02em",
           }}
         >
           {km.toFixed(1)} km

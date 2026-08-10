@@ -166,3 +166,86 @@ export const getRouteEta = createServerFn({ method: "POST" })
       distanceMeters: r.distanceMeters ?? 0,
     };
   });
+
+export type GasStation = {
+  placeId: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  /** Distância em linha reta (m) informada pelo ranking do Google. */
+  distanceKm: number;
+};
+
+function distKm(aLat: number, aLng: number, bLat: number, bLng: number): number {
+  const R = 6371;
+  const dLat = ((bLat - aLat) * Math.PI) / 180;
+  const dLng = ((bLng - aLng) * Math.PI) / 180;
+  const lat1 = (aLat * Math.PI) / 180;
+  const lat2 = (bLat * Math.PI) / 180;
+  const h =
+    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+
+/** Postos de combustível mais próximos de uma posição. */
+export const nearbyGasStations = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { lat: number; lng: number; limit?: number }) => input)
+  .handler(async ({ data }): Promise<GasStation[]> => {
+    const { lat, lng } = data;
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+    const limit = Math.max(1, Math.min(10, data.limit ?? 3));
+
+    const search = async (radius: number) => {
+      const res = await fetch(`${GATEWAY}/places/v1/places:searchNearby`, {
+        method: "POST",
+        headers: {
+          ...gatewayHeaders(),
+          "Content-Type": "application/json",
+          "X-Goog-FieldMask":
+            "places.id,places.displayName,places.formattedAddress,places.location",
+        },
+        body: JSON.stringify({
+          includedTypes: ["gas_station"],
+          maxResultCount: limit,
+          rankPreference: "DISTANCE",
+          languageCode: "pt-BR",
+          regionCode: "BR",
+          locationRestriction: {
+            circle: { center: { latitude: lat, longitude: lng }, radius },
+          },
+        }),
+      });
+      if (!res.ok) {
+        const t = await res.text();
+        console.error("[gas stations]", res.status, t);
+        throw new Error(`Falha ao buscar postos (${res.status})`);
+      }
+      const json = (await res.json()) as {
+        places?: Array<{
+          id: string;
+          displayName?: { text?: string };
+          formattedAddress?: string;
+          location?: { latitude: number; longitude: number };
+        }>;
+      };
+      return json.places ?? [];
+    };
+
+    let places = await search(5000);
+    if (places.length === 0) places = await search(15000);
+
+    return places
+      .filter((p) => !!p.location)
+      .map((p) => ({
+        placeId: p.id,
+        name: p.displayName?.text ?? "Posto",
+        address: p.formattedAddress ?? "",
+        lat: p.location!.latitude,
+        lng: p.location!.longitude,
+        distanceKm: distKm(lat, lng, p.location!.latitude, p.location!.longitude),
+      }))
+      .sort((a, b) => a.distanceKm - b.distanceKm)
+      .slice(0, limit);
+  });

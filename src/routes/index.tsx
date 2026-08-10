@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
+  ArrowRight,
   BellRing,
   Bluetooth,
   Check,
@@ -15,10 +16,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PLANS, priceLabel } from "@/lib/billing/plans";
-import { OG_SCREENSHOT } from "@/lib/demo/screens";
+import { OG_SCREENSHOT, SCREENSHOTS, SCREENSHOT_BY_ID } from "@/lib/demo/screens";
+import { USE_CASE_LIST } from "@/lib/marketing/content";
+import { ScreenShot } from "@/components/marketing/ScreenShot";
+import { SiteHeader } from "@/components/marketing/SiteHeader";
+import { SiteFooter } from "@/components/marketing/SiteFooter";
 
-import mockupPainel from "@/assets/mockup-painel.png";
-import mockupRastreador from "@/assets/mockup-rastreador.png";
 
 const SITE = "https://telemetrix.lovable.app";
 const TITLE = "Telemetrix — telemetria e rastreamento do seu carro";

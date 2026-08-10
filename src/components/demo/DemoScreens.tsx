@@ -274,7 +274,9 @@ function RelatorioScreen() {
         <h4 className="text-sm font-semibold">Km por dia</h4>
         <div className="mt-3 flex h-28 items-end gap-2">
           {DEMO_REPORT.byDay.map((d) => (
-            <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
+            <div key={d.day} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
+              <div className="flex w-full flex-1 items-end">
+
               <div
                 className="w-full rounded-t-md bg-gradient-to-t from-primary/30 to-primary"
                 style={{ height: `${(d.km / max) * 100}%` }}

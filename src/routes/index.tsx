@@ -183,7 +183,7 @@ function LandingPage() {
                 Plano Free para sempre · sem cartão de crédito
               </p>
             </div>
-            <ScreenShot screen={SCREENSHOT_BY_ID.painel} priority />
+            <HeroVideo />
           </div>
         </section>
 

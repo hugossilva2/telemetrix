@@ -1,4 +1,5 @@
 import { C } from "../theme";
+import { display } from "../fonts";
 
 interface Props {
   size: number;
@@ -63,7 +64,7 @@ export const Gauge = ({
       >
         <span
           style={{
-            fontFamily: "var(--display)",
+            fontFamily: display,
             fontSize: size * 0.26,
             fontWeight: 700,
             color: C.fg,

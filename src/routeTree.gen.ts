@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as RecursosRouteImport } from './routes/recursos'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -42,6 +43,11 @@ import { Route as AuthenticatedMotoristasIdRouteImport } from './routes/_authent
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecursosRoute = RecursosRouteImport.update({
+  id: '/recursos',
+  path: '/recursos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
@@ -192,6 +198,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -254,6 +262,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/demo': typeof DemoRoute
+  '/recursos': typeof RecursosRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/acompanhar': typeof AuthenticatedAcompanharRoute
@@ -286,6 +295,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/demo'
+    | '/recursos'
     | '/sitemap.xml'
     | '/abastecimento'
     | '/acompanhar'
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/demo'
+    | '/recursos'
     | '/sitemap.xml'
     | '/abastecimento'
     | '/acompanhar'
@@ -347,6 +358,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/demo'
+    | '/recursos'
     | '/sitemap.xml'
     | '/_authenticated/abastecimento'
     | '/_authenticated/acompanhar'
@@ -379,6 +391,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   DemoRoute: typeof DemoRoute
+  RecursosRoute: typeof RecursosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
   ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
@@ -391,6 +404,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recursos': {
+      id: '/recursos'
+      path: '/recursos'
+      fullPath: '/recursos'
+      preLoaderRoute: typeof RecursosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo': {
@@ -671,6 +691,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   DemoRoute: DemoRoute,
+  RecursosRoute: RecursosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
   ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,

@@ -65,7 +65,7 @@ export const SceneRoute = () => {
           position: "absolute",
           bottom: 110,
           right: 80,
-          width: 520,
+          width: 580,
           padding: 34,
           borderRadius: 30,
           background: `linear-gradient(160deg, ${C.surface}, ${C.card})`,
@@ -83,12 +83,11 @@ export const SceneRoute = () => {
             fontSize: 66,
             margin: "10px 0 22px",
             color: C.fg,
-            fontVariantNumeric: "tabular-nums",
           }}
         >
           {km.toFixed(1)} km
         </p>
-        <div style={{ display: "flex", gap: 40 }}>
+        <div style={{ display: "flex", gap: 34 }}>
           {[
             ["duração", "27 min"],
             ["média", "41 km/h"],
@@ -103,9 +102,9 @@ export const SceneRoute = () => {
                   fontFamily: display,
                   fontWeight: 500,
                   margin: "6px 0 0",
-                  fontSize: 34,
+                  fontSize: 32,
                   color: k === "custo" ? C.primary : C.fg,
-                  fontVariantNumeric: "tabular-nums",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {v}

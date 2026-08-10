@@ -83,7 +83,7 @@ export function GaugeCluster({
         </GaugeRing>
 
         <GaugeRing
-          label="Combustível"
+          label={fuelEstimated ? "Combustível ~" : "Combustível"}
           value={fuel}
           max={100}
           arcClassName={fuel !== undefined && fuel < 15 ? "text-warning" : "text-success"}
@@ -95,7 +95,13 @@ export function GaugeCluster({
           <span className="mt-0.5 block text-[10px] text-muted-foreground">
             {liters != null ? `${liters.toFixed(0)} L` : "sem dado"}
           </span>
+          {fuelEstimated && (
+            <span className="mt-0.5 block text-[9px] uppercase tracking-wide text-warning">
+              estimado
+            </span>
+          )}
         </GaugeRing>
+
       </div>
       {off && (
         <p className="mt-2 text-center text-[11px] text-muted-foreground">

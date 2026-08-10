@@ -19,6 +19,7 @@ import { PLANS, priceLabel } from "@/lib/billing/plans";
 import { OG_SCREENSHOT, SCREENSHOTS, SCREENSHOT_BY_ID } from "@/lib/demo/screens";
 import { USE_CASE_LIST } from "@/lib/marketing/content";
 import { ScreenShot } from "@/components/marketing/ScreenShot";
+import { HeroVideo } from "@/components/marketing/HeroVideo";
 import { SiteHeader } from "@/components/marketing/SiteHeader";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
 

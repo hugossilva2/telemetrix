@@ -18,6 +18,8 @@ export interface LiveAutonomy {
   kmpl: number | null;
   source: "medido" | "estimado";
   fuelPct: number | null;
+  /** De onde veio o nível do tanque. */
+  fuelSource: "obd" | "abastecimento" | null;
   liters: number | null;
   autonomyKm: number | null;
   stage: FuelStage;
@@ -33,8 +35,12 @@ const MAX_SAMPLES = 60;
  * Autonomia em tempo real: mede o consumo real da viagem atual (queda do nível
  * do tanque por km rodado) e cai no consumo da ficha técnica ajustado pelo
  * estilo de condução enquanto não houver dados suficientes.
+ *
+ * `fallbackFuelPct` cobre veículos sem o PID de nível de combustível (o nível
+ * estimado pelos abastecimentos entra no lugar da leitura do OBD).
  */
-export function useLiveAutonomy(): LiveAutonomy {
+export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
+
   const { telemetry } = useTelemetry();
   const { spec, fuel } = useActiveVehicle();
 

@@ -1,3 +1,4 @@
+import type React from "react";
 import {
   BatteryCharging,
   Bell,
@@ -427,7 +428,7 @@ function RastreioScreen() {
   );
 }
 
-const SCREEN_MAP: Record<DemoScreenId, () => JSX.Element> = {
+const SCREEN_MAP: Record<DemoScreenId, () => React.ReactElement> = {
   painel: PainelScreen,
   viagens: ViagensScreen,
   relatorio: RelatorioScreen,

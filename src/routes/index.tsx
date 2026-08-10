@@ -32,7 +32,10 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE },
+      { property: "og:image", content: OG_SCREENSHOT.absoluteUrl },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: OG_SCREENSHOT.absoluteUrl },
+
     ],
     links: [{ rel: "canonical", href: SITE }],
     scripts: [

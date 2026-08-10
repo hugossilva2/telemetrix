@@ -1,11 +1,16 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Fuel, Gauge, MapPin, Navigation } from "lucide-react";
+import { Fuel, Gauge, MapPin, Navigation, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useLiveAutonomy } from "@/hooks/useLiveAutonomy";
+import { useTankEstimate } from "@/hooks/useTankEstimate";
+import { useOdometerSync } from "@/hooks/useOdometerSync";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 import { getRouteEta, nearbyGasStations } from "@/lib/places.functions";
 import {
   FUEL_STAGE_CLASS,
@@ -30,10 +35,16 @@ function mapsUrl(lat: number, lng: number, placeId: string) {
  * atual, com aviso e lista de postos próximos um pouco antes da reserva.
  */
 export function AutonomyCard() {
-  const live = useLiveAutonomy();
+  useOdometerSync();
+  const tank = useTankEstimate();
+  const live = useLiveAutonomy(tank.estimate?.pct ?? null);
+  const { spec } = useActiveVehicle();
   const { telemetry } = useTelemetry();
   const stations = useServerFn(nearbyGasStations);
   const eta = useServerFn(getRouteEta);
+  const [calibrating, setCalibrating] = useState(false);
+  const [pctDraft, setPctDraft] = useState(50);
+
 
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;

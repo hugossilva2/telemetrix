@@ -57,6 +57,12 @@ export interface IngestSummary {
 export async function ingestFlespiMessages(
   messages: FlespiMessage[],
 ): Promise<IngestSummary> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { sendTrackerEventPush } = await import("@/lib/push/send.server");
+
+  let processed = 0;
+  let skippedNoDevice = 0;
+  let skippedUnknownVehicle = 0;
   let skippedOutOfOrder = 0;
 
   for (const msg of messages) {

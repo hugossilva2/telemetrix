@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 
 /**
  * Heartbeat de perda de sinal.
- * Chamar periodicamente (ex.: pg_cron a cada 5 min):
- *   POST https://drive-wise-69.lovable.app/api/public/tracker-heartbeat?secret=<FLESPI_WEBHOOK_SECRET>
+ * Chamado por pg_cron a cada 5 min (header `apikey`):
+ *   POST https://telemetrix.lovable.app/api/public/tracker-heartbeat
+ * Também aceita `?secret=<FLESPI_WEBHOOK_SECRET>` para testes manuais.
  *
  * Regra: se `device_trip_state.last_message_at` (ou vehicles.updated_at)
  * ficar mais de SIGNAL_LOST_THRESHOLD_MIN sem novas mensagens, insere um
@@ -17,14 +18,17 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.FLESPI_WEBHOOK_SECRET;
-        if (!expected) return new Response("Server not configured", { status: 500 });
         const url = new URL(request.url);
-        const provided =
-          url.searchParams.get("secret") ??
-          request.headers.get("x-webhook-secret") ??
-          "";
-        if (provided !== expected) return new Response("Unauthorized", { status: 401 });
+        const secret = process.env.FLESPI_WEBHOOK_SECRET;
+        const anon =
+          process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
+        const providedSecret =
+          url.searchParams.get("secret") ?? request.headers.get("x-webhook-secret");
+        const apikey =
+          request.headers.get("apikey") ?? url.searchParams.get("apikey");
+        const authorized =
+          (!!secret && providedSecret === secret) || (!!anon && apikey === anon);
+        if (!authorized) return new Response("Unauthorized", { status: 401 });
 
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"

@@ -273,6 +273,10 @@ function FollowPage() {
   const speed = latest?.speed_kmh != null ? Number(latest.speed_kmh) : null;
   const lastSeen = state?.last_message_at ?? latest?.recorded_at ?? null;
 
+  const lastSeenMs = lastSeen ? new Date(lastSeen).getTime() : null;
+  const staleMin = lastSeenMs ? Math.floor((Date.now() - lastSeenMs) / 60000) : null;
+  const isLive = staleMin != null && staleMin < 3;
+
   const tripActive = !!(ignitionOn && state?.start_time);
   const now = useNow(tripActive);
   const startMs = state?.start_time ? new Date(state.start_time).getTime() : null;
@@ -335,7 +339,20 @@ function FollowPage() {
       title={vehicle?.name ?? "Acompanhar"}
       subtitle={
         <span className="inline-flex items-center gap-1.5">
-          <Eye className="size-3" /> somente leitura · atualizado {relative(lastSeen)}
+          <Eye className="size-3" /> somente leitura ·{" "}
+          {isLive ? (
+            <span className="inline-flex items-center gap-1 text-success">
+              <span className="relative grid size-2 place-items-center">
+                <span className="absolute inset-0 animate-ping rounded-full bg-success/60" />
+                <span className="size-1.5 rounded-full bg-success" />
+              </span>
+              ao vivo
+            </span>
+          ) : (
+            <span className={staleMin != null && staleMin >= 10 ? "text-warning" : undefined}>
+              última posição {relative(lastSeen)}
+            </span>
+          )}
         </span>
       }
       action={<SignOutButton iconOnly />}

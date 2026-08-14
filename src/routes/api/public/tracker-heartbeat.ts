@@ -12,7 +12,14 @@ import { createFileRoute } from "@tanstack/react-router";
  * para não repetir até o sinal voltar (o webhook limpa a flag).
  */
 
-const SIGNAL_LOST_THRESHOLD_MIN = 10;
+// Com ignição ligada o rastreador reporta a cada poucos segundos, então 15 min
+// sem mensagem já é perda de sinal. Estacionado, o FMC003 entra em modo de
+// economia e manda apenas um keep-alive por hora — usar 10 min aqui gerava
+// alerta de "sinal perdido" toda hora com o carro parado na garagem.
+const SIGNAL_LOST_THRESHOLD_MIN = 15;
+const PARKED_SIGNAL_LOST_THRESHOLD_MIN = 180;
+// Evita repetição em sequência mesmo que o keep-alive limpe a flag.
+const REALERT_COOLDOWN_MIN = 360;
 
 export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {
@@ -35,7 +42,9 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
         );
         const { sendTrackerEventPush } = await import("@/lib/push/send.server");
 
-        const cutoffMs = Date.now() - SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
+        const nowMs = Date.now();
+        const cutoffMs = nowMs - SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
+        const parkedCutoffMs = nowMs - PARKED_SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
         const cutoffIso = new Date(cutoffMs).toISOString();
 
         const { data: vehicles } = await supabaseAdmin
@@ -54,13 +63,31 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
 
           const { data: state } = await supabaseAdmin
             .from("device_trip_state")
-            .select("last_message_at,last_lat,last_lng")
+            .select("last_message_at,last_lat,last_lng,ignition_on")
             .eq("device_id", v.flespi_device_id as string)
             .maybeSingle();
 
           const lastMsg = state?.last_message_at;
           if (!lastMsg) continue; // nunca recebemos mensagem — não alertar
-          if (new Date(lastMsg as string).getTime() > cutoffMs) continue; // ainda em dia
+          const lastMsgMs = new Date(lastMsg as string).getTime();
+          // Estacionado o keep-alive é horário; só alerta após um silêncio longo.
+          const effectiveCutoffMs =
+            state?.ignition_on === true ? cutoffMs : parkedCutoffMs;
+          if (lastMsgMs > effectiveCutoffMs) continue; // ainda em dia
+
+          // Não repetir alertas em sequência (keep-alive limpa a flag do veículo).
+          const { data: recentAlert } = await supabaseAdmin
+            .from("tracker_events")
+            .select("id")
+            .eq("vehicle_id", v.id as string)
+            .eq("type", "signal_lost")
+            .gte(
+              "occurred_at",
+              new Date(nowMs - REALERT_COOLDOWN_MIN * 60 * 1000).toISOString(),
+            )
+            .limit(1)
+            .maybeSingle();
+          if (recentAlert) continue;
 
           await supabaseAdmin.from("tracker_events").insert({
             user_id: v.user_id,
@@ -70,7 +97,11 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             lng: state?.last_lng ?? null,
             metadata: {
               last_message_at: lastMsg,
-              threshold_min: SIGNAL_LOST_THRESHOLD_MIN,
+              threshold_min:
+                state?.ignition_on === true
+                  ? SIGNAL_LOST_THRESHOLD_MIN
+                  : PARKED_SIGNAL_LOST_THRESHOLD_MIN,
+              parked: state?.ignition_on !== true,
             },
           });
 

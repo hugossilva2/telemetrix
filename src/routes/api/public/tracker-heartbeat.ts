@@ -97,7 +97,11 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             lng: state?.last_lng ?? null,
             metadata: {
               last_message_at: lastMsg,
-              threshold_min: SIGNAL_LOST_THRESHOLD_MIN,
+              threshold_min:
+                state?.ignition_on === true
+                  ? SIGNAL_LOST_THRESHOLD_MIN
+                  : PARKED_SIGNAL_LOST_THRESHOLD_MIN,
+              parked: state?.ignition_on !== true,
             },
           });
 

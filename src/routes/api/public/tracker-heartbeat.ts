@@ -42,7 +42,9 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
         );
         const { sendTrackerEventPush } = await import("@/lib/push/send.server");
 
-        const cutoffMs = Date.now() - SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
+        const nowMs = Date.now();
+        const cutoffMs = nowMs - SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
+        const parkedCutoffMs = nowMs - PARKED_SIGNAL_LOST_THRESHOLD_MIN * 60 * 1000;
         const cutoffIso = new Date(cutoffMs).toISOString();
 
         const { data: vehicles } = await supabaseAdmin
@@ -61,13 +63,31 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
 
           const { data: state } = await supabaseAdmin
             .from("device_trip_state")
-            .select("last_message_at,last_lat,last_lng")
+            .select("last_message_at,last_lat,last_lng,ignition_on")
             .eq("device_id", v.flespi_device_id as string)
             .maybeSingle();
 
           const lastMsg = state?.last_message_at;
           if (!lastMsg) continue; // nunca recebemos mensagem — não alertar
-          if (new Date(lastMsg as string).getTime() > cutoffMs) continue; // ainda em dia
+          const lastMsgMs = new Date(lastMsg as string).getTime();
+          // Estacionado o keep-alive é horário; só alerta após um silêncio longo.
+          const effectiveCutoffMs =
+            state?.ignition_on === true ? cutoffMs : parkedCutoffMs;
+          if (lastMsgMs > effectiveCutoffMs) continue; // ainda em dia
+
+          // Não repetir alertas em sequência (keep-alive limpa a flag do veículo).
+          const { data: recentAlert } = await supabaseAdmin
+            .from("tracker_events")
+            .select("id")
+            .eq("vehicle_id", v.id as string)
+            .eq("type", "signal_lost")
+            .gte(
+              "occurred_at",
+              new Date(nowMs - REALERT_COOLDOWN_MIN * 60 * 1000).toISOString(),
+            )
+            .limit(1)
+            .maybeSingle();
+          if (recentAlert) continue;
 
           await supabaseAdmin.from("tracker_events").insert({
             user_id: v.user_id,

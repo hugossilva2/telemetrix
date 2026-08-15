@@ -27,17 +27,10 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const url = new URL(request.url);
-        const secret = process.env.FLESPI_WEBHOOK_SECRET;
-        const anon =
-          process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
-        const providedSecret =
-          url.searchParams.get("secret") ?? request.headers.get("x-webhook-secret");
-        const apikey =
-          request.headers.get("apikey") ?? url.searchParams.get("apikey");
-        const authorized =
-          (!!secret && providedSecret === secret) || (!!anon && apikey === anon);
-        if (!authorized) return new Response("Unauthorized", { status: 401 });
+        if (!verifyWebhookSecret(request)) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+
 
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"

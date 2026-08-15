@@ -65,6 +65,50 @@ export async function ingestFlespiMessages(
   let skippedUnknownVehicle = 0;
   let skippedOutOfOrder = 0;
 
+  // Caches por lote: um lote da Flespi é quase sempre do mesmo device/usuário,
+  // então isso elimina praticamente todas as consultas repetidas.
+  type CachedVehicle = {
+    id: string;
+    user_id: string;
+    avg_consumption_kmpl: number | null;
+    signal_lost_notified_at: string | null;
+    alert_geofence: boolean | null;
+  };
+  type CachedPlace = {
+    id: string;
+    name: string | null;
+    lat: number | null;
+    lng: number | null;
+    geofence_radius_m: number | null;
+  };
+  const vehicleCache = new Map<string, CachedVehicle | null>();
+  const placesCache = new Map<string, CachedPlace[]>();
+
+  const getVehicleForDevice = async (deviceId: string) => {
+    if (vehicleCache.has(deviceId)) return vehicleCache.get(deviceId) ?? null;
+    const { data } = await supabaseAdmin
+      .from("vehicles")
+      .select("id,user_id,avg_consumption_kmpl,signal_lost_notified_at,alert_geofence")
+      .eq("flespi_device_id", deviceId)
+      .maybeSingle();
+    const v = (data as CachedVehicle | null) ?? null;
+    vehicleCache.set(deviceId, v);
+    return v;
+  };
+
+  const getPlacesForUser = async (userId: string) => {
+    const cached = placesCache.get(userId);
+    if (cached) return cached;
+    const { data } = await supabaseAdmin
+      .from("favorite_places")
+      .select("id,name,lat,lng,geofence_radius_m")
+      .eq("user_id", userId)
+      .eq("geofence_enabled", true);
+    const places = (data as CachedPlace[] | null) ?? [];
+    placesCache.set(userId, places);
+    return places;
+  };
+
   for (const msg of messages) {
     const deviceId = resolveDeviceId(msg);
     if (!deviceId) {
@@ -73,17 +117,14 @@ export async function ingestFlespiMessages(
       continue;
     }
 
-    // Resolve veículo/usuário pelo device_id.
-    const { data: vehicle } = await supabaseAdmin
-      .from("vehicles")
-      .select("id,user_id,avg_consumption_kmpl")
-      .eq("flespi_device_id", deviceId)
-      .maybeSingle();
+    // Resolve veículo/usuário pelo device_id (com cache por lote).
+    const vehicle = await getVehicleForDevice(deviceId);
     if (!vehicle) {
       skippedUnknownVehicle++;
       console.log("[flespi-webhook] skip: no vehicle for device", deviceId);
       continue;
     }
+
 
     const ign = msg["engine.ignition.status"];
     const lat = msg["position.latitude"];
@@ -135,17 +176,15 @@ export async function ingestFlespiMessages(
     const prevIgn = state?.ignition_on ?? null;
 
     // ---------- signal recuperado: limpa flag de "sinal perdido" ----------
-    const { data: vehicleFlags } = await supabaseAdmin
-      .from("vehicles")
-      .select("signal_lost_notified_at")
-      .eq("id", vehicle.id)
-      .maybeSingle();
-    if (vehicleFlags?.signal_lost_notified_at) {
+    if (vehicle.signal_lost_notified_at) {
       await supabaseAdmin
         .from("vehicles")
         .update({ signal_lost_notified_at: null })
         .eq("id", vehicle.id);
+      // Mantém o cache coerente: as próximas mensagens do lote não repetem.
+      vehicle.signal_lost_notified_at = null;
     }
+
 
     // ---------- tracker_pings (amostragem) ----------
     // IMPORTANTE: comparar com `last_ping_at` (último ping gravado), nunca com
@@ -239,18 +278,10 @@ export async function ingestFlespiMessages(
       typeof lat === "number" &&
       typeof lng === "number"
     ) {
-      const { data: vehicleAlerts } = await supabaseAdmin
-        .from("vehicles")
-        .select("alert_geofence")
-        .eq("id", vehicle.id)
-        .maybeSingle();
-      if (vehicleAlerts?.alert_geofence !== false) {
-        const { data: places } = await supabaseAdmin
-          .from("favorite_places")
-          .select("id,name,lat,lng,geofence_radius_m")
-          .eq("user_id", vehicle.user_id)
-          .eq("geofence_enabled", true);
+      if (vehicle.alert_geofence !== false) {
+        const places = await getPlacesForUser(vehicle.user_id as string);
         if (places && places.length > 0) {
+
           const geoState = (state?.geofence_state as any) ?? {};
           const placesState: Record<string, boolean> =
             geoState.places ?? {};

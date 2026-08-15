@@ -152,16 +152,12 @@ function FollowPage() {
   const vehicleId = share?.vehicle_id ?? null;
 
   // Registra o primeiro acesso do observador (aceite do convite).
+  // O aceite é feito por RPC: a policy de UPDATE do convidado foi removida
+  // para que ele não possa alterar vehicle_id/owner_id do próprio convite.
   useEffect(() => {
     if (!share || share.accepted_at) return;
     (async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-      if (!uid) return;
-      await supabase
-        .from("vehicle_shares")
-        .update({ accepted_at: new Date().toISOString(), viewer_user_id: uid })
-        .eq("id", share.id);
+      await supabase.rpc("accept_vehicle_share", { _share_id: share.id });
     })();
   }, [share]);
 
@@ -171,10 +167,7 @@ function FollowPage() {
     let stopped = false;
     const beat = async () => {
       if (stopped || document.visibilityState === "hidden") return;
-      await supabase
-        .from("vehicle_shares")
-        .update({ viewer_last_seen_at: new Date().toISOString() })
-        .eq("id", share.id);
+      await supabase.rpc("touch_vehicle_share_seen", { _share_id: share.id });
     };
     beat();
     const id = setInterval(beat, 30_000);
@@ -185,6 +178,7 @@ function FollowPage() {
       document.removeEventListener("visibilitychange", beat);
     };
   }, [share?.id]);
+
 
   const { data: vehicle } = useQuery({
     queryKey: ["shared-vehicle", vehicleId],

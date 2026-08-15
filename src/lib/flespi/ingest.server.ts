@@ -67,6 +67,8 @@ export async function ingestFlespiMessages(
   let skippedNoDevice = 0;
   let skippedUnknownVehicle = 0;
   let skippedOutOfOrder = 0;
+  let skippedLocked = 0;
+  let skippedDuplicate = 0;
 
   // Caches por lote: um lote da Flespi é quase sempre do mesmo device/usuário,
   // então isso elimina praticamente todas as consultas repetidas.

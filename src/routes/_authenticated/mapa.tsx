@@ -1,6 +1,7 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import type { SpeedSample } from "@/components/map/SpeedPolyline";
@@ -136,7 +137,7 @@ function MapaPage() {
         });
       } catch (err) {
         toast.error("Não foi possível traçar a rota", {
-          description: err instanceof Error ? err.message : undefined,
+          description: toUserMessage(err, "Verifique o destino e tente de novo."),
         });
       } finally {
         setRouting(false);

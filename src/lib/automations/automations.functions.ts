@@ -16,7 +16,10 @@ export const testAutomation = createServerFn({ method: "POST" })
       .select("*, favorite_places(name)")
       .eq("id", data.automationId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[automations] falha ao carregar a automação", error);
+      throw new Error("Não foi possível carregar a automação.");
+    }
     if (!automation) throw new Error("Automação não encontrada");
 
     const { callAutomation } = await import("@/lib/automations/run.server");

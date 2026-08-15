@@ -41,7 +41,7 @@ export const analyzeTripCoaching = createServerFn({ method: "POST" })
     }
 
     const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("IA não configurada neste projeto.");
+    if (!apiKey) throw new Error("O coach de direção está indisponível no momento.");
 
     const { data: trip, error } = await supabase
       .from("trips")
@@ -50,7 +50,10 @@ export const analyzeTripCoaching = createServerFn({ method: "POST" })
       )
       .eq("id", data.tripId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[coach] falha ao carregar a viagem", error);
+      throw new Error("Não foi possível carregar os dados da viagem.");
+    }
     if (!trip) throw new Error("Viagem não encontrada.");
 
     const { data: history } = await supabase

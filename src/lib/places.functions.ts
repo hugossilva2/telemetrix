@@ -6,7 +6,10 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 function gatewayHeaders() {
   const lovable = process.env.LOVABLE_API_KEY;
   const gmaps = process.env.GOOGLE_MAPS_API_KEY;
-  if (!lovable || !gmaps) throw new Error("Google Maps connector não configurado");
+  if (!lovable || !gmaps)
+    throw new Error(
+      "A busca de endereços está indisponível. Tente novamente em alguns minutos.",
+    );
   return {
     Authorization: `Bearer ${lovable}`,
     "X-Connection-Api-Key": gmaps,

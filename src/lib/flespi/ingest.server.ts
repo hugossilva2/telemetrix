@@ -255,15 +255,23 @@ export async function ingestFlespiMessages(
         ? new Date(state.last_ping_at as string).getTime()
         : 0;
       if (tsMs - lastPingMs >= PING_MIN_INTERVAL_MS) {
-        await supabaseAdmin.from("tracker_pings").insert({
-          user_id: vehicle.user_id,
-          vehicle_id: vehicle.id,
-          lat,
-          lng,
-          speed_kmh: typeof speed === "number" ? speed : null,
-          ignition: typeof ign === "boolean" ? ign : null,
-          recorded_at: nowIso,
-        });
+        // Reentrega do mesmo lote é no-op (unique vehicle_id + recorded_at).
+        const { data: pingRows } = await supabaseAdmin
+          .from("tracker_pings")
+          .upsert(
+            {
+              user_id: vehicle.user_id,
+              vehicle_id: vehicle.id,
+              lat,
+              lng,
+              speed_kmh: typeof speed === "number" ? speed : null,
+              ignition: typeof ign === "boolean" ? ign : null,
+              recorded_at: nowIso,
+            },
+            { onConflict: "vehicle_id,recorded_at", ignoreDuplicates: true },
+          )
+          .select("id");
+        if (!pingRows || pingRows.length === 0) skippedDuplicate++;
         pingWritten = true;
       }
     }

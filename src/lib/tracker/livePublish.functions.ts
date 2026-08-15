@@ -56,15 +56,18 @@ export const publishLiveState = createServerFn({ method: "POST" })
     if (stateErr) throw stateErr;
 
     if (hasFix) {
-      const { error: pingErr } = await supabaseAdmin.from("tracker_pings").insert({
-        user_id: context.userId,
-        vehicle_id: vehicle.id,
-        lat: data.lat as number,
-        lng: data.lng as number,
-        speed_kmh: data.speedKmh ?? null,
-        ignition: data.ignitionOn ?? null,
-        recorded_at: nowIso,
-      });
+      const { error: pingErr } = await supabaseAdmin.from("tracker_pings").upsert(
+        {
+          user_id: context.userId,
+          vehicle_id: vehicle.id,
+          lat: data.lat as number,
+          lng: data.lng as number,
+          speed_kmh: data.speedKmh ?? null,
+          ignition: data.ignitionOn ?? null,
+          recorded_at: nowIso,
+        },
+        { onConflict: "vehicle_id,recorded_at", ignoreDuplicates: true },
+      );
       if (pingErr) throw pingErr;
     }
 

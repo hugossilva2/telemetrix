@@ -112,7 +112,10 @@ export const backfillTripsFromFlespi = createServerFn({ method: "POST" })
       });
 
     if (rows.length > 0) {
-      const { error } = await supabase.from("trips").insert(rows);
+      // Ignora silenciosamente viagens que já existem (mesmo veículo + início).
+      const { error } = await supabase
+        .from("trips")
+        .upsert(rows, { onConflict: "vehicle_id,start_time", ignoreDuplicates: true });
       if (error) throw new Error(error.message);
     }
 

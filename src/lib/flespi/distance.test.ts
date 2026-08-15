@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  accumIncrementKm,
-  haversineKm,
-  resolveTripDistanceKm,
-} from "@/lib/flespi/distance";
+import { accumIncrementKm, haversineKm, resolveTripDistanceKm } from "@/lib/flespi/distance";
 
 // ~111 m por 0.001° de latitude
 const LAT = -12.9777;

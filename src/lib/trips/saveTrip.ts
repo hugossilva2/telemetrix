@@ -14,7 +14,6 @@ import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
 import { buildRouteData } from "@/lib/trips/routeData";
 import { getActiveVehicleId } from "@/lib/vehicles/active";
 
-
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
 
@@ -60,7 +59,6 @@ export async function saveClosedTrip(
     .limit(1);
   if (existing && existing.length > 0) return "duplicate";
 
-
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     (() => {
       const activeId = getActiveVehicleId();
@@ -83,8 +81,7 @@ export async function saveClosedTrip(
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
   const fuel = getFuelKind();
   // Sem consumo cadastrado, usa a meta Inmetro da ficha técnica do veículo.
-  const kmpl =
-    Number(vehicle?.avg_consumption_kmpl) || expectedKmpl({ fuel, avgSpeedKmh });
+  const kmpl = Number(vehicle?.avg_consumption_kmpl) || expectedKmpl({ fuel, avgSpeedKmh });
   const price = Number(lastFuel?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER;
   const fuelLiters = kmpl > 0 ? distanceKm / kmpl : null;
   const estimatedCost = fuelLiters != null ? fuelLiters * price : null;
@@ -98,7 +95,6 @@ export async function saveClosedTrip(
     fuel,
     avgSpeedKmh,
   });
-
 
   const source = telemetrySourceStore.get();
 
@@ -170,5 +166,4 @@ export async function saveClosedTrip(
     return "queued";
   }
   return "saved";
-
 }

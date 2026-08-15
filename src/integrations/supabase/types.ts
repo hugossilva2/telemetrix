@@ -63,9 +63,11 @@ export type Database = {
       }
       device_trip_state: {
         Row: {
+          accum_distance_km: number
           device_id: string
           geofence_state: Json
           ignition_on: boolean | null
+          ingest_lease_until: string | null
           last_lat: number | null
           last_lng: number | null
           last_message_at: string | null
@@ -81,9 +83,11 @@ export type Database = {
           vehicle_id: string | null
         }
         Insert: {
+          accum_distance_km?: number
           device_id: string
           geofence_state?: Json
           ignition_on?: boolean | null
+          ingest_lease_until?: string | null
           last_lat?: number | null
           last_lng?: number | null
           last_message_at?: string | null
@@ -99,9 +103,11 @@ export type Database = {
           vehicle_id?: string | null
         }
         Update: {
+          accum_distance_km?: number
           device_id?: string
           geofence_state?: Json
           ignition_on?: boolean | null
+          ingest_lease_until?: string | null
           last_lat?: number | null
           last_lng?: number | null
           last_message_at?: string | null

@@ -99,7 +99,9 @@ function PlaceSearch({
       });
       setTerm("");
     } catch (err) {
-      toast.error(toUserMessage(err, "Não foi possível carregar o local escolhido. Tente de novo."));
+      toast.error(
+        toUserMessage(err, "Não foi possível carregar o local escolhido. Tente de novo."),
+      );
     }
   };
 
@@ -251,7 +253,12 @@ function PlanejarPage() {
       return next;
     },
     onError: (err) =>
-      toast.error(toUserMessage(err, "Não foi possível calcular a rota. Verifique o destino e tente de novo.")),
+      toast.error(
+        toUserMessage(
+          err,
+          "Não foi possível calcular a rota. Verifique o destino e tente de novo.",
+        ),
+      ),
   });
 
   // Recalcula automaticamente quando origem, destino ou paradas mudam.
@@ -292,7 +299,6 @@ function PlanejarPage() {
     if (!plan) return;
     tripPlanStore.set({ ...plan, ...patch });
   };
-
 
   const currentPos = useMemo(
     () =>
@@ -426,7 +432,6 @@ function PlanejarPage() {
             Base: {formatDecimal(planKmpl)} km/L · {formatBRL(planPrice)}/L
           </p>
 
-
           <div className="mt-3 h-56 overflow-hidden rounded-xl border border-border">
             <ClientOnly fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
               <Suspense fallback={<div className="h-full w-full animate-pulse bg-muted" />}>
@@ -515,8 +520,6 @@ function PlanejarPage() {
           onReset={() => patchPlan({ pricePerLiter: price, kmpl, tollCost: 0 })}
         />
       )}
-
-
 
       {plan && longTrip?.isLong && (
         <LongTripCard

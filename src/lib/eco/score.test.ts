@@ -4,11 +4,7 @@ import type { EcoEvent, EcoEventType, EcoSeverity } from "@/lib/eco/detect";
 
 const T0 = 1_700_000_000_000;
 
-function ev(
-  type: EcoEventType,
-  severity: EcoSeverity = "moderate",
-  value = 0,
-): EcoEvent {
+function ev(type: EcoEventType, severity: EcoSeverity = "moderate", value = 0): EcoEvent {
   return {
     type,
     severity,
@@ -23,11 +19,7 @@ function ev(
 
 describe("countEvents", () => {
   it("conta por tipo", () => {
-    const counts = countEvents([
-      ev("harsh_brake"),
-      ev("harsh_brake", "severe"),
-      ev("overspeed"),
-    ]);
+    const counts = countEvents([ev("harsh_brake"), ev("harsh_brake", "severe"), ev("overspeed")]);
     expect(counts).toEqual({
       harsh_brake: 2,
       harsh_accel: 0,

@@ -71,7 +71,10 @@ export function DeleteTripButton({ tripId, onDeleted, variant = "icon", classNam
       setOpen(false);
       onDeleted?.();
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível excluir a viagem. Tente de novo em instantes.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível excluir a viagem. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -99,8 +102,8 @@ export function DeleteTripButton({ tripId, onDeleted, variant = "icon", classNam
           <AlertDialogHeader>
             <AlertDialogTitle>Excluir esta viagem?</AlertDialogTitle>
             <AlertDialogDescription>
-              A viagem será removida definitivamente e deixará de contar nos
-              relatórios, médias de consumo e eco score. Não é possível desfazer.
+              A viagem será removida definitivamente e deixará de contar nos relatórios, médias de
+              consumo e eco score. Não é possível desfazer.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

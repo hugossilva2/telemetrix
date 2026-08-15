@@ -98,18 +98,16 @@ function SharePage() {
       if (!uid || !vehicle?.id) throw new Error("Cadastre um veículo primeiro");
       const clean = email.trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) throw new Error("E-mail inválido");
-      const { error } = await supabase
-        .from("vehicle_shares")
-        .upsert(
-          {
-            owner_id: uid,
-            vehicle_id: vehicle.id,
-            invited_email: clean,
-            label: label.trim() || null,
-            revoked_at: null,
-          },
-          { onConflict: "vehicle_id,invited_email" },
-        );
+      const { error } = await supabase.from("vehicle_shares").upsert(
+        {
+          owner_id: uid,
+          vehicle_id: vehicle.id,
+          invited_email: clean,
+          label: label.trim() || null,
+          revoked_at: null,
+        },
+        { onConflict: "vehicle_id,invited_email" },
+      );
       if (error) throw error;
     },
     onSuccess: () => {
@@ -120,7 +118,10 @@ function SharePage() {
         description: "O observador verá o veículo ao entrar com esse e-mail.",
       });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível criar o convite. Confira o e-mail e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível criar o convite. Confira o e-mail e tente de novo."),
+      ),
   });
 
   const revoke = useMutation({
@@ -132,7 +133,10 @@ function SharePage() {
       qc.invalidateQueries({ queryKey: ["vehicle-shares"] });
       toast.success("Acesso removido");
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o acesso. Tente de novo em instantes.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover o acesso. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -144,21 +148,19 @@ function SharePage() {
           </span>
           <div className="min-w-0 text-xs leading-relaxed text-muted-foreground">
             O observador (esposa, mãe, sócio) vê{" "}
-            <span className="text-foreground">apenas rastreamento</span>: localização
-            atual, motor ligado/desligado, viagem em andamento e eventos de segurança.
-            Ele <span className="text-foreground">não</span> vê histórico de viagens,
-            despesas, abastecimentos, documentos nem motoristas.
+            <span className="text-foreground">apenas rastreamento</span>: localização atual, motor
+            ligado/desligado, viagem em andamento e eventos de segurança. Ele{" "}
+            <span className="text-foreground">não</span> vê histórico de viagens, despesas,
+            abastecimentos, documentos nem motoristas.
           </div>
         </div>
       </div>
 
       <div className="card-surface p-4">
-        <h2 className="font-display text-sm font-semibold tracking-tight">
-          Convidar por e-mail
-        </h2>
+        <h2 className="font-display text-sm font-semibold tracking-tight">Convidar por e-mail</h2>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Use o mesmo e-mail que a pessoa vai usar para entrar no app. Depois de entrar,
-          ela acessa a aba “Acompanhar”.
+          Use o mesmo e-mail que a pessoa vai usar para entrar no app. Depois de entrar, ela acessa
+          a aba “Acompanhar”.
         </p>
         <div className="mt-3 space-y-3">
           <div>
@@ -210,9 +212,7 @@ function SharePage() {
         {isLoading ? (
           <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>
         ) : !shares || shares.length === 0 ? (
-          <p className="mt-3 text-xs text-muted-foreground">
-            Nenhum observador convidado ainda.
-          </p>
+          <p className="mt-3 text-xs text-muted-foreground">Nenhum observador convidado ainda.</p>
         ) : (
           <ul className="mt-3 space-y-2">
             {shares.map((s) => (
@@ -222,9 +222,7 @@ function SharePage() {
               >
                 <span
                   className={`grid size-9 shrink-0 place-items-center rounded-xl ${
-                    s.accepted_at
-                      ? "bg-success/10 text-success"
-                      : "bg-muted text-muted-foreground"
+                    s.accepted_at ? "bg-success/10 text-success" : "bg-muted text-muted-foreground"
                   }`}
                 >
                   {s.accepted_at ? (

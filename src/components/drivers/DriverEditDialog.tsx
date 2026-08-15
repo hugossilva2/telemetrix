@@ -72,7 +72,13 @@ export function DriverEditDialog({
       qc.invalidateQueries({ queryKey: ["driver-photo"] });
       qc.invalidateQueries({ queryKey: ["driver-ranking"] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   return (

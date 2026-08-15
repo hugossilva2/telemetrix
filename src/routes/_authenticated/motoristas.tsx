@@ -23,7 +23,10 @@ export const Route = createFileRoute("/_authenticated/motoristas")({
       { title: "Motoristas · Telemetrix" },
       { name: "description", content: "Cadastre condutores, CNH e validade da habilitação." },
       { property: "og:title", content: "Motoristas · Telemetrix" },
-      { property: "og:description", content: "Cadastre condutores, CNH e validade da habilitação." },
+      {
+        property: "og:description",
+        content: "Cadastre condutores, CNH e validade da habilitação.",
+      },
     ],
   }),
   component: MotoristasPage,
@@ -58,7 +61,9 @@ function MotoristasPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("drivers")
-        .select("id,name,phone,photo_path,license_number,license_category,license_expires_on,is_default")
+        .select(
+          "id,name,phone,photo_path,license_number,license_category,license_expires_on,is_default",
+        )
         .order("is_default", { ascending: false })
         .order("name");
       if (error) throw error;
@@ -79,14 +84,14 @@ function MotoristasPage() {
       const { data: created, error } = await supabase
         .from("drivers")
         .insert({
-        user_id: uid,
-        name: name.trim(),
-        phone: phone.trim() || null,
-        photo_path: photoPath,
-        license_number: license.trim() || null,
-        license_category: category.trim() || null,
-        license_expires_on: expires || null,
-        is_default: isFirst,
+          user_id: uid,
+          name: name.trim(),
+          phone: phone.trim() || null,
+          photo_path: photoPath,
+          license_number: license.trim() || null,
+          license_category: category.trim() || null,
+          license_expires_on: expires || null,
+          is_default: isFirst,
         })
         .select("id")
         .single();
@@ -107,7 +112,13 @@ function MotoristasPage() {
       qc.invalidateQueries({ queryKey: ["trips"] });
       qc.invalidateQueries({ queryKey: ["driver-ranking"] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const setDefault = useMutation({
@@ -127,7 +138,13 @@ function MotoristasPage() {
       toast.success("Condutor padrão atualizado.");
       qc.invalidateQueries({ queryKey: ["drivers"] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível atualizar o condutor padrão. Tente de novo em instantes.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível atualizar o condutor padrão. Tente de novo em instantes.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -139,7 +156,10 @@ function MotoristasPage() {
       toast.success("Motorista removido.");
       qc.invalidateQueries({ queryKey: ["drivers"] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o motorista. Tente de novo em instantes.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover o motorista. Tente de novo em instantes."),
+      ),
   });
 
   if (showingProfile) return <Outlet />;
@@ -155,30 +175,70 @@ function MotoristasPage() {
       >
         <div className="space-y-1.5">
           <Label htmlFor="name">Nome</Label>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required maxLength={100} className="h-11 text-base" placeholder="João da Silva" />
+          <Input
+            id="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            maxLength={100}
+            className="h-11 text-base"
+            placeholder="João da Silva"
+          />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="phone">Telefone</Label>
-            <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={30} inputMode="tel" className="h-11 text-base" placeholder="(00) 00000-0000" />
+            <Input
+              id="phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              maxLength={30}
+              inputMode="tel"
+              className="h-11 text-base"
+              placeholder="(00) 00000-0000"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="category">Categoria CNH</Label>
-            <Input id="category" value={category} onChange={(e) => setCategory(e.target.value.toUpperCase())} maxLength={5} className="h-11 text-base" placeholder="AB" />
+            <Input
+              id="category"
+              value={category}
+              onChange={(e) => setCategory(e.target.value.toUpperCase())}
+              maxLength={5}
+              className="h-11 text-base"
+              placeholder="AB"
+            />
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="license">Nº da CNH</Label>
-            <Input id="license" value={license} onChange={(e) => setLicense(e.target.value)} maxLength={30} inputMode="numeric" className="h-11 text-base" />
+            <Input
+              id="license"
+              value={license}
+              onChange={(e) => setLicense(e.target.value)}
+              maxLength={30}
+              inputMode="numeric"
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="expires">Validade</Label>
-            <Input id="expires" type="date" value={expires} onChange={(e) => setExpires(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="expires"
+              type="date"
+              value={expires}
+              onChange={(e) => setExpires(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
-        <FileAttachment label="Foto / CNH digitalizada (opcional)" file={photo} onChange={setPhoto} />
+        <FileAttachment
+          label="Foto / CNH digitalizada (opcional)"
+          file={photo}
+          onChange={setPhoto}
+        />
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
           {save.isPending ? "Salvando…" : "Cadastrar motorista"}
@@ -217,7 +277,9 @@ function MotoristasPage() {
                       <ChevronRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
                     </Link>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {[d.license_category && `Cat. ${d.license_category}`, d.phone].filter(Boolean).join(" · ") || "Sem dados adicionais"}
+                      {[d.license_category && `Cat. ${d.license_category}`, d.phone]
+                        .filter(Boolean)
+                        .join(" · ") || "Sem dados adicionais"}
                     </p>
                     {d.license_expires_on && (
                       <span
@@ -229,7 +291,16 @@ function MotoristasPage() {
                     {d.photo_path && (
                       <button
                         type="button"
-                        onClick={() => openDocFile(d.photo_path as string).catch((e: Error) => toast.error(toUserMessage(e, "Não foi possível abrir a foto. Tente de novo em instantes.")))}
+                        onClick={() =>
+                          openDocFile(d.photo_path as string).catch((e: Error) =>
+                            toast.error(
+                              toUserMessage(
+                                e,
+                                "Não foi possível abrir a foto. Tente de novo em instantes.",
+                              ),
+                            ),
+                          )
+                        }
                         className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                       >
                         <FileText className="size-3.5" /> Ver arquivo

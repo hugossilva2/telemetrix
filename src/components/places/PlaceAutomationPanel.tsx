@@ -64,16 +64,16 @@ export function PlaceAutomationPanel({ place }: Props) {
 
   const fenceMutation = useMutation({
     mutationFn: async (patch: { geofence_enabled?: boolean; geofence_radius_m?: number }) => {
-      const { error } = await supabase
-        .from("favorite_places")
-        .update(patch)
-        .eq("id", place.id);
+      const { error } = await supabase.from("favorite_places").update(patch).eq("id", place.id);
       if (error) throw error;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo."),
+      ),
   });
 
   return (
@@ -210,16 +210,16 @@ function AutomationForm({
       toast.success("Automação salva");
       qc.invalidateQueries({ queryKey: ["place_automations", placeId] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo."),
+      ),
   });
 
   const remove = useMutation({
     mutationFn: async () => {
       if (!automation) return;
-      const { error } = await supabase
-        .from("place_automations")
-        .delete()
-        .eq("id", automation.id);
+      const { error } = await supabase.from("place_automations").delete().eq("id", automation.id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -227,7 +227,10 @@ function AutomationForm({
       toast.success("Automação removida");
       qc.invalidateQueries({ queryKey: ["place_automations", placeId] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo."),
+      ),
   });
 
   const test = useMutation({
@@ -240,7 +243,10 @@ function AutomationForm({
       else toast.error(r.error ?? "Falha no disparo");
       qc.invalidateQueries({ queryKey: ["automation_runs", placeId] });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível disparar o teste. Verifique a URL e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível disparar o teste. Verifique a URL e tente de novo."),
+      ),
   });
 
   return (
@@ -324,7 +330,12 @@ function AutomationForm({
       </div>
 
       <div className="flex gap-2">
-        <Button size="sm" className="flex-1" onClick={() => save.mutate()} disabled={save.isPending}>
+        <Button
+          size="sm"
+          className="flex-1"
+          onClick={() => save.mutate()}
+          disabled={save.isPending}
+        >
           {save.isPending ? "Salvando…" : "Salvar"}
         </Button>
         <Button

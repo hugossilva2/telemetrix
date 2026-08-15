@@ -116,8 +116,10 @@ export async function requestCoaching({
     }),
   });
 
-  if (res.status === 429) throw new Error("Limite de uso da IA atingido. Tente novamente em alguns minutos.");
-  if (res.status === 402) throw new Error("Créditos de IA esgotados. Adicione créditos no workspace para continuar.");
+  if (res.status === 429)
+    throw new Error("Limite de uso da IA atingido. Tente novamente em alguns minutos.");
+  if (res.status === 402)
+    throw new Error("Créditos de IA esgotados. Adicione créditos no workspace para continuar.");
   if (!res.ok) {
     const body = await res.text();
     console.error(`[coach] gateway ${res.status}: ${body}`);

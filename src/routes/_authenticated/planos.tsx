@@ -41,10 +41,11 @@ function PlanosPage() {
               Seu plano: {loading ? "…" : currentPlan.toUpperCase()}
             </p>
             <p className="text-xs text-muted-foreground">
-              {vehicles.length} de{" "}
-              {Number.isFinite(limits.maxVehicles) ? limits.maxVehicles : "∞"} veículos usados ·
-              histórico de{" "}
-              {Number.isFinite(limits.historyDays) ? `${limits.historyDays} dias` : "todo o período"}
+              {vehicles.length} de {Number.isFinite(limits.maxVehicles) ? limits.maxVehicles : "∞"}{" "}
+              veículos usados · histórico de{" "}
+              {Number.isFinite(limits.historyDays)
+                ? `${limits.historyDays} dias`
+                : "todo o período"}
             </p>
           </div>
         </div>

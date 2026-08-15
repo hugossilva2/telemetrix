@@ -40,6 +40,5 @@ export const testAutomation = createServerFn({ method: "POST" })
       manual: true,
     });
 
-
     return result;
   });

@@ -45,14 +45,15 @@ export function TripCoachCard({ tripId }: { tripId: string }) {
   });
 
   const mutation = useMutation({
-    mutationFn: (force: boolean) =>
-      analyze({ data: { tripId, fuel: getFuelKind(), force } }),
+    mutationFn: (force: boolean) => analyze({ data: { tripId, fuel: getFuelKind(), force } }),
     onSuccess: (data) => {
       cached.refetch();
       void data;
     },
     onError: (err: unknown) => {
-      toast.error(toUserMessage(err, "Não foi possível analisar a viagem agora. Tente de novo em instantes."));
+      toast.error(
+        toUserMessage(err, "Não foi possível analisar a viagem agora. Tente de novo em instantes."),
+      );
     },
   });
 
@@ -140,11 +141,7 @@ export function TripCoachCard({ tripId }: { tripId: string }) {
             Gere um resumo em texto, 3 dicas personalizadas e a comparação com suas viagens
             anteriores e com a meta Inmetro do Cronos.
           </p>
-          <Button
-            className="mt-3 w-full"
-            disabled={loading}
-            onClick={() => mutation.mutate(false)}
-          >
+          <Button className="mt-3 w-full" disabled={loading} onClick={() => mutation.mutate(false)}>
             <Sparkles className={`size-4 ${loading ? "animate-pulse" : ""}`} />
             {loading ? "Analisando viagem..." : "Analisar com IA"}
           </Button>

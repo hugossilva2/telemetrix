@@ -7,9 +7,7 @@ function gatewayHeaders() {
   const lovable = process.env.LOVABLE_API_KEY;
   const gmaps = process.env.GOOGLE_MAPS_API_KEY;
   if (!lovable || !gmaps)
-    throw new Error(
-      "A busca de endereços está indisponível. Tente novamente em alguns minutos.",
-    );
+    throw new Error("A busca de endereços está indisponível. Tente novamente em alguns minutos.");
   return {
     Authorization: `Bearer ${lovable}`,
     "X-Connection-Api-Key": gmaps,
@@ -120,10 +118,8 @@ export type RouteEta = {
 export const getRouteEta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: {
-      origin: { lat: number; lng: number };
-      destination: { lat: number; lng: number };
-    }) => input,
+    (input: { origin: { lat: number; lng: number }; destination: { lat: number; lng: number } }) =>
+      input,
   )
   .handler(async ({ data }): Promise<RouteEta> => {
     const body = {
@@ -186,8 +182,7 @@ function distKm(aLat: number, aLng: number, bLat: number, bLng: number): number 
   const dLng = ((bLng - aLng) * Math.PI) / 180;
   const lat1 = (aLat * Math.PI) / 180;
   const lat2 = (bLat * Math.PI) / 180;
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 

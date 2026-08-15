@@ -25,7 +25,6 @@ import { PushNotificationsCard } from "@/components/settings/PushNotificationsCa
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 
-
 export const Route = createFileRoute("/_authenticated/acompanhar")({
   head: () => ({
     meta: [
@@ -64,7 +63,12 @@ const EVENT_META: Record<
     color: "text-destructive",
     bg: "bg-destructive/10",
   },
-  geofence_enter: { label: "Chegou na cerca", Icon: LogIn, color: "text-chart-3", bg: "bg-chart-3/10" },
+  geofence_enter: {
+    label: "Chegou na cerca",
+    Icon: LogIn,
+    color: "text-chart-3",
+    bg: "bg-chart-3/10",
+  },
   geofence_exit: {
     label: "Saiu da cerca",
     Icon: AlertTriangle,
@@ -97,17 +101,13 @@ function relative(iso: string | null | undefined) {
   return dtf.format(new Date(iso));
 }
 
-function haversineKm(
-  a: { lat: number; lng: number },
-  b: { lat: number; lng: number },
-) {
+function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
   const R = 6371;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLng = ((b.lng - a.lng) * Math.PI) / 180;
   const la1 = (a.lat * Math.PI) / 180;
   const la2 = (b.lat * Math.PI) / 180;
-  const h =
-    Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
   return 2 * R * Math.asin(Math.sqrt(h));
 }
 
@@ -130,8 +130,6 @@ function useNow(active: boolean) {
   }, [active]);
   return now;
 }
-
-
 
 function FollowPage() {
   const { data: share, isLoading } = useQuery({
@@ -178,7 +176,6 @@ function FollowPage() {
       document.removeEventListener("visibilitychange", beat);
     };
   }, [share?.id]);
-
 
   const { data: vehicle } = useQuery({
     queryKey: ["shared-vehicle", vehicleId],
@@ -300,7 +297,6 @@ function FollowPage() {
     };
   }, [tripActive, startMs, pings, now, state?.max_speed_kmh]);
 
-
   if (isLoading) {
     return (
       <AppShell title="Acompanhar" subtitle="Modo observador" action={<SignOutButton iconOnly />}>
@@ -320,8 +316,8 @@ function FollowPage() {
             Nenhum veículo compartilhado com você
           </h2>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Peça ao dono do veículo para convidar este e-mail em Gestão → Observadores.
-            O convite precisa usar exatamente o e-mail desta conta.
+            Peça ao dono do veículo para convidar este e-mail em Gestão → Observadores. O convite
+            precisa usar exatamente o e-mail desta conta.
           </p>
         </div>
       </AppShell>
@@ -387,26 +383,10 @@ function FollowPage() {
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <LiveStat
-              label="Duração"
-              value={formatDuration(live.elapsedMs)}
-              Icon={Clock}
-            />
-            <LiveStat
-              label="Distância"
-              value={`${live.distance.toFixed(1)} km`}
-              Icon={RouteIcon}
-            />
-            <LiveStat
-              label="Média"
-              value={`${Math.round(live.avgSpeed)} km/h`}
-              Icon={Gauge}
-            />
-            <LiveStat
-              label="Máxima"
-              value={`${Math.round(live.maxSpeed)} km/h`}
-              Icon={Zap}
-            />
+            <LiveStat label="Duração" value={formatDuration(live.elapsedMs)} Icon={Clock} />
+            <LiveStat label="Distância" value={`${live.distance.toFixed(1)} km`} Icon={RouteIcon} />
+            <LiveStat label="Média" value={`${Math.round(live.avgSpeed)} km/h`} Icon={Gauge} />
+            <LiveStat label="Máxima" value={`${Math.round(live.maxSpeed)} km/h`} Icon={Zap} />
           </div>
 
           <p className="mt-3 text-[11px] text-muted-foreground">
@@ -414,8 +394,6 @@ function FollowPage() {
           </p>
         </div>
       )}
-
-
 
       <div className="overflow-hidden rounded-2xl border border-border/70">
         <div className="h-[52vh] w-full">
@@ -442,9 +420,7 @@ function FollowPage() {
       <ObserverTripsList vehicleId={vehicleId} />
 
       <div className="card-surface p-4">
-        <h2 className="font-display text-sm font-semibold tracking-tight">
-          Últimos eventos
-        </h2>
+        <h2 className="font-display text-sm font-semibold tracking-tight">Últimos eventos</h2>
         {!events || events.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">Nenhum evento registrado.</p>
         ) : (
@@ -501,15 +477,7 @@ function Tile({
   );
 }
 
-function LiveStat({
-  label,
-  value,
-  Icon,
-}: {
-  label: string;
-  value: string;
-  Icon: typeof Car;
-}) {
+function LiveStat({ label, value, Icon }: { label: string; value: string; Icon: typeof Car }) {
   return (
     <div className="rounded-xl border border-border/60 bg-muted/30 p-2.5">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">

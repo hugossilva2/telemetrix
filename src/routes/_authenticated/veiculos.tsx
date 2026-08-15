@@ -130,7 +130,13 @@ function VeiculosPage() {
       if (editing === "new" && id) setVehicleId(id);
       setEditing(null);
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o veículo. Verifique sua conexão e tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o veículo. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -142,7 +148,10 @@ function VeiculosPage() {
       toast.success("Veículo removido.");
       invalidate();
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o veículo. Tente de novo em instantes.")),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover o veículo. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -157,9 +166,7 @@ function VeiculosPage() {
     >
       {atLimit && (
         <section className="card-surface border-primary/40 p-4">
-          <p className="text-sm font-semibold">
-            Limite do plano {plan.toUpperCase()} atingido
-          </p>
+          <p className="text-sm font-semibold">Limite do plano {plan.toUpperCase()} atingido</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Seu plano permite {limits.maxVehicles}{" "}
             {limits.maxVehicles === 1 ? "veículo" : "veículos"}. Faça upgrade para monitorar mais

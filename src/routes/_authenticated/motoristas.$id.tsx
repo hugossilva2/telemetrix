@@ -67,15 +67,7 @@ const EVENT_ORDER: EcoEventType[] = [
   "high_rpm",
 ];
 
-function Kpi({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: typeof Gauge;
-  label: string;
-  value: string;
-}) {
+function Kpi({ icon: Icon, label, value }: { icon: typeof Gauge; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-border/60 bg-card p-3">
       <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-muted-foreground">
@@ -93,7 +85,10 @@ function DriverProfilePage() {
   const { data: trips = [] } = useDriverTrips(id);
   const { data: safeStarts = [] } = useDriverSafeStarts(id);
 
-  const result = useMemo(() => computeDriverScore(trips, safeStarts, { fuel: getFuelKind() }), [trips, safeStarts]);
+  const result = useMemo(
+    () => computeDriverScore(trips, safeStarts, { fuel: getFuelKind() }),
+    [trips, safeStarts],
+  );
   const series = useMemo(() => monthlyScoreSeries(trips), [trips]);
   const { stats } = result;
 
@@ -142,7 +137,6 @@ function DriverProfilePage() {
               <DriverEditDialog driver={driver} />
             </div>
           </div>
-
 
           <DriverScoreCard score={result.score} pillars={result.pillars} />
 
@@ -194,9 +188,7 @@ function DriverProfilePage() {
                   key={type}
                   className="rounded-xl border border-border/60 bg-card p-2 text-center"
                 >
-                  <div
-                    className={`text-[10px] uppercase tracking-wide ${ECO_EVENT_COLOR[type]}`}
-                  >
+                  <div className={`text-[10px] uppercase tracking-wide ${ECO_EVENT_COLOR[type]}`}>
                     {ECO_EVENT_LABEL[type]}
                   </div>
                   <div className="mt-1 text-base font-semibold tabular-nums">
@@ -240,9 +232,7 @@ function DriverProfilePage() {
               <ShieldCheck className="size-4" /> Últimas partidas seguras
             </h2>
             {safeStarts.length === 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Nenhuma partida sincronizada ainda.
-              </p>
+              <p className="text-xs text-muted-foreground">Nenhuma partida sincronizada ainda.</p>
             ) : (
               <ul className="space-y-1.5">
                 {safeStarts.slice(0, 8).map((s) => (

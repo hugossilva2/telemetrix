@@ -87,7 +87,8 @@ export function CheckupButtons() {
         },
       });
     },
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível registrar a conferência. Tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(toUserMessage(e, "Não foi possível registrar a conferência. Tente de novo.")),
   });
 
   const remove = useMutation({
@@ -96,7 +97,8 @@ export function CheckupButtons() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["checkups"] }),
-    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover a conferência. Tente de novo.")),
+    onError: (e: Error) =>
+      toast.error(toUserMessage(e, "Não foi possível remover a conferência. Tente de novo.")),
   });
 
   return (
@@ -163,9 +165,7 @@ export function CheckupButtons() {
             {records.slice(0, 30).map((r) => (
               <li key={r.id} className="flex items-center gap-3 py-2.5">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">
-                    {CHECKUP_LABEL[r.item] ?? r.item}
-                  </p>
+                  <p className="truncate text-sm font-medium">{CHECKUP_LABEL[r.item] ?? r.item}</p>
                   <p className="mt-0.5 text-[11px] text-muted-foreground">
                     {formatWhen(r.checked_at)}
                     {r.mileage_km != null

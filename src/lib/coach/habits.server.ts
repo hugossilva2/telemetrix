@@ -38,13 +38,7 @@ const EVENT_PT: Record<string, string> = {
   high_rpm: "giro alto",
 };
 
-export function buildHabitsPrompt({
-  agg,
-  fuel,
-}: {
-  agg: HabitsAggregate;
-  fuel: FuelKind;
-}) {
+export function buildHabitsPrompt({ agg, fuel }: { agg: HabitsAggregate; fuel: FuelKind }) {
   const spec = DEFAULT_SPEC;
   const target = expectedKmpl({ fuel, avgSpeedKmh: agg.avgSpeedKmh });
   return [
@@ -99,7 +93,8 @@ function parseRecommendations(value: unknown): DrivingRecommendation[] {
       return {
         title,
         detail: typeof rec["detail"] === "string" ? rec["detail"].trim() : "",
-        impact: typeof rec["impact"] === "string" && rec["impact"].trim() ? rec["impact"].trim() : null,
+        impact:
+          typeof rec["impact"] === "string" && rec["impact"].trim() ? rec["impact"].trim() : null,
         priority: priority(rec["priority"]),
       } satisfies DrivingRecommendation;
     })

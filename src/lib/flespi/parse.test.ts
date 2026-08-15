@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  mergeTelemetry,
-  parseFlespiMessage,
-  parseFlespiStateTopic,
-} from "@/lib/flespi/parse";
+import { mergeTelemetry, parseFlespiMessage, parseFlespiStateTopic } from "@/lib/flespi/parse";
 
 describe("parseFlespiMessage", () => {
   it("lê payload achatado", () => {
@@ -94,19 +90,18 @@ describe("parseFlespiMessage", () => {
   it("converte booleanos em várias formas", () => {
     const truthy = [true, 1, "1", "true"];
     for (const v of truthy) {
-      expect(
-        parseFlespiMessage(JSON.stringify({ "engine.ignition.status": v }))?.ignitionOn,
-      ).toBe(true);
+      expect(parseFlespiMessage(JSON.stringify({ "engine.ignition.status": v }))?.ignitionOn).toBe(
+        true,
+      );
     }
     const falsy = [false, 0, "0", "false"];
     for (const v of falsy) {
-      expect(
-        parseFlespiMessage(JSON.stringify({ "engine.ignition.status": v }))?.ignitionOn,
-      ).toBe(false);
+      expect(parseFlespiMessage(JSON.stringify({ "engine.ignition.status": v }))?.ignitionOn).toBe(
+        false,
+      );
     }
     expect(
-      parseFlespiMessage(JSON.stringify({ "engine.ignition.status": "maybe" }))
-        ?.ignitionOn,
+      parseFlespiMessage(JSON.stringify({ "engine.ignition.status": "maybe" }))?.ignitionOn,
     ).toBeUndefined();
   });
 
@@ -126,10 +121,7 @@ describe("parseFlespiMessage", () => {
 
 describe("parseFlespiStateTopic", () => {
   it("extrai a chave depois de /telemetry/", () => {
-    const t = parseFlespiStateTopic(
-      "flespi/state/gw/devices/123/telemetry/can.engine.rpm",
-      "2450",
-    );
+    const t = parseFlespiStateTopic("flespi/state/gw/devices/123/telemetry/can.engine.rpm", "2450");
     expect(t).toEqual({ engineRpm: 2450 });
   });
 
@@ -148,18 +140,13 @@ describe("parseFlespiStateTopic", () => {
 
   it("aceita booleanos escalares", () => {
     expect(
-      parseFlespiStateTopic(
-        "flespi/state/gw/devices/1/telemetry/engine.ignition.status",
-        "true",
-      ),
+      parseFlespiStateTopic("flespi/state/gw/devices/1/telemetry/engine.ignition.status", "true"),
     ).toEqual({ ignitionOn: true });
   });
 
   it("devolve null quando o tópico não é de telemetria ou a chave é desconhecida", () => {
     expect(parseFlespiStateTopic("flespi/message/gw/devices/1", "{}")).toBeNull();
-    expect(
-      parseFlespiStateTopic("flespi/state/gw/devices/1/telemetry/foo.bar", "1"),
-    ).toBeNull();
+    expect(parseFlespiStateTopic("flespi/state/gw/devices/1/telemetry/foo.bar", "1")).toBeNull();
   });
 });
 

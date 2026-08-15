@@ -91,21 +91,17 @@ describe("detectBetween — aceleração", () => {
 
 describe("detectBetween — guards de intervalo", () => {
   it("ignora pares com dt < 1 s", () => {
-    expect(
-      detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 500, speed: 10 }), TH),
-    ).toEqual([]);
+    expect(detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 500, speed: 10 }), TH)).toEqual([]);
   });
 
   it("ignora pares com dt > 30 s", () => {
-    expect(
-      detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 31_000, speed: 0 }), TH),
-    ).toEqual([]);
+    expect(detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 31_000, speed: 0 }), TH)).toEqual([]);
   });
 
   it("aceita exatamente dt = 1 s e dt = 30 s", () => {
-    expect(
-      detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 1000, speed: 40 }), TH),
-    ).toHaveLength(1);
+    expect(detectBetween(s({ t: T0, speed: 60 }), s({ t: T0 + 1000, speed: 40 }), TH)).toHaveLength(
+      1,
+    );
     expect(
       detectBetween(s({ t: T0, speed: 300 }), s({ t: T0 + 30_000, speed: 0 }), TH),
     ).toHaveLength(1);
@@ -114,29 +110,17 @@ describe("detectBetween — guards de intervalo", () => {
 
 describe("detectBetween — overspeed e high_rpm só na transição", () => {
   it("dispara overspeed ao cruzar o limite", () => {
-    const events = detectBetween(
-      s({ t: T0, speed: 108 }),
-      s({ t: T0 + 5000, speed: 115 }),
-      TH,
-    );
+    const events = detectBetween(s({ t: T0, speed: 108 }), s({ t: T0 + 5000, speed: 115 }), TH);
     expect(events.map((e) => e.type)).toContain("overspeed");
   });
 
   it("não repete overspeed enquanto continua acima do limite", () => {
-    const events = detectBetween(
-      s({ t: T0, speed: 115 }),
-      s({ t: T0 + 5000, speed: 118 }),
-      TH,
-    );
+    const events = detectBetween(s({ t: T0, speed: 115 }), s({ t: T0 + 5000, speed: 118 }), TH);
     expect(events.map((e) => e.type)).not.toContain("overspeed");
   });
 
   it("marca overspeed severe acima de limite + 20", () => {
-    const events = detectBetween(
-      s({ t: T0, speed: 100 }),
-      s({ t: T0 + 5000, speed: 135 }),
-      TH,
-    );
+    const events = detectBetween(s({ t: T0, speed: 100 }), s({ t: T0 + 5000, speed: 135 }), TH);
     const over = events.find((e) => e.type === "overspeed");
     expect(over?.severity).toBe("severe");
   });
@@ -227,9 +211,7 @@ describe("detectBetween — delta de rumo", () => {
       s({ t: T0 + 1000, speed: 40, heading: 170 }),
       TH,
     );
-    expect(real340.find((e) => e.type === "harsh_corner")!.value).toBeGreaterThan(
-      corner!.value,
-    );
+    expect(real340.find((e) => e.type === "harsh_corner")!.value).toBeGreaterThan(corner!.value);
   });
 
   it("ignora curva abaixo de 15 km/h", () => {

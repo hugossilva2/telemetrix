@@ -41,7 +41,7 @@ async function fetchMessages(deviceId: string, fromS: number) {
 
 async function run(request: Request) {
   const url = new URL(request.url);
-  if (!isAuthorized(request, url)) {
+  if (!verifyWebhookSecret(request, url)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

@@ -70,7 +70,12 @@ function looksLikeUserMessage(message: string): boolean {
   if (m.length < 8 || m.length > 200) return false;
   if (!/\s/.test(m)) return false;
   // precisa ter pelo menos uma palavra em português comum ou acento
-  return /[áàâãéêíóôõúüç]/i.test(m) || /\b(não|de|da|do|em|para|no|na|e|o|a|tente|verifique|precisamos|inválid\w*)\b/i.test(m);
+  return (
+    /[áàâãéêíóôõúüç]/i.test(m) ||
+    /\b(não|de|da|do|em|para|por|no|na|com|sem|um|uma|ao|que|tente|verifique|precisamos|adicione|aguarde|inválid\w*|encontrad\w*|registrad\w*)\b/i.test(
+      m,
+    )
+  );
 }
 
 /**

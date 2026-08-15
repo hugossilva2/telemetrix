@@ -1,4 +1,9 @@
 import { fireAutomationsForPlace } from "@/lib/automations/run.server";
+import {
+  accumIncrementKm,
+  haversineKm as haversineKmPure,
+  resolveTripDistanceKm,
+} from "@/lib/flespi/distance";
 
 /**
  * Núcleo de ingestão de mensagens do rastreador Flespi.

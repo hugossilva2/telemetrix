@@ -366,6 +366,7 @@ export async function ingestFlespiMessages(
         max_speed_kmh: speed ?? 0,
         updated_at: nowIso,
         last_message_at: nowIso,
+        ...(pingWritten ? { last_ping_at: nowIso } : {}),
       });
       processed++;
       continue;

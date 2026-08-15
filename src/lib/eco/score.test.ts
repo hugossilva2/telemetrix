@@ -147,10 +147,15 @@ describe("ecoBand", () => {
     expect(ecoBand(0).label).toBe("Agressivo");
   });
 
-  it("devolve 'Sem dados' para valores inválidos", () => {
-    expect(ecoBand(null).label).toBe("Sem dados");
+  it("devolve 'Sem dados' para undefined e NaN", () => {
     expect(ecoBand(undefined).label).toBe("Sem dados");
     expect(ecoBand(Number.NaN).label).toBe("Sem dados");
+  });
+
+  // Comportamento ATUAL, documentado sem correção: Number(null) === 0, então um
+  // score nulo cai na faixa "Agressivo" em vez de "Sem dados". Achado reportado.
+  it("hoje trata null como 0 e devolve 'Agressivo'", () => {
+    expect(ecoBand(null).label).toBe("Agressivo");
   });
 });
 

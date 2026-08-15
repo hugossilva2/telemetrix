@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
 import { ingestFlespiMessages } from "@/lib/flespi/ingest.server";
 import type { FlespiMessage } from "@/lib/flespi/ingest.server";
 
@@ -21,18 +22,10 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.FLESPI_WEBHOOK_SECRET;
-        if (!expected) {
-          return new Response("Server not configured", { status: 500 });
-        }
-        const url = new URL(request.url);
-        const provided =
-          url.searchParams.get("secret") ??
-          request.headers.get("x-webhook-secret") ??
-          "";
-        if (provided !== expected) {
+        if (!verifyWebhookSecret(request)) {
           return new Response("Unauthorized", { status: 401 });
         }
+
 
         let body: unknown;
         try {

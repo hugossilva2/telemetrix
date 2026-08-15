@@ -148,12 +148,16 @@ export async function ingestFlespiMessages(
     }
 
     // ---------- tracker_pings (amostragem) ----------
+    // IMPORTANTE: comparar com `last_ping_at` (último ping gravado), nunca com
+    // `last_message_at` — este avança a cada mensagem e, com o FMC003
+    // reportando a cada ~6s, o intervalo de 20s nunca era alcançado.
+    let pingWritten = false;
     if (
       typeof lat === "number" &&
       typeof lng === "number"
     ) {
-      const lastPingMs = state?.last_message_at
-        ? new Date(state.last_message_at as string).getTime()
+      const lastPingMs = state?.last_ping_at
+        ? new Date(state.last_ping_at as string).getTime()
         : 0;
       if (tsMs - lastPingMs >= PING_MIN_INTERVAL_MS) {
         await supabaseAdmin.from("tracker_pings").insert({
@@ -165,6 +169,7 @@ export async function ingestFlespiMessages(
           ignition: typeof ign === "boolean" ? ign : null,
           recorded_at: nowIso,
         });
+        pingWritten = true;
       }
     }
 

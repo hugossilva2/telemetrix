@@ -114,6 +114,42 @@ export async function ingestFlespiMessages(
     return places;
   };
 
+  /**
+   * Lease de execução por device. O webhook e o coletor periódico leem a mesma
+   * fonte; sem isso, duas execuções simultâneas duplicariam viagens e eventos.
+   * Devolve `held` quando este processo é o dono do lease (precisa liberar).
+   */
+  const acquireLease = async (deviceId: string) => {
+    const nowIso = new Date().toISOString();
+    const untilIso = new Date(Date.now() + LEASE_MS).toISOString();
+    const { data } = await supabaseAdmin
+      .from("device_trip_state")
+      .update({ ingest_lease_until: untilIso })
+      .eq("device_id", deviceId)
+      .or(`ingest_lease_until.is.null,ingest_lease_until.lt.${nowIso}`)
+      .select("device_id");
+    if (data && data.length > 0) return { ok: true, held: true };
+
+    // Nenhuma linha afetada: ou o lease está ativo em outra execução, ou o
+    // device ainda não tem estado (primeira mensagem) — nesse caso segue sem lease.
+    const { data: existing } = await supabaseAdmin
+      .from("device_trip_state")
+      .select("device_id")
+      .eq("device_id", deviceId)
+      .maybeSingle();
+    if (existing) return { ok: false, held: false };
+    return { ok: true, held: false };
+  };
+
+  const releaseLease = async (deviceId: string) => {
+    await supabaseAdmin
+      .from("device_trip_state")
+      .update({ ingest_lease_until: null })
+      .eq("device_id", deviceId);
+  };
+
+  // Agrupa por device preservando a ordem das mensagens.
+  const groups = new Map<string, FlespiMessage[]>();
   for (const msg of messages) {
     const deviceId = resolveDeviceId(msg);
     if (!deviceId) {
@@ -121,14 +157,29 @@ export async function ingestFlespiMessages(
       console.log("[flespi-webhook] skip: no device id", Object.keys(msg).slice(0, 10));
       continue;
     }
+    const list = groups.get(deviceId);
+    if (list) list.push(msg);
+    else groups.set(deviceId, [msg]);
+  }
 
+  for (const [deviceId, deviceMessages] of groups) {
     // Resolve veículo/usuário pelo device_id (com cache por lote).
     const vehicle = await getVehicleForDevice(deviceId);
     if (!vehicle) {
-      skippedUnknownVehicle++;
+      skippedUnknownVehicle += deviceMessages.length;
       console.log("[flespi-webhook] skip: no vehicle for device", deviceId);
       continue;
     }
+
+    const lease = await acquireLease(deviceId);
+    if (!lease.ok) {
+      skippedLocked += deviceMessages.length;
+      console.log("[flespi-webhook] skip: lease ativo em outra execução", deviceId);
+      continue;
+    }
+
+    try {
+      for (const msg of deviceMessages) {
 
 
     const ign = msg["engine.ignition.status"];

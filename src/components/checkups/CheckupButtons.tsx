@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Check, Loader2, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -86,7 +87,7 @@ export function CheckupButtons() {
         },
       });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível registrar a conferência. Tente de novo.")),
   });
 
   const remove = useMutation({
@@ -95,7 +96,7 @@ export function CheckupButtons() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["checkups"] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover a conferência. Tente de novo.")),
   });
 
   return (

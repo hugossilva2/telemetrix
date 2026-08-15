@@ -3,6 +3,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, LogIn, LogOut, MapPinOff, Plus, Radar, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +132,7 @@ function RastreadorPage() {
       setName("");
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o ponto. Tente de novo em instantes.")),
   });
 
   const fallback = (

@@ -3,6 +3,7 @@ import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import {
   Crosshair,
   Fuel,
@@ -98,7 +99,7 @@ function PlaceSearch({
       });
       setTerm("");
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Falha ao carregar o local");
+      toast.error(toUserMessage(err, "Não foi possível carregar o local escolhido. Tente de novo."));
     }
   };
 
@@ -250,7 +251,7 @@ function PlanejarPage() {
       return next;
     },
     onError: (err) =>
-      toast.error(err instanceof Error ? err.message : "Não foi possível calcular a rota"),
+      toast.error(toUserMessage(err, "Não foi possível calcular a rota. Verifique o destino e tente de novo.")),
   });
 
   // Recalcula automaticamente quando origem, destino ou paradas mudam.

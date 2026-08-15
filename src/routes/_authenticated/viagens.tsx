@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { ChevronLeft, ChevronRight, DownloadCloud, Leaf, Loader2, Route as RouteIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -112,7 +113,7 @@ function ViagensPage() {
         toast.info("Nenhuma viagem nova encontrada no histórico");
       }
     },
-    onError: (e: Error) => toast.error(e.message || "Falha ao importar histórico"),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível importar o histórico do rastreador. Tente de novo em instantes.")),
   });
 
 

@@ -2,6 +2,7 @@ import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-r
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { ChevronRight, FileText, Star, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -106,7 +107,7 @@ function MotoristasPage() {
       qc.invalidateQueries({ queryKey: ["trips"] });
       qc.invalidateQueries({ queryKey: ["driver-ranking"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.")),
   });
 
   const setDefault = useMutation({
@@ -126,7 +127,7 @@ function MotoristasPage() {
       toast.success("Condutor padrão atualizado.");
       qc.invalidateQueries({ queryKey: ["drivers"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível atualizar o condutor padrão. Tente de novo em instantes.")),
   });
 
   const remove = useMutation({
@@ -138,7 +139,7 @@ function MotoristasPage() {
       toast.success("Motorista removido.");
       qc.invalidateQueries({ queryKey: ["drivers"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o motorista. Tente de novo em instantes.")),
   });
 
   if (showingProfile) return <Outlet />;
@@ -228,7 +229,7 @@ function MotoristasPage() {
                     {d.photo_path && (
                       <button
                         type="button"
-                        onClick={() => openDocFile(d.photo_path as string).catch((e: Error) => toast.error(e.message))}
+                        onClick={() => openDocFile(d.photo_path as string).catch((e: Error) => toast.error(toUserMessage(e, "Não foi possível abrir a foto. Tente de novo em instantes.")))}
                         className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                       >
                         <FileText className="size-3.5" /> Ver arquivo

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { BarChart3, FileText, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -147,7 +148,7 @@ function DespesasPage() {
       setDate(todayInput());
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a despesa. Verifique sua conexão e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -159,7 +160,7 @@ function DespesasPage() {
       toast.success("Despesa removida.");
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover a despesa. Tente de novo em instantes.")),
   });
 
   const togglePaid = useMutation({
@@ -168,7 +169,7 @@ function DespesasPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível atualizar a despesa. Tente de novo em instantes.")),
   });
 
   return (
@@ -387,7 +388,7 @@ function DespesasPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              openDocFile(e.file_path as string).catch((err: Error) => toast.error(err.message))
+                              openDocFile(e.file_path as string).catch((err: Error) => toast.error(toUserMessage(err, "Não foi possível abrir o comprovante. Tente de novo em instantes.")))
                             }
                             className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                           >

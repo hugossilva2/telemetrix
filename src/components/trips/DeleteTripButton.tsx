@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -70,7 +71,7 @@ export function DeleteTripButton({ tripId, onDeleted, variant = "icon", classNam
       setOpen(false);
       onDeleted?.();
     },
-    onError: (e: Error) => toast.error(e.message || "Não foi possível excluir a viagem"),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível excluir a viagem. Tente de novo em instantes.")),
   });
 
   return (

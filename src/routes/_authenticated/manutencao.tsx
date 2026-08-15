@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { FileText, Trash2, Wrench } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -134,7 +135,7 @@ function ManutencaoPage() {
       setMileage(currentMileage != null ? currentMileage.toFixed(0) : "");
       qc.invalidateQueries({ queryKey: ["maintenance"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o registro de manutenção. Verifique sua conexão e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -146,7 +147,7 @@ function ManutencaoPage() {
       toast.success("Registro removido.");
       qc.invalidateQueries({ queryKey: ["maintenance"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o registro. Tente de novo em instantes.")),
   });
 
   return (
@@ -295,7 +296,7 @@ function ManutencaoPage() {
                   {r.file_path && (
                     <button
                       type="button"
-                      onClick={() => openDocFile(r.file_path as string).catch((e: Error) => toast.error(e.message))}
+                      onClick={() => openDocFile(r.file_path as string).catch((e: Error) => toast.error(toUserMessage(e, "Não foi possível abrir o arquivo. Tente de novo em instantes.")))}
                       className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                     >
                       <FileText className="size-3.5" /> Ver anexo

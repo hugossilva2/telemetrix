@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Pencil } from "lucide-react";
 import {
   Dialog,
@@ -71,7 +72,7 @@ export function DriverEditDialog({
       qc.invalidateQueries({ queryKey: ["driver-photo"] });
       qc.invalidateQueries({ queryKey: ["driver-ranking"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o motorista. Verifique sua conexão e tente de novo.")),
   });
 
   return (

@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Car } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,7 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error, "Não foi possível entrar. Confira os dados e tente de novo."));
       return;
     }
     toast.success("Bem-vindo!");
@@ -57,7 +58,7 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error, "Não foi possível criar a conta. Tente de novo."));
       return;
     }
     if (data.session) {

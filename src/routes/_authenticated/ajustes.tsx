@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Save, Car } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -130,7 +131,7 @@ function AjustesPage() {
       toast.success("Ajustes salvos.");
       qc.invalidateQueries({ queryKey: ["vehicle-primary"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar os ajustes. Tente de novo em instantes.")),
   });
 
   return (

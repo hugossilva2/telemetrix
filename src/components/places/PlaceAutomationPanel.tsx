@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { CheckCircle2, PlugZap, Send, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,7 +73,7 @@ export function PlaceAutomationPanel({ place }: Props) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
   });
 
   return (
@@ -209,7 +210,7 @@ function AutomationForm({
       toast.success("Automação salva");
       qc.invalidateQueries({ queryKey: ["place_automations", placeId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -226,7 +227,7 @@ function AutomationForm({
       toast.success("Automação removida");
       qc.invalidateQueries({ queryKey: ["place_automations", placeId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar a automação. Verifique a URL e tente de novo.")),
   });
 
   const test = useMutation({
@@ -239,7 +240,7 @@ function AutomationForm({
       else toast.error(r.error ?? "Falha no disparo");
       qc.invalidateQueries({ queryKey: ["automation_runs", placeId] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível disparar o teste. Verifique a URL e tente de novo.")),
   });
 
   return (

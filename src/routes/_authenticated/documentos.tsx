@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { FileText, ShieldCheck, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -122,7 +123,7 @@ function DocumentosPage() {
       qc.invalidateQueries({ queryKey: ["vehicle_documents"] });
       qc.invalidateQueries({ queryKey: ["docs-alerts"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o documento. Verifique sua conexão e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -135,7 +136,7 @@ function DocumentosPage() {
       qc.invalidateQueries({ queryKey: ["vehicle_documents"] });
       qc.invalidateQueries({ queryKey: ["docs-alerts"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o documento. Tente de novo em instantes.")),
   });
 
   return (
@@ -236,7 +237,7 @@ function DocumentosPage() {
                     {d.file_path && (
                       <button
                         type="button"
-                        onClick={() => openDocFile(d.file_path as string).catch((e: Error) => toast.error(e.message))}
+                        onClick={() => openDocFile(d.file_path as string).catch((e: Error) => toast.error(toUserMessage(e, "Não foi possível abrir o arquivo. Tente de novo em instantes.")))}
                         className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                       >
                         <FileText className="size-3.5" /> Ver arquivo

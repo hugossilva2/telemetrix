@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eye, Mail, Plus, Trash2, UserRoundCheck, UserRoundX } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -119,7 +120,7 @@ function SharePage() {
         description: "O observador verá o veículo ao entrar com esse e-mail.",
       });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível criar o convite. Confira o e-mail e tente de novo.")),
   });
 
   const revoke = useMutation({
@@ -131,7 +132,7 @@ function SharePage() {
       qc.invalidateQueries({ queryKey: ["vehicle-shares"] });
       toast.success("Acesso removido");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o acesso. Tente de novo em instantes.")),
   });
 
   return (

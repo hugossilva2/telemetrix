@@ -2,6 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Bot, Lightbulb, RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { analyzeTripCoaching } from "@/lib/coach/coach.functions";
@@ -51,7 +52,7 @@ export function TripCoachCard({ tripId }: { tripId: string }) {
       void data;
     },
     onError: (err: unknown) => {
-      toast.error(err instanceof Error ? err.message : "Não foi possível analisar a viagem.");
+      toast.error(toUserMessage(err, "Não foi possível analisar a viagem agora. Tente de novo em instantes."));
     },
   });
 

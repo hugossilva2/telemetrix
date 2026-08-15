@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Car, Check, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -129,7 +130,7 @@ function VeiculosPage() {
       if (editing === "new" && id) setVehicleId(id);
       setEditing(null);
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o veículo. Verifique sua conexão e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -141,7 +142,7 @@ function VeiculosPage() {
       toast.success("Veículo removido.");
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o veículo. Tente de novo em instantes.")),
   });
 
   return (

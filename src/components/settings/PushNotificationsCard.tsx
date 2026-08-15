@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Bell, BellOff, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -45,7 +46,7 @@ export function PushNotificationsCard() {
       qc.invalidateQueries({ queryKey: ["push-enabled"] });
       qc.invalidateQueries({ queryKey: ["push-devices"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível atualizar as notificações neste dispositivo.")),
   });
 
   const sendTest = useMutation({
@@ -54,7 +55,7 @@ export function PushNotificationsCard() {
       if (r.sent > 0) toast.success(`Teste enviado para ${r.sent} dispositivo(s).`);
       else toast.error("Nenhum dispositivo recebeu. Ative as notificações e tente de novo.");
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível enviar a notificação de teste.")),
   });
 
   return (

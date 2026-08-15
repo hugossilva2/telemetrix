@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Camera, FileText, Paperclip, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -148,7 +149,7 @@ function AbastecimentoPage() {
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o abastecimento. Verifique sua conexão e tente de novo.")),
   });
 
   const remove = useMutation({
@@ -161,7 +162,7 @@ function AbastecimentoPage() {
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível excluir o abastecimento. Tente de novo em instantes.")),
   });
 
   const openReceipt = useMutation({
@@ -173,7 +174,7 @@ function AbastecimentoPage() {
       return data.signedUrl;
     },
     onSuccess: (url) => window.open(url, "_blank", "noopener,noreferrer"),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível abrir o comprovante. Tente de novo em instantes.")),
   });
 
   const chartData = useMemo(() => {

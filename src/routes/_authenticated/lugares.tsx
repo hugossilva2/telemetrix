@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Briefcase, Dumbbell, Home, MapPin, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,7 +106,7 @@ function LugaresPage() {
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
       qc.invalidateQueries({ queryKey: ["favorite_places_eta"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível salvar o local. Verifique sua conexão e tente de novo.")),
   });
 
   const deleteMutation = useMutation({
@@ -118,7 +119,7 @@ function LugaresPage() {
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
       qc.invalidateQueries({ queryKey: ["favorite_places_eta"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover o local. Tente de novo em instantes.")),
   });
 
   const pickSuggestion = async (s: PlaceSuggestion) => {
@@ -127,7 +128,7 @@ function LugaresPage() {
       setSelected(d);
       setQuery(`${s.primaryText} — ${s.secondaryText}`);
     } catch (e) {
-      toast.error((e as Error).message);
+      toast.error(toUserMessage(e, "Não foi possível carregar o endereço escolhido. Tente de novo."));
     }
   };
 

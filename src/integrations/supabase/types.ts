@@ -1083,10 +1083,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_vehicle_share: { Args: { _share_id: string }; Returns: boolean }
       can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
       current_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_plan"]
+      }
+      touch_vehicle_share_seen: {
+        Args: { _share_id: string }
+        Returns: boolean
       }
     }
     Enums: {

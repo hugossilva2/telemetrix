@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
 
 /**
  * Heartbeat de perda de sinal.
- * Chamado por pg_cron a cada 5 min (header `apikey`):
+ * Chamado por pg_cron a cada 5 min com o header `x-webhook-secret`:
  *   POST https://telemetrix.lovable.app/api/public/tracker-heartbeat
  * Também aceita `?secret=<FLESPI_WEBHOOK_SECRET>` para testes manuais.
  *
@@ -11,6 +12,7 @@ import { createFileRoute } from "@tanstack/react-router";
  * `tracker_events: signal_lost` e marca `vehicles.signal_lost_notified_at`
  * para não repetir até o sinal voltar (o webhook limpa a flag).
  */
+
 
 // Com ignição ligada o rastreador reporta a cada poucos segundos, então 15 min
 // sem mensagem já é perda de sinal. Estacionado, o FMC003 entra em modo de
@@ -25,17 +27,10 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const url = new URL(request.url);
-        const secret = process.env.FLESPI_WEBHOOK_SECRET;
-        const anon =
-          process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
-        const providedSecret =
-          url.searchParams.get("secret") ?? request.headers.get("x-webhook-secret");
-        const apikey =
-          request.headers.get("apikey") ?? url.searchParams.get("apikey");
-        const authorized =
-          (!!secret && providedSecret === secret) || (!!anon && apikey === anon);
-        if (!authorized) return new Response("Unauthorized", { status: 401 });
+        if (!verifyWebhookSecret(request)) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+
 
         const { supabaseAdmin } = await import(
           "@/integrations/supabase/client.server"

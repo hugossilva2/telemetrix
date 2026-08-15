@@ -70,6 +70,7 @@ export type Database = {
           last_lng: number | null
           last_message_at: string | null
           last_mileage: number | null
+          last_ping_at: string | null
           max_speed_kmh: number
           mileage_at_start: number | null
           start_lat: number | null
@@ -87,6 +88,7 @@ export type Database = {
           last_lng?: number | null
           last_message_at?: string | null
           last_mileage?: number | null
+          last_ping_at?: string | null
           max_speed_kmh?: number
           mileage_at_start?: number | null
           start_lat?: number | null
@@ -104,6 +106,7 @@ export type Database = {
           last_lng?: number | null
           last_message_at?: string | null
           last_mileage?: number | null
+          last_ping_at?: string | null
           max_speed_kmh?: number
           mileage_at_start?: number | null
           start_lat?: number | null

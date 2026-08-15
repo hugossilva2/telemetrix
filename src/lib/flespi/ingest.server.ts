@@ -148,12 +148,16 @@ export async function ingestFlespiMessages(
     }
 
     // ---------- tracker_pings (amostragem) ----------
+    // IMPORTANTE: comparar com `last_ping_at` (último ping gravado), nunca com
+    // `last_message_at` — este avança a cada mensagem e, com o FMC003
+    // reportando a cada ~6s, o intervalo de 20s nunca era alcançado.
+    let pingWritten = false;
     if (
       typeof lat === "number" &&
       typeof lng === "number"
     ) {
-      const lastPingMs = state?.last_message_at
-        ? new Date(state.last_message_at as string).getTime()
+      const lastPingMs = state?.last_ping_at
+        ? new Date(state.last_ping_at as string).getTime()
         : 0;
       if (tsMs - lastPingMs >= PING_MIN_INTERVAL_MS) {
         await supabaseAdmin.from("tracker_pings").insert({
@@ -165,6 +169,7 @@ export async function ingestFlespiMessages(
           ignition: typeof ign === "boolean" ? ign : null,
           recorded_at: nowIso,
         });
+        pingWritten = true;
       }
     }
 
@@ -361,6 +366,7 @@ export async function ingestFlespiMessages(
         max_speed_kmh: speed ?? 0,
         updated_at: nowIso,
         last_message_at: nowIso,
+        ...(pingWritten ? { last_ping_at: nowIso } : {}),
       });
       processed++;
       continue;
@@ -477,6 +483,7 @@ export async function ingestFlespiMessages(
             state.mileage_at_start ?? mileage ?? null,
           updated_at: nowIso,
           last_message_at: nowIso,
+          ...(pingWritten ? { last_ping_at: nowIso } : {}),
         })
         .eq("device_id", deviceId);
       processed++;
@@ -490,6 +497,7 @@ export async function ingestFlespiMessages(
         updated_at: nowIso,
         max_speed_kmh: 0,
         last_message_at: nowIso,
+        ...(pingWritten ? { last_ping_at: nowIso } : {}),
       });
     }
   }

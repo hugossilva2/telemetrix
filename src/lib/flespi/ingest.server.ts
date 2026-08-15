@@ -459,6 +459,7 @@ export async function ingestFlespiMessages(
         last_lng: lng ?? null,
         last_mileage: mileage ?? null,
         max_speed_kmh: speed ?? 0,
+        accum_distance_km: 0,
         updated_at: nowIso,
         last_message_at: nowIso,
         ...(pingWritten ? { last_ping_at: nowIso } : {}),
@@ -472,26 +473,30 @@ export async function ingestFlespiMessages(
       const endLng = lng ?? state.last_lng;
       const endMileage = mileage ?? state.last_mileage;
 
-      let distanceKm = 0;
-      if (
-        typeof endMileage === "number" &&
-        typeof state.mileage_at_start === "number" &&
-        endMileage > state.mileage_at_start
-      ) {
-        distanceKm = endMileage - state.mileage_at_start;
-      } else if (
-        typeof state.start_lat === "number" &&
-        typeof state.start_lng === "number" &&
-        typeof endLat === "number" &&
-        typeof endLng === "number"
-      ) {
-        distanceKm = haversineKm(
-          state.start_lat,
-          state.start_lng,
-          endLat,
-          endLng,
-        );
-      }
+      // Último trecho antes de desligar também entra no acumulado.
+      const lastMsgMs = state.last_message_at
+        ? new Date(state.last_message_at as string).getTime()
+        : null;
+      const finalIncrement = accumIncrementKm({
+        prevLat: state.last_lat,
+        prevLng: state.last_lng,
+        lat,
+        lng,
+        dtSeconds: lastMsgMs ? (tsMs - lastMsgMs) / 1000 : null,
+      });
+      const accumKm = Number(state.accum_distance_km ?? 0) + finalIncrement;
+
+      // Odômetro é mais preciso; acumulado ping a ping cobre viagens circulares;
+      // linha reta início→fim é só o último recurso.
+      const distanceKm = resolveTripDistanceKm({
+        mileageStart: state.mileage_at_start as number | null,
+        mileageEnd: endMileage as number | null,
+        accumKm,
+        startLat: state.start_lat,
+        startLng: state.start_lng,
+        endLat,
+        endLng,
+      });
 
       const durationS = Math.max(
         0,
@@ -532,23 +537,31 @@ export async function ingestFlespiMessages(
         typeof speed === "number" ? speed : 0,
       );
 
-      await supabaseAdmin.from("trips").insert({
-        user_id: vehicle.user_id,
-        vehicle_id: vehicle.id,
-        start_time: state.start_time as string,
-        end_time: nowIso,
-        start_lat: state.start_lat,
-        start_lng: state.start_lng,
-        end_lat: endLat,
-        end_lng: endLng,
-        distance_km: distanceKm,
-        avg_speed_kmh: avgSpeed,
-        max_speed_kmh: maxSpeed,
-        mileage_at_start: state.mileage_at_start,
-        mileage_at_end: endMileage,
-        fuel_liters: fuelLiters,
-        estimated_cost: estimatedCost,
-      });
+      // Reentrega do mesmo fechamento é no-op (unique vehicle_id + start_time).
+      const { data: tripRows } = await supabaseAdmin
+        .from("trips")
+        .upsert(
+          {
+            user_id: vehicle.user_id,
+            vehicle_id: vehicle.id,
+            start_time: state.start_time as string,
+            end_time: nowIso,
+            start_lat: state.start_lat,
+            start_lng: state.start_lng,
+            end_lat: endLat,
+            end_lng: endLng,
+            distance_km: distanceKm,
+            avg_speed_kmh: avgSpeed,
+            max_speed_kmh: maxSpeed,
+            mileage_at_start: state.mileage_at_start,
+            mileage_at_end: endMileage,
+            fuel_liters: fuelLiters,
+            estimated_cost: estimatedCost,
+          },
+          { onConflict: "vehicle_id,start_time", ignoreDuplicates: true },
+        )
+        .select("id");
+      if (!tripRows || tripRows.length === 0) skippedDuplicate++;
 
       await supabaseAdmin
         .from("device_trip_state")
@@ -564,6 +577,16 @@ export async function ingestFlespiMessages(
         Number(state.max_speed_kmh) || 0,
         typeof speed === "number" ? speed : 0,
       );
+      const lastMsgMs = state.last_message_at
+        ? new Date(state.last_message_at as string).getTime()
+        : null;
+      const increment = accumIncrementKm({
+        prevLat: state.last_lat,
+        prevLng: state.last_lng,
+        lat,
+        lng,
+        dtSeconds: lastMsgMs ? (tsMs - lastMsgMs) / 1000 : null,
+      });
       await supabaseAdmin
         .from("device_trip_state")
         .update({
@@ -576,6 +599,8 @@ export async function ingestFlespiMessages(
           start_lng: state.start_lng ?? lng ?? null,
           mileage_at_start:
             state.mileage_at_start ?? mileage ?? null,
+          accum_distance_km:
+            Number(state.accum_distance_km ?? 0) + increment,
           updated_at: nowIso,
           last_message_at: nowIso,
           ...(pingWritten ? { last_ping_at: nowIso } : {}),
@@ -595,6 +620,12 @@ export async function ingestFlespiMessages(
         ...(pingWritten ? { last_ping_at: nowIso } : {}),
       });
     }
+      }
+    } finally {
+      // Libera o lease mesmo em caso de erro (a linha pode ter sido apagada no
+      // fechamento da viagem — nesse caso o update é no-op).
+      if (lease.held) await releaseLease(deviceId);
+    }
   }
 
   return {
@@ -602,6 +633,9 @@ export async function ingestFlespiMessages(
     skippedNoDevice,
     skippedUnknownVehicle,
     skippedOutOfOrder,
+    skippedLocked,
+    skippedDuplicate,
     received: messages.length,
   };
 }
+

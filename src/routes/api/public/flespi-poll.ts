@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FLESPI_CONFIG } from "@/lib/flespi/config";
+import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
 import { ingestFlespiMessages } from "@/lib/flespi/ingest.server";
 import type { FlespiMessage } from "@/lib/flespi/ingest.server";
 
@@ -12,21 +13,12 @@ import type { FlespiMessage } from "@/lib/flespi/ingest.server";
  * viagens. Assim o rastreamento funciona 24h, sem depender do app aberto nem
  * de um stream configurado na Flespi.
  *
- * Chamado por pg_cron a cada 2 minutos com o header `apikey`.
+ * Chamado por pg_cron a cada 2 minutos com o header `x-webhook-secret`.
  */
 
 const MAX_MESSAGES = 500;
 const LOOKBACK_S = 15 * 60;
 
-function isAuthorized(request: Request, url: URL) {
-  const secret = process.env.FLESPI_WEBHOOK_SECRET;
-  const anon = process.env.SUPABASE_ANON_KEY ?? process.env.SUPABASE_PUBLISHABLE_KEY;
-  const providedSecret =
-    url.searchParams.get("secret") ?? request.headers.get("x-webhook-secret");
-  if (secret && providedSecret === secret) return true;
-  const apikey = request.headers.get("apikey") ?? url.searchParams.get("apikey");
-  return !!anon && apikey === anon;
-}
 
 async function fetchMessages(deviceId: string, fromS: number) {
   const params = new URLSearchParams({

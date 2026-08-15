@@ -10,12 +10,7 @@ import { DrivingHabitsCard } from "@/components/coach/DrivingHabitsCard";
 
 import { ECO_EVENT_COLOR, ECO_EVENT_LABEL, ecoBand, formatIdle } from "@/lib/eco/score";
 import type { EcoEventType } from "@/lib/eco/detect";
-import {
-  DEFAULT_ECO_SETTINGS,
-
-  getEcoSettings,
-  saveEcoSettings,
-} from "@/lib/eco/settings";
+import { DEFAULT_ECO_SETTINGS, getEcoSettings, saveEcoSettings } from "@/lib/eco/settings";
 import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
 import { fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
 
@@ -103,9 +98,7 @@ function EcoPage() {
     const last = rows.filter((t) => monthKey(t.start_time) === prevKey);
 
     const avg = (list: EcoTrip[]) =>
-      list.length > 0
-        ? list.reduce((s, t) => s + (t.eco_score ?? 0), 0) / list.length
-        : null;
+      list.length > 0 ? list.reduce((s, t) => s + (t.eco_score ?? 0), 0) / list.length : null;
 
     const counts: Record<EcoEventType, number> = {
       harsh_brake: 0,
@@ -138,8 +131,7 @@ function EcoPage() {
     const weekAgo = Date.now() - 7 * 86400_000;
     const weekTrips = rows.filter((t) => new Date(t.start_time).getTime() >= weekAgo);
     const cleanWeek =
-      weekTrips.length >= 3 &&
-      weekTrips.every((t) => (t.harsh_brake_count ?? 0) === 0);
+      weekTrips.length >= 3 && weekTrips.every((t) => (t.harsh_brake_count ?? 0) === 0);
 
     return {
       curAvg: avg(cur),
@@ -160,9 +152,7 @@ function EcoPage() {
   const [settings, setSettings] = useState(() => getEcoSettings());
 
   const diff =
-    stats?.curAvg != null && stats?.lastAvg != null
-      ? stats.curAvg - stats.lastAvg
-      : null;
+    stats?.curAvg != null && stats?.lastAvg != null ? stats.curAvg - stats.lastAvg : null;
 
   return (
     <AppShell title="Eco Score" subtitle="Sua nota de direção de 0 a 100">
@@ -170,8 +160,8 @@ function EcoPage() {
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       ) : !stats ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
-          Ainda não há viagens pontuadas. Assim que você fizer uma viagem com o
-          motor ligado, a nota aparece aqui automaticamente.
+          Ainda não há viagens pontuadas. Assim que você fizer uma viagem com o motor ligado, a nota
+          aparece aqui automaticamente.
         </div>
       ) : (
         <>
@@ -206,9 +196,7 @@ function EcoPage() {
 
           <section className="mt-3 grid grid-cols-2 gap-3">
             <div className="rounded-2xl border border-warning/30 bg-warning/5 p-3">
-              <p className="text-[10px] uppercase tracking-wide text-warning">
-                Desperdício do mês
-              </p>
+              <p className="text-[10px] uppercase tracking-wide text-warning">Desperdício do mês</p>
               <p className="mt-1 text-lg font-semibold tabular-nums text-warning">
                 {formatBRL(stats.wastedR)}
               </p>
@@ -220,9 +208,7 @@ function EcoPage() {
               <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Marcha lenta
               </p>
-              <p className="mt-1 text-lg font-semibold tabular-nums">
-                {formatIdle(stats.idle)}
-              </p>
+              <p className="mt-1 text-lg font-semibold tabular-nums">{formatIdle(stats.idle)}</p>
               <p className="text-[11px] text-muted-foreground">motor ligado parado</p>
             </div>
           </section>
@@ -235,9 +221,7 @@ function EcoPage() {
               <div key={type}>
                 <div className="flex items-center justify-between text-xs">
                   <span className={ECO_EVENT_COLOR[type]}>{ECO_EVENT_LABEL[type]}</span>
-                  <span className="tabular-nums text-muted-foreground">
-                    {stats.counts[type]}
-                  </span>
+                  <span className="tabular-nums text-muted-foreground">{stats.counts[type]}</span>
                 </div>
                 <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
                   <div
@@ -270,9 +254,7 @@ function EcoPage() {
             <Achievement
               Icon={Award}
               label="Melhor viagem"
-              value={
-                stats.best?.eco_score != null ? `${Math.round(stats.best.eco_score)}` : "—"
-              }
+              value={stats.best?.eco_score != null ? `${Math.round(stats.best.eco_score)}` : "—"}
               active={(stats.best?.eco_score ?? 0) >= 90}
             />
           </div>
@@ -294,12 +276,11 @@ function EcoPage() {
                     {Math.round(t.eco_score ?? 0)}
                   </span>
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-medium">
-                      {formatDateTime(t.start_time)}
-                    </p>
+                    <p className="truncate text-xs font-medium">{formatDateTime(t.start_time)}</p>
                     <p className="text-[11px] text-muted-foreground tabular-nums">
                       {formatDecimal(t.distance_km ?? 0)} km ·{" "}
-                      {(t.harsh_brake_count ?? 0) + (t.harsh_accel_count ?? 0) +
+                      {(t.harsh_brake_count ?? 0) +
+                        (t.harsh_accel_count ?? 0) +
                         (t.harsh_corner_count ?? 0)}{" "}
                       evento(s)
                     </p>
@@ -361,7 +342,6 @@ function EcoPage() {
             onCheckedChange={(v) => setSettings({ ...settings, liveAlerts: v })}
           />
         </div>
-
 
         <div className="grid grid-cols-2 gap-3">
           <div>
@@ -429,17 +409,16 @@ function EcoPage() {
         </div>
 
         <p className="text-[11px] text-muted-foreground">
-          A nota é calculada a partir da velocidade, do rumo, do RPM e da carga do
-          motor, com os limites calibrados pela ficha técnica do veículo: aceleração
-          de fábrica (0-100 em 11,5 s), faixa econômica de 1.500-2.500 rpm e as metas
-          de consumo Inmetro do combustível selecionado.
+          A nota é calculada a partir da velocidade, do rumo, do RPM e da carga do motor, com os
+          limites calibrados pela ficha técnica do veículo: aceleração de fábrica (0-100 em 11,5 s),
+          faixa econômica de 1.500-2.500 rpm e as metas de consumo Inmetro do combustível
+          selecionado.
         </p>
       </div>
 
       <DrivingHabitsCard limit={20} />
       <TelemetryDiagnosticsCard />
     </AppShell>
-
   );
 }
 

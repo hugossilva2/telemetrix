@@ -3,6 +3,7 @@ import { useMemo, useState, useEffect, useRef } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { Camera, FileText, Paperclip, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -17,7 +18,10 @@ export const Route = createFileRoute("/_authenticated/abastecimento")({
       { title: "Abastecimento · Telemetrix" },
       { name: "description", content: "Registre abastecimentos e acompanhe o custo por km." },
       { property: "og:title", content: "Abastecimento · Telemetrix" },
-      { property: "og:description", content: "Registre abastecimentos e acompanhe o custo por km." },
+      {
+        property: "og:description",
+        content: "Registre abastecimentos e acompanhe o custo por km.",
+      },
     ],
   }),
   component: AbastecimentoPage,
@@ -148,7 +152,13 @@ function AbastecimentoPage() {
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o abastecimento. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -161,7 +171,10 @@ function AbastecimentoPage() {
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível excluir o abastecimento. Tente de novo em instantes."),
+      ),
   });
 
   const openReceipt = useMutation({
@@ -173,7 +186,10 @@ function AbastecimentoPage() {
       return data.signedUrl;
     },
     onSuccess: (url) => window.open(url, "_blank", "noopener,noreferrer"),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível abrir o comprovante. Tente de novo em instantes."),
+      ),
   });
 
   const chartData = useMemo(() => {
@@ -184,7 +200,10 @@ function AbastecimentoPage() {
       const dist = cur.mileage_at_fill - prev.mileage_at_fill;
       if (dist > 0) {
         rows.push({
-          label: new Date(cur.date).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+          label: new Date(cur.date).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+          }),
           costPerKm: +(cur.total_cost / dist).toFixed(3),
         });
       }
@@ -204,24 +223,65 @@ function AbastecimentoPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="price">Preço/litro (R$)</Label>
-            <Input id="price" type="number" inputMode="decimal" step="0.01" min="0" placeholder="5.89" value={price} onChange={(e) => setPrice(e.target.value)} required className="h-11 text-base" />
+            <Input
+              id="price"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="5.89"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="total">Valor total (R$)</Label>
-            <Input id="total" type="number" inputMode="decimal" step="0.01" min="0" placeholder="200.00" value={total} onChange={(e) => setTotal(e.target.value)} required className="h-11 text-base" />
+            <Input
+              id="total"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="200.00"
+              value={total}
+              onChange={(e) => setTotal(e.target.value)}
+              required
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="datetime">Data e hora</Label>
-          <Input id="datetime" type="datetime-local" value={datetime} onChange={(e) => setDatetime(e.target.value)} required className="h-11 text-base" />
+          <Input
+            id="datetime"
+            type="datetime-local"
+            value={datetime}
+            onChange={(e) => setDatetime(e.target.value)}
+            required
+            className="h-11 text-base"
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="mileage">Odômetro atual (km)</Label>
-          <Input id="mileage" type="number" inputMode="numeric" step="1" min="0" value={mileage} onChange={(e) => setMileage(e.target.value)} required className="h-11 text-base" />
+          <Input
+            id="mileage"
+            type="number"
+            inputMode="numeric"
+            step="1"
+            min="0"
+            value={mileage}
+            onChange={(e) => setMileage(e.target.value)}
+            required
+            className="h-11 text-base"
+          />
           <p className="text-xs text-muted-foreground">
-            {telemetry.mileageKm != null ? "Auto-preenchido pelo MQTT." : "Aguardando telemetria — preencha manualmente."}
+            {telemetry.mileageKm != null
+              ? "Auto-preenchido pelo MQTT."
+              : "Aguardando telemetria — preencha manualmente."}
           </p>
         </div>
 
@@ -230,7 +290,11 @@ function AbastecimentoPage() {
           {photo ? (
             <div className="relative">
               {photo.type.startsWith("image/") && photoPreview ? (
-                <img src={photoPreview} alt="Prévia do comprovante" className="max-h-56 w-full rounded-lg object-contain bg-muted/50" />
+                <img
+                  src={photoPreview}
+                  alt="Prévia do comprovante"
+                  className="max-h-56 w-full rounded-lg object-contain bg-muted/50"
+                />
               ) : (
                 <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-4 text-sm">
                   <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -287,7 +351,6 @@ function AbastecimentoPage() {
           />
         </div>
 
-
         <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">
           <span className="text-muted-foreground">Litros abastecidos</span>
           <span className="font-mono font-medium">{liters > 0 ? liters.toFixed(2) : "—"} L</span>
@@ -301,7 +364,9 @@ function AbastecimentoPage() {
       <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Abastecimentos registrados</h2>
         {logs.length === 0 ? (
-          <p className="mt-3 text-xs text-muted-foreground">Nenhum abastecimento registrado ainda.</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            Nenhum abastecimento registrado ainda.
+          </p>
         ) : (
           <ul className="mt-3 divide-y divide-border">
             {[...logs]
@@ -319,7 +384,8 @@ function AbastecimentoPage() {
                       })}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {Number(log.liters_filled).toFixed(2)} L · R$ {Number(log.price_per_liter).toFixed(2)}/L ·{" "}
+                      {Number(log.liters_filled).toFixed(2)} L · R${" "}
+                      {Number(log.price_per_liter).toFixed(2)}/L ·{" "}
                       {Number(log.mileage_at_fill).toLocaleString("pt-BR")} km
                     </p>
                     {log.receipt_url ? (
@@ -364,7 +430,10 @@ function AbastecimentoPage() {
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="label" tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }}
+                />
                 <YAxis tick={{ fontSize: 11, fill: "hsl(var(--muted-foreground))" }} />
                 <Tooltip
                   contentStyle={{

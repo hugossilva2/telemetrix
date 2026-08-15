@@ -31,7 +31,9 @@ const BLOCKED_HOST_PATTERNS = [
   /\.internal$/i,
 ];
 
-export function validateAutomationUrl(raw: string): { ok: true; url: URL } | { ok: false; error: string } {
+export function validateAutomationUrl(
+  raw: string,
+): { ok: true; url: URL } | { ok: false; error: string } {
   let url: URL;
   try {
     url = new URL(raw);
@@ -110,7 +112,6 @@ export async function callAutomation(
       statusCode: res.status,
       error: res.ok ? null : `HTTP ${res.status}${detail ? ` — ${detail}` : ""}`,
     };
-
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     return { ok: false, statusCode: null, error: msg.includes("abort") ? "Tempo esgotado" : msg };

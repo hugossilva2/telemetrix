@@ -3,6 +3,7 @@ import { lazy, Suspense, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertTriangle, LogIn, LogOut, MapPinOff, Plus, Radar, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,6 @@ import { useParkedSpot } from "@/lib/tracker/parked";
 import { DistanceToCarCard } from "@/components/tracker/DistanceToCarCard";
 import { useMyLocation } from "@/hooks/useMyLocation";
 
-
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -30,7 +30,10 @@ export const Route = createFileRoute("/_authenticated/rastreador")({
   head: () => ({
     meta: [
       { title: "Rastreador · Telemetrix" },
-      { name: "description", content: "Localização, alertas de segurança e histórico de eventos do veículo." },
+      {
+        name: "description",
+        content: "Localização, alertas de segurança e histórico de eventos do veículo.",
+      },
       { property: "og:title", content: "Rastreador · Telemetrix" },
       { property: "og:description", content: "Modo rastreador com alertas e pontos salvos." },
     ],
@@ -45,7 +48,12 @@ const EVENT_META: Record<
   { label: string; Icon: typeof LogIn; color: string; bg: string }
 > = {
   ignition_on: { label: "Motor ligado", Icon: LogIn, color: "text-success", bg: "bg-success/10" },
-  ignition_off: { label: "Motor desligado", Icon: LogOut, color: "text-muted-foreground", bg: "bg-muted" },
+  ignition_off: {
+    label: "Motor desligado",
+    Icon: LogOut,
+    color: "text-muted-foreground",
+    bg: "bg-muted",
+  },
   motion_off_ignition: {
     label: "Movimento suspeito",
     Icon: ShieldAlert,
@@ -65,7 +73,12 @@ const EVENT_META: Record<
     bg: "bg-warning/10",
   },
 
-  signal_lost: { label: "Sinal perdido", Icon: MapPinOff, color: "text-orange-500", bg: "bg-orange-500/10" },
+  signal_lost: {
+    label: "Sinal perdido",
+    Icon: MapPinOff,
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+  },
 };
 
 const dtf = new Intl.DateTimeFormat("pt-BR", {
@@ -80,7 +93,6 @@ function RastreadorPage() {
   const parked = useParkedSpot(telemetry.latitude, telemetry.longitude, telemetry.ignitionOn);
   const qc = useQueryClient();
   const { position: myPos } = useMyLocation();
-
 
   const { data: events = [] } = useQuery({
     queryKey: ["tracker_events"],
@@ -131,7 +143,8 @@ function RastreadorPage() {
       setName("");
       qc.invalidateQueries({ queryKey: ["favorite_places"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(toUserMessage(e, "Não foi possível salvar o ponto. Tente de novo em instantes.")),
   });
 
   const fallback = (
@@ -165,7 +178,6 @@ function RastreadorPage() {
               parked={parked}
               me={myPos}
             />
-
           </Suspense>
         </ClientOnly>
       </section>
@@ -179,7 +191,6 @@ function RastreadorPage() {
       </div>
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline" className="h-11">
@@ -245,7 +256,9 @@ function RastreadorPage() {
                   key={e.id}
                   className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
                 >
-                  <div className={`grid size-10 place-items-center rounded-full ${meta.bg} ${meta.color}`}>
+                  <div
+                    className={`grid size-10 place-items-center rounded-full ${meta.bg} ${meta.color}`}
+                  >
                     <Icon className="size-5" />
                   </div>
                   <div className="min-w-0 flex-1">

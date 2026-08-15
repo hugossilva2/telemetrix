@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Car } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,7 +41,9 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(
+        toUserMessage(error, "Não foi possível entrar. Confira os dados e tente de novo."),
+      );
       return;
     }
     toast.success("Bem-vindo!");
@@ -57,7 +60,7 @@ function AuthPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error(error.message);
+      toast.error(toUserMessage(error, "Não foi possível criar a conta. Tente de novo."));
       return;
     }
     if (data.session) {
@@ -89,11 +92,25 @@ function AuthPage() {
             <form onSubmit={handleSignIn} className="mt-4 space-y-3 card-surface p-4">
               <div className="space-y-1.5">
                 <Label htmlFor="signin-email">Email</Label>
-                <Input id="signin-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input
+                  id="signin-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="signin-password">Senha</Label>
-                <Input id="signin-password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+                <Input
+                  id="signin-password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Entrando…" : "Entrar"}
@@ -105,11 +122,26 @@ function AuthPage() {
             <form onSubmit={handleSignUp} className="mt-4 space-y-3 card-surface p-4">
               <div className="space-y-1.5">
                 <Label htmlFor="signup-email">Email</Label>
-                <Input id="signup-email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+                <Input
+                  id="signup-email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="signup-password">Senha</Label>
-                <Input id="signup-password" type="password" autoComplete="new-password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} />
+                <Input
+                  id="signup-password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  minLength={6}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
               </div>
               <Button type="submit" disabled={loading} className="w-full">
                 {loading ? "Criando…" : "Criar conta"}

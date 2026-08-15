@@ -18,7 +18,7 @@ export const analyzeDrivingHabits = createServerFn({ method: "POST" })
     const { supabase } = context;
 
     const apiKey = process.env["LOVABLE_API_KEY"];
-    if (!apiKey) throw new Error("IA não configurada neste projeto.");
+    if (!apiKey) throw new Error("O coach de direção está indisponível no momento.");
 
     const { data: rows, error } = await supabase
       .from("trips")
@@ -27,7 +27,10 @@ export const analyzeDrivingHabits = createServerFn({ method: "POST" })
       )
       .order("start_time", { ascending: false })
       .limit(data.limit);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[habits] falha ao carregar o histórico de viagens", error);
+      throw new Error("Não foi possível carregar seu histórico de viagens.");
+    }
 
     const trips = rows ?? [];
     if (trips.length < 3)

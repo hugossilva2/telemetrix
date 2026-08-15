@@ -9,7 +9,6 @@ import { TelemetryCard } from "@/components/dashboard/TelemetryCard";
 import { GaugeCluster } from "@/components/dashboard/GaugeCluster";
 import { AutonomyCard } from "@/components/dashboard/AutonomyCard";
 
-
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { formatKm } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
@@ -105,9 +104,7 @@ function Dashboard() {
 
       <AutonomyCard />
 
-
       <Bento>
-
         <BentoItem span={1}>
           <TelemetryCard
             label="Odômetro"

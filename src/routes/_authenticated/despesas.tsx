@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { BarChart3, FileText, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,9 @@ function DespesasPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("expenses")
-        .select("id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id")
+        .select(
+          "id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id",
+        )
         .order("expense_date", { ascending: false });
       if (error) throw error;
       return (data ?? []) as ExpenseRecord[];
@@ -147,7 +150,13 @@ function DespesasPage() {
       setDate(todayInput());
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar a despesa. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -159,7 +168,10 @@ function DespesasPage() {
       toast.success("Despesa removida.");
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover a despesa. Tente de novo em instantes."),
+      ),
   });
 
   const togglePaid = useMutation({
@@ -168,7 +180,10 @@ function DespesasPage() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível atualizar a despesa. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -177,7 +192,9 @@ function DespesasPage() {
         <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Total do mês</p>
           <p className="mt-1 font-mono text-xl font-semibold">{formatBRL(monthTotal)}</p>
-          <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{monthLabel(thisMonth)}</p>
+          <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">
+            {monthLabel(thisMonth)}
+          </p>
         </div>
         <div className="card-surface p-4">
           <p className="text-xs text-muted-foreground">Em aberto</p>
@@ -316,7 +333,9 @@ function DespesasPage() {
         <div className="flex items-center justify-between rounded-xl border border-border p-3">
           <div>
             <p className="text-sm font-medium">Já paga</p>
-            <p className="text-xs text-muted-foreground">Desmarque para acompanhar como pendência</p>
+            <p className="text-xs text-muted-foreground">
+              Desmarque para acompanhar como pendência
+            </p>
           </div>
           <Switch checked={paid} onCheckedChange={setPaid} />
         </div>
@@ -380,14 +399,22 @@ function DespesasPage() {
                             onClick={() => togglePaid.mutate({ id: e.id, value: true })}
                             className="mt-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[11px] font-medium text-destructive"
                           >
-                            Em aberto{e.due_date ? ` · vence ${formatDate(e.due_date)}` : ""} — marcar como paga
+                            Em aberto{e.due_date ? ` · vence ${formatDate(e.due_date)}` : ""} —
+                            marcar como paga
                           </button>
                         )}
                         {e.file_path && (
                           <button
                             type="button"
                             onClick={() =>
-                              openDocFile(e.file_path as string).catch((err: Error) => toast.error(err.message))
+                              openDocFile(e.file_path as string).catch((err: Error) =>
+                                toast.error(
+                                  toUserMessage(
+                                    err,
+                                    "Não foi possível abrir o comprovante. Tente de novo em instantes.",
+                                  ),
+                                ),
+                              )
                             }
                             className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                           >
@@ -396,7 +423,9 @@ function DespesasPage() {
                         )}
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <span className="font-mono text-sm font-semibold">{formatBRL(Number(e.amount))}</span>
+                        <span className="font-mono text-sm font-semibold">
+                          {formatBRL(Number(e.amount))}
+                        </span>
                         <button
                           type="button"
                           onClick={() => remove.mutate(e.id)}

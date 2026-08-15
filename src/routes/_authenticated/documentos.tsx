@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { FileText, ShieldCheck, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,15 @@ export const Route = createFileRoute("/_authenticated/documentos")({
   head: () => ({
     meta: [
       { title: "Documentos · Telemetrix" },
-      { name: "description", content: "CRLV, seguro, IPVA e licenciamento com alerta de vencimento." },
+      {
+        name: "description",
+        content: "CRLV, seguro, IPVA e licenciamento com alerta de vencimento.",
+      },
       { property: "og:title", content: "Documentos · Telemetrix" },
-      { property: "og:description", content: "CRLV, seguro, IPVA e licenciamento com alerta de vencimento." },
+      {
+        property: "og:description",
+        content: "CRLV, seguro, IPVA e licenciamento com alerta de vencimento.",
+      },
     ],
   }),
   component: DocumentosPage,
@@ -122,7 +129,13 @@ function DocumentosPage() {
       qc.invalidateQueries({ queryKey: ["vehicle_documents"] });
       qc.invalidateQueries({ queryKey: ["docs-alerts"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o documento. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -135,7 +148,10 @@ function DocumentosPage() {
       qc.invalidateQueries({ queryKey: ["vehicle_documents"] });
       qc.invalidateQueries({ queryKey: ["docs-alerts"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover o documento. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -165,34 +181,74 @@ function DocumentosPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="doc-expires">Vencimento</Label>
-            <Input id="doc-expires" type="date" value={expires} onChange={(e) => setExpires(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="doc-expires"
+              type="date"
+              value={expires}
+              onChange={(e) => setExpires(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="doc-title">Descrição</Label>
-          <Input id="doc-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} className="h-11 text-base" placeholder="Ex.: Seguro 2026 — Porto" />
+          <Input
+            id="doc-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={120}
+            className="h-11 text-base"
+            placeholder="Ex.: Seguro 2026 — Porto"
+          />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="doc-number">Número / apólice</Label>
-            <Input id="doc-number" value={number} onChange={(e) => setNumber(e.target.value)} maxLength={60} className="h-11 text-base" />
+            <Input
+              id="doc-number"
+              value={number}
+              onChange={(e) => setNumber(e.target.value)}
+              maxLength={60}
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="doc-amount">Valor (R$)</Label>
-            <Input id="doc-amount" type="number" inputMode="decimal" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="doc-amount"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="doc-issuer">Órgão / seguradora</Label>
-          <Input id="doc-issuer" value={issuer} onChange={(e) => setIssuer(e.target.value)} maxLength={80} className="h-11 text-base" />
+          <Input
+            id="doc-issuer"
+            value={issuer}
+            onChange={(e) => setIssuer(e.target.value)}
+            maxLength={80}
+            className="h-11 text-base"
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="doc-notes">Observações</Label>
-          <Input id="doc-notes" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={300} className="h-11 text-base" />
+          <Input
+            id="doc-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            maxLength={300}
+            className="h-11 text-base"
+          />
         </div>
 
         <FileAttachment label="Arquivo do documento (opcional)" file={file} onChange={setFile} />
@@ -231,12 +287,23 @@ function DocumentosPage() {
                     <span
                       className={`mt-1 inline-block rounded-full border px-2 py-0.5 text-[10px] font-medium ${expiryClasses[status]}`}
                     >
-                      {d.expires_on ? `${formatDate(d.expires_on)} · ${expiryLabel(d.expires_on)}` : "Sem vencimento"}
+                      {d.expires_on
+                        ? `${formatDate(d.expires_on)} · ${expiryLabel(d.expires_on)}`
+                        : "Sem vencimento"}
                     </span>
                     {d.file_path && (
                       <button
                         type="button"
-                        onClick={() => openDocFile(d.file_path as string).catch((e: Error) => toast.error(e.message))}
+                        onClick={() =>
+                          openDocFile(d.file_path as string).catch((e: Error) =>
+                            toast.error(
+                              toUserMessage(
+                                e,
+                                "Não foi possível abrir o arquivo. Tente de novo em instantes.",
+                              ),
+                            ),
+                          )
+                        }
                         className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                       >
                         <FileText className="size-3.5" /> Ver arquivo

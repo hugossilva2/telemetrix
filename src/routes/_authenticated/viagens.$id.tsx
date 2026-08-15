@@ -19,11 +19,7 @@ import { estimateTripCost } from "@/lib/trips/cost";
 import { EcoTripCard, parseEcoEvents } from "@/components/eco/EcoTripCard";
 import { EcoEventsChart } from "@/components/eco/EcoEventsChart";
 import { parseRouteData } from "@/lib/trips/routeData";
-import {
-  formatDateTime,
-  formatDurationBetween,
-  formatTime,
-} from "@/lib/trips/format";
+import { formatDateTime, formatDurationBetween, formatTime } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 import { TripCoachCard } from "@/components/coach/TripCoachCard";
 
@@ -41,8 +37,7 @@ export const Route = createFileRoute("/_authenticated/viagens/$id")({
       { property: "og:title", content: "Dashboard da viagem · Telemetrix" },
       {
         property: "og:description",
-        content:
-          "KPIs, comparativos e projeção financeira do mês para cada viagem.",
+        content: "KPIs, comparativos e projeção financeira do mês para cada viagem.",
       },
     ],
   }),
@@ -127,10 +122,7 @@ function TripDetailPage() {
     }));
   }, [trip?.route_data]);
 
-  const ecoEvents = useMemo(
-    () => (trip ? parseEcoEvents(trip.eco_events) : []),
-    [trip],
-  );
+  const ecoEvents = useMemo(() => (trip ? parseEcoEvents(trip.eco_events) : []), [trip]);
 
   const tripCost = trip
     ? estimateTripCost({
@@ -179,13 +171,10 @@ function TripDetailPage() {
         }),
       )
       .filter((v): v is number => v != null);
-    const avgKmpl =
-      simKmpl.length > 0 ? simKmpl.reduce((s, v) => s + v, 0) / simKmpl.length : null;
-    const avgCost =
-      simCost.length > 0 ? simCost.reduce((s, v) => s + v, 0) / simCost.length : null;
+    const avgKmpl = simKmpl.length > 0 ? simKmpl.reduce((s, v) => s + v, 0) / simKmpl.length : null;
+    const avgCost = simCost.length > 0 ? simCost.reduce((s, v) => s + v, 0) / simCost.length : null;
 
-    const kmplDiffPct =
-      kmpl != null && avgKmpl != null ? ((kmpl - avgKmpl) / avgKmpl) * 100 : null;
+    const kmplDiffPct = kmpl != null && avgKmpl != null ? ((kmpl - avgKmpl) / avgKmpl) * 100 : null;
     const costDiffPct =
       currentTripCost != null && avgCost != null && avgCost > 0
         ? ((currentTripCost - avgCost) / avgCost) * 100
@@ -218,14 +207,11 @@ function TripDetailPage() {
 
     const kmSharePct = monthKm > 0 ? ((trip.distance_km ?? 0) / monthKm) * 100 : 0;
     const costSharePct =
-      monthCost > 0 && currentTripCost != null
-        ? (currentTripCost / monthCost) * 100
-        : 0;
+      monthCost > 0 && currentTripCost != null ? (currentTripCost / monthCost) * 100 : 0;
 
     // Projeção do mês (só faz sentido se o mês selecionado é o mês corrente)
     const now = new Date();
-    const isCurrentMonth =
-      now.getFullYear() === y && now.getMonth() === m;
+    const isCurrentMonth = now.getFullYear() === y && now.getMonth() === m;
     const dayOfMonth = isCurrentMonth ? now.getDate() : daysInMonth;
     const factor = dayOfMonth > 0 ? daysInMonth / dayOfMonth : 1;
     const projKm = monthKm * factor;
@@ -266,10 +252,7 @@ function TripDetailPage() {
   );
 
   return (
-    <AppShell
-      title="Viagem"
-      subtitle={trip ? formatDateTime(trip.start_time) : "Detalhe"}
-    >
+    <AppShell title="Viagem" subtitle={trip ? formatDateTime(trip.start_time) : "Detalhe"}>
       <div className="mb-3 flex items-center justify-between">
         <Link
           to="/viagens"
@@ -286,13 +269,10 @@ function TripDetailPage() {
         )}
       </div>
 
-
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       ) : !trip ? (
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          Viagem não encontrada.
-        </p>
+        <p className="mt-6 text-center text-sm text-muted-foreground">Viagem não encontrada.</p>
       ) : (
         <>
           {analysis?.better && (
@@ -328,28 +308,20 @@ function TripDetailPage() {
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
                 Início
               </div>
-              <div className="text-sm font-medium tabular-nums">
-                {formatTime(trip.start_time)}
-              </div>
+              <div className="text-sm font-medium tabular-nums">{formatTime(trip.start_time)}</div>
               <div className="mt-1 text-[11px] text-muted-foreground tabular-nums">
                 Odômetro:{" "}
-                {trip.mileage_at_start != null
-                  ? `${Math.round(trip.mileage_at_start)} km`
-                  : "—"}
+                {trip.mileage_at_start != null ? `${Math.round(trip.mileage_at_start)} km` : "—"}
               </div>
             </div>
             <div className="card-surface p-3">
-              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                Fim
-              </div>
+              <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Fim</div>
               <div className="text-sm font-medium tabular-nums">
                 {trip.end_time ? formatTime(trip.end_time) : "—"}
               </div>
               <div className="mt-1 text-[11px] text-muted-foreground tabular-nums">
                 Odômetro:{" "}
-                {trip.mileage_at_end != null
-                  ? `${Math.round(trip.mileage_at_end)} km`
-                  : "—"}
+                {trip.mileage_at_end != null ? `${Math.round(trip.mileage_at_end)} km` : "—"}
               </div>
             </div>
           </div>
@@ -371,27 +343,17 @@ function TripDetailPage() {
             <Stat
               Icon={RouteIcon}
               label="Distância"
-              value={
-                trip.distance_km != null ? `${formatDecimal(trip.distance_km)} km` : "—"
-              }
+              value={trip.distance_km != null ? `${formatDecimal(trip.distance_km)} km` : "—"}
             />
             <Stat
               Icon={Gauge}
               label="Vel. média"
-              value={
-                trip.avg_speed_kmh != null
-                  ? formatSpeed(Math.round(trip.avg_speed_kmh))
-                  : "—"
-              }
+              value={trip.avg_speed_kmh != null ? formatSpeed(Math.round(trip.avg_speed_kmh)) : "—"}
             />
             <Stat
               Icon={Gauge}
               label="Vel. máxima"
-              value={
-                trip.max_speed_kmh != null
-                  ? formatSpeed(Math.round(trip.max_speed_kmh))
-                  : "—"
-              }
+              value={trip.max_speed_kmh != null ? formatSpeed(Math.round(trip.max_speed_kmh)) : "—"}
             />
             <Stat
               Icon={Fuel}
@@ -435,31 +397,20 @@ function TripDetailPage() {
             ) : (
               <>
                 <p className="text-[11px] text-muted-foreground">
-                  Baseado em {analysis.similarCount} viagem(ns) com distância entre ±20%
-                  desta.
+                  Baseado em {analysis.similarCount} viagem(ns) com distância entre ±20% desta.
                 </p>
                 <div className="mt-3 grid grid-cols-2 gap-3">
                   <CompareRow
                     label="Consumo (km/L)"
-                    thisValue={
-                      analysis.kmpl != null ? `${formatDecimal(analysis.kmpl)}` : "—"
-                    }
-                    avgValue={
-                      analysis.avgKmpl != null
-                        ? `${formatDecimal(analysis.avgKmpl)}`
-                        : "—"
-                    }
+                    thisValue={analysis.kmpl != null ? `${formatDecimal(analysis.kmpl)}` : "—"}
+                    avgValue={analysis.avgKmpl != null ? `${formatDecimal(analysis.avgKmpl)}` : "—"}
                     diffPct={analysis.kmplDiffPct}
                     higherIsBetter
                   />
                   <CompareRow
                     label="Custo"
-                    thisValue={
-                      analysis.tripCost != null ? formatBRL(analysis.tripCost) : "—"
-                    }
-                    avgValue={
-                      analysis.avgCost != null ? formatBRL(analysis.avgCost) : "—"
-                    }
+                    thisValue={analysis.tripCost != null ? formatBRL(analysis.tripCost) : "—"}
+                    avgValue={analysis.avgCost != null ? formatBRL(analysis.avgCost) : "—"}
                     diffPct={analysis.costDiffPct}
                     higherIsBetter={false}
                   />
@@ -504,30 +455,20 @@ function TripDetailPage() {
                   <p className="text-sm text-muted-foreground">
                     Mês encerrado — totais consolidados:{" "}
                     <span className="tabular-nums text-foreground">
-                      {formatDecimal(analysis.monthKm)} km ·{" "}
-                      {formatBRL(analysis.monthCost)}
+                      {formatDecimal(analysis.monthKm)} km · {formatBRL(analysis.monthCost)}
                     </span>
                     .
                   </p>
                 ) : (
                   <>
                     <p className="text-[11px] text-muted-foreground">
-                      Ritmo até hoje (dia {analysis.dayOfMonth} de {analysis.daysInMonth}) projetado para o mês inteiro.
+                      Ritmo até hoje (dia {analysis.dayOfMonth} de {analysis.daysInMonth}) projetado
+                      para o mês inteiro.
                     </p>
                     <div className="mt-3 grid grid-cols-3 gap-3">
-                      <MiniStat
-                        label="Km"
-                        value={`${formatDecimal(analysis.projKm)}`}
-                      />
-                      <MiniStat
-                        label="Litros"
-                        value={`${formatDecimal(analysis.projLiters)} L`}
-                      />
-                      <MiniStat
-                        label="Custo"
-                        value={formatBRL(analysis.projCost)}
-                        highlight
-                      />
+                      <MiniStat label="Km" value={`${formatDecimal(analysis.projKm)}`} />
+                      <MiniStat label="Litros" value={`${formatDecimal(analysis.projLiters)} L`} />
+                      <MiniStat label="Custo" value={formatBRL(analysis.projCost)} highlight />
                     </div>
                   </>
                 )}
@@ -574,11 +515,7 @@ function Stat({
         <Icon className="size-3.5" />
         {label}
       </div>
-      <div
-        className={`mt-1 text-lg font-semibold tabular-nums ${
-          highlight ? "text-success" : ""
-        }`}
-      >
+      <div className={`mt-1 text-lg font-semibold tabular-nums ${highlight ? "text-success" : ""}`}>
         {value}
       </div>
     </div>
@@ -598,29 +535,14 @@ function CompareRow({
   diffPct: number | null;
   higherIsBetter: boolean;
 }) {
-  const good =
-    diffPct == null
-      ? null
-      : higherIsBetter
-        ? diffPct >= 0
-        : diffPct <= 0;
-  const color =
-    good === null
-      ? "text-muted-foreground"
-      : good
-        ? "text-success"
-        : "text-rose-500";
-  const Icon =
-    good === null ? null : good ? TrendingUp : TrendingDown;
+  const good = diffPct == null ? null : higherIsBetter ? diffPct >= 0 : diffPct <= 0;
+  const color = good === null ? "text-muted-foreground" : good ? "text-success" : "text-rose-500";
+  const Icon = good === null ? null : good ? TrendingUp : TrendingDown;
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="mt-1 text-lg font-semibold tabular-nums">{thisValue}</div>
-      <div className="mt-0.5 text-[11px] text-muted-foreground tabular-nums">
-        média: {avgValue}
-      </div>
+      <div className="mt-0.5 text-[11px] text-muted-foreground tabular-nums">média: {avgValue}</div>
       {diffPct != null && (
         <div
           className={`mt-1 inline-flex items-center gap-1 text-xs font-medium tabular-nums ${color}`}
@@ -654,10 +576,7 @@ function ShareBar({
         <span className="text-[11px] text-muted-foreground tabular-nums">{right}</span>
       </div>
       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full ${barColor}`}
-          style={{ width: `${clamped}%` }}
-        />
+        <div className={`h-full ${barColor}`} style={{ width: `${clamped}%` }} />
       </div>
       <div className="mt-0.5 text-right text-[10px] text-muted-foreground tabular-nums">
         {clamped.toFixed(1)}%
@@ -677,13 +596,9 @@ function MiniStat({
 }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div
-        className={`mt-0.5 text-base font-semibold tabular-nums ${
-          highlight ? "text-success" : ""
-        }`}
+        className={`mt-0.5 text-base font-semibold tabular-nums ${highlight ? "text-success" : ""}`}
       >
         {value}
       </div>

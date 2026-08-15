@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Save, Car } from "lucide-react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -14,7 +15,6 @@ import { DataSourceCard } from "@/components/settings/DataSourceCard";
 import { OfflineQueueCard } from "@/components/settings/OfflineQueueCard";
 import { PushNotificationsCard } from "@/components/settings/PushNotificationsCard";
 import { SignOutButton } from "@/components/auth/SignOutButton";
-
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({
@@ -116,10 +116,7 @@ function AjustesPage() {
       };
 
       if (vehicle?.id) {
-        const { error } = await supabase
-          .from("vehicles")
-          .update(payload)
-          .eq("id", vehicle.id);
+        const { error } = await supabase.from("vehicles").update(payload).eq("id", vehicle.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("vehicles").insert(payload);
@@ -130,7 +127,10 @@ function AjustesPage() {
       toast.success("Ajustes salvos.");
       qc.invalidateQueries({ queryKey: ["vehicle-primary"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível salvar os ajustes. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -212,7 +212,8 @@ function AjustesPage() {
                 disabled={isLoading}
               />
               <p className="text-xs text-muted-foreground">
-                Vincula este veículo ao dispositivo para gravar viagens no servidor mesmo com o app fechado.
+                Vincula este veículo ao dispositivo para gravar viagens no servidor mesmo com o app
+                fechado.
               </p>
             </div>
           </div>
@@ -225,20 +226,15 @@ function AjustesPage() {
               <span className="text-sm">
                 Modo rastreador (monitoramento 24h)
                 <span className="mt-0.5 block text-xs text-muted-foreground">
-                  Mantém o servidor acompanhando o veículo e avisa se o rastreador
-                  ficar sem sinal, mesmo com o app fechado.
+                  Mantém o servidor acompanhando o veículo e avisa se o rastreador ficar sem sinal,
+                  mesmo com o app fechado.
                 </span>
               </span>
               <Switch checked={trackerMode} onCheckedChange={setTrackerMode} />
             </label>
             <label className="flex items-center justify-between gap-3">
-              <span className="text-sm">
-                Alertar quando o motor for ligado
-              </span>
-              <Switch
-                checked={alertEngine}
-                onCheckedChange={setAlertEngine}
-              />
+              <span className="text-sm">Alertar quando o motor for ligado</span>
+              <Switch checked={alertEngine} onCheckedChange={setAlertEngine} />
             </label>
             <label className="flex items-center justify-between gap-3">
               <span className="text-sm">Notificar motor ligado/desligado</span>
@@ -259,11 +255,7 @@ function AjustesPage() {
           </div>
         </section>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={saveMutation.isPending || isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={saveMutation.isPending || isLoading}>
           <Save className="mr-2 size-4" />
           {saveMutation.isPending ? "Salvando..." : "Salvar ajustes"}
         </Button>

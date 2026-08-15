@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { FileText, Trash2, Wrench } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -34,9 +35,15 @@ export const Route = createFileRoute("/_authenticated/manutencao")({
   head: () => ({
     meta: [
       { title: "Manutenção · Telemetrix" },
-      { name: "description", content: "Óleo, filtros, correia e pneus com alerta automático por quilometragem." },
+      {
+        name: "description",
+        content: "Óleo, filtros, correia e pneus com alerta automático por quilometragem.",
+      },
       { property: "og:title", content: "Manutenção · Telemetrix" },
-      { property: "og:description", content: "Alertas automáticos de manutenção por km e por tempo." },
+      {
+        property: "og:description",
+        content: "Alertas automáticos de manutenção por km e por tempo.",
+      },
     ],
   }),
   component: ManutencaoPage,
@@ -79,7 +86,9 @@ function ManutencaoPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("maintenance_records")
-        .select("id,type,title,service_date,mileage_at_service,interval_km,interval_months,cost,workshop,notes,file_path")
+        .select(
+          "id,type,title,service_date,mileage_at_service,interval_km,interval_months,cost,workshop,notes,file_path",
+        )
         .order("service_date", { ascending: false });
       if (error) throw error;
       return (data ?? []) as MaintenanceRecord[];
@@ -134,7 +143,13 @@ function ManutencaoPage() {
       setMileage(currentMileage != null ? currentMileage.toFixed(0) : "");
       qc.invalidateQueries({ queryKey: ["maintenance"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível salvar o registro de manutenção. Verifique sua conexão e tente de novo.",
+        ),
+      ),
   });
 
   const remove = useMutation({
@@ -146,7 +161,10 @@ function ManutencaoPage() {
       toast.success("Registro removido.");
       qc.invalidateQueries({ queryKey: ["maintenance"] });
     },
-    onError: (e: Error) => toast.error(e.message),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(e, "Não foi possível remover o registro. Tente de novo em instantes."),
+      ),
   });
 
   return (
@@ -221,47 +239,114 @@ function ManutencaoPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="mt-date">Data do serviço</Label>
-            <Input id="mt-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required className="h-11 text-base" />
+            <Input
+              id="mt-date"
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              required
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="mt-mileage">Odômetro (km)</Label>
-            <Input id="mt-mileage" type="number" inputMode="numeric" step="1" min="0" value={mileage} onChange={(e) => setMileage(e.target.value)} required className="h-11 text-base" />
+            <Input
+              id="mt-mileage"
+              type="number"
+              inputMode="numeric"
+              step="1"
+              min="0"
+              value={mileage}
+              onChange={(e) => setMileage(e.target.value)}
+              required
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="mt-ikm">Intervalo (km)</Label>
-            <Input id="mt-ikm" type="number" inputMode="numeric" step="500" min="0" value={intervalKm} onChange={(e) => setIntervalKm(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="mt-ikm"
+              type="number"
+              inputMode="numeric"
+              step="500"
+              min="0"
+              value={intervalKm}
+              onChange={(e) => setIntervalKm(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="mt-imonths">Intervalo (meses)</Label>
-            <Input id="mt-imonths" type="number" inputMode="numeric" step="1" min="0" value={intervalMonths} onChange={(e) => setIntervalMonths(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="mt-imonths"
+              type="number"
+              inputMode="numeric"
+              step="1"
+              min="0"
+              value={intervalMonths}
+              onChange={(e) => setIntervalMonths(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="mt-cost">Custo (R$)</Label>
-            <Input id="mt-cost" type="number" inputMode="decimal" step="0.01" min="0" value={cost} onChange={(e) => setCost(e.target.value)} className="h-11 text-base" />
+            <Input
+              id="mt-cost"
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              value={cost}
+              onChange={(e) => setCost(e.target.value)}
+              className="h-11 text-base"
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="mt-workshop">Oficina</Label>
-            <Input id="mt-workshop" value={workshop} onChange={(e) => setWorkshop(e.target.value)} maxLength={80} className="h-11 text-base" />
+            <Input
+              id="mt-workshop"
+              value={workshop}
+              onChange={(e) => setWorkshop(e.target.value)}
+              maxLength={80}
+              className="h-11 text-base"
+            />
           </div>
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="mt-title">Descrição</Label>
-          <Input id="mt-title" value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} className="h-11 text-base" placeholder="Ex.: Óleo 5W30 sintético" />
+          <Input
+            id="mt-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            maxLength={120}
+            className="h-11 text-base"
+            placeholder="Ex.: Óleo 5W30 sintético"
+          />
         </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="mt-notes">Observações</Label>
-          <Input id="mt-notes" value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={300} className="h-11 text-base" />
+          <Input
+            id="mt-notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            maxLength={300}
+            className="h-11 text-base"
+          />
         </div>
 
-        <FileAttachment label="Nota fiscal / ordem de serviço (opcional)" file={file} onChange={setFile} />
+        <FileAttachment
+          label="Nota fiscal / ordem de serviço (opcional)"
+          file={file}
+          onChange={setFile}
+        />
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
           {save.isPending ? "Salvando…" : "Registrar manutenção"}
@@ -295,7 +380,16 @@ function ManutencaoPage() {
                   {r.file_path && (
                     <button
                       type="button"
-                      onClick={() => openDocFile(r.file_path as string).catch((e: Error) => toast.error(e.message))}
+                      onClick={() =>
+                        openDocFile(r.file_path as string).catch((e: Error) =>
+                          toast.error(
+                            toUserMessage(
+                              e,
+                              "Não foi possível abrir o arquivo. Tente de novo em instantes.",
+                            ),
+                          ),
+                        )
+                      }
                       className="mt-1 flex items-center gap-1 text-xs font-medium text-primary"
                     >
                       <FileText className="size-3.5" /> Ver anexo
@@ -304,7 +398,9 @@ function ManutencaoPage() {
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   {r.cost != null && (
-                    <span className="font-mono text-sm font-semibold">{formatBRL(Number(r.cost))}</span>
+                    <span className="font-mono text-sm font-semibold">
+                      {formatBRL(Number(r.cost))}
+                    </span>
                   )}
                   <button
                     type="button"

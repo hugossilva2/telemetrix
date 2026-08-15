@@ -3,7 +3,15 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, DownloadCloud, Leaf, Loader2, Route as RouteIcon } from "lucide-react";
+import { toUserMessage } from "@/lib/errors/userMessage";
+import {
+  ChevronLeft,
+  ChevronRight,
+  DownloadCloud,
+  Leaf,
+  Loader2,
+  Route as RouteIcon,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,15 +23,19 @@ import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 import { useSubscription } from "@/lib/billing/subscription";
 
-
-
 export const Route = createFileRoute("/_authenticated/viagens")({
   head: () => ({
     meta: [
       { title: "Viagens · Telemetrix" },
-      { name: "description", content: "Histórico de viagens com relatório mensal, filtro e comparativo de eficiência." },
+      {
+        name: "description",
+        content: "Histórico de viagens com relatório mensal, filtro e comparativo de eficiência.",
+      },
       { property: "og:title", content: "Viagens · Telemetrix" },
-      { property: "og:description", content: "Relatório mensal e comparativo de eficiência entre viagens." },
+      {
+        property: "og:description",
+        content: "Relatório mensal e comparativo de eficiência entre viagens.",
+      },
     ],
   }),
   component: ViagensPage,
@@ -73,8 +85,7 @@ function removeOverlappingFragments(rows: TripRow[]) {
   return selected.sort((a, b) => getTripStartMs(b) - getTripStartMs(a));
 }
 
-const monthLabel = (d: Date) =>
-  d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+const monthLabel = (d: Date) => d.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
 
 function ViagensPage() {
   const showingTripDetail = useRouterState({
@@ -92,7 +103,9 @@ function ViagensPage() {
     queryFn: async (): Promise<TripRow[]> => {
       const { data, error } = await supabase
         .from("trips")
-        .select("id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost,eco_score")
+        .select(
+          "id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost,eco_score",
+        )
         .order("start_time", { ascending: false })
         .limit(500);
       if (error) throw error;
@@ -112,10 +125,14 @@ function ViagensPage() {
         toast.info("Nenhuma viagem nova encontrada no histórico");
       }
     },
-    onError: (e: Error) => toast.error(e.message || "Falha ao importar histórico"),
+    onError: (e: Error) =>
+      toast.error(
+        toUserMessage(
+          e,
+          "Não foi possível importar o histórico do rastreador. Tente de novo em instantes.",
+        ),
+      ),
   });
-
-
 
   const allTrips = useMemo(() => removeOverlappingFragments(trips ?? []), [trips]);
 
@@ -160,10 +177,7 @@ function ViagensPage() {
   const monthTrips = useMemo(() => {
     return visibleTrips.filter((t) => {
       const d = new Date(t.start_time);
-      return (
-        d.getFullYear() === monthDate.getFullYear() &&
-        d.getMonth() === monthDate.getMonth()
-      );
+      return d.getFullYear() === monthDate.getFullYear() && d.getMonth() === monthDate.getMonth();
     });
   }, [visibleTrips, monthDate]);
 
@@ -174,10 +188,11 @@ function ViagensPage() {
     let liters = 0;
     for (const t of monthTrips) {
       km += t.distance_km ?? 0;
-      cost += estimateTripCost({
-        estimatedCost: t.estimated_cost,
-        fuelLiters: t.fuel_liters,
-      }) ?? 0;
+      cost +=
+        estimateTripCost({
+          estimatedCost: t.estimated_cost,
+          fuelLiters: t.fuel_liters,
+        }) ?? 0;
       liters += t.fuel_liters ?? 0;
     }
     const kmpl = liters > 0 ? km / liters : null;
@@ -287,8 +302,6 @@ function ViagensPage() {
         </Button>
       </div>
 
-
-
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
       ) : monthTrips.length === 0 ? (
@@ -335,9 +348,7 @@ function ViagensPage() {
                       {t.avg_speed_kmh != null && (
                         <span>{Math.round(t.avg_speed_kmh)} km/h méd.</span>
                       )}
-                      {eff?.kmpl != null && (
-                        <span>{formatDecimal(eff.kmpl)} km/L</span>
-                      )}
+                      {eff?.kmpl != null && <span>{formatDecimal(eff.kmpl)} km/L</span>}
                       {tripCost != null && (
                         <span className="text-foreground">{formatBRL(tripCost)}</span>
                       )}
@@ -358,7 +369,6 @@ function ViagensPage() {
                 </div>
               </li>
             );
-
           })}
         </ul>
       )}
@@ -366,24 +376,12 @@ function ViagensPage() {
   );
 }
 
-function Kpi({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function Kpi({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="card-surface p-3">
-      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-        {label}
-      </div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div
-        className={`mt-0.5 text-lg font-semibold tabular-nums ${
-          highlight ? "text-success" : ""
-        }`}
+        className={`mt-0.5 text-lg font-semibold tabular-nums ${highlight ? "text-success" : ""}`}
       >
         {value}
       </div>

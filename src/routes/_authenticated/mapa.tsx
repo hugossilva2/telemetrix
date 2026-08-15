@@ -1,6 +1,7 @@
 import { createFileRoute, ClientOnly } from "@tanstack/react-router";
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import type { SpeedSample } from "@/components/map/SpeedPolyline";
@@ -20,7 +21,10 @@ export const Route = createFileRoute("/_authenticated/mapa")({
   head: () => ({
     meta: [
       { title: "Mapa · Telemetrix" },
-      { name: "description", content: "Localização do veículo em tempo real, rota percorrida e status." },
+      {
+        name: "description",
+        content: "Localização do veículo em tempo real, rota percorrida e status.",
+      },
       { property: "og:title", content: "Mapa · Telemetrix" },
       { property: "og:description", content: "Acompanhe a posição do veículo em tempo real." },
     ],
@@ -34,7 +38,6 @@ function haversineKm(a: TrailPoint, b: TrailPoint) {
 }
 
 import { useParkedSpot } from "@/lib/tracker/parked";
-
 
 function MapaPage() {
   const { telemetry, status, lastMessageAt } = useTelemetry();
@@ -65,7 +68,6 @@ function MapaPage() {
         Math.abs(d.lng - route.destination.lng) < 1e-5,
     );
 
-
   // Reset trail on ignition OFF -> ON (nova viagem).
   useEffect(() => {
     const prev = prevIgnitionRef.current;
@@ -78,7 +80,6 @@ function MapaPage() {
     }
     prevIgnitionRef.current = ignition;
   }, [ignition, mileage]);
-
 
   // Acumula pontos do rastro + odômetro atual
   useEffect(() => {
@@ -108,7 +109,9 @@ function MapaPage() {
 
   const handlePick = useCallback(
     async (dest: DestinationPick) => {
-      const origin = lastKnownPosRef.current ?? (typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null);
+      const origin =
+        lastKnownPosRef.current ??
+        (typeof lat === "number" && typeof lng === "number" ? { lat, lng } : null);
       if (!origin) {
         toast.error("Sem posição atual", {
           description: "Aguarde o GPS para traçar a rota.",
@@ -136,7 +139,7 @@ function MapaPage() {
         });
       } catch (err) {
         toast.error("Não foi possível traçar a rota", {
-          description: err instanceof Error ? err.message : undefined,
+          description: toUserMessage(err, "Verifique o destino e tente de novo."),
         });
       } finally {
         setRouting(false);

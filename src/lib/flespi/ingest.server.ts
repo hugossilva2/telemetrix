@@ -176,17 +176,15 @@ export async function ingestFlespiMessages(
     const prevIgn = state?.ignition_on ?? null;
 
     // ---------- signal recuperado: limpa flag de "sinal perdido" ----------
-    const { data: vehicleFlags } = await supabaseAdmin
-      .from("vehicles")
-      .select("signal_lost_notified_at")
-      .eq("id", vehicle.id)
-      .maybeSingle();
-    if (vehicleFlags?.signal_lost_notified_at) {
+    if (vehicle.signal_lost_notified_at) {
       await supabaseAdmin
         .from("vehicles")
         .update({ signal_lost_notified_at: null })
         .eq("id", vehicle.id);
+      // Mantém o cache coerente: as próximas mensagens do lote não repetem.
+      vehicle.signal_lost_notified_at = null;
     }
+
 
     // ---------- tracker_pings (amostragem) ----------
     // IMPORTANTE: comparar com `last_ping_at` (último ping gravado), nunca com

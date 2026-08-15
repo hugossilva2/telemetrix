@@ -1,9 +1,5 @@
 import { fireAutomationsForPlace } from "@/lib/automations/run.server";
-import {
-  accumIncrementKm,
-  haversineKm as haversineKmPure,
-  resolveTripDistanceKm,
-} from "@/lib/flespi/distance";
+import { accumIncrementKm, haversineKm, resolveTripDistanceKm } from "@/lib/flespi/distance";
 
 /**
  * Núcleo de ingestão de mensagens do rastreador Flespi.
@@ -18,8 +14,6 @@ const MOTION_SPEED_THRESHOLD = 3; // km/h — considera "em movimento"
 const MOTION_ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 min entre alertas de movimento
 const PING_MIN_INTERVAL_MS = 20 * 1000; // grava ping no máximo a cada 20s
 const GEOFENCE_EXIT_HYSTERESIS = 1.15; // só considera "saiu" a 15% além do raio
-const ACCUM_MIN_STEP_KM = 0.01; // piso de 10 m: abaixo disso é jitter de GPS parado
-const ACCUM_MAX_SPEED_KMH = 200; // teto: salto acima disso é reaquisição de sinal
 const LEASE_MS = 90 * 1000; // lease de execução por device
 
 export type FlespiMessage = Record<string, unknown> & {
@@ -40,10 +34,6 @@ function resolveDeviceId(msg: FlespiMessage): string | null {
     if (c !== undefined && c !== null && `${c}`.trim() !== "") return String(c);
   }
   return null;
-}
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  return haversineKmPure(lat1, lng1, lat2, lng2);
 }
 
 export interface IngestSummary {

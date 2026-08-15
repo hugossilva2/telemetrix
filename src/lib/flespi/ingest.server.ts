@@ -497,6 +497,7 @@ export async function ingestFlespiMessages(
         updated_at: nowIso,
         max_speed_kmh: 0,
         last_message_at: nowIso,
+        ...(pingWritten ? { last_ping_at: nowIso } : {}),
       });
     }
   }

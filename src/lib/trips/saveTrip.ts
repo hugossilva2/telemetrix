@@ -163,6 +163,9 @@ export async function saveClosedTrip(
   const { error } = await supabase.from("trips").insert(row);
 
   if (error) {
+    // 23505: já existe viagem com o mesmo veículo/horário de início (o webhook
+    // gravou primeiro). Não é falha — não vale reenfileirar.
+    if ((error as { code?: string }).code === "23505") return "duplicate";
     await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
     return "queued";
   }

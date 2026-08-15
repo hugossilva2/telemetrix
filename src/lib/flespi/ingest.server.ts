@@ -278,18 +278,10 @@ export async function ingestFlespiMessages(
       typeof lat === "number" &&
       typeof lng === "number"
     ) {
-      const { data: vehicleAlerts } = await supabaseAdmin
-        .from("vehicles")
-        .select("alert_geofence")
-        .eq("id", vehicle.id)
-        .maybeSingle();
-      if (vehicleAlerts?.alert_geofence !== false) {
-        const { data: places } = await supabaseAdmin
-          .from("favorite_places")
-          .select("id,name,lat,lng,geofence_radius_m")
-          .eq("user_id", vehicle.user_id)
-          .eq("geofence_enabled", true);
+      if (vehicle.alert_geofence !== false) {
+        const places = await getPlacesForUser(vehicle.user_id as string);
         if (places && places.length > 0) {
+
           const geoState = (state?.geofence_state as any) ?? {};
           const placesState: Record<string, boolean> =
             geoState.places ?? {};

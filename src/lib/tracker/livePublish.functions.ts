@@ -10,6 +10,8 @@ const schema = z.object({
   mileageKm: z.number().nullable().optional(),
   maxSpeedKmh: z.number().nullable().optional(),
   startTime: z.string().nullable().optional(),
+  /** Horário da mensagem de telemetria (não o horário do envio). */
+  recordedAt: z.string().datetime().nullable().optional(),
 });
 
 /**
@@ -33,6 +35,8 @@ export const publishLiveState = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const nowIso = new Date().toISOString();
+    // Horário real do dado; evita ping falso com o horário do envio.
+    const sampleIso = data.recordedAt ?? nowIso;
     const deviceId = vehicle.flespi_device_id ?? `app-${vehicle.id}`;
 
     const hasFix = typeof data.lat === "number" && typeof data.lng === "number";
@@ -48,7 +52,7 @@ export const publishLiveState = createServerFn({ method: "POST" })
         last_lng: hasFix ? data.lng : null,
         last_mileage: data.mileageKm ?? null,
         max_speed_kmh: data.maxSpeedKmh ?? 0,
-        last_message_at: nowIso,
+        last_message_at: sampleIso,
         updated_at: nowIso,
       },
       { onConflict: "device_id" },
@@ -64,7 +68,7 @@ export const publishLiveState = createServerFn({ method: "POST" })
           lng: data.lng as number,
           speed_kmh: data.speedKmh ?? null,
           ignition: data.ignitionOn ?? null,
-          recorded_at: nowIso,
+          recorded_at: sampleIso,
         },
         { onConflict: "vehicle_id,recorded_at", ignoreDuplicates: true },
       );

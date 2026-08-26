@@ -6,16 +6,24 @@ import { publishLiveState } from "@/lib/tracker/livePublish.functions";
 
 const ON_INTERVAL_MS = 10_000;
 const OFF_INTERVAL_MS = 60_000;
+/**
+ * Telemetria mais velha que isso é considerada "congelada" (rastreador sem
+ * enviar nada). Republicá-la criaria pings falsos com horário de agora e
+ * mascararia a perda de sinal.
+ */
+const STALE_AFTER_MS = 5 * 60_000;
 
 /**
  * Espelha a telemetria local no banco em intervalos curtos, para que o modo
  * observador (/acompanhar) veja a posição e a viagem em tempo real.
  */
 export function useLivePublish() {
-  const { telemetry } = useTelemetry();
+  const { telemetry, lastMessageAt } = useTelemetry();
   const publish = useServerFn(publishLiveState);
   const teleRef = useRef(telemetry);
   teleRef.current = telemetry;
+  const lastMsgRef = useRef(lastMessageAt);
+  lastMsgRef.current = lastMessageAt;
   const sending = useRef(false);
   const lastAt = useRef(0);
 
@@ -26,6 +34,9 @@ export function useLivePublish() {
       if (stopped || sending.current) return;
       const t = teleRef.current;
       if (t.ignitionOn === undefined && t.latitude == null) return;
+      // Sem horário de mensagem ou com dado velho: não publica.
+      const msgAt = lastMsgRef.current;
+      if (!msgAt || Date.now() - msgAt > STALE_AFTER_MS) return;
       const interval = t.ignitionOn ? ON_INTERVAL_MS : OFF_INTERVAL_MS;
       if (Date.now() - lastAt.current < interval - 500) return;
 
@@ -41,8 +52,10 @@ export function useLivePublish() {
             mileageKm: t.mileageKm ?? null,
             maxSpeedKmh: open?.maxSpeedKmh ?? t.speedKmh ?? 0,
             startTime: open?.startTime ?? null,
+            recordedAt: new Date(msgAt).toISOString(),
           },
         });
+
         lastAt.current = Date.now();
       } catch (err) {
         console.warn("[live] falha ao publicar telemetria", err);

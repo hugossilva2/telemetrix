@@ -33,6 +33,17 @@ function bool(v: unknown): boolean | undefined {
   return undefined;
 }
 
+/**
+ * Muitos carros (ex.: Cronos) não expõem o nível de combustível pelo CAN e o
+ * rastreador reporta `can.fuel.level: 0` de forma fixa. Um zero constante com o
+ * motor rodando não é um tanque vazio — é ausência de sensor. Tratamos 0 como
+ * "sem dado" para o app cair na estimativa pelos abastecimentos.
+ */
+function fuelLevelOrUndefined(v: number | undefined): number | undefined {
+  if (v === undefined) return undefined;
+  return v > 0 && v <= 100 ? v : undefined;
+}
+
 export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
   try {
     const data = JSON.parse(raw) as Record<string, unknown>;
@@ -53,7 +64,7 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
       ignitionOn: bool(pick(data, "engine.ignition.status")),
       mileageKm: num(pick(data, "vehicle.mileage")),
       batteryVoltage: num(pick(data, "battery.voltage")),
-      fuelLevel: num(pick(data, "can.fuel.level")),
+      fuelLevel: fuelLevelOrUndefined(num(pick(data, "can.fuel.level"))),
       engineRpm: num(pick(data, "can.engine.rpm")),
       engineLoad: num(pick(data, "can.engine.load.level")),
       headingDeg: num(pick(data, "position.direction")),
@@ -119,7 +130,7 @@ export function parseFlespiStateTopic(
         out.batteryVoltage = num(v);
         break;
       case "can.fuel.level":
-        out.fuelLevel = num(v);
+        out.fuelLevel = fuelLevelOrUndefined(num(v));
         break;
       case "can.engine.rpm":
         out.engineRpm = num(v);

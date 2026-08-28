@@ -115,6 +115,37 @@ function DespesasPage() {
 
   const driverName = (id: string | null) => drivers.find((d) => d.id === id)?.name ?? null;
 
+  function resetForm() {
+    setEditingId(null);
+    setExistingFilePath(null);
+    setCategory("pedagio");
+    setTitle("");
+    setAmount("");
+    setPlace("");
+    setDueDate("");
+    setDriverId("none");
+    setNotes("");
+    setFile(null);
+    setPaid(true);
+    setDate(todayInput());
+  }
+
+  function startEdit(e: ExpenseRecord) {
+    setEditingId(e.id);
+    setExistingFilePath(e.file_path);
+    setCategory(e.category);
+    setTitle(e.title ?? "");
+    setDate(e.expense_date.slice(0, 10));
+    setAmount(String(Number(e.amount)));
+    setPlace(e.place ?? "");
+    setDueDate(e.due_date ?? "");
+    setDriverId(e.driver_id ?? "none");
+    setPaid(e.paid);
+    setNotes(e.notes ?? "");
+    setFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -123,10 +154,13 @@ function DespesasPage() {
       const value = parseFloat(amount.replace(",", "."));
       if (!(value > 0)) throw new Error("Informe um valor maior que zero.");
 
-      const filePath = file ? await uploadDocFile(file, "expenses") : null;
+      const filePath = file
+        ? await uploadDocFile(file, "expenses")
+        : editingId
+          ? existingFilePath
+          : null;
 
-      const { error } = await supabase.from("expenses").insert({
-        user_id: uid,
+      const payload = {
         category,
         title: title.trim() || null,
         expense_date: date || todayInput(),
@@ -137,19 +171,20 @@ function DespesasPage() {
         notes: notes.trim() || null,
         file_path: filePath,
         driver_id: driverId === "none" ? null : driverId,
-      });
+      };
+
+      if (editingId) {
+        const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase.from("expenses").insert({ user_id: uid, ...payload });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Despesa registrada!");
-      setTitle("");
-      setAmount("");
-      setPlace("");
-      setDueDate("");
-      setNotes("");
-      setFile(null);
-      setPaid(true);
-      setDate(todayInput());
+      toast.success(editingId ? "Despesa atualizada!" : "Despesa registrada!");
+      resetForm();
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) =>

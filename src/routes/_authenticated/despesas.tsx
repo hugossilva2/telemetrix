@@ -68,6 +68,8 @@ function DespesasPage() {
   const [paid, setPaid] = useState(true);
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingFilePath, setExistingFilePath] = useState<string | null>(null);
 
   const { data: drivers = [] } = useQuery<DriverRow[]>({
     queryKey: ["drivers", "min"],

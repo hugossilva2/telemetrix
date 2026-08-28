@@ -36,6 +36,7 @@ export interface ExpenseRecord {
   notes: string | null;
   file_path: string | null;
   driver_id: string | null;
+  fuel_log_id?: string | null;
 }
 
 export const EXPENSE_CATEGORIES: {

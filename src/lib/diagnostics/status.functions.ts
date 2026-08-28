@@ -17,7 +17,7 @@ export interface DiagnosticsSnapshot {
     updatedAt: string | null;
   } | null;
   signalLostNotifiedAt: string | null;
-  lastSignalLost: { occurredAt: string; metadata: unknown } | null;
+  lastSignalLost: { occurredAt: string; metadata: Record<string, unknown> | null } | null;
   pingsLastHour: number;
   lastPing: { recordedAt: string; lat: number; lng: number } | null;
   lastTripEndedAt: string | null;
@@ -123,7 +123,7 @@ export const getDiagnostics = createServerFn({ method: "POST" })
       lastSignalLost: eventRes.data
         ? {
             occurredAt: eventRes.data.occurred_at as string,
-            metadata: eventRes.data.metadata ?? null,
+            metadata: (eventRes.data.metadata as Record<string, unknown> | null) ?? null,
           }
         : null,
       pingsLastHour: pingCountRes.count ?? 0,

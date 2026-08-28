@@ -17,7 +17,14 @@ export interface DiagnosticsSnapshot {
     updatedAt: string | null;
   } | null;
   signalLostNotifiedAt: string | null;
-  lastSignalLost: { occurredAt: string; metadata: Record<string, unknown> | null } | null;
+  lastSignalLost: {
+    occurredAt: string;
+    metadata: {
+      last_message_at: string | null;
+      threshold_min: number | null;
+      parked: boolean | null;
+    };
+  } | null;
   pingsLastHour: number;
   lastPing: { recordedAt: string; lat: number; lng: number } | null;
   lastTripEndedAt: string | null;
@@ -123,7 +130,17 @@ export const getDiagnostics = createServerFn({ method: "POST" })
       lastSignalLost: eventRes.data
         ? {
             occurredAt: eventRes.data.occurred_at as string,
-            metadata: (eventRes.data.metadata as Record<string, unknown> | null) ?? null,
+            metadata: (() => {
+              const m = (eventRes.data.metadata ?? {}) as Record<string, unknown>;
+              return {
+                last_message_at:
+                  typeof m["last_message_at"] === "string" ? (m["last_message_at"] as string) : null,
+                threshold_min: Number.isFinite(Number(m["threshold_min"]))
+                  ? Number(m["threshold_min"])
+                  : null,
+                parked: typeof m["parked"] === "boolean" ? (m["parked"] as boolean) : null,
+              };
+            })(),
           }
         : null,
       pingsLastHour: pingCountRes.count ?? 0,

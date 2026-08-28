@@ -268,6 +268,21 @@ function AbastecimentoPage() {
         }}
         className="space-y-3 card-surface p-4"
       >
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">
+            {editingId ? "Editar abastecimento" : "Novo abastecimento"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="price">Preço/litro (R$)</Label>

@@ -463,14 +463,24 @@ function DespesasPage() {
                         <span className="font-mono text-sm font-semibold">
                           {formatBRL(Number(e.amount))}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => remove.mutate(e.id)}
-                          className="text-muted-foreground transition-colors hover:text-destructive"
-                          aria-label="Excluir despesa"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(e)}
+                            className="text-muted-foreground transition-colors hover:text-primary"
+                            aria-label="Editar despesa"
+                          >
+                            <Pencil className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => remove.mutate(e.id)}
+                            className="text-muted-foreground transition-colors hover:text-destructive"
+                            aria-label="Excluir despesa"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
                       </div>
                     </li>
                   );

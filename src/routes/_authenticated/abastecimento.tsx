@@ -488,7 +488,38 @@ function AbastecimentoPage() {
       </div>
 
       <div className="card-surface p-4">
+        <h2 className="text-sm font-semibold">Indicadores de consumo</h2>
+        {metrics.points.length === 0 ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Cadastre ao menos 2 abastecimentos com odômetro para calcular km/L e R$/km.
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-muted/50 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Consumo médio</p>
+              <p className="font-mono text-lg font-semibold">
+                {metrics.avgKmpl?.toFixed(2)} km/L
+              </p>
+              <p className="text-xs text-muted-foreground">
+                último: {metrics.lastKmpl?.toFixed(2)} km/L
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/50 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Custo médio</p>
+              <p className="font-mono text-lg font-semibold">
+                R$ {metrics.avgCostPerKm?.toFixed(3)}/km
+              </p>
+              <p className="text-xs text-muted-foreground">
+                último: R$ {metrics.lastCostPerKm?.toFixed(3)}/km
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Histórico de custo (R$/km)</h2>
+
         {chartData.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">
             Cadastre ao menos 2 abastecimentos para ver o gráfico.

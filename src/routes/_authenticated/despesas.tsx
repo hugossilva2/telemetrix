@@ -201,7 +201,8 @@ function DespesasPage() {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, id) => {
+      if (editingId === id) resetForm();
       toast.success("Despesa removida.");
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },

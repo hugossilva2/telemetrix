@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Save, Car } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Save, Car, ChevronRight, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
@@ -139,7 +139,22 @@ function AjustesPage() {
         <DataSourceCard />
         <PushNotificationsCard />
         <OfflineQueueCard />
+        <Link
+          to="/diagnostico"
+          className="flex items-center justify-between gap-3 card-surface p-4 transition-colors hover:border-primary/50"
+        >
+          <span className="min-w-0">
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <Stethoscope className="size-4" /> Diagnóstico da conexão
+            </span>
+            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+              MQTT, horário original da última mensagem, latência e motivo do sinal perdido.
+            </span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+        </Link>
       </div>
+
 
       <form
         onSubmit={(e) => {

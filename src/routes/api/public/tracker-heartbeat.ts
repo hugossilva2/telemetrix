@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
+import {
+  PARKED_SIGNAL_LOST_THRESHOLD_MIN,
+  REALERT_COOLDOWN_MIN,
+  SIGNAL_LOST_THRESHOLD_MIN,
+} from "@/lib/tracker/signalLost";
 
 /**
  * Heartbeat de perda de sinal.
@@ -14,14 +19,6 @@ import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
  */
 
 
-// Com ignição ligada o rastreador reporta a cada poucos segundos, então 15 min
-// sem mensagem já é perda de sinal. Estacionado, o FMC003 entra em modo de
-// economia e manda apenas um keep-alive por hora — usar 10 min aqui gerava
-// alerta de "sinal perdido" toda hora com o carro parado na garagem.
-const SIGNAL_LOST_THRESHOLD_MIN = 15;
-const PARKED_SIGNAL_LOST_THRESHOLD_MIN = 180;
-// Evita repetição em sequência mesmo que o keep-alive limpe a flag.
-const REALERT_COOLDOWN_MIN = 360;
 
 export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {

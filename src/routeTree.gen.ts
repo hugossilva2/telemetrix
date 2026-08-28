@@ -32,6 +32,7 @@ import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
+import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDespesasRouteImport } from './routes/_authenticated/despesas'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
@@ -157,6 +158,12 @@ const AuthenticatedDocumentosRoute = AuthenticatedDocumentosRouteImport.update({
   path: '/documentos',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDiagnosticoRoute =
+  AuthenticatedDiagnosticoRouteImport.update({
+    id: '/diagnostico',
+    path: '/diagnostico',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedDespesasRoute = AuthenticatedDespesasRouteImport.update({
   id: '/despesas',
   path: '/despesas',
@@ -224,6 +231,7 @@ export interface FileRoutesByFullPath {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/despesas': typeof AuthenticatedDespesasRoute
+  '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
@@ -258,6 +266,7 @@ export interface FileRoutesByTo {
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/despesas': typeof AuthenticatedDespesasRoute
+  '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
@@ -294,6 +303,7 @@ export interface FileRoutesById {
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/despesas': typeof AuthenticatedDespesasRoute
+  '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/eco': typeof AuthenticatedEcoRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
@@ -330,6 +340,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/compartilhar'
     | '/despesas'
+    | '/diagnostico'
     | '/documentos'
     | '/eco'
     | '/gestao'
@@ -364,6 +375,7 @@ export interface FileRouteTypes {
     | '/ajustes'
     | '/compartilhar'
     | '/despesas'
+    | '/diagnostico'
     | '/documentos'
     | '/eco'
     | '/gestao'
@@ -399,6 +411,7 @@ export interface FileRouteTypes {
     | '/_authenticated/ajustes'
     | '/_authenticated/compartilhar'
     | '/_authenticated/despesas'
+    | '/_authenticated/diagnostico'
     | '/_authenticated/documentos'
     | '/_authenticated/eco'
     | '/_authenticated/gestao'
@@ -599,6 +612,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDocumentosRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/diagnostico': {
+      id: '/_authenticated/diagnostico'
+      path: '/diagnostico'
+      fullPath: '/diagnostico'
+      preLoaderRoute: typeof AuthenticatedDiagnosticoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/despesas': {
       id: '/_authenticated/despesas'
       path: '/despesas'
@@ -703,6 +723,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedDespesasRoute: typeof AuthenticatedDespesasRoute
+  AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
@@ -726,6 +747,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedDespesasRoute: AuthenticatedDespesasRoute,
+  AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEcoRoute: AuthenticatedEcoRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,

@@ -52,6 +52,8 @@ function AbastecimentoPage() {
   const [datetime, setDatetime] = useState(() => toLocalDatetimeInput(new Date()));
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingReceipt, setExistingReceipt] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 

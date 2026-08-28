@@ -420,7 +420,11 @@ function AbastecimentoPage() {
         </div>
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
-          {save.isPending ? "Salvando…" : "Salvar abastecimento"}
+          {save.isPending
+            ? "Salvando…"
+            : editingId
+              ? "Salvar alterações"
+              : "Salvar abastecimento"}
         </Button>
       </form>
 

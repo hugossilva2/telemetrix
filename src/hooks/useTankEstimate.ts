@@ -80,9 +80,14 @@ export function useTankEstimate(): UseTankEstimate {
   const odometerKm = useMemo(() => {
     const fromVehicle = Number(vehicle?.current_mileage);
     const fromTelemetry = Number(telemetry.mileageKm);
-    const candidates = [fromVehicle, fromTelemetry].filter((n) => Number.isFinite(n) && n > 0);
+    // Abastecimentos costumam ter o odômetro mais recente que o cadastro.
+    const fromFills = fills.map((f) => Number(f.odometerKm));
+    const candidates = [fromVehicle, fromTelemetry, ...fromFills].filter(
+      (n) => Number.isFinite(n) && n > 0,
+    );
     return candidates.length > 0 ? Math.max(...candidates) : null;
-  }, [vehicle?.current_mileage, telemetry.mileageKm]);
+  }, [vehicle?.current_mileage, telemetry.mileageKm, fills]);
+
 
   const historical = useMemo(() => historicalKmpl(fills), [fills]);
   const fallbackKmpl = useMemo(() => {

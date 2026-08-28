@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
+import { invalidateFuelMetrics } from "@/lib/fuel/invalidate";
+import { fuelMetrics } from "@/lib/fuel/metrics";
 import { Camera, FileText, Paperclip, Pencil, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -197,8 +199,7 @@ function AbastecimentoPage() {
     onSuccess: () => {
       toast.success(editingId ? "Abastecimento atualizado!" : "Abastecimento salvo!");
       resetForm();
-      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(
@@ -217,8 +218,7 @@ function AbastecimentoPage() {
     onSuccess: (_d, id) => {
       if (editingId === id) resetForm();
       toast.success("Abastecimento excluído.");
-      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(

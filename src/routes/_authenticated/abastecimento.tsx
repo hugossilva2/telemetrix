@@ -241,24 +241,9 @@ function AbastecimentoPage() {
       ),
   });
 
-  const chartData = useMemo(() => {
-    const rows: { label: string; costPerKm: number }[] = [];
-    for (let i = 1; i < logs.length; i++) {
-      const prev = logs[i - 1];
-      const cur = logs[i];
-      const dist = cur.mileage_at_fill - prev.mileage_at_fill;
-      if (dist > 0) {
-        rows.push({
-          label: new Date(cur.date).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-          }),
-          costPerKm: +(cur.total_cost / dist).toFixed(3),
-        });
-      }
-    }
-    return rows;
-  }, [logs]);
+  const metrics = useMemo(() => fuelMetrics(logs), [logs]);
+  const chartData = metrics.points;
+
 
   return (
     <AppShell title="Abastecimento" subtitle="Registro e histórico">

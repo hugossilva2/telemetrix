@@ -91,6 +91,30 @@ function AbastecimentoPage() {
     },
   });
 
+  function resetForm() {
+    setEditingId(null);
+    setExistingReceipt(null);
+    setPrice("");
+    setTotal("");
+    setPhoto(null);
+    setDatetime(toLocalDatetimeInput(new Date()));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
+  function startEdit(log: FuelLog) {
+    setEditingId(log.id);
+    setExistingReceipt(log.receipt_url);
+    setPrice(String(Number(log.price_per_liter)));
+    setTotal(String(Number(log.total_cost)));
+    setMileage(String(Number(log.mileage_at_fill)));
+    setDatetime(toLocalDatetimeInput(new Date(log.date)));
+    setPhoto(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -103,7 +127,7 @@ function AbastecimentoPage() {
       }
       const isoDate = datetime ? new Date(datetime).toISOString() : new Date().toISOString();
 
-      let receiptUrl: string | null = null;
+      let receiptUrl: string | null = editingId ? existingReceipt : null;
       if (photo) {
         const ext = photo.name.split(".").pop() || "jpg";
         const path = `${userData.user.id}/${Date.now()}.${ext}`;
@@ -114,13 +138,43 @@ function AbastecimentoPage() {
         receiptUrl = path;
       }
 
+      const litersNum = totalNum / priceNum;
+      const mirrored = {
+        title: `Abastecimento · ${litersNum.toFixed(2)} L`,
+        expense_date: isoDate.slice(0, 10),
+        amount: totalNum,
+        notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
+      };
+
+      if (editingId) {
+        const { error } = await supabase
+          .from("fuel_logs")
+          .update({
+            date: isoDate,
+            price_per_liter: priceNum,
+            liters_filled: litersNum,
+            total_cost: totalNum,
+            mileage_at_fill: mileageNum,
+            receipt_url: receiptUrl,
+          })
+          .eq("id", editingId);
+        if (error) throw error;
+
+        const { error: expErr } = await supabase
+          .from("expenses")
+          .update(mirrored)
+          .eq("fuel_log_id", editingId);
+        if (expErr) throw expErr;
+        return;
+      }
+
       const { data: inserted, error } = await supabase
         .from("fuel_logs")
         .insert({
           user_id: userData.user.id,
           date: isoDate,
           price_per_liter: priceNum,
-          liters_filled: totalNum / priceNum,
+          liters_filled: litersNum,
           total_cost: totalNum,
           mileage_at_fill: mileageNum,
           receipt_url: receiptUrl,
@@ -134,23 +188,15 @@ function AbastecimentoPage() {
         user_id: userData.user.id,
         fuel_log_id: inserted.id,
         category: "combustivel",
-        title: `Abastecimento · ${(totalNum / priceNum).toFixed(2)} L`,
-        expense_date: isoDate.slice(0, 10),
-        amount: totalNum,
         paid: true,
         place: null,
-        notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
+        ...mirrored,
       });
       if (expErr) throw expErr;
     },
     onSuccess: () => {
-      toast.success("Abastecimento salvo!");
-      setPrice("");
-      setTotal("");
-      setPhoto(null);
-      setDatetime(toLocalDatetimeInput(new Date()));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      if (cameraInputRef.current) cameraInputRef.current.value = "";
+      toast.success(editingId ? "Abastecimento atualizado!" : "Abastecimento salvo!");
+      resetForm();
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },

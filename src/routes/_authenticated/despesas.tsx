@@ -86,7 +86,7 @@ function DespesasPage() {
       const { data, error } = await supabase
         .from("expenses")
         .select(
-          "id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id",
+          "id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id,fuel_log_id",
         )
         .order("expense_date", { ascending: false });
       if (error) throw error;

@@ -139,7 +139,22 @@ function AjustesPage() {
         <DataSourceCard />
         <PushNotificationsCard />
         <OfflineQueueCard />
+        <Link
+          to="/diagnostico"
+          className="flex items-center justify-between gap-3 card-surface p-4 transition-colors hover:border-primary/50"
+        >
+          <span className="min-w-0">
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <Stethoscope className="size-4" /> Diagnóstico da conexão
+            </span>
+            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+              MQTT, horário original da última mensagem, latência e motivo do sinal perdido.
+            </span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+        </Link>
       </div>
+
 
       <form
         onSubmit={(e) => {

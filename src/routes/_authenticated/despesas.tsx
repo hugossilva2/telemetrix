@@ -400,9 +400,14 @@ function DespesasPage() {
         </div>
 
         <FileAttachment label="Comprovante (opcional)" file={file} onChange={setFile} />
+        {editingId && existingFilePath && !file && (
+          <p className="text-xs text-muted-foreground">
+            Comprovante já anexado — escolha um novo arquivo para substituir.
+          </p>
+        )}
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
-          {save.isPending ? "Salvando…" : "Salvar despesa"}
+          {save.isPending ? "Salvando…" : editingId ? "Salvar alterações" : "Salvar despesa"}
         </Button>
       </form>
 

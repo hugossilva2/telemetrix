@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useActiveVehicle } from "@/lib/vehicles/active";
-import { getDiagnostics } from "@/lib/diagnostics/status.functions";
+import { getDiagnostics, type DiagnosticsSnapshot } from "@/lib/diagnostics/status.functions";
 import {
   SIGNAL_HEALTH_CLASS,
   SIGNAL_HEALTH_LABEL,
@@ -120,10 +120,13 @@ function DiagnosticoPage() {
     return () => window.clearInterval(id);
   }, []);
 
-  const { data, isFetching, refetch } = useQuery({
+  const { data, isFetching, refetch } = useQuery<DiagnosticsSnapshot>({
     queryKey: ["diagnostics", vehicleId],
     refetchInterval: 30_000,
-    queryFn: () => fetchDiagnostics({ data: { vehicleId: vehicleId ?? null } }),
+    queryFn: () =>
+      fetchDiagnostics({
+        data: { vehicleId: vehicleId ?? null },
+      }) as Promise<DiagnosticsSnapshot>,
   });
 
   // Horário ORIGINAL da mensagem (relógio do rastreador), em epoch ms.
@@ -165,7 +168,7 @@ function DiagnosticoPage() {
           <div className="mt-3">
             <Row
               label="Origem dos dados"
-              value={source === "obd" ? "Adaptador OBD-II (Bluetooth)" : "Nuvem Flespi (MQTT)"}
+              value={source === "elm327" ? "Adaptador OBD-II (Bluetooth)" : "Nuvem Flespi (MQTT)"}
             />
             <Row
               label="Última mensagem recebida no app"

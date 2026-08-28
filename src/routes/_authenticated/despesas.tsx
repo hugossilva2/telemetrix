@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
-import { BarChart3, FileText, Trash2 } from "lucide-react";
+import { BarChart3, FileText, Pencil, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

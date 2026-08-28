@@ -214,7 +214,8 @@ function AbastecimentoPage() {
       const { error } = await supabase.from("fuel_logs").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, id) => {
+      if (editingId === id) resetForm();
       toast.success("Abastecimento excluído.");
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });

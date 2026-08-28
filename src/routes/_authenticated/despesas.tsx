@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
-import { BarChart3, FileText, Trash2 } from "lucide-react";
+import { BarChart3, FileText, Pencil, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,6 +68,8 @@ function DespesasPage() {
   const [paid, setPaid] = useState(true);
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingFilePath, setExistingFilePath] = useState<string | null>(null);
 
   const { data: drivers = [] } = useQuery<DriverRow[]>({
     queryKey: ["drivers", "min"],
@@ -84,7 +86,7 @@ function DespesasPage() {
       const { data, error } = await supabase
         .from("expenses")
         .select(
-          "id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id",
+          "id,category,title,expense_date,amount,due_date,paid,place,notes,file_path,driver_id,fuel_log_id",
         )
         .order("expense_date", { ascending: false });
       if (error) throw error;
@@ -113,6 +115,37 @@ function DespesasPage() {
 
   const driverName = (id: string | null) => drivers.find((d) => d.id === id)?.name ?? null;
 
+  function resetForm() {
+    setEditingId(null);
+    setExistingFilePath(null);
+    setCategory("pedagio");
+    setTitle("");
+    setAmount("");
+    setPlace("");
+    setDueDate("");
+    setDriverId("none");
+    setNotes("");
+    setFile(null);
+    setPaid(true);
+    setDate(todayInput());
+  }
+
+  function startEdit(e: ExpenseRecord) {
+    setEditingId(e.id);
+    setExistingFilePath(e.file_path);
+    setCategory(e.category);
+    setTitle(e.title ?? "");
+    setDate(e.expense_date.slice(0, 10));
+    setAmount(String(Number(e.amount)));
+    setPlace(e.place ?? "");
+    setDueDate(e.due_date ?? "");
+    setDriverId(e.driver_id ?? "none");
+    setPaid(e.paid);
+    setNotes(e.notes ?? "");
+    setFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -121,10 +154,13 @@ function DespesasPage() {
       const value = parseFloat(amount.replace(",", "."));
       if (!(value > 0)) throw new Error("Informe um valor maior que zero.");
 
-      const filePath = file ? await uploadDocFile(file, "expenses") : null;
+      const filePath = file
+        ? await uploadDocFile(file, "expenses")
+        : editingId
+          ? existingFilePath
+          : null;
 
-      const { error } = await supabase.from("expenses").insert({
-        user_id: uid,
+      const payload = {
         category,
         title: title.trim() || null,
         expense_date: date || todayInput(),
@@ -135,19 +171,20 @@ function DespesasPage() {
         notes: notes.trim() || null,
         file_path: filePath,
         driver_id: driverId === "none" ? null : driverId,
-      });
+      };
+
+      if (editingId) {
+        const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
+        if (error) throw error;
+        return;
+      }
+
+      const { error } = await supabase.from("expenses").insert({ user_id: uid, ...payload });
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Despesa registrada!");
-      setTitle("");
-      setAmount("");
-      setPlace("");
-      setDueDate("");
-      setNotes("");
-      setFile(null);
-      setPaid(true);
-      setDate(todayInput());
+      toast.success(editingId ? "Despesa atualizada!" : "Despesa registrada!");
+      resetForm();
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
     onError: (e: Error) =>
@@ -164,7 +201,8 @@ function DespesasPage() {
       const { error } = await supabase.from("expenses").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, id) => {
+      if (editingId === id) resetForm();
       toast.success("Despesa removida.");
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
@@ -230,7 +268,18 @@ function DespesasPage() {
         }}
         className="mt-4 space-y-3 card-surface p-4"
       >
-        <h2 className="text-sm font-semibold">Nova despesa</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">{editingId ? "Editar despesa" : "Nova despesa"}</h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="ex-cat">Categoria</Label>
@@ -352,9 +401,14 @@ function DespesasPage() {
         </div>
 
         <FileAttachment label="Comprovante (opcional)" file={file} onChange={setFile} />
+        {editingId && existingFilePath && !file && (
+          <p className="text-xs text-muted-foreground">
+            Comprovante já anexado — escolha um novo arquivo para substituir.
+          </p>
+        )}
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
-          {save.isPending ? "Salvando…" : "Salvar despesa"}
+          {save.isPending ? "Salvando…" : editingId ? "Salvar alterações" : "Salvar despesa"}
         </Button>
       </form>
 
@@ -426,14 +480,24 @@ function DespesasPage() {
                         <span className="font-mono text-sm font-semibold">
                           {formatBRL(Number(e.amount))}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => remove.mutate(e.id)}
-                          className="text-muted-foreground transition-colors hover:text-destructive"
-                          aria-label="Excluir despesa"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(e)}
+                            className="text-muted-foreground transition-colors hover:text-primary"
+                            aria-label="Editar despesa"
+                          >
+                            <Pencil className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => remove.mutate(e.id)}
+                            className="text-muted-foreground transition-colors hover:text-destructive"
+                            aria-label="Excluir despesa"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
                       </div>
                     </li>
                   );

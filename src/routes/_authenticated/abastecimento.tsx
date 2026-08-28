@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
-import { Camera, FileText, Paperclip, Receipt, Trash2, X } from "lucide-react";
+import { Camera, FileText, Paperclip, Pencil, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,8 @@ function AbastecimentoPage() {
   const [datetime, setDatetime] = useState(() => toLocalDatetimeInput(new Date()));
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [existingReceipt, setExistingReceipt] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
@@ -89,6 +91,30 @@ function AbastecimentoPage() {
     },
   });
 
+  function resetForm() {
+    setEditingId(null);
+    setExistingReceipt(null);
+    setPrice("");
+    setTotal("");
+    setPhoto(null);
+    setDatetime(toLocalDatetimeInput(new Date()));
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+  }
+
+  function startEdit(log: FuelLog) {
+    setEditingId(log.id);
+    setExistingReceipt(log.receipt_url);
+    setPrice(String(Number(log.price_per_liter)));
+    setTotal(String(Number(log.total_cost)));
+    setMileage(String(Number(log.mileage_at_fill)));
+    setDatetime(toLocalDatetimeInput(new Date(log.date)));
+    setPhoto(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    if (cameraInputRef.current) cameraInputRef.current.value = "";
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
@@ -101,7 +127,7 @@ function AbastecimentoPage() {
       }
       const isoDate = datetime ? new Date(datetime).toISOString() : new Date().toISOString();
 
-      let receiptUrl: string | null = null;
+      let receiptUrl: string | null = editingId ? existingReceipt : null;
       if (photo) {
         const ext = photo.name.split(".").pop() || "jpg";
         const path = `${userData.user.id}/${Date.now()}.${ext}`;
@@ -112,13 +138,43 @@ function AbastecimentoPage() {
         receiptUrl = path;
       }
 
+      const litersNum = totalNum / priceNum;
+      const mirrored = {
+        title: `Abastecimento · ${litersNum.toFixed(2)} L`,
+        expense_date: isoDate.slice(0, 10),
+        amount: totalNum,
+        notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
+      };
+
+      if (editingId) {
+        const { error } = await supabase
+          .from("fuel_logs")
+          .update({
+            date: isoDate,
+            price_per_liter: priceNum,
+            liters_filled: litersNum,
+            total_cost: totalNum,
+            mileage_at_fill: mileageNum,
+            receipt_url: receiptUrl,
+          })
+          .eq("id", editingId);
+        if (error) throw error;
+
+        const { error: expErr } = await supabase
+          .from("expenses")
+          .update(mirrored)
+          .eq("fuel_log_id", editingId);
+        if (expErr) throw expErr;
+        return;
+      }
+
       const { data: inserted, error } = await supabase
         .from("fuel_logs")
         .insert({
           user_id: userData.user.id,
           date: isoDate,
           price_per_liter: priceNum,
-          liters_filled: totalNum / priceNum,
+          liters_filled: litersNum,
           total_cost: totalNum,
           mileage_at_fill: mileageNum,
           receipt_url: receiptUrl,
@@ -132,23 +188,15 @@ function AbastecimentoPage() {
         user_id: userData.user.id,
         fuel_log_id: inserted.id,
         category: "combustivel",
-        title: `Abastecimento · ${(totalNum / priceNum).toFixed(2)} L`,
-        expense_date: isoDate.slice(0, 10),
-        amount: totalNum,
         paid: true,
         place: null,
-        notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
+        ...mirrored,
       });
       if (expErr) throw expErr;
     },
     onSuccess: () => {
-      toast.success("Abastecimento salvo!");
-      setPrice("");
-      setTotal("");
-      setPhoto(null);
-      setDatetime(toLocalDatetimeInput(new Date()));
-      if (fileInputRef.current) fileInputRef.current.value = "";
-      if (cameraInputRef.current) cameraInputRef.current.value = "";
+      toast.success(editingId ? "Abastecimento atualizado!" : "Abastecimento salvo!");
+      resetForm();
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
     },
@@ -166,7 +214,8 @@ function AbastecimentoPage() {
       const { error } = await supabase.from("fuel_logs").delete().eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_d, id) => {
+      if (editingId === id) resetForm();
       toast.success("Abastecimento excluído.");
       qc.invalidateQueries({ queryKey: ["fuel_logs"] });
       qc.invalidateQueries({ queryKey: ["expenses"] });
@@ -220,6 +269,21 @@ function AbastecimentoPage() {
         }}
         className="space-y-3 card-surface p-4"
       >
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">
+            {editingId ? "Editar abastecimento" : "Novo abastecimento"}
+          </h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="price">Preço/litro (R$)</Label>
@@ -287,6 +351,11 @@ function AbastecimentoPage() {
 
         <div className="space-y-1.5">
           <Label>Comprovante (opcional)</Label>
+          {editingId && existingReceipt && !photo && (
+            <p className="text-xs text-muted-foreground">
+              Comprovante já anexado — escolha um novo arquivo para substituir.
+            </p>
+          )}
           {photo ? (
             <div className="relative">
               {photo.type.startsWith("image/") && photoPreview ? (
@@ -357,7 +426,11 @@ function AbastecimentoPage() {
         </div>
 
         <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
-          {save.isPending ? "Salvando…" : "Salvar abastecimento"}
+          {save.isPending
+            ? "Salvando…"
+            : editingId
+              ? "Salvar alterações"
+              : "Salvar abastecimento"}
         </Button>
       </form>
 
@@ -403,15 +476,25 @@ function AbastecimentoPage() {
                     <span className="font-mono text-sm font-semibold">
                       R$ {Number(log.total_cost).toFixed(2)}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => remove.mutate(log.id)}
-                      disabled={remove.isPending}
-                      className="text-muted-foreground transition-colors hover:text-destructive"
-                      aria-label="Excluir abastecimento"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(log)}
+                        className="text-muted-foreground transition-colors hover:text-primary"
+                        aria-label="Editar abastecimento"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove.mutate(log.id)}
+                        disabled={remove.isPending}
+                        className="text-muted-foreground transition-colors hover:text-destructive"
+                        aria-label="Excluir abastecimento"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}

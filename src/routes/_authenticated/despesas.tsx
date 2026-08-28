@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
+import { invalidateFuelMetrics } from "@/lib/fuel/invalidate";
 import { BarChart3, FileText, Pencil, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -185,7 +186,7 @@ function DespesasPage() {
     onSuccess: () => {
       toast.success(editingId ? "Despesa atualizada!" : "Despesa registrada!");
       resetForm();
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(
@@ -204,7 +205,7 @@ function DespesasPage() {
     onSuccess: (_d, id) => {
       if (editingId === id) resetForm();
       toast.success("Despesa removida.");
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(
@@ -217,7 +218,7 @@ function DespesasPage() {
       const { error } = await supabase.from("expenses").update({ paid: value }).eq("id", id);
       if (error) throw error;
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["expenses"] }),
+    onSuccess: () => invalidateFuelMetrics(qc),
     onError: (e: Error) =>
       toast.error(
         toUserMessage(e, "Não foi possível atualizar a despesa. Tente de novo em instantes."),

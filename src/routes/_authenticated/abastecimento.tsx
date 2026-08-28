@@ -4,6 +4,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
+import { invalidateFuelMetrics } from "@/lib/fuel/invalidate";
+import { fuelMetrics } from "@/lib/fuel/metrics";
 import { Camera, FileText, Paperclip, Pencil, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
@@ -197,8 +199,7 @@ function AbastecimentoPage() {
     onSuccess: () => {
       toast.success(editingId ? "Abastecimento atualizado!" : "Abastecimento salvo!");
       resetForm();
-      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(
@@ -217,8 +218,7 @@ function AbastecimentoPage() {
     onSuccess: (_d, id) => {
       if (editingId === id) resetForm();
       toast.success("Abastecimento excluído.");
-      qc.invalidateQueries({ queryKey: ["fuel_logs"] });
-      qc.invalidateQueries({ queryKey: ["expenses"] });
+      invalidateFuelMetrics(qc);
     },
     onError: (e: Error) =>
       toast.error(
@@ -241,24 +241,9 @@ function AbastecimentoPage() {
       ),
   });
 
-  const chartData = useMemo(() => {
-    const rows: { label: string; costPerKm: number }[] = [];
-    for (let i = 1; i < logs.length; i++) {
-      const prev = logs[i - 1];
-      const cur = logs[i];
-      const dist = cur.mileage_at_fill - prev.mileage_at_fill;
-      if (dist > 0) {
-        rows.push({
-          label: new Date(cur.date).toLocaleDateString("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-          }),
-          costPerKm: +(cur.total_cost / dist).toFixed(3),
-        });
-      }
-    }
-    return rows;
-  }, [logs]);
+  const metrics = useMemo(() => fuelMetrics(logs), [logs]);
+  const chartData = metrics.points;
+
 
   return (
     <AppShell title="Abastecimento" subtitle="Registro e histórico">
@@ -503,7 +488,38 @@ function AbastecimentoPage() {
       </div>
 
       <div className="card-surface p-4">
+        <h2 className="text-sm font-semibold">Indicadores de consumo</h2>
+        {metrics.points.length === 0 ? (
+          <p className="mt-3 text-xs text-muted-foreground">
+            Cadastre ao menos 2 abastecimentos com odômetro para calcular km/L e R$/km.
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <div className="rounded-lg bg-muted/50 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Consumo médio</p>
+              <p className="font-mono text-lg font-semibold">
+                {metrics.avgKmpl?.toFixed(2)} km/L
+              </p>
+              <p className="text-xs text-muted-foreground">
+                último: {metrics.lastKmpl?.toFixed(2)} km/L
+              </p>
+            </div>
+            <div className="rounded-lg bg-muted/50 px-3 py-2">
+              <p className="text-xs text-muted-foreground">Custo médio</p>
+              <p className="font-mono text-lg font-semibold">
+                R$ {metrics.avgCostPerKm?.toFixed(3)}/km
+              </p>
+              <p className="text-xs text-muted-foreground">
+                último: R$ {metrics.lastCostPerKm?.toFixed(3)}/km
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Histórico de custo (R$/km)</h2>
+
         {chartData.length === 0 ? (
           <p className="mt-3 text-xs text-muted-foreground">
             Cadastre ao menos 2 abastecimentos para ver o gráfico.

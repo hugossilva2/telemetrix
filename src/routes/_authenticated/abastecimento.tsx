@@ -470,15 +470,25 @@ function AbastecimentoPage() {
                     <span className="font-mono text-sm font-semibold">
                       R$ {Number(log.total_cost).toFixed(2)}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => remove.mutate(log.id)}
-                      disabled={remove.isPending}
-                      className="text-muted-foreground transition-colors hover:text-destructive"
-                      aria-label="Excluir abastecimento"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => startEdit(log)}
+                        className="text-muted-foreground transition-colors hover:text-primary"
+                        aria-label="Editar abastecimento"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => remove.mutate(log.id)}
+                        disabled={remove.isPending}
+                        className="text-muted-foreground transition-colors hover:text-destructive"
+                        aria-label="Excluir abastecimento"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 </li>
               ))}

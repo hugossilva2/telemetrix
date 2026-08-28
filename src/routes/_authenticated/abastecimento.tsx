@@ -350,6 +350,11 @@ function AbastecimentoPage() {
 
         <div className="space-y-1.5">
           <Label>Comprovante (opcional)</Label>
+          {editingId && existingReceipt && !photo && (
+            <p className="text-xs text-muted-foreground">
+              Comprovante já anexado — escolha um novo arquivo para substituir.
+            </p>
+          )}
           {photo ? (
             <div className="relative">
               {photo.type.startsWith("image/") && photoPreview ? (

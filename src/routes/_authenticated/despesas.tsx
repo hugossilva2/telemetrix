@@ -267,7 +267,18 @@ function DespesasPage() {
         }}
         className="mt-4 space-y-3 card-surface p-4"
       >
-        <h2 className="text-sm font-semibold">Nova despesa</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">{editingId ? "Editar despesa" : "Nova despesa"}</h2>
+          {editingId && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Cancelar edição
+            </button>
+          )}
+        </div>
 
         <div className="space-y-1.5">
           <Label htmlFor="ex-cat">Categoria</Label>

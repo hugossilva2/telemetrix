@@ -46,17 +46,26 @@ export function historicalKmpl(fills: FuelFill[]): number | null {
   return values.reduce((a, b) => a + b, 0) / values.length;
 }
 
-/** Litros abastecidos depois da calibração. */
+/**
+ * Litros abastecidos depois da calibração. A data do abastecimento é o critério
+ * (a calibração vale para o instante em que o usuário informou o nível). O
+ * odômetro só é usado quando a data do abastecimento é inválida — usá-lo como
+ * critério paralelo somava abastecimentos antigos quando o odômetro registrado
+ * do veículo estava atrasado em relação aos lançamentos.
+ */
 export function litersAddedAfter(anchor: TankAnchor, fills: FuelFill[]): number {
   const anchorTime = Date.parse(anchor.at);
   return fills.reduce((sum, f) => {
     const t = Date.parse(f.date);
-    const afterByOdometer =
-      f.odometerKm != null && f.odometerKm > anchor.odometerKm + 0.5;
-    const afterByDate = Number.isFinite(t) && Number.isFinite(anchorTime) && t > anchorTime;
-    return sum + (afterByOdometer || afterByDate ? Number(f.liters) || 0 : 0);
+    const after = Number.isFinite(t)
+      ? Number.isFinite(anchorTime)
+        ? t > anchorTime
+        : false
+      : f.odometerKm != null && f.odometerKm > anchor.odometerKm + 0.5;
+    return sum + (after ? Number(f.liters) || 0 : 0);
   }, 0);
 }
+
 
 /**
  * Nível estimado do tanque agora. `null` quando falta calibração, odômetro

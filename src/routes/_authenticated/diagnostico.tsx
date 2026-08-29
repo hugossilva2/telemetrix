@@ -12,6 +12,8 @@ import {
   Server,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { RebuildRoutesCard } from "@/components/trips/RebuildRoutesCard";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTelemetry } from "@/hooks/useTelemetry";

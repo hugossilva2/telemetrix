@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
 import { haversineKm } from "@/lib/trips/geo";
 import { buildRouteData, type RouteData } from "@/lib/trips/routeData";
 import type { TrailPoint } from "@/lib/trips/store";
@@ -27,10 +28,10 @@ export function downsample<T>(points: T[], max: number): T[] {
 
 /** Lê os pings gravados na janela da viagem e devolve o rastro limpo. */
 export async function trailFromPings(
-  client: SupabaseClient<never, never, never>,
+  client: SupabaseClient<Database>,
   params: { vehicleId: string; startIso: string; endIso: string },
 ): Promise<TrailPoint[]> {
-  const { data, error } = await (client as unknown as SupabaseClient)
+  const { data, error } = await client
     .from("tracker_pings")
     .select("lat,lng,speed_kmh,recorded_at")
     .eq("vehicle_id", params.vehicleId)
@@ -66,7 +67,7 @@ export async function trailFromPings(
  * encaixando nas ruas quando o Google responder.
  */
 export async function buildRouteDataFromPings(
-  client: SupabaseClient<never, never, never>,
+  client: SupabaseClient<Database>,
   params: { vehicleId: string; startIso: string; endIso: string; source: string },
 ): Promise<RouteData | null> {
   const trail = await trailFromPings(client, params);

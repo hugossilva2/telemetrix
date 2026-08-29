@@ -90,7 +90,7 @@ function TripDetailPage() {
       const { data, error } = await supabase
         .from("trips")
         .select(
-          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
+          "id,vehicle_id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
         )
         .eq("id", id)
         .maybeSingle();

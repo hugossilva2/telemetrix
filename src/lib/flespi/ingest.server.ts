@@ -525,6 +525,31 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             .select("id");
           if (!tripRows || tripRows.length === 0) skippedDuplicate++;
 
+          // Traçado real percorrido, a partir dos pings gravados na viagem.
+          const newTripId = tripRows?.[0]?.id;
+          if (newTripId) {
+            try {
+              const { buildRouteDataFromPings } = await import(
+                "@/lib/trips/trailFromPings.server"
+              );
+              const routeData = await buildRouteDataFromPings(supabaseAdmin, {
+                vehicleId: vehicle.id,
+                startIso: state.start_time as string,
+                endIso: nowIso,
+                source: "fmc003",
+              });
+              if (routeData) {
+                await supabaseAdmin
+                  .from("trips")
+                  .update({ route_data: routeData as unknown as never })
+                  .eq("id", newTripId);
+              }
+            } catch (err) {
+              console.error("[ingest] route_data falhou:", err);
+            }
+          }
+
+
           await supabaseAdmin.from("device_trip_state").delete().eq("device_id", deviceId);
           processed++;
           continue;

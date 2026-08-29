@@ -46,8 +46,10 @@ export const Route = createFileRoute("/_authenticated/viagens/$id")({
 
 type TripDetail = {
   id: string;
+  vehicle_id: string | null;
   start_time: string;
   end_time: string | null;
+
   start_lat: number | null;
   start_lng: number | null;
   end_lat: number | null;
@@ -88,7 +90,7 @@ function TripDetailPage() {
       const { data, error } = await supabase
         .from("trips")
         .select(
-          "id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
+          "id,vehicle_id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
         )
         .eq("id", id)
         .maybeSingle();
@@ -110,7 +112,7 @@ function TripDetailPage() {
     },
   });
 
-  const routeTrail = useMemo(() => {
+  const savedTrail = useMemo(() => {
     const parsed = parseRouteData(trip?.route_data);
     if (!parsed) return undefined;
     return parsed.points.map((p) => ({
@@ -121,6 +123,38 @@ function TripDetailPage() {
       t: p.t,
     }));
   }, [trip?.route_data]);
+
+  // Reserva: viagens antigas sem traçado salvo desenham o percurso a partir
+  // dos pings gravados, em vez de uma linha reta início→fim.
+  const needsPingFallback = !savedTrail && !!trip?.vehicle_id && !!trip?.end_time;
+  const { data: pingTrail } = useQuery({
+    queryKey: ["trip-pings", id],
+    enabled: needsPingFallback,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tracker_pings")
+        .select("lat,lng,speed_kmh,recorded_at")
+        .eq("vehicle_id", trip!.vehicle_id as string)
+        .gte("recorded_at", trip!.start_time)
+        .lte("recorded_at", trip!.end_time as string)
+        .order("recorded_at", { ascending: true })
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? [])
+        .filter((r) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r) => ({
+          lat: r.lat as number,
+          lng: r.lng as number,
+          speed: typeof r.speed_kmh === "number" ? Number(r.speed_kmh) : null,
+          t: Date.parse(r.recorded_at),
+        }));
+    },
+  });
+
+  const routeTrail =
+    savedTrail ?? (pingTrail && pingTrail.length > 1 ? pingTrail : undefined);
+
 
   const ecoEvents = useMemo(() => (trip ? parseEcoEvents(trip.eco_events) : []), [trip]);
 

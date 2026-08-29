@@ -12,6 +12,8 @@ import {
   Server,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { RebuildRoutesCard } from "@/components/trips/RebuildRoutesCard";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useTelemetry } from "@/hooks/useTelemetry";
@@ -303,6 +305,9 @@ function DiagnosticoPage() {
             </p>
           )}
         </section>
+
+        <RebuildRoutesCard />
+
 
         <p className="flex items-start gap-2 px-1 text-[11px] text-muted-foreground">
           <Activity className="mt-0.5 size-3.5 shrink-0" />

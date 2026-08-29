@@ -304,6 +304,9 @@ function DiagnosticoPage() {
           )}
         </section>
 
+        <RebuildRoutesCard />
+
+
         <p className="flex items-start gap-2 px-1 text-[11px] text-muted-foreground">
           <Activity className="mt-0.5 size-3.5 shrink-0" />
           Se a conexão está "Conectado" mas a última mensagem gravada é antiga, o problema está no

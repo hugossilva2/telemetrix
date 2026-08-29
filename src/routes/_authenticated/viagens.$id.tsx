@@ -112,7 +112,7 @@ function TripDetailPage() {
     },
   });
 
-  const routeTrail = useMemo(() => {
+  const savedTrail = useMemo(() => {
     const parsed = parseRouteData(trip?.route_data);
     if (!parsed) return undefined;
     return parsed.points.map((p) => ({
@@ -123,6 +123,38 @@ function TripDetailPage() {
       t: p.t,
     }));
   }, [trip?.route_data]);
+
+  // Reserva: viagens antigas sem traçado salvo desenham o percurso a partir
+  // dos pings gravados, em vez de uma linha reta início→fim.
+  const needsPingFallback = !savedTrail && !!trip?.vehicle_id && !!trip?.end_time;
+  const { data: pingTrail } = useQuery({
+    queryKey: ["trip-pings", id],
+    enabled: needsPingFallback,
+    staleTime: 5 * 60_000,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("tracker_pings")
+        .select("lat,lng,speed_kmh,recorded_at")
+        .eq("vehicle_id", trip!.vehicle_id as string)
+        .gte("recorded_at", trip!.start_time)
+        .lte("recorded_at", trip!.end_time as string)
+        .order("recorded_at", { ascending: true })
+        .limit(1000);
+      if (error) throw error;
+      return (data ?? [])
+        .filter((r) => typeof r.lat === "number" && typeof r.lng === "number")
+        .map((r) => ({
+          lat: r.lat as number,
+          lng: r.lng as number,
+          speed: typeof r.speed_kmh === "number" ? Number(r.speed_kmh) : null,
+          t: Date.parse(r.recorded_at),
+        }));
+    },
+  });
+
+  const routeTrail =
+    savedTrail ?? (pingTrail && pingTrail.length > 1 ? pingTrail : undefined);
+
 
   const ecoEvents = useMemo(() => (trip ? parseEcoEvents(trip.eco_events) : []), [trip]);
 

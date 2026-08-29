@@ -46,8 +46,10 @@ export const Route = createFileRoute("/_authenticated/viagens/$id")({
 
 type TripDetail = {
   id: string;
+  vehicle_id: string | null;
   start_time: string;
   end_time: string | null;
+
   start_lat: number | null;
   start_lng: number | null;
   end_lat: number | null;

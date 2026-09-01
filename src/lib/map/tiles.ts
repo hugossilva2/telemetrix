@@ -7,8 +7,14 @@ export type TileLayerConfig = {
   attribution: string;
   maxZoom?: number;
   subdomains?: string;
+  /** Classe CSS aplicada aos tiles (ex.: filtro para modo escuro). */
+  className?: string;
 };
 
+const OSM_ATTR = "&copy; OpenStreetMap";
+
+// Nota: os basemaps da CARTO passaram a exigir chave de API (marca d'água
+// "API KEY REQUIRED"). Usamos OpenStreetMap + filtro CSS para o modo escuro.
 export const MAP_STYLES: Record<
   MapStyleId,
   { label: string; layers: TileLayerConfig[] }
@@ -17,10 +23,10 @@ export const MAP_STYLES: Record<
     label: "Escuro",
     layers: [
       {
-        url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-        attribution: "&copy; OpenStreetMap · &copy; CARTO",
-        subdomains: "abcd",
-        maxZoom: 20,
+        url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: OSM_ATTR,
+        maxZoom: 19,
+        className: "tiles-dark",
       },
     ],
   },
@@ -28,10 +34,10 @@ export const MAP_STYLES: Record<
     label: "Claro",
     layers: [
       {
-        url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-        attribution: "&copy; OpenStreetMap · &copy; CARTO",
-        subdomains: "abcd",
-        maxZoom: 20,
+        url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+        attribution: OSM_ATTR,
+        maxZoom: 19,
+        className: "tiles-light",
       },
     ],
   },
@@ -40,7 +46,7 @@ export const MAP_STYLES: Record<
     layers: [
       {
         url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        attribution: "&copy; OpenStreetMap",
+        attribution: OSM_ATTR,
         maxZoom: 19,
       },
     ],
@@ -54,10 +60,9 @@ export const MAP_STYLES: Record<
         maxZoom: 19,
       },
       {
-        url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
         attribution: "",
-        subdomains: "abcd",
-        maxZoom: 20,
+        maxZoom: 19,
       },
     ],
   },

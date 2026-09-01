@@ -195,6 +195,15 @@
   z-index: 2 !important;
 }
 
+/* Tiles OSM em modo escuro (substitui os basemaps CARTO, que agora exigem chave). */
+.leaflet-tile-pane .tiles-dark {
+  filter: invert(1) hue-rotate(190deg) saturate(0.35) brightness(0.72) contrast(1.05);
+}
+.leaflet-tile-pane .tiles-light {
+  filter: saturate(0.45) brightness(1.04);
+}
+
+
 /* Mostradores do painel: arco desliza suavemente até o novo valor. */
 .gauge-arc {
   transition: stroke-dashoffset 300ms cubic-bezier(0.22, 1, 0.36, 1);

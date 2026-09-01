@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Save, Car, ChevronRight, Stethoscope } from "lucide-react";
+import { Save, Car, ChevronRight, Stethoscope, UserCog } from "lucide-react";
+import { useAccountMode } from "@/lib/account/profile";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { useQueryClient, useQuery, useMutation } from "@tanstack/react-query";
@@ -45,6 +46,7 @@ type VehicleRow = {
 
 function AjustesPage() {
   const qc = useQueryClient();
+  const { info: modeInfo } = useAccountMode();
 
   const { data: vehicle, isLoading } = useQuery({
     queryKey: ["vehicle-primary"],
@@ -136,6 +138,20 @@ function AjustesPage() {
   return (
     <AppShell title="Ajustes" subtitle="Perfil e preferências">
       <div className="mb-4 space-y-4">
+        <Link
+          to="/perfil-de-uso"
+          className="flex items-center justify-between gap-3 card-surface p-4 transition-colors hover:border-primary/50"
+        >
+          <span className="min-w-0">
+            <span className="flex items-center gap-2 text-sm font-semibold">
+              <UserCog className="size-4" /> Perfil de uso
+            </span>
+            <span className="mt-0.5 block text-[11px] text-muted-foreground">
+              Atual: {modeInfo.label}. Motorista, motorista de app, instrutor ou autoescola.
+            </span>
+          </span>
+          <ChevronRight className="size-4 shrink-0 text-muted-foreground" />
+        </Link>
         <DataSourceCard />
         <PushNotificationsCard />
         <OfflineQueueCard />

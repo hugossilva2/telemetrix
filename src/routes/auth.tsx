@@ -65,7 +65,7 @@ function AuthPage() {
     }
     if (data.session) {
       toast.success("Conta criada!");
-      navigate({ to: "/inicio", replace: true });
+      navigate({ to: "/perfil-de-uso", replace: true });
     } else {
       toast.success("Confira seu email para confirmar a conta.");
     }

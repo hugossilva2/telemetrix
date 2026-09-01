@@ -3,7 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { TripRecorder } from "@/components/trips/TripRecorder";
 import { TelemetryProvider } from "@/components/telemetry/TelemetryProvider";
 import { ObserverGate } from "@/components/layout/ObserverGate";
+import { ModeOnboardingGate } from "@/components/layout/ModeOnboardingGate";
 import { ActiveVehicleProvider } from "@/lib/vehicles/active";
+import { AccountModeProvider } from "@/lib/account/profile";
 
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
@@ -15,12 +17,15 @@ export const Route = createFileRoute("/_authenticated")({
     return { user: data.user };
   },
   component: () => (
-    <ActiveVehicleProvider>
-      <TelemetryProvider>
-        <ObserverGate />
-        <TripRecorder />
-        <Outlet />
-      </TelemetryProvider>
-    </ActiveVehicleProvider>
+    <AccountModeProvider>
+      <ActiveVehicleProvider>
+        <TelemetryProvider>
+          <ObserverGate />
+          <ModeOnboardingGate />
+          <TripRecorder />
+          <Outlet />
+        </TelemetryProvider>
+      </ActiveVehicleProvider>
+    </AccountModeProvider>
   ),
 });

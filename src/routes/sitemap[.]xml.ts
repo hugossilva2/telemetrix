@@ -21,6 +21,9 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/casos-de-uso/motorista", changefreq: "monthly", priority: "0.7" },
           { path: "/casos-de-uso/familia", changefreq: "monthly", priority: "0.7" },
           { path: "/casos-de-uso/frota", changefreq: "monthly", priority: "0.7" },
+          { path: "/casos-de-uso/motorista-de-app", changefreq: "monthly", priority: "0.7" },
+          { path: "/casos-de-uso/instrutor", changefreq: "monthly", priority: "0.7" },
+          { path: "/casos-de-uso/autoescola", changefreq: "monthly", priority: "0.7" },
           { path: "/auth", changefreq: "monthly", priority: "0.5" },
         ];
 

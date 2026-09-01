@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { USE_CASE_LIST } from "@/lib/marketing/content";
 
 /** Rodapé compartilhado pelas páginas públicas de marketing. */
 export function SiteFooter() {
@@ -25,27 +26,16 @@ export function SiteFooter() {
         </nav>
         <nav className="flex flex-col gap-1.5 text-xs text-muted-foreground">
           <span className="font-semibold text-foreground">Casos de uso</span>
-          <Link
-            to="/casos-de-uso/$slug"
-            params={{ slug: "motorista" }}
-            className="hover:text-foreground"
-          >
-            Motorista do dia a dia
-          </Link>
-          <Link
-            to="/casos-de-uso/$slug"
-            params={{ slug: "familia" }}
-            className="hover:text-foreground"
-          >
-            Família
-          </Link>
-          <Link
-            to="/casos-de-uso/$slug"
-            params={{ slug: "frota" }}
-            className="hover:text-foreground"
-          >
-            Pequena frota
-          </Link>
+          {USE_CASE_LIST.map((u) => (
+            <Link
+              key={u.slug}
+              to="/casos-de-uso/$slug"
+              params={{ slug: u.slug }}
+              className="hover:text-foreground"
+            >
+              {u.label}
+            </Link>
+          ))}
         </nav>
       </div>
       <p className="mx-auto mt-6 max-w-5xl text-xs text-muted-foreground">

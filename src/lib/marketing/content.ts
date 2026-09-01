@@ -78,7 +78,7 @@ export const FEATURE_SECTIONS: FeatureSection[] = [
 ];
 
 export interface UseCase {
-  slug: "motorista" | "familia" | "frota";
+  slug: "motorista" | "familia" | "frota" | "motorista-de-app" | "instrutor" | "autoescola";
   label: string;
   title: string;
   description: string;
@@ -176,6 +176,93 @@ export const USE_CASES: Record<UseCase["slug"], UseCase> = {
     screens: ["relatorio", "viagens", "rastreio"],
     plan: "frota",
     planReason: "Veículos ilimitados, motoristas com ranking e despesas por veículo.",
+  },
+  "motorista-de-app": {
+    slug: "motorista-de-app",
+    label: "Motorista de app",
+    title: "Para quem roda de Uber, 99 e similares",
+    description:
+      "Saiba quanto sobra de verdade no fim da semana: ganhos, combustível e manutenção do carro lado a lado, na palma da mão.",
+    pain: [
+      "O valor que o app mostra não é o que sobra depois do combustível",
+      "Trocas de óleo e pneus chegam mais rápido com rodagem alta e pegam de surpresa",
+      "Difícil saber se vale mais a pena rodar de manhã ou à noite",
+    ],
+    solution: [
+      {
+        title: "Lucro por km e por hora",
+        text: "Lance corridas e turnos em dois toques; o app cruza com o combustível real gasto e mostra quanto sobrou.",
+      },
+      {
+        title: "Manutenção para rodagem alta",
+        text: "Intervalos de óleo, pneus e freios ajustados para quem roda 300 km por dia, com alerta antes de vencer.",
+      },
+      {
+        title: "Semana no formato do app",
+        text: "Relatório de segunda a domingo, igual ao extrato da plataforma, com custo por corrida.",
+      },
+    ],
+    screens: ["relatorio", "abastecer", "viagens"],
+    plan: "pro",
+    planReason: "Histórico completo, relatórios semanais e coach de direção para economizar combustível.",
+  },
+  instrutor: {
+    slug: "instrutor",
+    label: "Instrutor autônomo",
+    title: "Para o instrutor que dá aulas com o próprio carro",
+    description:
+      "Alunos, agenda e cada aula registrada como trajeto avaliado — freadas, giro do motor e quilometragem — sem planilha.",
+    pain: [
+      "Aulas anotadas no papel ou no WhatsApp, sem histórico por aluno",
+      "Combustível e desgaste do carro sem relação com as aulas dadas",
+      "Aluno pergunta como está indo e você não tem dado para mostrar",
+    ],
+    solution: [
+      {
+        title: "Aula vira trajeto avaliado",
+        text: "Ao encerrar a aula, o percurso gravado pelo carro vira o registro com Eco Score e eventos de direção.",
+      },
+      {
+        title: "Alunos e evolução",
+        text: "Cadastro do aluno, aulas contratadas x realizadas, checklist (baliza, embreagem, sinalização) e observações.",
+      },
+      {
+        title: "Cobrança por aula",
+        text: "Valor por aula ou pacote, com pago/pendente por aluno e custo do carro por aula.",
+      },
+    ],
+    screens: ["viagens", "painel", "relatorio"],
+    plan: "pro",
+    planReason: "Histórico completo, relatórios e compartilhamento com alunos.",
+  },
+  autoescola: {
+    slug: "autoescola",
+    label: "Autoescola",
+    title: "Para autoescolas com vários carros e instrutores",
+    description:
+      "Instrutores com login próprio, agenda geral por carro e a visão do dono: aulas, quilometragem e combustível por veículo.",
+    pain: [
+      "Não se sabe qual carro está com qual instrutor a cada hora",
+      "Combustível por carro só aparece no fim do mês, sem ligação com as aulas",
+      "Documentos e revisões de vários carros vencendo em datas diferentes",
+    ],
+    solution: [
+      {
+        title: "Equipe com login",
+        text: "Convide instrutores; cada um registra suas aulas no celular e vê apenas o que é dele.",
+      },
+      {
+        title: "Agenda geral sem conflito",
+        text: "Quem está com qual carro, alunos por instrutor e avisos de horário sobreposto.",
+      },
+      {
+        title: "Visão do dono",
+        text: "Aulas por instrutor, km e combustível por carro, custo por aula e ranking de direção da equipe.",
+      },
+    ],
+    screens: ["rastreio", "relatorio", "viagens"],
+    plan: "frota",
+    planReason: "Veículos ilimitados, equipe com ranking e despesas por veículo.",
   },
 };
 

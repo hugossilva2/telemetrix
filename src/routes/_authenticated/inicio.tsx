@@ -26,6 +26,8 @@ import { useOpenTrip } from "@/lib/trips/store";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { useAccountMode } from "@/lib/account/profile";
+import { ModeSpotlightCard } from "@/components/dashboard/ModeSpotlightCard";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -41,6 +43,7 @@ export const Route = createFileRoute("/_authenticated/inicio")({
 
 function Dashboard() {
   const { vehicle: activeVehicle } = useActiveVehicle();
+  const { info: modeInfo } = useAccountMode();
   const { status, telemetry, lastMessageAt } = useTelemetry();
   const ignitionOn = telemetry.ignitionOn === true;
 
@@ -81,8 +84,9 @@ function Dashboard() {
   return (
     <AppShell
       title="Painel"
-      subtitle={tripMode ? "Viagem em andamento · tempo real" : "Telemetria em tempo real"}
+      subtitle={tripMode ? "Viagem em andamento · tempo real" : modeInfo.dashboardSubtitle}
     >
+      {!tripMode && <ModeSpotlightCard />}
       <StatusHeader
         ignitionOn={telemetry.ignitionOn}
         status={status}

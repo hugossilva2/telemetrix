@@ -24,6 +24,7 @@ import { Route as AuthenticatedRelatorioRouteImport } from './routes/_authentica
 import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
 import { Route as AuthenticatedPlanosRouteImport } from './routes/_authenticated/planos'
 import { Route as AuthenticatedPlanejarRouteImport } from './routes/_authenticated/planejar'
+import { Route as AuthenticatedPerfilDeUsoRouteImport } from './routes/_authenticated/perfil-de-uso'
 import { Route as AuthenticatedMotoristasRouteImport } from './routes/_authenticated/motoristas'
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedManutencaoRouteImport } from './routes/_authenticated/manutencao'
@@ -118,6 +119,12 @@ const AuthenticatedPlanejarRoute = AuthenticatedPlanejarRouteImport.update({
   path: '/planejar',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPerfilDeUsoRoute =
+  AuthenticatedPerfilDeUsoRouteImport.update({
+    id: '/perfil-de-uso',
+    path: '/perfil-de-uso',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMotoristasRoute = AuthenticatedMotoristasRouteImport.update({
   id: '/motoristas',
   path: '/motoristas',
@@ -240,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRouteWithChildren
+  '/perfil-de-uso': typeof AuthenticatedPerfilDeUsoRoute
   '/planejar': typeof AuthenticatedPlanejarRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
@@ -275,6 +283,7 @@ export interface FileRoutesByTo {
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
   '/motoristas': typeof AuthenticatedMotoristasRouteWithChildren
+  '/perfil-de-uso': typeof AuthenticatedPerfilDeUsoRoute
   '/planejar': typeof AuthenticatedPlanejarRoute
   '/planos': typeof AuthenticatedPlanosRoute
   '/rastreador': typeof AuthenticatedRastreadorRoute
@@ -312,6 +321,7 @@ export interface FileRoutesById {
   '/_authenticated/manutencao': typeof AuthenticatedManutencaoRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
   '/_authenticated/motoristas': typeof AuthenticatedMotoristasRouteWithChildren
+  '/_authenticated/perfil-de-uso': typeof AuthenticatedPerfilDeUsoRoute
   '/_authenticated/planejar': typeof AuthenticatedPlanejarRoute
   '/_authenticated/planos': typeof AuthenticatedPlanosRoute
   '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
@@ -349,6 +359,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/mapa'
     | '/motoristas'
+    | '/perfil-de-uso'
     | '/planejar'
     | '/planos'
     | '/rastreador'
@@ -384,6 +395,7 @@ export interface FileRouteTypes {
     | '/manutencao'
     | '/mapa'
     | '/motoristas'
+    | '/perfil-de-uso'
     | '/planejar'
     | '/planos'
     | '/rastreador'
@@ -420,6 +432,7 @@ export interface FileRouteTypes {
     | '/_authenticated/manutencao'
     | '/_authenticated/mapa'
     | '/_authenticated/motoristas'
+    | '/_authenticated/perfil-de-uso'
     | '/_authenticated/planejar'
     | '/_authenticated/planos'
     | '/_authenticated/rastreador'
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       path: '/planejar'
       fullPath: '/planejar'
       preLoaderRoute: typeof AuthenticatedPlanejarRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/perfil-de-uso': {
+      id: '/_authenticated/perfil-de-uso'
+      path: '/perfil-de-uso'
+      fullPath: '/perfil-de-uso'
+      preLoaderRoute: typeof AuthenticatedPerfilDeUsoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/motoristas': {
@@ -732,6 +752,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedManutencaoRoute: typeof AuthenticatedManutencaoRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
   AuthenticatedMotoristasRoute: typeof AuthenticatedMotoristasRouteWithChildren
+  AuthenticatedPerfilDeUsoRoute: typeof AuthenticatedPerfilDeUsoRoute
   AuthenticatedPlanejarRoute: typeof AuthenticatedPlanejarRoute
   AuthenticatedPlanosRoute: typeof AuthenticatedPlanosRoute
   AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
@@ -756,6 +777,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedManutencaoRoute: AuthenticatedManutencaoRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,
   AuthenticatedMotoristasRoute: AuthenticatedMotoristasRouteWithChildren,
+  AuthenticatedPerfilDeUsoRoute: AuthenticatedPerfilDeUsoRoute,
   AuthenticatedPlanejarRoute: AuthenticatedPlanejarRoute,
   AuthenticatedPlanosRoute: AuthenticatedPlanosRoute,
   AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,

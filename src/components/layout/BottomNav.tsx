@@ -1,23 +1,54 @@
 import { Link } from "@tanstack/react-router";
-import { Car, Eye, Fuel, FolderCog, Radar, Route as RouteIcon, Settings } from "lucide-react";
+import {
+  Car,
+  Eye,
+  Fuel,
+  FolderCog,
+  Radar,
+  Route as RouteIcon,
+  Settings,
+  Users,
+  Wallet,
+  type LucideIcon,
+} from "lucide-react";
 import { useIsObserver } from "@/lib/shares/observer";
+import { useAccountMode } from "@/lib/account/profile";
+import type { AccountMode } from "@/lib/account/mode";
 
-const items = [
-  { to: "/inicio", label: "Painel", Icon: Car, exact: true },
-  { to: "/rastreador", label: "Rastreio", Icon: Radar, exact: false },
-  { to: "/viagens", label: "Viagens", Icon: RouteIcon, exact: false },
-  { to: "/abastecimento", label: "Abastecer", Icon: Fuel, exact: false },
-  { to: "/gestao", label: "Gestão", Icon: FolderCog, exact: false },
-  { to: "/ajustes", label: "Ajustes", Icon: Settings, exact: false },
-] as const;
+interface NavItem {
+  to: "/inicio" | "/rastreador" | "/viagens" | "/abastecimento" | "/gestao" | "/ajustes" | "/despesas" | "/motoristas" | "/acompanhar";
+  label: string;
+  Icon: LucideIcon;
+  exact: boolean;
+}
 
-const observerItems = [
+const base = {
+  painel: { to: "/inicio", label: "Painel", Icon: Car, exact: true },
+  rastreio: { to: "/rastreador", label: "Rastreio", Icon: Radar, exact: false },
+  viagens: { to: "/viagens", label: "Viagens", Icon: RouteIcon, exact: false },
+  abastecer: { to: "/abastecimento", label: "Abastecer", Icon: Fuel, exact: false },
+  gestao: { to: "/gestao", label: "Gestão", Icon: FolderCog, exact: false },
+  ajustes: { to: "/ajustes", label: "Ajustes", Icon: Settings, exact: false },
+  despesas: { to: "/despesas", label: "Gastos", Icon: Wallet, exact: false },
+  equipe: { to: "/motoristas", label: "Equipe", Icon: Users, exact: false },
+} satisfies Record<string, NavItem>;
+
+/** Menu inferior por perfil de uso. Motorista mantém o menu original. */
+const NAV_BY_MODE: Record<AccountMode, NavItem[]> = {
+  motorista: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
+  app: [base.painel, base.viagens, base.abastecer, base.despesas, base.gestao, base.ajustes],
+  instrutor: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
+  autoescola: [base.painel, base.rastreio, base.viagens, base.equipe, base.gestao, base.ajustes],
+};
+
+const observerItems: NavItem[] = [
   { to: "/acompanhar", label: "Rastreio", Icon: Eye, exact: false },
-] as const;
+];
 
 export function BottomNav() {
   const { isObserver } = useIsObserver();
-  const navItems = isObserver ? observerItems : items;
+  const { mode } = useAccountMode();
+  const navItems = isObserver ? observerItems : NAV_BY_MODE[mode];
 
   return (
     <nav

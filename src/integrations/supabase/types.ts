@@ -436,6 +436,33 @@ export type Database = {
           },
         ]
       }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          mode: Database["public"]["Enums"]["account_mode"]
+          onboarded_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          mode?: Database["public"]["Enums"]["account_mode"]
+          onboarded_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          mode?: Database["public"]["Enums"]["account_mode"]
+          onboarded_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
@@ -1101,6 +1128,7 @@ export type Database = {
       }
     }
     Enums: {
+      account_mode: "motorista" | "app" | "instrutor" | "autoescola"
       app_plan: "free" | "pro" | "frota"
       expense_category:
         | "pedagio"
@@ -1266,6 +1294,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_mode: ["motorista", "app", "instrutor", "autoescola"],
       app_plan: ["free", "pro", "frota"],
       expense_category: [
         "pedagio",

@@ -11,6 +11,7 @@ export function StyledTileLayers({ style }: { style: MapStyleId }) {
           url={l.url}
           attribution={l.attribution}
           maxZoom={l.maxZoom}
+          {...(l.className ? { className: l.className } : {})}
           {...(l.subdomains ? { subdomains: l.subdomains } : {})}
         />
       ))}

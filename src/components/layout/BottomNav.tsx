@@ -16,7 +16,7 @@ import { useAccountMode } from "@/lib/account/profile";
 import type { AccountMode } from "@/lib/account/mode";
 
 interface NavItem {
-  to: "/inicio" | "/rastreador" | "/viagens" | "/abastecimento" | "/gestao" | "/ajustes" | "/despesas" | "/motoristas";
+  to: "/inicio" | "/rastreador" | "/viagens" | "/abastecimento" | "/gestao" | "/ajustes" | "/despesas" | "/motoristas" | "/acompanhar";
   label: string;
   Icon: LucideIcon;
   exact: boolean;
@@ -42,7 +42,7 @@ const NAV_BY_MODE: Record<AccountMode, NavItem[]> = {
 };
 
 const observerItems: NavItem[] = [
-  { to: "/rastreador", label: "Rastreio", Icon: Eye, exact: false },
+  { to: "/acompanhar", label: "Rastreio", Icon: Eye, exact: false },
 ];
 
 export function BottomNav() {

@@ -85,7 +85,7 @@ export function useSetAccountMode() {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id;
       if (!userId) throw new Error("Sessão expirada");
-      const payload: Record<string, unknown> = {
+      const payload: { mode: AccountMode; onboarded_at: string; display_name?: string | null } = {
         mode: input.mode,
         onboarded_at: new Date().toISOString(),
       };

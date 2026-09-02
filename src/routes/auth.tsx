@@ -11,6 +11,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/auth")({
   ssr: false,
+  validateSearch: (s: Record<string, unknown>): { redirect?: string } => ({
+    redirect:
+      typeof s.redirect === "string" && s.redirect.startsWith("/") && !s.redirect.startsWith("//")
+        ? s.redirect
+        : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Entrar · Gestão Veicular" },
@@ -24,6 +30,9 @@ export const Route = createFileRoute("/auth")({
 
 function AuthPage() {
   const navigate = useNavigate();
+  const { redirect } = Route.useSearch();
+  const go = (fallback: "/inicio" | "/perfil-de-uso") =>
+    redirect ? navigate({ href: redirect, replace: true }) : navigate({ to: fallback, replace: true });
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,9 +40,10 @@ function AuthPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
-      if (data.user) navigate({ to: "/inicio", replace: true });
+      if (data.user) go("/inicio");
     });
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [navigate, redirect]);
 
   async function handleSignIn(e: React.FormEvent) {
     e.preventDefault();
@@ -47,7 +57,7 @@ function AuthPage() {
       return;
     }
     toast.success("Bem-vindo!");
-    navigate({ to: "/inicio", replace: true });
+    go("/inicio");
   }
 
   async function handleSignUp(e: React.FormEvent) {
@@ -65,7 +75,7 @@ function AuthPage() {
     }
     if (data.session) {
       toast.success("Conta criada!");
-      navigate({ to: "/perfil-de-uso", replace: true });
+      go("/perfil-de-uso");
     } else {
       toast.success("Confira seu email para confirmar a conta.");
     }

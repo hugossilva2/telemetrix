@@ -320,6 +320,95 @@ export type Database = {
           },
         ]
       }
+      lessons: {
+        Row: {
+          checklist: Json
+          created_at: string
+          duration_min: number
+          ended_at: string | null
+          id: string
+          instructor_id: string
+          notes: string | null
+          org_id: string
+          paid: boolean
+          price: number | null
+          scheduled_at: string
+          started_at: string | null
+          status: Database["public"]["Enums"]["lesson_status"]
+          student_id: string
+          trip_id: string | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          checklist?: Json
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          id?: string
+          instructor_id: string
+          notes?: string | null
+          org_id: string
+          paid?: boolean
+          price?: number | null
+          scheduled_at: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["lesson_status"]
+          student_id: string
+          trip_id?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          checklist?: Json
+          created_at?: string
+          duration_min?: number
+          ended_at?: string | null
+          id?: string
+          instructor_id?: string
+          notes?: string | null
+          org_id?: string
+          paid?: boolean
+          price?: number | null
+          scheduled_at?: string
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["lesson_status"]
+          student_id?: string
+          trip_id?: string | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lessons_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lessons_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       maintenance_records: {
         Row: {
           cost: number | null
@@ -371,6 +460,122 @@ export type Database = {
           user_id?: string
           vehicle_id?: string | null
           workshop?: string | null
+        }
+        Relationships: []
+      }
+      organization_invites: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          expires_at: string
+          id: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          student_id: string | null
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          org_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          student_id?: string | null
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          expires_at?: string
+          id?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          student_id?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_invites_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_invites_student_fk"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          kind: Database["public"]["Enums"]["org_kind"]
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["org_kind"]
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: Database["public"]["Enums"]["org_kind"]
+          name?: string
+          owner_id?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -672,6 +877,62 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          active: boolean
+          category: string | null
+          contracted_lessons: number
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          org_id: string
+          phone: string | null
+          photo_path: string | null
+          renach: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          contracted_lessons?: number
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          org_id: string
+          phone?: string | null
+          photo_path?: string | null
+          renach?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          contracted_lessons?: number
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          org_id?: string
+          phone?: string | null
+          photo_path?: string | null
+          renach?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "students_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -1236,12 +1497,41 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_org_invite: { Args: { _token: string }; Returns: string }
       accept_vehicle_share: { Args: { _share_id: string }; Returns: boolean }
       can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
       current_plan: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_plan"]
       }
+      get_org_invite: {
+        Args: { _token: string }
+        Returns: {
+          accepted: boolean
+          expired: boolean
+          org_kind: Database["public"]["Enums"]["org_kind"]
+          org_name: string
+          role: Database["public"]["Enums"]["org_role"]
+          student_name: string
+        }[]
+      }
+      has_org_role: {
+        Args: {
+          _org_id: string
+          _role: Database["public"]["Enums"]["org_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_org_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_staff: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      my_student_ids: { Args: never; Returns: string[] }
       touch_vehicle_share_seen: {
         Args: { _share_id: string }
         Returns: boolean
@@ -1261,6 +1551,7 @@ export type Database = {
         | "acessorio"
         | "outro"
         | "combustivel"
+      lesson_status: "agendada" | "em_andamento" | "concluida" | "cancelada"
       maintenance_type:
         | "oleo"
         | "filtro_oleo"
@@ -1272,6 +1563,8 @@ export type Database = {
         | "velas"
         | "revisao"
         | "outro"
+      org_kind: "instrutor" | "autoescola"
+      org_role: "owner" | "instructor" | "student"
       ride_platform: "uber" | "99" | "indrive" | "outra"
       subscription_status: "active" | "trialing" | "canceled" | "past_due"
       tracker_event_type:
@@ -1429,6 +1722,7 @@ export const Constants = {
         "outro",
         "combustivel",
       ],
+      lesson_status: ["agendada", "em_andamento", "concluida", "cancelada"],
       maintenance_type: [
         "oleo",
         "filtro_oleo",
@@ -1441,6 +1735,8 @@ export const Constants = {
         "revisao",
         "outro",
       ],
+      org_kind: ["instrutor", "autoescola"],
+      org_role: ["owner", "instructor", "student"],
       ride_platform: ["uber", "99", "indrive", "outra"],
       subscription_status: ["active", "trialing", "canceled", "past_due"],
       tracker_event_type: [

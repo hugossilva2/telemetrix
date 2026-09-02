@@ -1,0 +1,12 @@
+REVOKE EXECUTE ON FUNCTION public.has_org_role(uuid, uuid, public.org_role) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.is_org_member(uuid, uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.is_org_staff(uuid, uuid) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.my_student_ids() FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.get_org_invite(text) FROM PUBLIC, anon;
+REVOKE EXECUTE ON FUNCTION public.accept_org_invite(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.has_org_role(uuid, uuid, public.org_role) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_org_member(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.is_org_staff(uuid, uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.my_student_ids() TO authenticated;
+GRANT EXECUTE ON FUNCTION public.get_org_invite(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.accept_org_invite(text) TO authenticated;

@@ -4,6 +4,7 @@ import { TripRecorder } from "@/components/trips/TripRecorder";
 import { TelemetryProvider } from "@/components/telemetry/TelemetryProvider";
 import { ObserverGate } from "@/components/layout/ObserverGate";
 import { ModeOnboardingGate } from "@/components/layout/ModeOnboardingGate";
+import { StudentGate } from "@/components/layout/StudentGate";
 import { ActiveVehicleProvider } from "@/lib/vehicles/active";
 import { AccountModeProvider } from "@/lib/account/profile";
 
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/_authenticated")({
         <TelemetryProvider>
           <ObserverGate />
           <ModeOnboardingGate />
+          <StudentGate />
           <TripRecorder />
           <Outlet />
         </TelemetryProvider>

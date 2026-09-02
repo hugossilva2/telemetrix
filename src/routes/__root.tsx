@@ -142,7 +142,7 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Rotas públicas de marketing e login não usam a navegação do app.
   const publicPaths = ["/", "/auth", "/demo", "/recursos", "/precos"];
-  const showNav = !publicPaths.includes(pathname) && !pathname.startsWith("/casos-de-uso");
+  const showNav = !publicPaths.includes(pathname) && !pathname.startsWith("/casos-de-uso") && !pathname.startsWith("/convite/");
 
   useEffect(() => {
     registerServiceWorker();

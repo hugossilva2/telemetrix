@@ -29,6 +29,7 @@ import { useActiveVehicle } from "@/lib/vehicles/active";
 import { useAccountMode } from "@/lib/account/profile";
 import { ModeSpotlightCard } from "@/components/dashboard/ModeSpotlightCard";
 import { ProfitTodayCard } from "@/components/dashboard/ProfitTodayCard";
+import { LessonsTodayCard } from "@/components/dashboard/LessonsTodayCard";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({
@@ -88,6 +89,7 @@ function Dashboard() {
       subtitle={tripMode ? "Viagem em andamento · tempo real" : modeInfo.dashboardSubtitle}
     >
       {!tripMode && <ProfitTodayCard />}
+      {!tripMode && <LessonsTodayCard />}
       {!tripMode && <ModeSpotlightCard />}
       <StatusHeader
         ignitionOn={telemetry.ignitionOn}

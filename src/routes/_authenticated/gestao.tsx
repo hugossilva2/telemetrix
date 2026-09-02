@@ -3,7 +3,9 @@ import {
   BarChart3,
   CalendarRange,
   CarTaxiFront,
+  CalendarDays,
   ClipboardCheck,
+  GraduationCap,
   Eye,
   Leaf,
   PiggyBank,
@@ -98,9 +100,20 @@ const appModeLinks: typeof links = [
   { to: "/viagens", label: "Viagens", desc: "Histórico gravado pelo OBD/rastreador", Icon: RouteIcon },
 ];
 
+const teachingLinks: typeof links = [
+  { to: "/aulas", label: "Aulas", desc: "Agenda, iniciar/encerrar e checklist", Icon: CalendarDays },
+  { to: "/alunos", label: "Alunos", desc: "Cadastro, convite e evolução", Icon: GraduationCap },
+  { to: "/rastreador", label: "Rastreio", desc: "Localização, alertas e geofences", Icon: Radar },
+];
+
 function GestaoPage() {
   const { mode } = useAccountMode();
-  const items = mode === "app" ? [...appModeLinks, ...links] : links;
+  const items =
+    mode === "app"
+      ? [...appModeLinks, ...links]
+      : mode === "instrutor" || mode === "autoescola"
+        ? [...teachingLinks, ...links]
+        : links;
   return (
     <AppShell title="Gestão" subtitle="Manutenção, condutores e documentos">
       <MaintenanceAlertsCard />

@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { ModePicker } from "@/components/account/ModePicker";
 import { useAccountMode, useSetAccountMode } from "@/lib/account/profile";
 import { toUserMessage } from "@/lib/errors/userMessage";
-import type { AccountMode } from "@/lib/account/mode";
+import { isTeachingMode, type AccountMode } from "@/lib/account/mode";
+import { useEnsureSchool } from "@/lib/school/api";
 
 export const Route = createFileRoute("/_authenticated/perfil-de-uso")({
   head: () => ({
@@ -26,6 +27,7 @@ function PerfilDeUsoPage() {
   const navigate = useNavigate();
   const { mode, profile, needsOnboarding, loading } = useAccountMode();
   const save = useSetAccountMode();
+  const ensureSchool = useEnsureSchool();
   const [selected, setSelected] = useState<AccountMode>(mode);
   const [displayName, setDisplayName] = useState("");
 
@@ -40,7 +42,17 @@ function PerfilDeUsoPage() {
     save.mutate(
       { mode: selected, displayName },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
+          if (isTeachingMode(selected)) {
+            try {
+              await ensureSchool.mutateAsync({
+                name: displayName.trim() || (selected === "autoescola" ? "Minha autoescola" : "Minha escola"),
+                kind: selected as "instrutor" | "autoescola",
+              });
+            } catch {
+              /* a tela de Aulas/Alunos oferece criar depois */
+            }
+          }
           toast.success(needsOnboarding ? "Tudo pronto! Bem-vindo ao Telemetrix." : "Perfil de uso atualizado.");
           navigate({ to: needsOnboarding ? "/inicio" : "/ajustes", replace: true });
         },

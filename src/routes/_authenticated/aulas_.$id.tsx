@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { formatDateTime } from "@/lib/trips/format";
@@ -90,7 +91,7 @@ function AulaPage() {
   }, [lesson, candidates.data]);
 
   const save = useMutation({
-    mutationFn: async (patch: Record<string, unknown>) => {
+    mutationFn: async (patch: Database["public"]["Tables"]["lessons"]["Update"]) => {
       const { error } = await supabase.from("lessons").update(patch).eq("id", id);
       if (error) throw error;
     },

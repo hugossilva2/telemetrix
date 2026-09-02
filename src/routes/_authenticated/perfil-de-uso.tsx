@@ -47,7 +47,7 @@ function PerfilDeUsoPage() {
             try {
               await ensureSchool.mutateAsync({
                 name: displayName.trim() || (selected === "autoescola" ? "Minha autoescola" : "Minha escola"),
-                kind: selected,
+                kind: selected as "instrutor" | "autoescola",
               });
             } catch {
               /* a tela de Aulas/Alunos oferece criar depois */

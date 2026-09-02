@@ -19,7 +19,7 @@ import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
 import { useEndLesson, useStartLesson } from "@/lib/school/actions";
 
 export const Route = createFileRoute("/_authenticated/aulas")({
-  validateSearch: (s: Record<string, unknown>) => ({
+  validateSearch: (s: Record<string, unknown>): { aluno?: string } => ({
     aluno: typeof s.aluno === "string" ? s.aluno : undefined,
   }),
   head: () => ({

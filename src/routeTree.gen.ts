@@ -19,6 +19,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CasosDeUsoSlugRouteImport } from './routes/casos-de-uso.$slug'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
+import { Route as AuthenticatedSemanaRouteImport } from './routes/_authenticated/semana'
 import { Route as AuthenticatedRotinasRouteImport } from './routes/_authenticated/rotinas'
 import { Route as AuthenticatedRelatorioRouteImport } from './routes/_authenticated/relatorio'
 import { Route as AuthenticatedRastreadorRouteImport } from './routes/_authenticated/rastreador'
@@ -94,6 +95,11 @@ const AuthenticatedViagensRoute = AuthenticatedViagensRouteImport.update({
 const AuthenticatedVeiculosRoute = AuthenticatedVeiculosRouteImport.update({
   id: '/veiculos',
   path: '/veiculos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSemanaRoute = AuthenticatedSemanaRouteImport.update({
+  id: '/semana',
+  path: '/semana',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRotinasRoute = AuthenticatedRotinasRouteImport.update({
@@ -267,6 +273,7 @@ export interface FileRoutesByFullPath {
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
   '/rotinas': typeof AuthenticatedRotinasRoute
+  '/semana': typeof AuthenticatedSemanaRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
@@ -305,6 +312,7 @@ export interface FileRoutesByTo {
   '/rastreador': typeof AuthenticatedRastreadorRoute
   '/relatorio': typeof AuthenticatedRelatorioRoute
   '/rotinas': typeof AuthenticatedRotinasRoute
+  '/semana': typeof AuthenticatedSemanaRoute
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
@@ -345,6 +353,7 @@ export interface FileRoutesById {
   '/_authenticated/rastreador': typeof AuthenticatedRastreadorRoute
   '/_authenticated/relatorio': typeof AuthenticatedRelatorioRoute
   '/_authenticated/rotinas': typeof AuthenticatedRotinasRoute
+  '/_authenticated/semana': typeof AuthenticatedSemanaRoute
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/rastreador'
     | '/relatorio'
     | '/rotinas'
+    | '/semana'
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
@@ -423,6 +433,7 @@ export interface FileRouteTypes {
     | '/rastreador'
     | '/relatorio'
     | '/rotinas'
+    | '/semana'
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
@@ -462,6 +473,7 @@ export interface FileRouteTypes {
     | '/_authenticated/rastreador'
     | '/_authenticated/relatorio'
     | '/_authenticated/rotinas'
+    | '/_authenticated/semana'
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
     | '/casos-de-uso/$slug'
@@ -556,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/veiculos'
       fullPath: '/veiculos'
       preLoaderRoute: typeof AuthenticatedVeiculosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/semana': {
+      id: '/_authenticated/semana'
+      path: '/semana'
+      fullPath: '/semana'
+      preLoaderRoute: typeof AuthenticatedSemanaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/rotinas': {
@@ -798,6 +817,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedRastreadorRoute: typeof AuthenticatedRastreadorRoute
   AuthenticatedRelatorioRoute: typeof AuthenticatedRelatorioRoute
   AuthenticatedRotinasRoute: typeof AuthenticatedRotinasRoute
+  AuthenticatedSemanaRoute: typeof AuthenticatedSemanaRoute
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
 }
@@ -825,6 +845,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedRastreadorRoute: AuthenticatedRastreadorRoute,
   AuthenticatedRelatorioRoute: AuthenticatedRelatorioRoute,
   AuthenticatedRotinasRoute: AuthenticatedRotinasRoute,
+  AuthenticatedSemanaRoute: AuthenticatedSemanaRoute,
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
 }

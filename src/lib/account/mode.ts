@@ -39,7 +39,7 @@ export const ACCOUNT_MODE_INFO: Record<AccountMode, AccountModeInfo> = {
     highlights: ["Lucro por km e por hora", "Corridas e turnos", "Manutenção por rodagem alta"],
     dashboardSubtitle: "Seu carro é sua ferramenta de trabalho",
     useCaseSlug: "motorista-de-app",
-    upcoming: ["Relatório semanal seg–dom", "Manutenção por rodagem alta"],
+    upcoming: [],
   },
   instrutor: {
     id: "instrutor",

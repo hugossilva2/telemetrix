@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { ChevronRight, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { useAccountMode } from "@/lib/account/profile";
 import {
   computeStatus,
+  HEAVY_WARN_KM,
   latestByType,
   maintenanceClasses,
   MAINTENANCE_LABEL,
@@ -37,6 +39,8 @@ function alreadyNotifiedToday(key: string) {
 export function MaintenanceAlertsCard() {
   const { telemetry } = useTelemetry();
   const currentMileage = telemetry.mileageKm ?? null;
+  const { mode } = useAccountMode();
+  const statusOpts = mode === "app" ? { warnKm: HEAVY_WARN_KM } : {};
 
   const { data: records = [] } = useQuery<MaintenanceRecord[]>({
     queryKey: ["maintenance"],
@@ -52,10 +56,10 @@ export function MaintenanceAlertsCard() {
 
   const alerts = useMemo(() => {
     return latestByType(records)
-      .map((r) => ({ record: r, info: computeStatus(r, currentMileage) }))
+      .map((r) => ({ record: r, info: computeStatus(r, currentMileage, statusOpts) }))
       .filter((x) => x.info.status === "soon" || x.info.status === "overdue")
       .sort((a, b) => (a.info.status === "overdue" ? -1 : 1) - (b.info.status === "overdue" ? -1 : 1));
-  }, [records, currentMileage]);
+  }, [records, currentMileage, statusOpts.warnKm]);
 
   useEffect(() => {
     for (const a of alerts) {

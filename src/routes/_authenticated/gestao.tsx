@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BarChart3,
+  CalendarRange,
   CarTaxiFront,
   ClipboardCheck,
   Eye,
@@ -92,6 +93,7 @@ const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
 const appModeLinks: typeof links = [
   { to: "/corridas", label: "Corridas", desc: "Lançamento rápido e turnos", Icon: CarTaxiFront },
   { to: "/lucro", label: "Meu lucro", desc: "Ganhos − gastos, R$/km e R$/hora", Icon: PiggyBank },
+  { to: "/semana", label: "Semana", desc: "Relatório seg–dom, como no app de corridas", Icon: CalendarRange },
   { to: "/rastreador", label: "Rastreio", desc: "Localização, alertas e geofences", Icon: Radar },
   { to: "/viagens", label: "Viagens", desc: "Histórico gravado pelo OBD/rastreador", Icon: RouteIcon },
 ];

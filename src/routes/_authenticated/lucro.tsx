@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis } from "recharts";
-import { Car, Fuel, Wallet } from "lucide-react";
+import { CalendarRange, Car, Fuel, Wallet } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatBRL } from "@/lib/format";
 import { useProfitCosts, useRides, useShifts } from "@/lib/rides/api";
@@ -103,6 +103,15 @@ function LucroPage() {
           <Kpi label="R$/hora" value={summary.profitPerHour != null ? formatBRL(summary.profitPerHour) : "—"} hint={`${summary.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h de turno`} />
         </div>
       </section>
+
+      <Link
+        to="/semana"
+        className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 px-4 py-3 transition-colors hover:border-primary/50"
+      >
+        <CalendarRange className="size-4 text-primary" />
+        <span className="flex-1 text-sm font-medium">Relatório semanal (seg–dom)</span>
+        <span className="text-xs text-muted-foreground">ver semanas</span>
+      </Link>
 
       <section className="card-surface divide-y divide-border/60 p-0">
         <Row Icon={Car} label="Ganhos" hint={summary.tips > 0 ? `inclui ${formatBRL(summary.tips)} em gorjetas` : "corridas + gorjetas"} value={formatBRL(summary.earnings)} />

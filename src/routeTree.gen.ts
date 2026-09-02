@@ -49,6 +49,7 @@ import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/
 import { Route as ApiPublicFlespiPollRouteImport } from './routes/api/public/flespi-poll'
 import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 import { Route as AuthenticatedMotoristasIdRouteImport } from './routes/_authenticated/motoristas.$id'
+import { Route as AuthenticatedAulasIdRouteImport } from './routes/_authenticated/aulas_.$id'
 import { Route as AuthenticatedAlunosIdRouteImport } from './routes/_authenticated/alunos_.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -256,6 +257,11 @@ const AuthenticatedMotoristasIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedMotoristasRoute,
   } as any)
+const AuthenticatedAulasIdRoute = AuthenticatedAulasIdRouteImport.update({
+  id: '/aulas_/$id',
+  path: '/aulas/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAlunosIdRoute = AuthenticatedAlunosIdRouteImport.update({
   id: '/alunos_/$id',
   path: '/alunos/$id',
@@ -298,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/alunos/$id': typeof AuthenticatedAlunosIdRoute
+  '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/alunos/$id': typeof AuthenticatedAlunosIdRoute
+  '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
   '/_authenticated/alunos_/$id': typeof AuthenticatedAlunosIdRoute
+  '/_authenticated/aulas_/$id': typeof AuthenticatedAulasIdRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -428,6 +437,7 @@ export interface FileRouteTypes {
     | '/viagens'
     | '/casos-de-uso/$slug'
     | '/alunos/$id'
+    | '/aulas/$id'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-poll'
@@ -470,6 +480,7 @@ export interface FileRouteTypes {
     | '/viagens'
     | '/casos-de-uso/$slug'
     | '/alunos/$id'
+    | '/aulas/$id'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-poll'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/_authenticated/viagens'
     | '/casos-de-uso/$slug'
     | '/_authenticated/alunos_/$id'
+    | '/_authenticated/aulas_/$id'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-poll'
@@ -816,6 +828,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMotoristasIdRouteImport
       parentRoute: typeof AuthenticatedMotoristasRoute
     }
+    '/_authenticated/aulas_/$id': {
+      id: '/_authenticated/aulas_/$id'
+      path: '/aulas/$id'
+      fullPath: '/aulas/$id'
+      preLoaderRoute: typeof AuthenticatedAulasIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/alunos_/$id': {
       id: '/_authenticated/alunos_/$id'
       path: '/alunos/$id'
@@ -880,6 +899,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
   AuthenticatedAlunosIdRoute: typeof AuthenticatedAlunosIdRoute
+  AuthenticatedAulasIdRoute: typeof AuthenticatedAulasIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -911,6 +931,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
   AuthenticatedAlunosIdRoute: AuthenticatedAlunosIdRoute,
+  AuthenticatedAulasIdRoute: AuthenticatedAulasIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

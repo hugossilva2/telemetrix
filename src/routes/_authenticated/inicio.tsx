@@ -28,6 +28,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { useAccountMode } from "@/lib/account/profile";
 import { ModeSpotlightCard } from "@/components/dashboard/ModeSpotlightCard";
+import { ProfitTodayCard } from "@/components/dashboard/ProfitTodayCard";
 
 export const Route = createFileRoute("/_authenticated/inicio")({
   head: () => ({

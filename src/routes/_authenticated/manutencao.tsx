@@ -92,6 +92,7 @@ function ManutencaoPage() {
     setType(t);
     const km = defaultIntervalKm(t, heavyUse);
     setIntervalKm(km != null ? String(km) : "");
+    const preset = MAINTENANCE_TYPES.find((x) => x.value === t);
     setIntervalMonths(preset?.defaultMonths != null ? String(preset.defaultMonths) : "");
   };
 

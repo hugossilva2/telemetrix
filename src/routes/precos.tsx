@@ -3,7 +3,8 @@ import { Check, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SiteHeader } from "@/components/marketing/SiteHeader";
 import { SiteFooter } from "@/components/marketing/SiteFooter";
-import { PLANS, priceLabel } from "@/lib/billing/plans";
+import { LIMIT_LABELS, PLANS, limitValueLabel, priceLabel, type PlanLimits } from "@/lib/billing/plans";
+import { ACCOUNT_MODES, ACCOUNT_MODE_INFO } from "@/lib/account/mode";
 import { OG_SCREENSHOT, SITE_URL } from "@/lib/demo/screens";
 
 const TITLE = "Preços do Telemetrix — planos Free, Pro e Frota";
@@ -29,32 +30,34 @@ const FAQ = [
     a: "Não. O hardware é comprado separadamente (um ELM327 Bluetooth custa a partir de cerca de R$ 60) ou você usa um rastreador compatível que já tenha.",
   },
   {
+    q: "Os planos mudam conforme o perfil (motorista de app, instrutor, autoescola)?",
+    a: "Os planos são os mesmos para todos; o que muda são os limites que importam para você: corridas por mês para motoristas de app, alunos ativos para instrutores e instrutores convidados para autoescolas.",
+  },
+  {
     q: "A cobrança é em reais?",
     a: "Sim, os preços são em reais e cobrados mensalmente.",
   },
 ];
 
+const MATRIX_KEYS: (keyof PlanLimits)[] = [
+  "maxVehicles",
+  "historyDays",
+  "reports",
+  "aiCoach",
+  "automations",
+  "sharing",
+  "fleet",
+  "ridesPerMonth",
+  "maxStudents",
+  "maxInstructors",
+];
+
 const MATRIX: { label: string; get: (i: number) => boolean | string }[] = [
-  {
-    label: "Veículos",
-    get: (i) => {
-      const n = PLANS[i].limits.maxVehicles;
-      return Number.isFinite(n) ? String(n) : "Ilimitados";
-    },
-  },
-  {
-    label: "Histórico de viagens",
-    get: (i) => {
-      const d = PLANS[i].limits.historyDays;
-      return Number.isFinite(d) ? `${d} dias` : "Completo";
-    },
-  },
   { label: "Telemetria ao vivo e Eco Score", get: () => true },
-  { label: "Relatórios e tendências", get: (i) => PLANS[i].limits.reports },
-  { label: "Coach de direção com IA", get: (i) => PLANS[i].limits.aiCoach },
-  { label: "Rotinas por cerca virtual", get: (i) => PLANS[i].limits.automations },
-  { label: "Compartilhar rastreamento", get: (i) => PLANS[i].limits.sharing },
-  { label: "Motoristas e ranking", get: (i) => PLANS[i].limits.fleet },
+  ...MATRIX_KEYS.map((k) => ({
+    label: LIMIT_LABELS[k],
+    get: (i: number) => limitValueLabel(k, PLANS[i].limits),
+  })),
 ];
 
 export const Route = createFileRoute("/precos")({
@@ -146,6 +149,36 @@ function PrecosPage() {
                 </Button>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section className="px-4 pt-14">
+          <div className="mx-auto max-w-5xl">
+            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">
+              Qual plano para o seu uso?
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Você escolhe o perfil ao criar a conta; os limites abaixo são os que valem para cada um.
+            </p>
+            <div className="mt-5 grid gap-4 md:grid-cols-2">
+              {ACCOUNT_MODES.map((m) => {
+                const info = ACCOUNT_MODE_INFO[m];
+                return (
+                  <article key={m} className="card-surface p-5">
+                    <h3 className="font-display text-lg font-bold">{info.label}</h3>
+                    <p className="text-xs text-muted-foreground">{info.tagline}</p>
+                    <ul className="mt-3 space-y-2 text-sm">
+                      {PLANS.map((p) => (
+                        <li key={p.id} className="flex gap-2">
+                          <span className="w-12 shrink-0 font-semibold">{p.name}</span>
+                          <span className="text-muted-foreground">{p.examples[m]}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </article>
+                );
+              })}
+            </div>
           </div>
         </section>
 

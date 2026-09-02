@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import {
+  CalendarDays,
   Car,
   CarTaxiFront,
   Eye,
+  GraduationCap,
   Fuel,
   FolderCog,
   PiggyBank,
@@ -13,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { useIsObserver } from "@/lib/shares/observer";
+import { useIsStudent } from "@/lib/school/student";
 import { useAccountMode } from "@/lib/account/profile";
 import type { AccountMode } from "@/lib/account/mode";
 
@@ -27,7 +30,10 @@ interface NavItem {
     | "/corridas"
     | "/lucro"
     | "/motoristas"
-    | "/acompanhar";
+    | "/acompanhar"
+    | "/aulas"
+    | "/alunos"
+    | "/aluno";
   label: string;
   Icon: LucideIcon;
   exact: boolean;
@@ -43,24 +49,32 @@ const base = {
   corridas: { to: "/corridas", label: "Corridas", Icon: CarTaxiFront, exact: false },
   lucro: { to: "/lucro", label: "Lucro", Icon: PiggyBank, exact: false },
   equipe: { to: "/motoristas", label: "Equipe", Icon: Users, exact: false },
+  aulas: { to: "/aulas", label: "Aulas", Icon: CalendarDays, exact: false },
+  alunos: { to: "/alunos", label: "Alunos", Icon: GraduationCap, exact: false },
 } satisfies Record<string, NavItem>;
 
 /** Menu inferior por perfil de uso. Motorista mantém o menu original. */
 const NAV_BY_MODE: Record<AccountMode, NavItem[]> = {
   motorista: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
   app: [base.painel, base.corridas, base.lucro, base.abastecer, base.gestao, base.ajustes],
-  instrutor: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
-  autoescola: [base.painel, base.rastreio, base.viagens, base.equipe, base.gestao, base.ajustes],
+  instrutor: [base.painel, base.aulas, base.alunos, base.viagens, base.gestao, base.ajustes],
+  autoescola: [base.painel, base.aulas, base.alunos, base.equipe, base.gestao, base.ajustes],
 };
 
 const observerItems: NavItem[] = [
   { to: "/acompanhar", label: "Rastreio", Icon: Eye, exact: false },
 ];
 
+const studentItems: NavItem[] = [
+  { to: "/aluno", label: "Meu progresso", Icon: GraduationCap, exact: false },
+  base.ajustes,
+];
+
 export function BottomNav() {
   const { isObserver } = useIsObserver();
+  const { isStudent } = useIsStudent();
   const { mode } = useAccountMode();
-  const navItems = isObserver ? observerItems : NAV_BY_MODE[mode];
+  const navItems = isObserver ? observerItems : isStudent ? studentItems : NAV_BY_MODE[mode];
 
   return (
     <nav
@@ -69,7 +83,7 @@ export function BottomNav() {
     >
       <ul
         className={`mx-auto grid max-w-md px-1 py-1 ${
-          isObserver ? "grid-cols-1" : "grid-cols-6"
+          isObserver ? "grid-cols-1" : isStudent ? "grid-cols-2" : "grid-cols-6"
         }`}
       >
         {navItems.map(({ to, label, Icon, exact }) => (

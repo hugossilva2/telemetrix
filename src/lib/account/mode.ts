@@ -48,7 +48,7 @@ export const ACCOUNT_MODE_INFO: Record<AccountMode, AccountModeInfo> = {
     highlights: ["Alunos e agenda", "Aula vira trajeto avaliado", "Cobrança por aula"],
     dashboardSubtitle: "Aulas e alunos no seu carro",
     useCaseSlug: "instrutor",
-    upcoming: ["Cadastro de alunos", "Agenda de aulas", "Aula vinculada à viagem"],
+    upcoming: [],
   },
   autoescola: {
     id: "autoescola",

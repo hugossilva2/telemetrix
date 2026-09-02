@@ -16,7 +16,6 @@ import {
   MapPin,
   ShieldCheck,
   UserRound,
-  Users,
   Wallet,
   Wrench,
 } from "lucide-react";

@@ -19,6 +19,9 @@ import {
   useToggleAssignment,
 } from "@/lib/school/teamApi";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
+import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard";
+import { limitStatus } from "@/lib/billing/plans";
+import { useSubscription } from "@/lib/billing/subscription";
 
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({
@@ -52,6 +55,7 @@ function EquipePage() {
   const removeMember = useRemoveMember(school?.id);
   const setInFleet = useSetVehicleInFleet(school?.id);
   const toggle = useToggleAssignment(school?.id);
+  const { plan, limits } = useSubscription();
 
   const [email, setEmail] = useState("");
   const [lastLink, setLastLink] = useState<string | null>(null);
@@ -67,6 +71,7 @@ function EquipePage() {
   const instructors = (team.data ?? []).filter((m) => m.role === "instructor");
   const owner = (team.data ?? []).find((m) => m.role === "owner");
   const openInvites = (invites.data ?? []).filter((i) => i.role === "instructor" && !i.accepted_at);
+  const instructorLimit = limitStatus(instructors.length + openInvites.length, limits.maxInstructors);
   const fleetCars = fleet.data?.fleet ?? [];
   const myCars = fleet.data?.mine ?? [];
   const has = (userId: string, vehicleId: string) =>
@@ -142,10 +147,27 @@ function EquipePage() {
         </ul>
 
         {isOwner && (
+          <div className="mt-3">
+            <LimitCounter status={instructorLimit} noun="instrutores (contando convites em aberto)" />
+            <PlanLimitCard
+              plan={plan}
+              status={instructorLimit}
+              noun="instrutores convidados"
+              hint={
+                instructorLimit.max === 0
+                  ? "No plano Free a escola funciona só com o dono. Faça upgrade para montar a equipe."
+                  : "Remova um instrutor ou faça upgrade para convidar mais."
+              }
+            />
+          </div>
+        )}
+
+        {isOwner && !instructorLimit.atLimit && (
           <form
             className="mt-3 space-y-2 rounded-xl border border-dashed border-border p-3"
             onSubmit={(e) => {
               e.preventDefault();
+              if (instructorLimit.atLimit) return;
               createInvite.mutate(
                 { email },
                 {

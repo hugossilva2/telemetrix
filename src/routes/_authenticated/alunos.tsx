@@ -13,6 +13,9 @@ import { toUserMessage } from "@/lib/errors/userMessage";
 import { invalidateSchool, useLessons, useMySchool, useStudents } from "@/lib/school/api";
 import { LICENSE_CATEGORIES, studentProgress } from "@/lib/school/lessons";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
+import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard";
+import { limitStatus } from "@/lib/billing/plans";
+import { useSubscription } from "@/lib/billing/subscription";
 
 export const Route = createFileRoute("/_authenticated/alunos")({
   head: () => ({
@@ -57,10 +60,19 @@ function AlunosPage() {
     query.trim() ? s.name.toLowerCase().includes(query.trim().toLowerCase()) : true,
   );
 
+  const { plan, limits } = useSubscription();
+  const studentLimit = limitStatus(
+    (students.data ?? []).filter((s) => s.active).length,
+    limits.maxStudents,
+  );
+
   const create = useMutation({
     mutationFn: async () => {
       if (!school) throw new Error("Escola não encontrada");
       if (!name.trim()) throw new Error("Informe o nome do aluno.");
+      if (studentLimit.atLimit) {
+        throw new Error(`Seu plano permite ${studentLimit.max} alunos ativos. Faça upgrade para cadastrar mais.`);
+      }
       const { error } = await supabase.from("students").insert({
         org_id: school.id,
         name: name.trim(),
@@ -99,12 +111,24 @@ function AlunosPage() {
           onChange={(e) => setQuery(e.target.value)}
           className="h-11"
         />
-        <Button type="button" className="h-11 shrink-0" onClick={() => setOpen((v) => !v)}>
+        <Button
+          type="button"
+          className="h-11 shrink-0"
+          onClick={() => setOpen((v) => !v)}
+          disabled={studentLimit.atLimit}
+        >
           <Plus className="size-4" /> Novo
         </Button>
       </div>
+      <LimitCounter status={studentLimit} noun="alunos ativos" />
+      <PlanLimitCard
+        plan={plan}
+        status={studentLimit}
+        noun="alunos ativos"
+        hint="Desative alunos que concluíram o processo ou faça upgrade para cadastrar mais."
+      />
 
-      {open && (
+      {open && !studentLimit.atLimit && (
         <form
           onSubmit={(e) => {
             e.preventDefault();

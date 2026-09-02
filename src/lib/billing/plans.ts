@@ -3,6 +3,8 @@
  * Módulo puro: nomes, preços e limites de cada plano.
  */
 
+import type { AccountMode } from "@/lib/account/mode";
+
 export type PlanId = "free" | "pro" | "frota";
 
 export interface PlanLimits {
@@ -20,6 +22,12 @@ export interface PlanLimits {
   sharing: boolean;
   /** Gestão de motoristas e ranking de equipe. */
   fleet: boolean;
+  /** Alunos ativos por escola (Instrutor/Autoescola). `Infinity` = sem limite. */
+  maxStudents: number;
+  /** Instrutores convidados além do dono (Autoescola). 0 = só o dono. */
+  maxInstructors: number;
+  /** Corridas lançadas por mês (Motorista de app). `Infinity` = sem limite. */
+  ridesPerMonth: number;
 }
 
 export interface PlanInfo {
@@ -31,6 +39,8 @@ export interface PlanInfo {
   highlight?: boolean;
   features: string[];
   limits: PlanLimits;
+  /** Exemplo de uso do plano em cada perfil de conta. */
+  examples: Record<AccountMode, string>;
 }
 
 export const PLANS: PlanInfo[] = [

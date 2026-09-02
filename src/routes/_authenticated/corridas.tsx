@@ -12,6 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { formatBRL, formatKm } from "@/lib/format";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard";
+import { countInMonth, limitStatus } from "@/lib/billing/plans";
+import { useSubscription } from "@/lib/billing/subscription";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import {
   invalidateRides,
@@ -53,6 +56,8 @@ function CorridasPage() {
   const { telemetry } = useTelemetry();
   const rides = useRides();
   const { shift: openShift, isLoading: shiftLoading } = useOpenShift();
+  const { plan, limits } = useSubscription();
+  const rideLimit = limitStatus(countInMonth(rides.data ?? []), limits.ridesPerMonth);
 
   const [platform, setPlatform] = useState<RidePlatform>(() => {
     try {
@@ -114,6 +119,9 @@ function CorridasPage() {
       if (!uid) throw new Error("Sessão expirada");
       const value = num(amount);
       if (!(value !== null && value > 0)) throw new Error("Informe o valor da corrida.");
+      if (!editingId && rideLimit.atLimit) {
+        throw new Error(`Seu plano permite ${rideLimit.max} corridas por mês. Faça upgrade para lançar sem limite.`);
+      }
       const payload = {
         platform,
         amount: value,
@@ -248,6 +256,13 @@ function CorridasPage() {
       </Link>
 
       {/* Lançamento rápido */}
+      <LimitCounter status={rideLimit} noun="corridas lançadas neste mês" />
+      <PlanLimitCard
+        plan={plan}
+        status={rideLimit}
+        noun="corridas por mês"
+        hint="No Pro as corridas são ilimitadas e você ganha o relatório semanal seg–dom."
+      />
       <form
         onSubmit={(e) => {
           e.preventDefault();

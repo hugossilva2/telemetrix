@@ -19,6 +19,9 @@ import {
   useToggleAssignment,
 } from "@/lib/school/teamApi";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
+import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard";
+import { limitStatus } from "@/lib/billing/plans";
+import { useSubscription } from "@/lib/billing/subscription";
 
 export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({
@@ -52,6 +55,7 @@ function EquipePage() {
   const removeMember = useRemoveMember(school?.id);
   const setInFleet = useSetVehicleInFleet(school?.id);
   const toggle = useToggleAssignment(school?.id);
+  const { plan, limits } = useSubscription();
 
   const [email, setEmail] = useState("");
   const [lastLink, setLastLink] = useState<string | null>(null);

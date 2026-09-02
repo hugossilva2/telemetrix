@@ -67,6 +67,7 @@ function EquipePage() {
   const instructors = (team.data ?? []).filter((m) => m.role === "instructor");
   const owner = (team.data ?? []).find((m) => m.role === "owner");
   const openInvites = (invites.data ?? []).filter((i) => i.role === "instructor" && !i.accepted_at);
+  const instructorLimit = limitStatus(instructors.length + openInvites.length, limits.maxInstructors);
   const fleetCars = fleet.data?.fleet ?? [];
   const myCars = fleet.data?.mine ?? [];
   const has = (userId: string, vehicleId: string) =>

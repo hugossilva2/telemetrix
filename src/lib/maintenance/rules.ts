@@ -83,7 +83,7 @@ export function computeStatus(
   currentMileageKm: number | null | undefined,
   opts: { warnKm?: number } = {},
 ): MaintenanceStatusInfo {
-  const WARN_KM = opts.warnKm ?? DEFAULT_WARN_KM;
+  const warnKm = opts.warnKm ?? DEFAULT_WARN_KM;
   let remainingKm: number | null = null;
   let nextKm: number | null = null;
   if (record.interval_km != null && record.interval_km > 0) {
@@ -104,7 +104,7 @@ export function computeStatus(
   const overdue =
     (remainingKm != null && remainingKm <= 0) || (remainingDays != null && remainingDays <= 0);
   const soon =
-    (remainingKm != null && remainingKm <= WARN_KM) ||
+    (remainingKm != null && remainingKm <= warnKm) ||
     (remainingDays != null && remainingDays <= WARN_DAYS);
 
   let status: MaintenanceStatus = "unknown";
@@ -121,7 +121,7 @@ export function computeStatus(
     } else {
       message = `Vencido há ${Math.abs(remainingDays ?? 0)} dia(s)`;
     }
-  } else if (remainingKm != null && (remainingDays == null || remainingKm <= WARN_KM)) {
+  } else if (remainingKm != null && (remainingDays == null || remainingKm <= warnKm)) {
     message = `Faltam ${Math.round(remainingKm).toLocaleString("pt-BR")} km`;
   } else if (remainingDays != null) {
     message = `Faltam ${remainingDays} dia(s)`;

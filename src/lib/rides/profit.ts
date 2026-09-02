@@ -206,3 +206,78 @@ export function dailyEarnings(rides: RidePoint[], p: Period): { label: string; v
   }
   return days;
 }
+
+/** Período seg–dom a partir da chave "AAAA-MM-DD" (segunda-feira). */
+export function weekPeriodFromKey(key: string): Period {
+  return weekPeriod(new Date(`${key}T12:00:00`));
+}
+
+export interface DayBreakdown {
+  /** "seg" … "dom" */
+  label: string;
+  date: string;
+  rides: number;
+  earnings: number;
+  km: number;
+  hours: number;
+}
+
+/** Detalhe por dia da semana (seg–dom): corridas, ganhos, km e horas de turno. */
+export function weeklyBreakdown(
+  rides: RidePoint[],
+  shifts: ShiftPoint[],
+  p: Period,
+  now = new Date(),
+): DayBreakdown[] {
+  const labels = ["seg", "ter", "qua", "qui", "sex", "sáb", "dom"];
+  const out: DayBreakdown[] = [];
+  const cursor = new Date(p.start);
+  for (let i = 0; i < 7 && cursor < p.end; i++) {
+    const next = new Date(cursor);
+    next.setDate(next.getDate() + 1);
+    const day: Period = { start: new Date(cursor), end: next };
+    const dr = rides.filter((r) => inPeriod(r.occurred_at, day));
+    const rideKm = dr.reduce((s, r) => s + n(r.distance_km), 0);
+    const rideMin = dr.reduce((s, r) => s + n(r.duration_min), 0);
+    const h = shiftHours(shifts, day, now);
+    const y = cursor.getFullYear();
+    const m = String(cursor.getMonth() + 1).padStart(2, "0");
+    const d = String(cursor.getDate()).padStart(2, "0");
+    out.push({
+      label: labels[(cursor.getDay() + 6) % 7],
+      date: `${y}-${m}-${d}`,
+      rides: dr.length,
+      earnings: Math.round(dr.reduce((s, r) => s + n(r.amount) + n(r.tip), 0) * 100) / 100,
+      km: Math.round(Math.max(rideKm, shiftKm(shifts, day)) * 100) / 100,
+      hours: Math.round((h > 0 ? h : rideMin / 60) * 100) / 100,
+    });
+    cursor.setDate(cursor.getDate() + 1);
+  }
+  return out;
+}
+
+/**
+ * Ritmo de rodagem: média de km por semana nas últimas `weeks` semanas
+ * completas + a atual (ignora semanas sem km). Null se não houver dados.
+ */
+export function kmPerWeek(
+  rides: RidePoint[],
+  shifts: ShiftPoint[],
+  weeks = 4,
+  now = new Date(),
+): number | null {
+  let total = 0;
+  let counted = 0;
+  let p = weekPeriod(now);
+  for (let i = 0; i < weeks; i++) {
+    const s = profitSummary({ rides, shifts, fuel: [], expenses: [] }, p, now);
+    if (s.km > 0) {
+      total += s.km;
+      counted++;
+    }
+    const start = new Date(p.start);
+    start.setDate(start.getDate() - 7);
+    p = weekPeriod(start);
+  }
+  return counted > 0 ? Math.round(total / counted) : null;
+}

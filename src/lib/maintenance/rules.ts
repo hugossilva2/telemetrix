@@ -1,15 +1,26 @@
+/**
+ * `defaultKm` é o intervalo de uso pessoal; `heavyKm` é o intervalo para
+ * rodagem alta (motorista de app), em que o carro roda muito mais por mês.
+ */
 export const MAINTENANCE_TYPES = [
-  { value: "oleo", label: "Troca de óleo", defaultKm: 10000, defaultMonths: 12 },
-  { value: "filtro_oleo", label: "Filtro de óleo", defaultKm: 10000, defaultMonths: 12 },
-  { value: "filtro_ar", label: "Filtro de ar", defaultKm: 15000, defaultMonths: 12 },
-  { value: "filtro_combustivel", label: "Filtro de combustível", defaultKm: 20000, defaultMonths: 24 },
-  { value: "correia", label: "Correia dentada", defaultKm: 60000, defaultMonths: 48 },
-  { value: "pneus", label: "Rodízio de pneus", defaultKm: 10000, defaultMonths: 12 },
-  { value: "freios", label: "Freios / pastilhas", defaultKm: 30000, defaultMonths: 24 },
-  { value: "velas", label: "Velas de ignição", defaultKm: 40000, defaultMonths: 36 },
-  { value: "revisao", label: "Revisão geral", defaultKm: 10000, defaultMonths: 12 },
-  { value: "outro", label: "Outro", defaultKm: null, defaultMonths: null },
+  { value: "oleo", label: "Troca de óleo", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
+  { value: "filtro_oleo", label: "Filtro de óleo", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
+  { value: "filtro_ar", label: "Filtro de ar", defaultKm: 15000, heavyKm: 10000, defaultMonths: 12 },
+  { value: "filtro_combustivel", label: "Filtro de combustível", defaultKm: 20000, heavyKm: 15000, defaultMonths: 24 },
+  { value: "correia", label: "Correia dentada", defaultKm: 60000, heavyKm: 50000, defaultMonths: 48 },
+  { value: "pneus", label: "Rodízio de pneus", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
+  { value: "freios", label: "Freios / pastilhas", defaultKm: 30000, heavyKm: 20000, defaultMonths: 24 },
+  { value: "velas", label: "Velas de ignição", defaultKm: 40000, heavyKm: 30000, defaultMonths: 36 },
+  { value: "revisao", label: "Revisão geral", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
+  { value: "outro", label: "Outro", defaultKm: null, heavyKm: null, defaultMonths: null },
 ] as const;
+
+/** Intervalo padrão em km para o tipo, conforme o regime de uso. */
+export function defaultIntervalKm(type: string, heavyUse: boolean): number | null {
+  const t = MAINTENANCE_TYPES.find((x) => x.value === type);
+  if (!t) return null;
+  return heavyUse ? t.heavyKm : t.defaultKm;
+}
 
 export type MaintenanceType = (typeof MAINTENANCE_TYPES)[number]["value"];
 
@@ -19,6 +30,9 @@ export const MAINTENANCE_LABEL: Record<string, string> = Object.fromEntries(
 
 /** Km restantes a partir do qual o alerta fica amarelo. */
 export const WARN_KM = 500;
+const DEFAULT_WARN_KM = WARN_KM;
+/** Rodagem alta: avisa com mais antecedência (uma semana de trabalho ≈ 1.000 km). */
+export const HEAVY_WARN_KM = 1000;
 /** Dias restantes a partir do qual o alerta fica amarelo. */
 export const WARN_DAYS = 30;
 
@@ -67,7 +81,9 @@ function daysBetweenToday(dt: Date): number {
 export function computeStatus(
   record: MaintenanceRecord,
   currentMileageKm: number | null | undefined,
+  opts: { warnKm?: number } = {},
 ): MaintenanceStatusInfo {
+  const WARN_KM = opts.warnKm ?? DEFAULT_WARN_KM;
   let remainingKm: number | null = null;
   let nextKm: number | null = null;
   if (record.interval_km != null && record.interval_km > 0) {
@@ -141,4 +157,14 @@ export function latestByType(records: MaintenanceRecord[]): MaintenanceRecord[] 
     }
   }
   return Array.from(map.values());
+}
+
+/**
+ * Dias estimados até vencer pelos km, dado o ritmo semanal de rodagem.
+ * Retorna null sem ritmo ou sem km restantes.
+ */
+export function daysUntilAtPace(remainingKm: number | null, kmPerWeek: number | null): number | null {
+  if (remainingKm == null || kmPerWeek == null || !(kmPerWeek > 0)) return null;
+  if (remainingKm <= 0) return 0;
+  return Math.round((remainingKm / kmPerWeek) * 7);
 }

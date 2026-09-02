@@ -320,6 +320,45 @@ export type Database = {
           },
         ]
       }
+      instructor_vehicles: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "instructor_vehicles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "instructor_vehicles_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
           checklist: Json
@@ -523,6 +562,7 @@ export type Database = {
       organization_members: {
         Row: {
           created_at: string
+          display_name: string | null
           id: string
           org_id: string
           role: Database["public"]["Enums"]["org_role"]
@@ -530,6 +570,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          display_name?: string | null
           id?: string
           org_id: string
           role: Database["public"]["Enums"]["org_role"]
@@ -537,6 +578,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          display_name?: string | null
           id?: string
           org_id?: string
           role?: Database["public"]["Enums"]["org_role"]
@@ -1416,6 +1458,7 @@ export type Database = {
           obd_device_id: string | null
           obd_device_name: string | null
           obd_first_paired_at: string | null
+          org_id: string | null
           plate: string
           signal_lost_notified_at: string | null
           tank_l: number
@@ -1449,6 +1492,7 @@ export type Database = {
           obd_device_id?: string | null
           obd_device_name?: string | null
           obd_first_paired_at?: string | null
+          org_id?: string | null
           plate: string
           signal_lost_notified_at?: string | null
           tank_l?: number
@@ -1482,6 +1526,7 @@ export type Database = {
           obd_device_id?: string | null
           obd_device_name?: string | null
           obd_first_paired_at?: string | null
+          org_id?: string | null
           plate?: string
           signal_lost_notified_at?: string | null
           tank_l?: number
@@ -1490,7 +1535,15 @@ export type Database = {
           user_id?: string
           zero_to_100_s?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -1531,7 +1584,18 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_vehicle_staff: { Args: { _vehicle_id: string }; Returns: boolean }
       my_student_ids: { Args: never; Returns: string[] }
+      org_team: {
+        Args: { _org_id: string }
+        Returns: {
+          created_at: string
+          display_name: string
+          email: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }[]
+      }
       touch_vehicle_share_seen: {
         Args: { _share_id: string }
         Returns: boolean

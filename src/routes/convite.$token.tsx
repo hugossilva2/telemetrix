@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { GraduationCap, School } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,6 +27,7 @@ const ROLE_LABEL: Record<string, string> = { student: "aluno", instructor: "inst
 function ConvitePage() {
   const { token } = Route.useParams();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ function ConvitePage() {
       }
     },
     onSuccess: () => {
+      qc.invalidateQueries();
       toast.success("Convite aceito! Bem-vindo.");
       navigate({ to: invite.data?.role === "student" ? "/aluno" : "/inicio", replace: true });
     },
@@ -112,7 +114,9 @@ function ConvitePage() {
               .
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Você verá suas aulas, trajetos, pontuação de direção e as observações do instrutor.
+              {invite.data.role === "instructor"
+                ? "Sua conta passa para o perfil Instrutor e você verá a agenda, os alunos e os carros da escola."
+                : "Você verá suas aulas, trajetos, pontuação de direção e as observações do instrutor."}
             </p>
             <Button className="mt-4 h-11 w-full" onClick={() => accept.mutate()} disabled={accept.isPending}>
               {accept.isPending ? "Aceitando…" : "Aceitar convite"}

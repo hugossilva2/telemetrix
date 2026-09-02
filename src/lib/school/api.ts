@@ -52,6 +52,7 @@ export interface LessonRecord {
   price: number | null;
   paid: boolean;
   student?: { name: string } | null;
+  vehicle?: { name: string; plate: string } | null;
   trip?: {
     id: string;
     distance_km: number | null;
@@ -77,7 +78,7 @@ export interface InviteRecord {
 const STUDENT_SELECT =
   "id,org_id,user_id,name,phone,photo_path,category,renach,contracted_lessons,notes,active,created_at";
 const LESSON_SELECT =
-  "id,org_id,student_id,instructor_id,vehicle_id,scheduled_at,duration_min,started_at,ended_at,trip_id,status,notes,checklist,price,paid,student:students(name),trip:trips(id,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count)";
+  "id,org_id,student_id,instructor_id,vehicle_id,scheduled_at,duration_min,started_at,ended_at,trip_id,status,notes,checklist,price,paid,student:students(name),vehicle:vehicles(name,plate),trip:trips(id,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count)";
 
 async function currentUserId(): Promise<string> {
   const { data } = await supabase.auth.getUser();
@@ -167,6 +168,7 @@ function normalizeLesson(l: Record<string, unknown>): LessonRecord {
     price: raw.price == null ? null : Number(raw.price),
     checklist: Array.isArray(raw.checklist) ? (raw.checklist as ChecklistEntry[]) : [],
     student: (raw.student as { name: string } | null) ?? null,
+    vehicle: (raw.vehicle as { name: string; plate: string } | null) ?? null,
     trip: (raw.trip as LessonRecord["trip"]) ?? null,
   };
 }

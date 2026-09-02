@@ -16,6 +16,7 @@ import { Route as DemoRouteImport } from './routes/demo'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ConviteTokenRouteImport } from './routes/convite.$token'
 import { Route as CasosDeUsoSlugRouteImport } from './routes/casos-de-uso.$slug'
 import { Route as AuthenticatedViagensRouteImport } from './routes/_authenticated/viagens'
 import { Route as AuthenticatedVeiculosRouteImport } from './routes/_authenticated/veiculos'
@@ -85,6 +86,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConviteTokenRoute = ConviteTokenRouteImport.update({
+  id: '/convite/$token',
+  path: '/convite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CasosDeUsoSlugRoute = CasosDeUsoSlugRouteImport.update({
@@ -310,6 +316,7 @@ export interface FileRoutesByFullPath {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/alunos/$id': typeof AuthenticatedAlunosIdRoute
   '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -354,6 +361,7 @@ export interface FileRoutesByTo {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/alunos/$id': typeof AuthenticatedAlunosIdRoute
   '/aulas/$id': typeof AuthenticatedAulasIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/convite/$token': typeof ConviteTokenRoute
   '/_authenticated/alunos_/$id': typeof AuthenticatedAlunosIdRoute
   '/_authenticated/aulas_/$id': typeof AuthenticatedAulasIdRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
@@ -446,6 +455,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
+    | '/convite/$token'
     | '/alunos/$id'
     | '/aulas/$id'
     | '/motoristas/$id'
@@ -490,6 +500,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
+    | '/convite/$token'
     | '/alunos/$id'
     | '/aulas/$id'
     | '/motoristas/$id'
@@ -535,6 +546,7 @@ export interface FileRouteTypes {
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
     | '/casos-de-uso/$slug'
+    | '/convite/$token'
     | '/_authenticated/alunos_/$id'
     | '/_authenticated/aulas_/$id'
     | '/_authenticated/motoristas/$id'
@@ -553,6 +565,7 @@ export interface RootRouteChildren {
   RecursosRoute: typeof RecursosRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   CasosDeUsoSlugRoute: typeof CasosDeUsoSlugRoute
+  ConviteTokenRoute: typeof ConviteTokenRoute
   ApiPublicFlespiPollRoute: typeof ApiPublicFlespiPollRoute
   ApiPublicFlespiWebhookRoute: typeof ApiPublicFlespiWebhookRoute
   ApiPublicTrackerHeartbeatRoute: typeof ApiPublicTrackerHeartbeatRoute
@@ -607,6 +620,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/convite/$token': {
+      id: '/convite/$token'
+      path: '/convite/$token'
+      fullPath: '/convite/$token'
+      preLoaderRoute: typeof ConviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/casos-de-uso/$slug': {
@@ -967,6 +987,7 @@ const rootRouteChildren: RootRouteChildren = {
   RecursosRoute: RecursosRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   CasosDeUsoSlugRoute: CasosDeUsoSlugRoute,
+  ConviteTokenRoute: ConviteTokenRoute,
   ApiPublicFlespiPollRoute: ApiPublicFlespiPollRoute,
   ApiPublicFlespiWebhookRoute: ApiPublicFlespiWebhookRoute,
   ApiPublicTrackerHeartbeatRoute: ApiPublicTrackerHeartbeatRoute,

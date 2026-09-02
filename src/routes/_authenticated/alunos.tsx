@@ -102,12 +102,24 @@ function AlunosPage() {
           onChange={(e) => setQuery(e.target.value)}
           className="h-11"
         />
-        <Button type="button" className="h-11 shrink-0" onClick={() => setOpen((v) => !v)}>
+        <Button
+          type="button"
+          className="h-11 shrink-0"
+          onClick={() => setOpen((v) => !v)}
+          disabled={studentLimit.atLimit}
+        >
           <Plus className="size-4" /> Novo
         </Button>
       </div>
+      <LimitCounter status={studentLimit} noun="alunos ativos" />
+      <PlanLimitCard
+        plan={plan}
+        status={studentLimit}
+        noun="alunos ativos"
+        hint="Desative alunos que concluíram o processo ou faça upgrade para cadastrar mais."
+      />
 
-      {open && (
+      {open && !studentLimit.atLimit && (
         <form
           onSubmit={(e) => {
             e.preventDefault();

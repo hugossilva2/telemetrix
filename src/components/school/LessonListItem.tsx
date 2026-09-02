@@ -8,10 +8,13 @@ export function LessonListItem({
   lesson,
   hideStudent,
   studentView,
+  instructorName,
 }: {
   lesson: LessonRecord;
   hideStudent?: boolean;
   studentView?: boolean;
+  /** Visão da autoescola: mostra quem dá a aula. */
+  instructorName?: string;
 }) {
   const d = new Date(lesson.scheduled_at);
   const day = d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" });
@@ -29,6 +32,10 @@ export function LessonListItem({
             {LESSON_STATUS_LABEL[lesson.status]}
           </span>
           <span className="text-[11px] text-muted-foreground">{lesson.duration_min} min</span>
+          {instructorName && <span className="text-[11px] text-muted-foreground">· {instructorName}</span>}
+          {!studentView && lesson.vehicle && (
+            <span className="font-mono text-[10px] text-muted-foreground">{lesson.vehicle.plate}</span>
+          )}
           {lesson.trip?.eco_score != null && (
             <span className="inline-flex items-center gap-0.5 text-[11px] text-primary">
               <Leaf className="size-3" /> {Math.round(lesson.trip.eco_score)}

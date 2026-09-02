@@ -33,7 +33,8 @@ interface NavItem {
     | "/acompanhar"
     | "/aulas"
     | "/alunos"
-    | "/aluno";
+    | "/aluno"
+    | "/equipe";
   label: string;
   Icon: LucideIcon;
   exact: boolean;
@@ -51,6 +52,7 @@ const base = {
   equipe: { to: "/motoristas", label: "Equipe", Icon: Users, exact: false },
   aulas: { to: "/aulas", label: "Aulas", Icon: CalendarDays, exact: false },
   alunos: { to: "/alunos", label: "Alunos", Icon: GraduationCap, exact: false },
+  escola: { to: "/equipe", label: "Equipe", Icon: Users, exact: false },
 } satisfies Record<string, NavItem>;
 
 /** Menu inferior por perfil de uso. Motorista mantém o menu original. */
@@ -58,7 +60,7 @@ const NAV_BY_MODE: Record<AccountMode, NavItem[]> = {
   motorista: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
   app: [base.painel, base.corridas, base.lucro, base.abastecer, base.gestao, base.ajustes],
   instrutor: [base.painel, base.aulas, base.alunos, base.viagens, base.gestao, base.ajustes],
-  autoescola: [base.painel, base.aulas, base.alunos, base.equipe, base.gestao, base.ajustes],
+  autoescola: [base.painel, base.aulas, base.alunos, base.escola, base.gestao, base.ajustes],
 };
 
 const observerItems: NavItem[] = [

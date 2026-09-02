@@ -6,6 +6,8 @@ import {
   CalendarDays,
   ClipboardCheck,
   GraduationCap,
+  School,
+  Users,
   Eye,
   Leaf,
   PiggyBank,
@@ -100,6 +102,11 @@ const appModeLinks: typeof links = [
   { to: "/viagens", label: "Viagens", desc: "Histórico gravado pelo OBD/rastreador", Icon: RouteIcon },
 ];
 
+const schoolLinks: typeof links = [
+  { to: "/escola", label: "Visão da escola", desc: "Aulas por instrutor, km e custo por carro", Icon: School },
+  { to: "/equipe", label: "Equipe e frota", desc: "Instrutores, convites e carros", Icon: Users },
+];
+
 const teachingLinks: typeof links = [
   { to: "/aulas", label: "Aulas", desc: "Agenda, iniciar/encerrar e checklist", Icon: CalendarDays },
   { to: "/alunos", label: "Alunos", desc: "Cadastro, convite e evolução", Icon: GraduationCap },
@@ -111,9 +118,11 @@ function GestaoPage() {
   const items =
     mode === "app"
       ? [...appModeLinks, ...links]
-      : mode === "instrutor" || mode === "autoescola"
-        ? [...teachingLinks, ...links]
-        : links;
+      : mode === "autoescola"
+        ? [...schoolLinks, ...teachingLinks, ...links]
+        : mode === "instrutor"
+          ? [...teachingLinks, ...links]
+          : links;
   return (
     <AppShell title="Gestão" subtitle="Manutenção, condutores e documentos">
       <MaintenanceAlertsCard />

@@ -34,6 +34,7 @@ import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedLucroRouteImport } from './routes/_authenticated/lucro'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
+import { Route as AuthenticatedEscolaRouteImport } from './routes/_authenticated/escola'
 import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
@@ -180,6 +181,11 @@ const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
   path: '/gestao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEscolaRoute = AuthenticatedEscolaRouteImport.update({
+  id: '/escola',
+  path: '/escola',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
   id: '/equipe',
   path: '/equipe',
@@ -306,6 +312,7 @@ export interface FileRoutesByFullPath {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/equipe': typeof AuthenticatedEquipeRoute
+  '/escola': typeof AuthenticatedEscolaRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/lucro': typeof AuthenticatedLucroRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/equipe': typeof AuthenticatedEquipeRoute
+  '/escola': typeof AuthenticatedEscolaRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/lucro': typeof AuthenticatedLucroRoute
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/eco': typeof AuthenticatedEcoRoute
   '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
+  '/_authenticated/escola': typeof AuthenticatedEscolaRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/lucro': typeof AuthenticatedLucroRoute
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/eco'
     | '/equipe'
+    | '/escola'
     | '/gestao'
     | '/inicio'
     | '/lucro'
@@ -494,6 +504,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/eco'
     | '/equipe'
+    | '/escola'
     | '/gestao'
     | '/inicio'
     | '/lucro'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/_authenticated/documentos'
     | '/_authenticated/eco'
     | '/_authenticated/equipe'
+    | '/_authenticated/escola'
     | '/_authenticated/gestao'
     | '/_authenticated/inicio'
     | '/_authenticated/lucro'
@@ -760,6 +772,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGestaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/escola': {
+      id: '/_authenticated/escola'
+      path: '/escola'
+      fullPath: '/escola'
+      preLoaderRoute: typeof AuthenticatedEscolaRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/equipe': {
       id: '/_authenticated/equipe'
       path: '/equipe'
@@ -942,6 +961,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
   AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
+  AuthenticatedEscolaRoute: typeof AuthenticatedEscolaRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedLucroRoute: typeof AuthenticatedLucroRoute
@@ -976,6 +996,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEcoRoute: AuthenticatedEcoRoute,
   AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
+  AuthenticatedEscolaRoute: AuthenticatedEscolaRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedLucroRoute: AuthenticatedLucroRoute,

@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { CalendarDays, Play, Plus, Square } from "lucide-react";
+import { AlertTriangle, CalendarDays, Play, Plus, Square } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,8 @@ import { lessonFinancials, lessonsOfDay } from "@/lib/school/lessons";
 import { LessonListItem } from "@/components/school/LessonListItem";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
 import { useEndLesson, useStartLesson } from "@/lib/school/actions";
+import { memberName, useFleet, useAssignments, useTeam } from "@/lib/school/teamApi";
+import { conflictsForNew } from "@/lib/school/team";
 
 export const Route = createFileRoute("/_authenticated/aulas")({
   validateSearch: (s: Record<string, unknown>): { aluno?: string } => ({
@@ -52,6 +54,19 @@ function AulasPage() {
   const lessons = useLessons(school?.id);
   const startLesson = useStartLesson();
   const endLesson = useEndLesson();
+  const isSchool = school?.kind === "autoescola";
+  const isOwner = school?.role === "owner";
+  const team = useTeam(isSchool ? school?.id : null);
+  const fleet = useFleet(school?.id);
+  const assignments = useAssignments(isSchool ? school?.id : null);
+  const [meId, setMeId] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setMeId(data.user?.id ?? ""));
+  }, []);
+  const [instructorId, setInstructorId] = useState<string>("");
+  const effectiveInstructor = instructorId || meId;
+  const [lessonVehicleId, setLessonVehicleId] = useState<string>("");
+  const [onlyMine, setOnlyMine] = useState(true);
 
   const [open, setOpen] = useState(!!aluno);
   const [studentId, setStudentId] = useState(aluno ?? "");
@@ -66,8 +81,29 @@ function AulasPage() {
   });
   const [tab, setTab] = useState<"proximas" | "historico">("proximas");
 
-  const all = lessons.data ?? [];
+  const allSchool = lessons.data ?? [];
+  // Instrutor de autoescola vê por padrão só as próprias aulas; o dono vê tudo.
+  const all = isSchool && !isOwner && onlyMine && meId ? allSchool.filter((l) => l.instructor_id === meId) : allSchool;
   const today = useMemo(() => lessonsOfDay(all), [all]);
+
+  const fleetCars = fleet.data?.fleet ?? [];
+  const allowedCars =
+    isSchool && !isOwner && (assignments.data ?? []).some((a) => a.user_id === meId)
+      ? fleetCars.filter((v) => (assignments.data ?? []).some((a) => a.user_id === meId && a.vehicle_id === v.id))
+      : fleetCars;
+  const chosenVehicle = lessonVehicleId || (allowedCars.length > 0 ? allowedCars[0].id : vehicleId);
+  const draftConflicts = useMemo(() => {
+    if (!open || !effectiveInstructor || !when) return [];
+    return conflictsForNew(
+      allSchool.map((l) => ({ ...l, trip_eco_score: l.trip?.eco_score ?? null })),
+      {
+        scheduled_at: new Date(when).toISOString(),
+        duration_min: Math.max(10, parseInt(duration || "50", 10) || 50),
+        instructor_id: effectiveInstructor,
+        vehicle_id: chosenVehicle ?? null,
+      },
+    );
+  }, [open, effectiveInstructor, when, duration, chosenVehicle, allSchool]);
   const inProgress = all.find((l) => l.status === "em_andamento") ?? null;
   const now = Date.now();
   const upcoming = all
@@ -95,8 +131,8 @@ function AulasPage() {
       const { error } = await supabase.from("lessons").insert({
         org_id: school.id,
         student_id: studentId,
-        instructor_id: uid,
-        vehicle_id: vehicleId,
+        instructor_id: isOwner && instructorId ? instructorId : uid,
+        vehicle_id: chosenVehicle ?? null,
         scheduled_at: new Date(when).toISOString(),
         duration_min: Math.max(10, parseInt(duration || "50", 10) || 50),
         price: p != null && Number.isFinite(p) ? p : null,
@@ -160,6 +196,13 @@ function AulasPage() {
         </section>
       )}
 
+      {isSchool && !isOwner && (
+        <label className="flex items-center justify-between text-xs text-muted-foreground">
+          <span>Mostrar só as minhas aulas</span>
+          <input type="checkbox" className="size-4 accent-primary" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
+        </label>
+      )}
+
       <div className="flex gap-2">
         <div className="grid flex-1 grid-cols-2 gap-1 rounded-xl bg-muted/60 p-1">
           {(["proximas", "historico"] as const).map((t) => (
@@ -212,6 +255,41 @@ function AulasPage() {
               </SelectContent>
             </Select>
           </div>
+          {isSchool && isOwner && (team.data?.length ?? 0) > 1 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="ls-instr">Instrutor</Label>
+              <Select value={effectiveInstructor} onValueChange={setInstructorId}>
+                <SelectTrigger id="ls-instr" className="h-11">
+                  <SelectValue placeholder="Instrutor" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(team.data ?? []).map((m) => (
+                    <SelectItem key={m.user_id} value={m.user_id}>
+                      {m.display_name || m.email}
+                      {m.user_id === meId ? " (eu)" : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          {allowedCars.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="ls-car">Carro</Label>
+              <Select value={chosenVehicle ?? ""} onValueChange={setLessonVehicleId}>
+                <SelectTrigger id="ls-car" className="h-11">
+                  <SelectValue placeholder="Carro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allowedCars.map((v) => (
+                    <SelectItem key={v.id} value={v.id}>
+                      {v.name} · {v.plate}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           <div className="space-y-1.5">
             <Label htmlFor="ls-when">Data e hora</Label>
             <Input id="ls-when" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} className="h-11" required />
@@ -226,6 +304,13 @@ function AulasPage() {
               <Input id="ls-price" inputMode="decimal" placeholder="0,00" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
             </div>
           </div>
+          {draftConflicts.length > 0 && (
+            <p className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-2 text-[11px] text-warning">
+              <AlertTriangle className="mt-px size-3.5 shrink-0" />
+              Conflito de horário: {draftConflicts[0].kind === "instrutor" ? "este instrutor" : "este carro"} já tem aula nesse período.
+              Você ainda pode agendar.
+            </p>
+          )}
           <div className="flex gap-2">
             <Button type="submit" className="flex-1" disabled={create.isPending}>
               {create.isPending ? "Salvando…" : "Agendar"}
@@ -247,7 +332,11 @@ function AulasPage() {
         ) : (
           <ul className="divide-y divide-border/60">
             {(tab === "proximas" ? upcoming : history).map((l) => (
-              <LessonListItem key={l.id} lesson={l} />
+              <LessonListItem
+                key={l.id}
+                lesson={l}
+                instructorName={isSchool && (isOwner || !onlyMine) ? memberName(team.data, l.instructor_id) : undefined}
+              />
             ))}
           </ul>
         )}

@@ -348,7 +348,7 @@ function CorridasPage() {
           </button>
         )}
 
-        <Button type="submit" className="h-12 w-full text-base" disabled={save.isPending}>
+        <Button type="submit" className="h-12 w-full text-base" disabled={save.isPending || (!editingId && rideLimit.atLimit)}>
           {save.isPending ? "Salvando..." : editingId ? "Salvar alterações" : "Registrar corrida"}
         </Button>
       </form>

@@ -29,12 +29,14 @@ import { Route as AuthenticatedMotoristasRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMapaRouteImport } from './routes/_authenticated/mapa'
 import { Route as AuthenticatedManutencaoRouteImport } from './routes/_authenticated/manutencao'
 import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticated/lugares'
+import { Route as AuthenticatedLucroRouteImport } from './routes/_authenticated/lucro'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
 import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
 import { Route as AuthenticatedDespesasRouteImport } from './routes/_authenticated/despesas'
+import { Route as AuthenticatedCorridasRouteImport } from './routes/_authenticated/corridas'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAcompanharRouteImport } from './routes/_authenticated/acompanhar'
@@ -145,6 +147,11 @@ const AuthenticatedLugaresRoute = AuthenticatedLugaresRouteImport.update({
   path: '/lugares',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLucroRoute = AuthenticatedLucroRouteImport.update({
+  id: '/lucro',
+  path: '/lucro',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedInicioRoute = AuthenticatedInicioRouteImport.update({
   id: '/inicio',
   path: '/inicio',
@@ -174,6 +181,11 @@ const AuthenticatedDiagnosticoRoute =
 const AuthenticatedDespesasRoute = AuthenticatedDespesasRouteImport.update({
   id: '/despesas',
   path: '/despesas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCorridasRoute = AuthenticatedCorridasRouteImport.update({
+  id: '/corridas',
+  path: '/corridas',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedCompartilharRoute =
@@ -237,12 +249,14 @@ export interface FileRoutesByFullPath {
   '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/corridas': typeof AuthenticatedCorridasRoute
   '/despesas': typeof AuthenticatedDespesasRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/lucro': typeof AuthenticatedLucroRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
@@ -273,12 +287,14 @@ export interface FileRoutesByTo {
   '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/corridas': typeof AuthenticatedCorridasRoute
   '/despesas': typeof AuthenticatedDespesasRoute
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
+  '/lucro': typeof AuthenticatedLucroRoute
   '/lugares': typeof AuthenticatedLugaresRoute
   '/manutencao': typeof AuthenticatedManutencaoRoute
   '/mapa': typeof AuthenticatedMapaRoute
@@ -311,12 +327,14 @@ export interface FileRoutesById {
   '/_authenticated/acompanhar': typeof AuthenticatedAcompanharRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
+  '/_authenticated/corridas': typeof AuthenticatedCorridasRoute
   '/_authenticated/despesas': typeof AuthenticatedDespesasRoute
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/eco': typeof AuthenticatedEcoRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
+  '/_authenticated/lucro': typeof AuthenticatedLucroRoute
   '/_authenticated/lugares': typeof AuthenticatedLugaresRoute
   '/_authenticated/manutencao': typeof AuthenticatedManutencaoRoute
   '/_authenticated/mapa': typeof AuthenticatedMapaRoute
@@ -349,12 +367,14 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/ajustes'
     | '/compartilhar'
+    | '/corridas'
     | '/despesas'
     | '/diagnostico'
     | '/documentos'
     | '/eco'
     | '/gestao'
     | '/inicio'
+    | '/lucro'
     | '/lugares'
     | '/manutencao'
     | '/mapa'
@@ -385,12 +405,14 @@ export interface FileRouteTypes {
     | '/acompanhar'
     | '/ajustes'
     | '/compartilhar'
+    | '/corridas'
     | '/despesas'
     | '/diagnostico'
     | '/documentos'
     | '/eco'
     | '/gestao'
     | '/inicio'
+    | '/lucro'
     | '/lugares'
     | '/manutencao'
     | '/mapa'
@@ -422,12 +444,14 @@ export interface FileRouteTypes {
     | '/_authenticated/acompanhar'
     | '/_authenticated/ajustes'
     | '/_authenticated/compartilhar'
+    | '/_authenticated/corridas'
     | '/_authenticated/despesas'
     | '/_authenticated/diagnostico'
     | '/_authenticated/documentos'
     | '/_authenticated/eco'
     | '/_authenticated/gestao'
     | '/_authenticated/inicio'
+    | '/_authenticated/lucro'
     | '/_authenticated/lugares'
     | '/_authenticated/manutencao'
     | '/_authenticated/mapa'
@@ -604,6 +628,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLugaresRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/lucro': {
+      id: '/_authenticated/lucro'
+      path: '/lucro'
+      fullPath: '/lucro'
+      preLoaderRoute: typeof AuthenticatedLucroRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/inicio': {
       id: '/_authenticated/inicio'
       path: '/inicio'
@@ -644,6 +675,13 @@ declare module '@tanstack/react-router' {
       path: '/despesas'
       fullPath: '/despesas'
       preLoaderRoute: typeof AuthenticatedDespesasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/corridas': {
+      id: '/_authenticated/corridas'
+      path: '/corridas'
+      fullPath: '/corridas'
+      preLoaderRoute: typeof AuthenticatedCorridasRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/compartilhar': {
@@ -742,12 +780,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAcompanharRoute: typeof AuthenticatedAcompanharRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
+  AuthenticatedCorridasRoute: typeof AuthenticatedCorridasRoute
   AuthenticatedDespesasRoute: typeof AuthenticatedDespesasRoute
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
+  AuthenticatedLucroRoute: typeof AuthenticatedLucroRoute
   AuthenticatedLugaresRoute: typeof AuthenticatedLugaresRoute
   AuthenticatedManutencaoRoute: typeof AuthenticatedManutencaoRoute
   AuthenticatedMapaRoute: typeof AuthenticatedMapaRoute
@@ -767,12 +807,14 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAcompanharRoute: AuthenticatedAcompanharRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
+  AuthenticatedCorridasRoute: AuthenticatedCorridasRoute,
   AuthenticatedDespesasRoute: AuthenticatedDespesasRoute,
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEcoRoute: AuthenticatedEcoRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
+  AuthenticatedLucroRoute: AuthenticatedLucroRoute,
   AuthenticatedLugaresRoute: AuthenticatedLugaresRoute,
   AuthenticatedManutencaoRoute: AuthenticatedManutencaoRoute,
   AuthenticatedMapaRoute: AuthenticatedMapaRoute,

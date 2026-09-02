@@ -493,6 +493,79 @@ export type Database = {
         }
         Relationships: []
       }
+      rides: {
+        Row: {
+          amount: number
+          created_at: string
+          distance_km: number | null
+          duration_min: number | null
+          id: string
+          notes: string | null
+          occurred_at: string
+          platform: Database["public"]["Enums"]["ride_platform"]
+          shift_id: string | null
+          tip: number
+          trip_id: string | null
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number | null
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          platform?: Database["public"]["Enums"]["ride_platform"]
+          shift_id?: string | null
+          tip?: number
+          trip_id?: string | null
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          distance_km?: number | null
+          duration_min?: number | null
+          id?: string
+          notes?: string | null
+          occurred_at?: string
+          platform?: Database["public"]["Enums"]["ride_platform"]
+          shift_id?: string | null
+          tip?: number
+          trip_id?: string | null
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rides_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rides_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rides_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       safe_starts: {
         Row: {
           created_at: string
@@ -549,6 +622,53 @@ export type Database = {
           },
           {
             foreignKeyName: "safe_starts_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shifts: {
+        Row: {
+          created_at: string
+          end_mileage: number | null
+          ended_at: string | null
+          id: string
+          notes: string | null
+          start_mileage: number | null
+          started_at: string
+          updated_at: string
+          user_id: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          end_mileage?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          start_mileage?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          end_mileage?: number | null
+          ended_at?: string | null
+          id?: string
+          notes?: string | null
+          start_mileage?: number | null
+          started_at?: string
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shifts_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
@@ -1152,6 +1272,7 @@ export type Database = {
         | "velas"
         | "revisao"
         | "outro"
+      ride_platform: "uber" | "99" | "indrive" | "outra"
       subscription_status: "active" | "trialing" | "canceled" | "past_due"
       tracker_event_type:
         | "ignition_on"
@@ -1320,6 +1441,7 @@ export const Constants = {
         "revisao",
         "outro",
       ],
+      ride_platform: ["uber", "99", "indrive", "outra"],
       subscription_status: ["active", "trialing", "canceled", "past_due"],
       tracker_event_type: [
         "ignition_on",

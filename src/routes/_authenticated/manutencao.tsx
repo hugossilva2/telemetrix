@@ -90,7 +90,6 @@ function ManutencaoPage() {
   const onTypeChange = (v: string) => {
     const t = v as MaintenanceType;
     setType(t);
-    const preset = MAINTENANCE_TYPES.find((x) => x.value === t);
     const km = defaultIntervalKm(t, heavyUse);
     setIntervalKm(km != null ? String(km) : "");
     setIntervalMonths(preset?.defaultMonths != null ? String(preset.defaultMonths) : "");

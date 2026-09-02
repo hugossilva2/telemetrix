@@ -87,6 +87,7 @@ function Dashboard() {
       title="Painel"
       subtitle={tripMode ? "Viagem em andamento · tempo real" : modeInfo.dashboardSubtitle}
     >
+      {!tripMode && <ProfitTodayCard />}
       {!tripMode && <ModeSpotlightCard />}
       <StatusHeader
         ignitionOn={telemetry.ignitionOn}

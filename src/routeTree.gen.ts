@@ -39,6 +39,7 @@ import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDespesasRouteImport } from './routes/_authenticated/despesas'
 import { Route as AuthenticatedCorridasRouteImport } from './routes/_authenticated/corridas'
 import { Route as AuthenticatedCompartilharRouteImport } from './routes/_authenticated/compartilhar'
+import { Route as AuthenticatedAlunosRouteImport } from './routes/_authenticated/alunos'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAcompanharRouteImport } from './routes/_authenticated/acompanhar'
 import { Route as AuthenticatedAbastecimentoRouteImport } from './routes/_authenticated/abastecimento'
@@ -47,6 +48,7 @@ import { Route as ApiPublicFlespiWebhookRouteImport } from './routes/api/public/
 import { Route as ApiPublicFlespiPollRouteImport } from './routes/api/public/flespi-poll'
 import { Route as AuthenticatedViagensIdRouteImport } from './routes/_authenticated/viagens.$id'
 import { Route as AuthenticatedMotoristasIdRouteImport } from './routes/_authenticated/motoristas.$id'
+import { Route as AuthenticatedAlunosIdRouteImport } from './routes/_authenticated/alunos_.$id'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -200,6 +202,11 @@ const AuthenticatedCompartilharRoute =
     path: '/compartilhar',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAlunosRoute = AuthenticatedAlunosRouteImport.update({
+  id: '/alunos',
+  path: '/alunos',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
   id: '/ajustes',
   path: '/ajustes',
@@ -243,6 +250,11 @@ const AuthenticatedMotoristasIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedMotoristasRoute,
   } as any)
+const AuthenticatedAlunosIdRoute = AuthenticatedAlunosIdRouteImport.update({
+  id: '/alunos_/$id',
+  path: '/alunos/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -254,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
+  '/alunos': typeof AuthenticatedAlunosRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/corridas': typeof AuthenticatedCorridasRoute
   '/despesas': typeof AuthenticatedDespesasRoute
@@ -277,6 +290,7 @@ export interface FileRoutesByFullPath {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/alunos/$id': typeof AuthenticatedAlunosIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -293,6 +307,7 @@ export interface FileRoutesByTo {
   '/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/acompanhar': typeof AuthenticatedAcompanharRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
+  '/alunos': typeof AuthenticatedAlunosRoute
   '/compartilhar': typeof AuthenticatedCompartilharRoute
   '/corridas': typeof AuthenticatedCorridasRoute
   '/despesas': typeof AuthenticatedDespesasRoute
@@ -316,6 +331,7 @@ export interface FileRoutesByTo {
   '/veiculos': typeof AuthenticatedVeiculosRoute
   '/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/alunos/$id': typeof AuthenticatedAlunosIdRoute
   '/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -334,6 +350,7 @@ export interface FileRoutesById {
   '/_authenticated/abastecimento': typeof AuthenticatedAbastecimentoRoute
   '/_authenticated/acompanhar': typeof AuthenticatedAcompanharRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/alunos': typeof AuthenticatedAlunosRoute
   '/_authenticated/compartilhar': typeof AuthenticatedCompartilharRoute
   '/_authenticated/corridas': typeof AuthenticatedCorridasRoute
   '/_authenticated/despesas': typeof AuthenticatedDespesasRoute
@@ -357,6 +374,7 @@ export interface FileRoutesById {
   '/_authenticated/veiculos': typeof AuthenticatedVeiculosRoute
   '/_authenticated/viagens': typeof AuthenticatedViagensRouteWithChildren
   '/casos-de-uso/$slug': typeof CasosDeUsoSlugRoute
+  '/_authenticated/alunos_/$id': typeof AuthenticatedAlunosIdRoute
   '/_authenticated/motoristas/$id': typeof AuthenticatedMotoristasIdRoute
   '/_authenticated/viagens/$id': typeof AuthenticatedViagensIdRoute
   '/api/public/flespi-poll': typeof ApiPublicFlespiPollRoute
@@ -375,6 +393,7 @@ export interface FileRouteTypes {
     | '/abastecimento'
     | '/acompanhar'
     | '/ajustes'
+    | '/alunos'
     | '/compartilhar'
     | '/corridas'
     | '/despesas'
@@ -398,6 +417,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
+    | '/alunos/$id'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-poll'
@@ -414,6 +434,7 @@ export interface FileRouteTypes {
     | '/abastecimento'
     | '/acompanhar'
     | '/ajustes'
+    | '/alunos'
     | '/compartilhar'
     | '/corridas'
     | '/despesas'
@@ -437,6 +458,7 @@ export interface FileRouteTypes {
     | '/veiculos'
     | '/viagens'
     | '/casos-de-uso/$slug'
+    | '/alunos/$id'
     | '/motoristas/$id'
     | '/viagens/$id'
     | '/api/public/flespi-poll'
@@ -454,6 +476,7 @@ export interface FileRouteTypes {
     | '/_authenticated/abastecimento'
     | '/_authenticated/acompanhar'
     | '/_authenticated/ajustes'
+    | '/_authenticated/alunos'
     | '/_authenticated/compartilhar'
     | '/_authenticated/corridas'
     | '/_authenticated/despesas'
@@ -477,6 +500,7 @@ export interface FileRouteTypes {
     | '/_authenticated/veiculos'
     | '/_authenticated/viagens'
     | '/casos-de-uso/$slug'
+    | '/_authenticated/alunos_/$id'
     | '/_authenticated/motoristas/$id'
     | '/_authenticated/viagens/$id'
     | '/api/public/flespi-poll'
@@ -710,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCompartilharRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/alunos': {
+      id: '/_authenticated/alunos'
+      path: '/alunos'
+      fullPath: '/alunos'
+      preLoaderRoute: typeof AuthenticatedAlunosRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/ajustes': {
       id: '/_authenticated/ajustes'
       path: '/ajustes'
@@ -766,6 +797,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMotoristasIdRouteImport
       parentRoute: typeof AuthenticatedMotoristasRoute
     }
+    '/_authenticated/alunos_/$id': {
+      id: '/_authenticated/alunos_/$id'
+      path: '/alunos/$id'
+      fullPath: '/alunos/$id'
+      preLoaderRoute: typeof AuthenticatedAlunosIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -798,6 +836,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAbastecimentoRoute: typeof AuthenticatedAbastecimentoRoute
   AuthenticatedAcompanharRoute: typeof AuthenticatedAcompanharRoute
   AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedAlunosRoute: typeof AuthenticatedAlunosRoute
   AuthenticatedCompartilharRoute: typeof AuthenticatedCompartilharRoute
   AuthenticatedCorridasRoute: typeof AuthenticatedCorridasRoute
   AuthenticatedDespesasRoute: typeof AuthenticatedDespesasRoute
@@ -820,12 +859,14 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSemanaRoute: typeof AuthenticatedSemanaRoute
   AuthenticatedVeiculosRoute: typeof AuthenticatedVeiculosRoute
   AuthenticatedViagensRoute: typeof AuthenticatedViagensRouteWithChildren
+  AuthenticatedAlunosIdRoute: typeof AuthenticatedAlunosIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAbastecimentoRoute: AuthenticatedAbastecimentoRoute,
   AuthenticatedAcompanharRoute: AuthenticatedAcompanharRoute,
   AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedAlunosRoute: AuthenticatedAlunosRoute,
   AuthenticatedCompartilharRoute: AuthenticatedCompartilharRoute,
   AuthenticatedCorridasRoute: AuthenticatedCorridasRoute,
   AuthenticatedDespesasRoute: AuthenticatedDespesasRoute,
@@ -848,6 +889,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSemanaRoute: AuthenticatedSemanaRoute,
   AuthenticatedVeiculosRoute: AuthenticatedVeiculosRoute,
   AuthenticatedViagensRoute: AuthenticatedViagensRouteWithChildren,
+  AuthenticatedAlunosIdRoute: AuthenticatedAlunosIdRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =

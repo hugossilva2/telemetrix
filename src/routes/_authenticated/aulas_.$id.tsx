@@ -327,7 +327,7 @@ function AulaPage() {
             disabled={!dirty || save.isPending}
             onClick={() =>
               save.mutate(
-                { checklist, notes: notes.trim() || null, price: p != null && Number.isFinite(p) ? p : null },
+                { checklist: checklist as unknown as Database["public"]["Tables"]["lessons"]["Update"]["checklist"], notes: notes.trim() || null, price: p != null && Number.isFinite(p) ? p : null },
                 { onSuccess: () => toast.success("Aula salva.") },
               )
             }

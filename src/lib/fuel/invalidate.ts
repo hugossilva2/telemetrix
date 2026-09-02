@@ -14,6 +14,7 @@ const FUEL_DEPENDENT_KEYS = [
   ["report-week"],
   ["trends-trips"],
   ["eco-trips"],
+  ["profit-costs"],
 ] as const;
 
 export function invalidateFuelMetrics(qc: QueryClient) {

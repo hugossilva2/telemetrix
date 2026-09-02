@@ -1,14 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import {
   Car,
+  CarTaxiFront,
   Eye,
   Fuel,
   FolderCog,
+  PiggyBank,
   Radar,
   Route as RouteIcon,
   Settings,
   Users,
-  Wallet,
   type LucideIcon,
 } from "lucide-react";
 import { useIsObserver } from "@/lib/shares/observer";
@@ -16,7 +17,17 @@ import { useAccountMode } from "@/lib/account/profile";
 import type { AccountMode } from "@/lib/account/mode";
 
 interface NavItem {
-  to: "/inicio" | "/rastreador" | "/viagens" | "/abastecimento" | "/gestao" | "/ajustes" | "/despesas" | "/motoristas" | "/acompanhar";
+  to:
+    | "/inicio"
+    | "/rastreador"
+    | "/viagens"
+    | "/abastecimento"
+    | "/gestao"
+    | "/ajustes"
+    | "/corridas"
+    | "/lucro"
+    | "/motoristas"
+    | "/acompanhar";
   label: string;
   Icon: LucideIcon;
   exact: boolean;
@@ -29,14 +40,15 @@ const base = {
   abastecer: { to: "/abastecimento", label: "Abastecer", Icon: Fuel, exact: false },
   gestao: { to: "/gestao", label: "Gestão", Icon: FolderCog, exact: false },
   ajustes: { to: "/ajustes", label: "Ajustes", Icon: Settings, exact: false },
-  despesas: { to: "/despesas", label: "Gastos", Icon: Wallet, exact: false },
+  corridas: { to: "/corridas", label: "Corridas", Icon: CarTaxiFront, exact: false },
+  lucro: { to: "/lucro", label: "Lucro", Icon: PiggyBank, exact: false },
   equipe: { to: "/motoristas", label: "Equipe", Icon: Users, exact: false },
 } satisfies Record<string, NavItem>;
 
 /** Menu inferior por perfil de uso. Motorista mantém o menu original. */
 const NAV_BY_MODE: Record<AccountMode, NavItem[]> = {
   motorista: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
-  app: [base.painel, base.viagens, base.abastecer, base.despesas, base.gestao, base.ajustes],
+  app: [base.painel, base.corridas, base.lucro, base.abastecer, base.gestao, base.ajustes],
   instrutor: [base.painel, base.rastreio, base.viagens, base.abastecer, base.gestao, base.ajustes],
   autoescola: [base.painel, base.rastreio, base.viagens, base.equipe, base.gestao, base.ajustes],
 };

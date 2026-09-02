@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BarChart3,
+  CarTaxiFront,
   ClipboardCheck,
   Eye,
   Leaf,
+  PiggyBank,
+  Radar,
   Route as RouteIcon,
   MapPin,
   ShieldCheck,
@@ -17,6 +20,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
 import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
+import { useAccountMode } from "@/lib/account/profile";
 
 export const Route = createFileRoute("/_authenticated/gestao")({
   head: () => ({
@@ -85,7 +89,16 @@ const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
   { to: "/lugares", label: "Lugares", desc: "Favoritos, geofences e ETA", Icon: MapPin },
 ];
 
+const appModeLinks: typeof links = [
+  { to: "/corridas", label: "Corridas", desc: "Lançamento rápido e turnos", Icon: CarTaxiFront },
+  { to: "/lucro", label: "Meu lucro", desc: "Ganhos − gastos, R$/km e R$/hora", Icon: PiggyBank },
+  { to: "/rastreador", label: "Rastreio", desc: "Localização, alertas e geofences", Icon: Radar },
+  { to: "/viagens", label: "Viagens", desc: "Histórico gravado pelo OBD/rastreador", Icon: RouteIcon },
+];
+
 function GestaoPage() {
+  const { mode } = useAccountMode();
+  const items = mode === "app" ? [...appModeLinks, ...links] : links;
   return (
     <AppShell title="Gestão" subtitle="Manutenção, condutores e documentos">
       <MaintenanceAlertsCard />
@@ -97,7 +110,7 @@ function GestaoPage() {
       <div className="card-surface p-4">
         <h2 className="font-display text-sm font-semibold tracking-tight">Atalhos</h2>
         <ul className="mt-3 grid grid-cols-2 gap-3">
-          {links.map(({ to, label, desc, Icon }) => (
+          {items.map(({ to, label, desc, Icon }) => (
             <li key={to} className="min-w-0">
               <Link
                 to={to}

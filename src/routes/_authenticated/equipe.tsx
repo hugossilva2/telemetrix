@@ -142,10 +142,27 @@ function EquipePage() {
         </ul>
 
         {isOwner && (
+          <div className="mt-3">
+            <LimitCounter status={instructorLimit} noun="instrutores (contando convites em aberto)" />
+            <PlanLimitCard
+              plan={plan}
+              status={instructorLimit}
+              noun="instrutores convidados"
+              hint={
+                instructorLimit.max === 0
+                  ? "No plano Free a escola funciona só com o dono. Faça upgrade para montar a equipe."
+                  : "Remova um instrutor ou faça upgrade para convidar mais."
+              }
+            />
+          </div>
+        )}
+
+        {isOwner && !instructorLimit.atLimit && (
           <form
             className="mt-3 space-y-2 rounded-xl border border-dashed border-border p-3"
             onSubmit={(e) => {
               e.preventDefault();
+              if (instructorLimit.atLimit) return;
               createInvite.mutate(
                 { email },
                 {

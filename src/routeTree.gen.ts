@@ -34,6 +34,7 @@ import { Route as AuthenticatedLugaresRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedLucroRouteImport } from './routes/_authenticated/lucro'
 import { Route as AuthenticatedInicioRouteImport } from './routes/_authenticated/inicio'
 import { Route as AuthenticatedGestaoRouteImport } from './routes/_authenticated/gestao'
+import { Route as AuthenticatedEquipeRouteImport } from './routes/_authenticated/equipe'
 import { Route as AuthenticatedEcoRouteImport } from './routes/_authenticated/eco'
 import { Route as AuthenticatedDocumentosRouteImport } from './routes/_authenticated/documentos'
 import { Route as AuthenticatedDiagnosticoRouteImport } from './routes/_authenticated/diagnostico'
@@ -179,6 +180,11 @@ const AuthenticatedGestaoRoute = AuthenticatedGestaoRouteImport.update({
   path: '/gestao',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedEquipeRoute = AuthenticatedEquipeRouteImport.update({
+  id: '/equipe',
+  path: '/equipe',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedEcoRoute = AuthenticatedEcoRouteImport.update({
   id: '/eco',
   path: '/eco',
@@ -299,6 +305,7 @@ export interface FileRoutesByFullPath {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/lucro': typeof AuthenticatedLucroRoute
@@ -344,6 +351,7 @@ export interface FileRoutesByTo {
   '/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/documentos': typeof AuthenticatedDocumentosRoute
   '/eco': typeof AuthenticatedEcoRoute
+  '/equipe': typeof AuthenticatedEquipeRoute
   '/gestao': typeof AuthenticatedGestaoRoute
   '/inicio': typeof AuthenticatedInicioRoute
   '/lucro': typeof AuthenticatedLucroRoute
@@ -391,6 +399,7 @@ export interface FileRoutesById {
   '/_authenticated/diagnostico': typeof AuthenticatedDiagnosticoRoute
   '/_authenticated/documentos': typeof AuthenticatedDocumentosRoute
   '/_authenticated/eco': typeof AuthenticatedEcoRoute
+  '/_authenticated/equipe': typeof AuthenticatedEquipeRoute
   '/_authenticated/gestao': typeof AuthenticatedGestaoRoute
   '/_authenticated/inicio': typeof AuthenticatedInicioRoute
   '/_authenticated/lucro': typeof AuthenticatedLucroRoute
@@ -438,6 +447,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/documentos'
     | '/eco'
+    | '/equipe'
     | '/gestao'
     | '/inicio'
     | '/lucro'
@@ -483,6 +493,7 @@ export interface FileRouteTypes {
     | '/diagnostico'
     | '/documentos'
     | '/eco'
+    | '/equipe'
     | '/gestao'
     | '/inicio'
     | '/lucro'
@@ -529,6 +540,7 @@ export interface FileRouteTypes {
     | '/_authenticated/diagnostico'
     | '/_authenticated/documentos'
     | '/_authenticated/eco'
+    | '/_authenticated/equipe'
     | '/_authenticated/gestao'
     | '/_authenticated/inicio'
     | '/_authenticated/lucro'
@@ -748,6 +760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGestaoRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/equipe': {
+      id: '/_authenticated/equipe'
+      path: '/equipe'
+      fullPath: '/equipe'
+      preLoaderRoute: typeof AuthenticatedEquipeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/eco': {
       id: '/_authenticated/eco'
       path: '/eco'
@@ -922,6 +941,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDiagnosticoRoute: typeof AuthenticatedDiagnosticoRoute
   AuthenticatedDocumentosRoute: typeof AuthenticatedDocumentosRoute
   AuthenticatedEcoRoute: typeof AuthenticatedEcoRoute
+  AuthenticatedEquipeRoute: typeof AuthenticatedEquipeRoute
   AuthenticatedGestaoRoute: typeof AuthenticatedGestaoRoute
   AuthenticatedInicioRoute: typeof AuthenticatedInicioRoute
   AuthenticatedLucroRoute: typeof AuthenticatedLucroRoute
@@ -955,6 +975,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDiagnosticoRoute: AuthenticatedDiagnosticoRoute,
   AuthenticatedDocumentosRoute: AuthenticatedDocumentosRoute,
   AuthenticatedEcoRoute: AuthenticatedEcoRoute,
+  AuthenticatedEquipeRoute: AuthenticatedEquipeRoute,
   AuthenticatedGestaoRoute: AuthenticatedGestaoRoute,
   AuthenticatedInicioRoute: AuthenticatedInicioRoute,
   AuthenticatedLucroRoute: AuthenticatedLucroRoute,

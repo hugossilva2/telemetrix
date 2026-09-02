@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   BarChart3,
+  CarTaxiFront,
   ClipboardCheck,
   Eye,
   Leaf,
+  PiggyBank,
+  Radar,
   Route as RouteIcon,
   MapPin,
   ShieldCheck,
@@ -17,6 +20,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { ExpiringDocsCard } from "@/components/docs/ExpiringDocsCard";
 import { MaintenanceAlertsCard } from "@/components/maintenance/MaintenanceAlertsCard";
 import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
+import { useAccountMode } from "@/lib/account/profile";
 
 export const Route = createFileRoute("/_authenticated/gestao")({
   head: () => ({

@@ -13,6 +13,9 @@ import { toUserMessage } from "@/lib/errors/userMessage";
 import { invalidateSchool, useLessons, useMySchool, useStudents } from "@/lib/school/api";
 import { LICENSE_CATEGORIES, studentProgress } from "@/lib/school/lessons";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
+import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard";
+import { limitStatus } from "@/lib/billing/plans";
+import { useSubscription } from "@/lib/billing/subscription";
 
 export const Route = createFileRoute("/_authenticated/alunos")({
   head: () => ({

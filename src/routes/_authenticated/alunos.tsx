@@ -60,10 +60,19 @@ function AlunosPage() {
     query.trim() ? s.name.toLowerCase().includes(query.trim().toLowerCase()) : true,
   );
 
+  const { plan, limits } = useSubscription();
+  const studentLimit = limitStatus(
+    (students.data ?? []).filter((s) => s.active).length,
+    limits.maxStudents,
+  );
+
   const create = useMutation({
     mutationFn: async () => {
       if (!school) throw new Error("Escola não encontrada");
       if (!name.trim()) throw new Error("Informe o nome do aluno.");
+      if (studentLimit.atLimit) {
+        throw new Error(`Seu plano permite ${studentLimit.max} alunos ativos. Faça upgrade para cadastrar mais.`);
+      }
       const { error } = await supabase.from("students").insert({
         org_id: school.id,
         name: name.trim(),

@@ -23,6 +23,9 @@ import { formatBRL } from "@/lib/format";
 import { formatDate } from "@/lib/docs/expiry";
 import {
   computeStatus,
+  daysUntilAtPace,
+  defaultIntervalKm,
+  HEAVY_WARN_KM,
   latestByType,
   maintenanceClasses,
   MAINTENANCE_LABEL,
@@ -30,6 +33,9 @@ import {
   type MaintenanceRecord,
   type MaintenanceType,
 } from "@/lib/maintenance/rules";
+import { useAccountMode } from "@/lib/account/profile";
+import { useRides, useShifts } from "@/lib/rides/api";
+import { kmPerWeek } from "@/lib/rides/profit";
 
 export const Route = createFileRoute("/_authenticated/manutencao")({
   head: () => ({
@@ -56,13 +62,21 @@ function todayInput() {
 function ManutencaoPage() {
   const qc = useQueryClient();
   const { telemetry } = useTelemetry();
+  const { mode } = useAccountMode();
+  const heavyUse = mode === "app";
+  const ridesQ = useRides();
+  const shiftsQ = useShifts();
+  const pace = useMemo(
+    () => (heavyUse ? kmPerWeek(ridesQ.data ?? [], shiftsQ.data ?? []) : null),
+    [heavyUse, ridesQ.data, shiftsQ.data],
+  );
   const currentMileage = telemetry.mileageKm ?? null;
 
   const [type, setType] = useState<MaintenanceType>("oleo");
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayInput);
   const [mileage, setMileage] = useState("");
-  const [intervalKm, setIntervalKm] = useState("10000");
+  const [intervalKm, setIntervalKm] = useState(() => String(defaultIntervalKm("oleo", mode === "app") ?? ""));
   const [intervalMonths, setIntervalMonths] = useState("12");
   const [cost, setCost] = useState("");
   const [workshop, setWorkshop] = useState("");
@@ -76,8 +90,9 @@ function ManutencaoPage() {
   const onTypeChange = (v: string) => {
     const t = v as MaintenanceType;
     setType(t);
+    const km = defaultIntervalKm(t, heavyUse);
+    setIntervalKm(km != null ? String(km) : "");
     const preset = MAINTENANCE_TYPES.find((x) => x.value === t);
-    setIntervalKm(preset?.defaultKm != null ? String(preset.defaultKm) : "");
     setIntervalMonths(preset?.defaultMonths != null ? String(preset.defaultMonths) : "");
   };
 
@@ -98,11 +113,11 @@ function ManutencaoPage() {
   const upcoming = useMemo(() => {
     const items = latestByType(records).map((r) => ({
       record: r,
-      info: computeStatus(r, currentMileage),
+      info: computeStatus(r, currentMileage, heavyUse ? { warnKm: HEAVY_WARN_KM } : {}),
     }));
     const rank = { overdue: 0, soon: 1, ok: 2, unknown: 3 } as const;
     return items.sort((a, b) => rank[a.info.status] - rank[b.info.status]);
-  }, [records, currentMileage]);
+  }, [records, currentMileage, heavyUse]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -176,6 +191,19 @@ function ManutencaoPage() {
           : "Aguardando telemetria do odômetro"
       }
     >
+      {heavyUse && (
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+          <p className="text-sm font-semibold">Metas para rodagem alta</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Como motorista de app, os intervalos sugeridos são mais curtos (óleo e rodízio a cada
+            5.000 km) e o aviso chega com 1.000 km de antecedência.
+            {pace != null
+              ? ` Seu ritmo atual é de ~${pace.toLocaleString("pt-BR")} km por semana.`
+              : " Registre corridas ou turnos com odômetro para estimar quantos dias faltam."}
+          </p>
+        </div>
+      )}
+
       {/* Próximas manutenções */}
       <div className="card-surface p-4">
         <h2 className="text-sm font-semibold">Próximas manutenções</h2>
@@ -203,7 +231,17 @@ function ManutencaoPage() {
                         : "Sem intervalo definido"}
                   </p>
                 </div>
-                <span className="shrink-0 text-[11px] font-medium">{info.message}</span>
+                <span className="shrink-0 text-right text-[11px] font-medium">
+                  {info.message}
+                  {(() => {
+                    const d = daysUntilAtPace(info.remainingKm, pace);
+                    return d != null && d > 0 && info.status !== "overdue" ? (
+                      <span className="block text-[10px] font-normal text-muted-foreground">
+                        ≈ {d} dia{d === 1 ? "" : "s"} no seu ritmo
+                      </span>
+                    ) : null;
+                  })()}
+                </span>
               </li>
             ))}
           </ul>

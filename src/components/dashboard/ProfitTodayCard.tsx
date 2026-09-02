@@ -51,7 +51,7 @@ export function ProfitTodayCard() {
             {today.profitPerHour != null && ` · ${formatBRL(today.profitPerHour)}/h`}
           </p>
         </Link>
-        <Link to="/lucro" className="rounded-xl border border-border/70 bg-background/35 p-3">
+        <Link to="/semana" className="rounded-xl border border-border/70 bg-background/35 p-3">
           <p className="text-[11px] text-muted-foreground">Semana (seg–dom)</p>
           <p className={`mt-0.5 font-mono text-xl font-semibold ${week.profit < 0 ? "text-destructive" : ""}`}>
             {formatBRL(week.profit)}

@@ -95,3 +95,38 @@ describe("períodos", () => {
     expect(days[2].value).toBe(10);
   });
 });
+
+describe("weeklyBreakdown / kmPerWeek", () => {
+  it("quebra a semana em 7 dias seg–dom", async () => {
+    const { weeklyBreakdown, weekPeriodFromKey } = await import("./profit");
+    const p = weekPeriodFromKey("2026-08-31");
+    const days = weeklyBreakdown(
+      [
+        { occurred_at: "2026-08-31T10:00:00", platform: "uber", amount: 30, tip: 0, distance_km: 10, duration_min: 30 },
+        { occurred_at: "2026-09-06T10:00:00", platform: "99", amount: 20, tip: 5, distance_km: 5, duration_min: 30 },
+      ],
+      [],
+      p,
+    );
+    expect(days).toHaveLength(7);
+    expect(days[0]).toMatchObject({ label: "seg", date: "2026-08-31", rides: 1, earnings: 30, km: 10, hours: 0.5 });
+    expect(days[6]).toMatchObject({ label: "dom", date: "2026-09-06", rides: 1, earnings: 25 });
+    expect(days[3].rides).toBe(0);
+  });
+
+  it("estima km por semana ignorando semanas vazias", async () => {
+    const { kmPerWeek } = await import("./profit");
+    const now = new Date("2026-09-02T12:00:00");
+    const km = kmPerWeek(
+      [
+        { occurred_at: "2026-09-01T10:00:00", platform: "uber", amount: 1, tip: 0, distance_km: 100, duration_min: 1 },
+        { occurred_at: "2026-08-20T10:00:00", platform: "uber", amount: 1, tip: 0, distance_km: 300, duration_min: 1 },
+      ],
+      [],
+      4,
+      now,
+    );
+    expect(km).toBe(200);
+    expect(kmPerWeek([], [], 4, now)).toBeNull();
+  });
+});

@@ -500,15 +500,56 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           const durationH = durationS / 3600;
           const avgSpeed = durationH > 0 ? distanceKm / durationH : 0;
 
-          const { data: lastFuel } = await supabaseAdmin
-            .from("fuel_logs")
-            .select("price_per_liter")
-            .eq("user_id", vehicle.user_id)
-            .order("date", { ascending: false })
-            .limit(1)
-            .maybeSingle();
+          const [{ data: lastFuel }, { data: defaultDriver }, { data: tripPings }] =
+            await Promise.all([
+              supabaseAdmin
+                .from("fuel_logs")
+                .select("price_per_liter")
+                .eq("user_id", vehicle.user_id)
+                .order("date", { ascending: false })
+                .limit(1)
+                .maybeSingle(),
+              supabaseAdmin
+                .from("drivers")
+                .select("id")
+                .eq("user_id", vehicle.user_id)
+                .eq("is_default", true)
+                .limit(1)
+                .maybeSingle(),
+              supabaseAdmin
+                .from("tracker_pings")
+                .select("speed_kmh,ignition,recorded_at")
+                .eq("vehicle_id", vehicle.id)
+                .gte("recorded_at", state.start_time as string)
+                .lte("recorded_at", nowIso)
+                .order("recorded_at", { ascending: true }),
+            ]);
+
+          // Marcha lenta: motor ligado e praticamente parado entre dois pings.
+          let idleSeconds = 0;
+          const pings = tripPings ?? [];
+          for (let i = 1; i < pings.length; i++) {
+            const prev = pings[i - 1];
+            const cur = pings[i];
+            const dt =
+              (new Date(cur.recorded_at as string).getTime() -
+                new Date(prev.recorded_at as string).getTime()) /
+              1000;
+            if (!Number.isFinite(dt) || dt <= 0 || dt > 15 * 60) continue;
+            const prevSpeed = Number(prev.speed_kmh);
+            const curSpeed = Number(cur.speed_kmh);
+            const stopped =
+              Number.isFinite(prevSpeed) &&
+              Number.isFinite(curSpeed) &&
+              prevSpeed < IDLE_SPEED_KMH &&
+              curSpeed < IDLE_SPEED_KMH;
+            const engineOn = prev.ignition !== false && cur.ignition !== false;
+            if (stopped && engineOn) idleSeconds += dt;
+          }
+          idleSeconds = Math.round(idleSeconds);
 
           const fuelKind = parseFuelKind(vehicle.fuel_kind);
+          const spec = specFromVehicleRow(vehicle);
           const { data: calibration } = await supabaseAdmin
             .from("vehicle_fuel_calibration")
             .select("kmpl,samples,fuel_type")
@@ -520,13 +561,26 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           const { kmpl, source: fuelSource } = resolveKmpl({
             calibration,
             vehicleKmpl: vehicle.avg_consumption_kmpl,
-            spec: specFromVehicleRow(vehicle),
+            spec,
             fuel: fuelKind,
             avgSpeedKmh: avgSpeed,
           });
-          const price = Number(lastFuel?.price_per_liter) || 5.89;
-          const fuelLiters = tripFuelLiters({ distanceKm, kmpl });
+          const price = Number(lastFuel?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER;
+          const fuelLiters = tripFuelLiters({ distanceKm, kmpl, idleSeconds });
           const estimatedCost = fuelLiters !== null && price > 0 ? fuelLiters * price : null;
+
+          // Sem eventos de condução vindos do rastreador: o score reflete
+          // distância, consumo e marcha lenta da viagem.
+          const eco = summarizeEco({
+            events: [],
+            idleSeconds,
+            distanceKm,
+            kmpl,
+            pricePerLiter: price,
+            fuel: fuelKind,
+            avgSpeedKmh: avgSpeed,
+            spec,
+          });
 
           const maxSpeed = Math.max(
             Number(state.max_speed_kmh) || 0,
@@ -534,12 +588,13 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           );
 
           // Reentrega do mesmo fechamento é no-op (unique vehicle_id + start_time).
-          const { data: tripRows } = await supabaseAdmin
+          const { data: tripRows, error: tripError } = await supabaseAdmin
             .from("trips")
             .upsert(
               {
                 user_id: vehicle.user_id,
                 vehicle_id: vehicle.id,
+                driver_id: defaultDriver?.id ?? null,
                 start_time: state.start_time as string,
                 end_time: nowIso,
                 start_lat: state.start_lat,
@@ -555,10 +610,19 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
                 fuel_kmpl_used: kmpl,
                 fuel_source: fuelSource,
                 estimated_cost: estimatedCost,
+                idle_seconds: idleSeconds,
+                eco_score: eco.score,
+                hardware_source: "fmc003",
               },
               { onConflict: "vehicle_id,start_time", ignoreDuplicates: true },
             )
             .select("id");
+
+          if (tripError) {
+            // Falha real de gravação: mantém o estado do device para nova tentativa.
+            console.error("[ingest] falha ao gravar viagem:", tripError);
+            continue;
+          }
           if (!tripRows || tripRows.length === 0) skippedDuplicate++;
 
           // Traçado real percorrido, a partir dos pings gravados na viagem.
@@ -585,10 +649,12 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             }
           }
 
-
-          await supabaseAdmin.from("device_trip_state").delete().eq("device_id", deviceId);
+          // Encerra a viagem sem apagar a linha: preserva last_message_at e
+          // geofence_state, senão o poll seguinte reprocessa e repete os pushes.
+          await clearTripFields(deviceId);
           processed++;
           continue;
+
         }
 
         // Atualização durante viagem em andamento.

@@ -8,8 +8,7 @@ interface Props {
   onChange: (file: File | null) => void;
 }
 
-const FILE_ACCEPT =
-  "image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt";
+const FILE_ACCEPT = "image/*,application/pdf,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt";
 
 /**
  * Campo de anexo reutilizável: câmera ou galeria/arquivo, com prévia.

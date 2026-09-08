@@ -36,8 +36,8 @@ export function OfflineQueueCard() {
       </header>
 
       <p className="text-xs text-muted-foreground">
-        Viagens gravadas sem internet ficam salvas no aparelho e são enviadas
-        automaticamente quando a conexão volta.
+        Viagens gravadas sem internet ficam salvas no aparelho e são enviadas automaticamente quando
+        a conexão volta.
       </p>
 
       {items.length > 0 && (

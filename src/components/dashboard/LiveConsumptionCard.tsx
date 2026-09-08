@@ -15,14 +15,18 @@ export function LiveConsumptionCard() {
   const open = useOpenTrip();
   const { vehicle, spec, fuel } = useActiveVehicle();
 
-  const { pricePerLiter: price, hasPriceFromLog, kmpl, source } = useFuelRefs(vehicle?.id, fuel, {
+  const {
+    pricePerLiter: price,
+    hasPriceFromLog,
+    kmpl,
+    source,
+  } = useFuelRefs(vehicle?.id, fuel, {
     vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
     spec,
     avgSpeedKmh: null,
   });
 
   const distanceKm = openTripDistanceKm(open);
-
 
   const usingFallbackPrice = !hasPriceFromLog;
 

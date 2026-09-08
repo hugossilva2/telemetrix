@@ -50,7 +50,12 @@ export function FuelSourceBadge({
 
   if (as === "text") {
     return (
-      <span className={cn("inline-flex items-center gap-1 text-[10px] text-muted-foreground", className)}>
+      <span
+        className={cn(
+          "inline-flex items-center gap-1 text-[10px] text-muted-foreground",
+          className,
+        )}
+      >
         <Icon className={cn("size-3", measured && "text-success")} />
         {text}
       </span>

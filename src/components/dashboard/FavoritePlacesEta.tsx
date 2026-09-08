@@ -18,7 +18,6 @@ export function FavoritePlacesEta() {
   const eta = useServerFn(getRouteEta);
   const startTrip = useStartTripDialog();
 
-
   const { data: allPlaces = [] } = useFavoritePlaces();
 
   const lat = telemetry.latitude;
@@ -26,18 +25,13 @@ export function FavoritePlacesEta() {
   const hasOrigin = typeof lat === "number" && typeof lng === "number";
 
   // Bucketize origin to avoid refetching for every tiny GPS jitter (~1km grid).
-  const originKey = hasOrigin
-    ? `${(lat! * 100).toFixed(0)}_${(lng! * 100).toFixed(0)}`
-    : "none";
+  const originKey = hasOrigin ? `${(lat! * 100).toFixed(0)}_${(lng! * 100).toFixed(0)}` : "none";
 
   // Teto de chamadas de rota: só os 4 locais mais próximos, a cada 3 minutos.
   const places = useMemo(() => {
     if (!hasOrigin) return allPlaces.slice(0, ETA_PLACE_LIMIT);
     return [...allPlaces]
-      .sort(
-        (a, b) =>
-          haversineKm(lat!, lng!, a.lat, a.lng) - haversineKm(lat!, lng!, b.lat, b.lng),
-      )
+      .sort((a, b) => haversineKm(lat!, lng!, a.lat, a.lng) - haversineKm(lat!, lng!, b.lat, b.lng))
       .slice(0, ETA_PLACE_LIMIT);
   }, [allPlaces, hasOrigin, originKey]);
 
@@ -90,9 +84,7 @@ export function FavoritePlacesEta() {
             const Icon = iconFor(p.icon);
             const q = etaQueries[i];
             const seconds = q?.data?.durationSeconds;
-            const km = q?.data?.distanceMeters
-              ? (q.data.distanceMeters / 1000).toFixed(1)
-              : null;
+            const km = q?.data?.distanceMeters ? (q.data.distanceMeters / 1000).toFixed(1) : null;
             const etaText = typeof seconds === "number" ? formatEta(seconds) : null;
             return (
               <li key={p.id} className="snap-start">
@@ -105,7 +97,8 @@ export function FavoritePlacesEta() {
                       icon: p.icon,
                       lat: p.lat,
                       lng: p.lng,
-                      geofence_radius_m: (p as { geofence_radius_m?: number }).geofence_radius_m ?? 150,
+                      geofence_radius_m:
+                        (p as { geofence_radius_m?: number }).geofence_radius_m ?? 150,
                     })
                   }
                   className="flex min-w-[140px] flex-col gap-1 card-surface p-3 text-left transition active:scale-[0.98] hover:border-primary/50"
@@ -124,12 +117,8 @@ export function FavoritePlacesEta() {
                     <span className="text-xs text-destructive">Falhou</span>
                   ) : etaText ? (
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-lg font-bold tabular-nums text-primary">
-                        {etaText}
-                      </span>
-                      {km && (
-                        <span className="text-xs text-muted-foreground">· {km} km</span>
-                      )}
+                      <span className="text-lg font-bold tabular-nums text-primary">{etaText}</span>
+                      {km && <span className="text-xs text-muted-foreground">· {km} km</span>}
                     </div>
                   ) : (
                     <span className="text-xs text-muted-foreground">—</span>
@@ -151,9 +140,7 @@ export function FavoritePlacesEta() {
           const idx = places.findIndex((x) => x.id === p.id);
           const q = idx >= 0 ? etaQueries[idx] : undefined;
           const s = q?.data?.durationSeconds;
-          const km = q?.data?.distanceMeters
-            ? (q.data.distanceMeters / 1000).toFixed(1)
-            : null;
+          const km = q?.data?.distanceMeters ? (q.data.distanceMeters / 1000).toFixed(1) : null;
           if (typeof s !== "number") return null;
           return (
             <span className="block text-foreground">
@@ -165,5 +152,4 @@ export function FavoritePlacesEta() {
       />
     </section>
   );
-
 }

@@ -257,5 +257,4 @@ export const DEMO_DOCS = [
   { label: "CNH", dueAt: "vence em 2 anos", tone: "ok" as const },
 ];
 
-export const brl = (n: number) =>
-  n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

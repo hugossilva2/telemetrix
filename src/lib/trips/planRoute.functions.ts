@@ -21,11 +21,7 @@ export type PlannedRoute = {
 export const planRoute = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
-    (input: {
-      origin: PlanPoint;
-      destination: PlanPoint;
-      stops?: PlanPoint[];
-    }) => input,
+    (input: { origin: PlanPoint; destination: PlanPoint; stops?: PlanPoint[] }) => input,
   )
   .handler(async ({ data }): Promise<PlannedRoute> => {
     const lovable = process.env.LOVABLE_API_KEY;
@@ -67,7 +63,7 @@ export const planRoute = createServerFn({ method: "POST" })
       const reason = details.find((d) => d.reason)?.reason;
       if (reason === "API_KEY_HTTP_REFERRER_BLOCKED") {
         throw new Error(
-          "A chave do Google Maps está restrita por referrer. Ajuste a restrição da chave de servidor para \"None\" ou \"IP addresses\".",
+          'A chave do Google Maps está restrita por referrer. Ajuste a restrição da chave de servidor para "None" ou "IP addresses".',
         );
       }
       if (reason === "API_KEY_SERVICE_BLOCKED") {

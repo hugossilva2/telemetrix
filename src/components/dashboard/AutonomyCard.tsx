@@ -13,11 +13,7 @@ import { useOdometerSync } from "@/hooks/useOdometerSync";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 import { getRouteEta, nearbyGasStations } from "@/lib/places.functions";
-import {
-  FUEL_STAGE_CLASS,
-  FUEL_STAGE_LABEL,
-  REFUEL_ALERT_PCT,
-} from "@/lib/eco/autonomy";
+import { FUEL_STAGE_CLASS, FUEL_STAGE_LABEL, REFUEL_ALERT_PCT } from "@/lib/eco/autonomy";
 import { formatEta } from "@/lib/format";
 
 function mapsUrl(lat: number, lng: number, placeId: string) {
@@ -38,7 +34,6 @@ export function AutonomyCard() {
   const eta = useServerFn(getRouteEta);
   const [calibrating, setCalibrating] = useState(false);
   const [pctDraft, setPctDraft] = useState(50);
-
 
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
@@ -117,10 +112,7 @@ export function AutonomyCard() {
             {live.kmpl != null ? live.kmpl.toFixed(1) : "—"}
             <span className="ml-1 text-xs font-normal text-muted-foreground">km/L</span>
           </div>
-          <FuelSourceBadge
-            as="text"
-            source={live.source === "medido" ? "viagem" : "ficha"}
-          />
+          <FuelSourceBadge as="text" source={live.source === "medido" ? "viagem" : "ficha"} />
         </div>
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Tanque</div>
@@ -138,8 +130,8 @@ export function AutonomyCard() {
       <div className="mt-3 border-t border-border/60 pt-3">
         {live.fuelSource !== "obd" && !tank.anchor && (
           <p className="text-[11px] text-muted-foreground">
-            Seu carro não informa o nível de combustível. Diga quanto tem no tanque agora
-            para o app acompanhar pelos km rodados.
+            Seu carro não informa o nível de combustível. Diga quanto tem no tanque agora para o app
+            acompanhar pelos km rodados.
           </p>
         )}
 
@@ -206,7 +198,6 @@ export function AutonomyCard() {
           </div>
         )}
       </div>
-
 
       {live.needsRefuel && (
         <div className="mt-4 border-t border-border/60 pt-3">

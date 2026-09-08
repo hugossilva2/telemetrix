@@ -36,9 +36,9 @@ export interface FuelMetricsSummary {
 
 /** Espera os abastecimentos em qualquer ordem; ordena por data internamente. */
 export function fuelMetrics(logs: FuelLogPoint[]): FuelMetricsSummary {
-  const sorted = logs.filter((log) => log.is_full_tank).sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
+  const sorted = logs
+    .filter((log) => log.is_full_tank)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const points: FuelMetricPoint[] = [];
   let totalKm = 0;
   let totalLiters = 0;

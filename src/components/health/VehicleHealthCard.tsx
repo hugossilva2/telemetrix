@@ -6,11 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useMaintenanceRecords } from "@/lib/maintenance/useMaintenanceRecords";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useCheckups } from "@/components/checkups/CheckupButtons";
-import {
-  summarizeCheckups,
-  vehicleHealth,
-  checkupClasses,
-} from "@/lib/checkups/rules";
+import { summarizeCheckups, vehicleHealth, checkupClasses } from "@/lib/checkups/rules";
 import {
   computeStatus,
   latestByType,
@@ -27,7 +23,9 @@ export function VehicleHealthCard() {
 
   const { data: maintenance = [] } = useMaintenanceRecords();
 
-  const { data: docs = [] } = useQuery<{ id: string; title: string | null; type: string; expires_on: string | null }[]>({
+  const { data: docs = [] } = useQuery<
+    { id: string; title: string | null; type: string; expires_on: string | null }[]
+  >({
     queryKey: ["health-docs"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -72,17 +70,27 @@ export function VehicleHealthCard() {
           <Activity className="size-4 text-primary" />
           <h2 className="text-sm font-semibold">Saúde do veículo</h2>
         </div>
-        <Link
-          to="/rotinas"
-          className="flex items-center gap-0.5 text-xs font-medium text-primary"
-        >
+        <Link to="/rotinas" className="flex items-center gap-0.5 text-xs font-medium text-primary">
           Rotinas <ChevronRight className="size-3.5" />
         </Link>
       </div>
 
       <div className="mt-3 flex items-center gap-4">
-        <svg width={size} height={size} className="-rotate-90 shrink-0" role="img" aria-label={`Saúde ${health.score} de 100`}>
-          <circle cx={size / 2} cy={size / 2} r={r} fill="none" strokeWidth={stroke} className="stroke-muted" />
+        <svg
+          width={size}
+          height={size}
+          className="-rotate-90 shrink-0"
+          role="img"
+          aria-label={`Saúde ${health.score} de 100`}
+        >
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            fill="none"
+            strokeWidth={stroke}
+            className="stroke-muted"
+          />
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -108,7 +116,9 @@ export function VehicleHealthCard() {
         <div className="min-w-0 flex-1">
           <p className={`text-sm font-semibold ${health.color}`}>{health.label}</p>
           <ul className="mt-1.5 space-y-1">
-            {pending.length === 0 && maintenanceOverdue + maintenanceSoon === 0 && expiredDocs.length === 0 ? (
+            {pending.length === 0 &&
+            maintenanceOverdue + maintenanceSoon === 0 &&
+            expiredDocs.length === 0 ? (
               <li className="text-xs text-muted-foreground">Tudo em dia. Bom uso!</li>
             ) : (
               <>

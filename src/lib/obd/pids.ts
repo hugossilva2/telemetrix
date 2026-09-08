@@ -15,8 +15,7 @@ const u = (b: number | undefined) => (typeof b === "number" ? b : undefined);
 export const PID_RPM: PidSpec = {
   cmd: "010C",
   pid: "0C",
-  decode: (b) =>
-    b.length >= 2 ? (b[0] * 256 + b[1]) / 4 : undefined,
+  decode: (b) => (b.length >= 2 ? (b[0] * 256 + b[1]) / 4 : undefined),
 };
 
 export const PID_SPEED: PidSpec = {

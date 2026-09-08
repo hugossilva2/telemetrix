@@ -79,22 +79,17 @@ export function parseFlespiMessage(raw: string): VehicleTelemetry | null {
       gsmSignal: num(pick(data, "gsm.signal.level")),
       timestamp: num(pick(data, "timestamp")),
     };
-
   } catch {
     return null;
   }
 }
-
 
 /**
  * Extrai telemetria de mensagens do tópico `flespi/state/.../telemetry/<campo>`,
  * onde o payload é um valor escalar (número/bool/string) OU um JSON aninhado
  * (ex.: tópico `.../position` com objeto completo).
  */
-export function parseFlespiStateTopic(
-  topic: string,
-  raw: string,
-): VehicleTelemetry | null {
+export function parseFlespiStateTopic(topic: string, raw: string): VehicleTelemetry | null {
   const marker = "/telemetry/";
   const idx = topic.indexOf(marker);
   if (idx < 0) return null;
@@ -166,14 +161,12 @@ export function parseFlespiStateTopic(
     }
   };
 
-
   if (key === "position" && value && typeof value === "object") {
     const o = value as Record<string, unknown>;
     out.latitude = num(o.latitude);
     out.longitude = num(o.longitude);
     if (o.speed !== undefined) out.speedKmh = num(o.speed);
     if (o.direction !== undefined) out.headingDeg = num(o.direction);
-
   } else {
     assign(key, value);
   }
@@ -183,12 +176,8 @@ export function parseFlespiStateTopic(
   return hasAny ? out : null;
 }
 
-
 // Mescla telemetria nova sobre a anterior, preservando campos ausentes.
-export function mergeTelemetry(
-  prev: VehicleTelemetry,
-  next: VehicleTelemetry,
-): VehicleTelemetry {
+export function mergeTelemetry(prev: VehicleTelemetry, next: VehicleTelemetry): VehicleTelemetry {
   const merged: VehicleTelemetry = { ...prev };
   (Object.keys(next) as (keyof VehicleTelemetry)[]).forEach((k) => {
     const v = next[k];

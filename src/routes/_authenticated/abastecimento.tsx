@@ -285,7 +285,6 @@ function AbastecimentoPage() {
   const metrics = useMemo(() => fuelMetrics(logs), [logs]);
   const chartData = metrics.points;
 
-
   return (
     <AppShell title="Abastecimento" subtitle="Registro e histórico">
       <form
@@ -489,17 +488,8 @@ function AbastecimentoPage() {
             Selecione ou cadastre um veículo antes de salvar o abastecimento.
           </p>
         ) : null}
-        <Button
-          type="submit"
-          size="lg"
-          className="w-full"
-          disabled={save.isPending || !vehicleId}
-        >
-          {save.isPending
-            ? "Salvando…"
-            : editingId
-              ? "Salvar alterações"
-              : "Salvar abastecimento"}
+        <Button type="submit" size="lg" className="w-full" disabled={save.isPending || !vehicleId}>
+          {save.isPending ? "Salvando…" : editingId ? "Salvar alterações" : "Salvar abastecimento"}
         </Button>
       </form>
 
@@ -585,9 +575,7 @@ function AbastecimentoPage() {
           <div className="mt-3 grid grid-cols-2 gap-3">
             <div className="rounded-lg bg-muted/50 px-3 py-2">
               <p className="text-xs text-muted-foreground">Consumo médio</p>
-              <p className="font-mono text-lg font-semibold">
-                {metrics.avgKmpl?.toFixed(2)} km/L
-              </p>
+              <p className="font-mono text-lg font-semibold">{metrics.avgKmpl?.toFixed(2)} km/L</p>
               <p className="text-xs text-muted-foreground">
                 último: {metrics.lastKmpl?.toFixed(2)} km/L
               </p>

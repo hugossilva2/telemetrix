@@ -34,7 +34,9 @@ export function MaintenanceAlertsCard() {
     return latestByType(records)
       .map((r) => ({ record: r, info: computeStatus(r, currentMileage, statusOpts) }))
       .filter((x) => x.info.status === "soon" || x.info.status === "overdue")
-      .sort((a, b) => (a.info.status === "overdue" ? -1 : 1) - (b.info.status === "overdue" ? -1 : 1));
+      .sort(
+        (a, b) => (a.info.status === "overdue" ? -1 : 1) - (b.info.status === "overdue" ? -1 : 1),
+      );
   }, [records, currentMileage, statusOpts.warnKm]);
 
   useEffect(() => {

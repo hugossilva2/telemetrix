@@ -21,7 +21,9 @@ export function DrivingHabitsCard({ limit = 20 }: { limit?: number }) {
   const mutation = useMutation<HabitsAnalysis>({
     mutationFn: () => analyze({ data: { fuel: getFuelKind(), limit } }),
     onError: (error) =>
-      toast.error(error instanceof Error ? error.message : "Não foi possível gerar as recomendações."),
+      toast.error(
+        error instanceof Error ? error.message : "Não foi possível gerar as recomendações.",
+      ),
   });
 
   const result = mutation.data;
@@ -62,8 +64,8 @@ export function DrivingHabitsCard({ limit = 20 }: { limit?: number }) {
 
       {!result && !mutation.isPending && (
         <p className="mt-3 text-xs text-muted-foreground">
-          Toque em <strong>Gerar</strong> para receber um plano de condução personalizado com base nos
-          seus dados reais de telemetria.
+          Toque em <strong>Gerar</strong> para receber um plano de condução personalizado com base
+          nos seus dados reais de telemetria.
         </p>
       )}
 
@@ -93,9 +95,7 @@ export function DrivingHabitsCard({ limit = 20 }: { limit?: number }) {
             <Stat
               label="Consumo"
               value={
-                result.stats.avgKmpl != null
-                  ? `${formatDecimal(result.stats.avgKmpl)} km/l`
-                  : "—"
+                result.stats.avgKmpl != null ? `${formatDecimal(result.stats.avgKmpl)} km/l` : "—"
               }
             />
             <Stat label="Desperdício" value={formatBRL(result.stats.wastedCost)} />

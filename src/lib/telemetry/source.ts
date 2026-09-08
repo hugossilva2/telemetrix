@@ -30,7 +30,6 @@ export const telemetrySourceStore = {
       listeners.delete(l);
     };
   },
-
 };
 
 /** Preferência do usuário para a fonte de dados, persistida no localStorage. */

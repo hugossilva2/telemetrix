@@ -91,11 +91,7 @@ export function BluetoothPairCard() {
         onClick={handleConnect}
         disabled={busy || supported === false}
       >
-        {busy
-          ? "Conectando…"
-          : firstTime
-            ? "Parear Bluetooth"
-            : "Reconectar"}
+        {busy ? "Conectando…" : firstTime ? "Parear Bluetooth" : "Reconectar"}
       </Button>
 
       {status === "error" && !busy && (

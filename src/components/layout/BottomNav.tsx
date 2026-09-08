@@ -89,7 +89,6 @@ export function BottomNav() {
         }`}
       >
         {navItems.map(({ to, label, Icon, exact }) => (
-
           <li key={to}>
             <Link
               to={to}

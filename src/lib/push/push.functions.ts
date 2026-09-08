@@ -20,7 +20,9 @@ export const sendTestPush = createServerFn({ method: "POST" })
  */
 export const notifyTrackerEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { type: string; placeName?: string | null; vehicleId?: string | null }) => input)
+  .inputValidator(
+    (input: { type: string; placeName?: string | null; vehicleId?: string | null }) => input,
+  )
   .handler(async ({ data, context }) => {
     const { sendTrackerEventPush } = await import("./send.server");
     let vehicleId = data.vehicleId ?? null;

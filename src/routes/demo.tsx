@@ -26,7 +26,6 @@ export const Route = createFileRoute("/demo")({
       { property: "og:image", content: OG_SCREENSHOT.absoluteUrl },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:image", content: OG_SCREENSHOT.absoluteUrl },
-
     ],
     links: [{ rel: "canonical", href: `${SITE}/demo` }],
   }),
@@ -61,8 +60,7 @@ function DemoPage() {
           Veja o Telemetrix funcionando
         </h1>
         <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-muted-foreground">
-          Toque nas abas para navegar pelas telas reais do app com uma frota de exemplo —
-          {" "}
+          Toque nas abas para navegar pelas telas reais do app com uma frota de exemplo —{" "}
           {DEMO_VEHICLES.map((v) => v.name.split(" ").slice(0, 2).join(" ")).join(", ")}.
         </p>
 

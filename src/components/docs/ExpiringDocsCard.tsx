@@ -45,7 +45,9 @@ export function ExpiringDocsCard() {
         if (!d.expires_on) continue;
         list.push({
           key: `doc-${d.id}`,
-          label: d.title ? `${DOC_LABEL[d.type] ?? d.type} · ${d.title}` : (DOC_LABEL[d.type] ?? d.type),
+          label: d.title
+            ? `${DOC_LABEL[d.type] ?? d.type} · ${d.title}`
+            : (DOC_LABEL[d.type] ?? d.type),
           expires_on: d.expires_on,
           to: "/documentos",
         });
@@ -87,7 +89,9 @@ export function ExpiringDocsCard() {
                 className="flex items-center gap-2 rounded-lg px-1 py-1.5 transition-colors hover:bg-accent/50"
               >
                 <span className="min-w-0 flex-1 truncate text-xs font-medium">{i.label}</span>
-                <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${expiryClasses[status]}`}>
+                <span
+                  className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-medium ${expiryClasses[status]}`}
+                >
                   {expiryLabel(i.expires_on)}
                 </span>
                 <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />

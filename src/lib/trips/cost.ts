@@ -59,7 +59,10 @@ export function estimatePlanCost({
   const total = roundTrip ? oneWay * 2 : oneWay;
 
   const consumption = Math.min(safe(kmpl, 10) || 10, 100);
-  const price = Math.min(safe(pricePerLiter, DEFAULT_GAS_PRICE_PER_LITER) || DEFAULT_GAS_PRICE_PER_LITER, 100);
+  const price = Math.min(
+    safe(pricePerLiter, DEFAULT_GAS_PRICE_PER_LITER) || DEFAULT_GAS_PRICE_PER_LITER,
+    100,
+  );
   const tolls = Math.min(safe(tollCost), 100_000);
 
   const fuelLiters = consumption > 0 ? total / consumption : 0;

@@ -62,9 +62,10 @@ export const SCREENSHOTS: ScreenShotInfo[] = [
   ),
 ];
 
-export const SCREENSHOT_BY_ID = Object.fromEntries(
-  SCREENSHOTS.map((s) => [s.id, s]),
-) as Record<ScreenShotInfo["id"], ScreenShotInfo>;
+export const SCREENSHOT_BY_ID = Object.fromEntries(SCREENSHOTS.map((s) => [s.id, s])) as Record<
+  ScreenShotInfo["id"],
+  ScreenShotInfo
+>;
 
 /** Print usado como imagem de compartilhamento padrão. */
 export const OG_SCREENSHOT = SCREENSHOT_BY_ID.painel;

@@ -11,14 +11,7 @@ import type { SnappedPoint } from "@/lib/maps/snapToRoads.functions";
 export const ROUTE_DATA_VERSION = 1;
 
 /** [lat, lng, t(ms), speed(km/h)|null, rpm|null, accel(km/h/s)|null] */
-export type CompactPoint = [
-  number,
-  number,
-  number,
-  number | null,
-  number | null,
-  number | null,
-];
+export type CompactPoint = [number, number, number, number | null, number | null, number | null];
 
 export interface RouteData {
   version: number;
@@ -114,9 +107,7 @@ export function buildRouteData(params: {
     version: ROUTE_DATA_VERSION,
     snapped: useSnapped,
     source: params.source,
-    points: withA.map(
-      (p) => [p.lat, p.lng, p.t, p.speed, p.rpm, p.accel] as CompactPoint,
-    ),
+    points: withA.map((p) => [p.lat, p.lng, p.t, p.speed, p.rpm, p.accel] as CompactPoint),
     events: (params.events ?? [])
       .filter(
         (e): e is EcoEvent & { lat: number; lng: number } =>

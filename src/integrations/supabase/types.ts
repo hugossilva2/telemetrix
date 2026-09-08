@@ -1,1666 +1,1660 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
+    PostgrestVersion: "14.5";
+  };
   public: {
     Tables: {
       automation_runs: {
         Row: {
-          automation_id: string | null
-          created_at: string
-          error: string | null
-          id: string
-          manual: boolean
-          ok: boolean
-          place_id: string | null
-          status_code: number | null
-          trigger: string | null
-          user_id: string
-        }
+          automation_id: string | null;
+          created_at: string;
+          error: string | null;
+          id: string;
+          manual: boolean;
+          ok: boolean;
+          place_id: string | null;
+          status_code: number | null;
+          trigger: string | null;
+          user_id: string;
+        };
         Insert: {
-          automation_id?: string | null
-          created_at?: string
-          error?: string | null
-          id?: string
-          manual?: boolean
-          ok?: boolean
-          place_id?: string | null
-          status_code?: number | null
-          trigger?: string | null
-          user_id: string
-        }
+          automation_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          manual?: boolean;
+          ok?: boolean;
+          place_id?: string | null;
+          status_code?: number | null;
+          trigger?: string | null;
+          user_id: string;
+        };
         Update: {
-          automation_id?: string | null
-          created_at?: string
-          error?: string | null
-          id?: string
-          manual?: boolean
-          ok?: boolean
-          place_id?: string | null
-          status_code?: number | null
-          trigger?: string | null
-          user_id?: string
-        }
+          automation_id?: string | null;
+          created_at?: string;
+          error?: string | null;
+          id?: string;
+          manual?: boolean;
+          ok?: boolean;
+          place_id?: string | null;
+          status_code?: number | null;
+          trigger?: string | null;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "automation_runs_automation_id_fkey"
-            columns: ["automation_id"]
-            isOneToOne: false
-            referencedRelation: "place_automations"
-            referencedColumns: ["id"]
+            foreignKeyName: "automation_runs_automation_id_fkey";
+            columns: ["automation_id"];
+            isOneToOne: false;
+            referencedRelation: "place_automations";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       device_trip_state: {
         Row: {
-          accum_distance_km: number
-          device_id: string
-          geofence_state: Json
-          ignition_on: boolean | null
-          ingest_lease_until: string | null
-          last_lat: number | null
-          last_lng: number | null
-          last_message_at: string | null
-          last_mileage: number | null
-          last_ping_at: string | null
-          max_speed_kmh: number
-          mileage_at_start: number | null
-          start_lat: number | null
-          start_lng: number | null
-          start_time: string | null
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          accum_distance_km: number;
+          device_id: string;
+          geofence_state: Json;
+          ignition_on: boolean | null;
+          ingest_lease_until: string | null;
+          last_lat: number | null;
+          last_lng: number | null;
+          last_message_at: string | null;
+          last_mileage: number | null;
+          last_ping_at: string | null;
+          max_speed_kmh: number;
+          mileage_at_start: number | null;
+          start_lat: number | null;
+          start_lng: number | null;
+          start_time: string | null;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          accum_distance_km?: number
-          device_id: string
-          geofence_state?: Json
-          ignition_on?: boolean | null
-          ingest_lease_until?: string | null
-          last_lat?: number | null
-          last_lng?: number | null
-          last_message_at?: string | null
-          last_mileage?: number | null
-          last_ping_at?: string | null
-          max_speed_kmh?: number
-          mileage_at_start?: number | null
-          start_lat?: number | null
-          start_lng?: number | null
-          start_time?: string | null
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          accum_distance_km?: number;
+          device_id: string;
+          geofence_state?: Json;
+          ignition_on?: boolean | null;
+          ingest_lease_until?: string | null;
+          last_lat?: number | null;
+          last_lng?: number | null;
+          last_message_at?: string | null;
+          last_mileage?: number | null;
+          last_ping_at?: string | null;
+          max_speed_kmh?: number;
+          mileage_at_start?: number | null;
+          start_lat?: number | null;
+          start_lng?: number | null;
+          start_time?: string | null;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          accum_distance_km?: number
-          device_id?: string
-          geofence_state?: Json
-          ignition_on?: boolean | null
-          ingest_lease_until?: string | null
-          last_lat?: number | null
-          last_lng?: number | null
-          last_message_at?: string | null
-          last_mileage?: number | null
-          last_ping_at?: string | null
-          max_speed_kmh?: number
-          mileage_at_start?: number | null
-          start_lat?: number | null
-          start_lng?: number | null
-          start_time?: string | null
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
-        Relationships: []
-      }
+          accum_distance_km?: number;
+          device_id?: string;
+          geofence_state?: Json;
+          ignition_on?: boolean | null;
+          ingest_lease_until?: string | null;
+          last_lat?: number | null;
+          last_lng?: number | null;
+          last_message_at?: string | null;
+          last_mileage?: number | null;
+          last_ping_at?: string | null;
+          max_speed_kmh?: number;
+          mileage_at_start?: number | null;
+          start_lat?: number | null;
+          start_lng?: number | null;
+          start_time?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
+        Relationships: [];
+      };
       drivers: {
         Row: {
-          created_at: string
-          id: string
-          is_default: boolean
-          license_category: string | null
-          license_expires_on: string | null
-          license_number: string | null
-          name: string
-          phone: string | null
-          photo_path: string | null
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          id: string;
+          is_default: boolean;
+          license_category: string | null;
+          license_expires_on: string | null;
+          license_number: string | null;
+          name: string;
+          phone: string | null;
+          photo_path: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          license_category?: string | null
-          license_expires_on?: string | null
-          license_number?: string | null
-          name: string
-          phone?: string | null
-          photo_path?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          license_category?: string | null;
+          license_expires_on?: string | null;
+          license_number?: string | null;
+          name: string;
+          phone?: string | null;
+          photo_path?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          is_default?: boolean
-          license_category?: string | null
-          license_expires_on?: string | null
-          license_number?: string | null
-          name?: string
-          phone?: string | null
-          photo_path?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          is_default?: boolean;
+          license_category?: string | null;
+          license_expires_on?: string | null;
+          license_number?: string | null;
+          name?: string;
+          phone?: string | null;
+          photo_path?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       expenses: {
         Row: {
-          amount: number
-          category: Database["public"]["Enums"]["expense_category"]
-          created_at: string
-          driver_id: string | null
-          due_date: string | null
-          expense_date: string
-          file_path: string | null
-          fuel_log_id: string | null
-          id: string
-          notes: string | null
-          paid: boolean
-          place: string | null
-          title: string | null
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          amount: number;
+          category: Database["public"]["Enums"]["expense_category"];
+          created_at: string;
+          driver_id: string | null;
+          due_date: string | null;
+          expense_date: string;
+          file_path: string | null;
+          fuel_log_id: string | null;
+          id: string;
+          notes: string | null;
+          paid: boolean;
+          place: string | null;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          amount?: number
-          category?: Database["public"]["Enums"]["expense_category"]
-          created_at?: string
-          driver_id?: string | null
-          due_date?: string | null
-          expense_date?: string
-          file_path?: string | null
-          fuel_log_id?: string | null
-          id?: string
-          notes?: string | null
-          paid?: boolean
-          place?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          amount?: number;
+          category?: Database["public"]["Enums"]["expense_category"];
+          created_at?: string;
+          driver_id?: string | null;
+          due_date?: string | null;
+          expense_date?: string;
+          file_path?: string | null;
+          fuel_log_id?: string | null;
+          id?: string;
+          notes?: string | null;
+          paid?: boolean;
+          place?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          amount?: number
-          category?: Database["public"]["Enums"]["expense_category"]
-          created_at?: string
-          driver_id?: string | null
-          due_date?: string | null
-          expense_date?: string
-          file_path?: string | null
-          fuel_log_id?: string | null
-          id?: string
-          notes?: string | null
-          paid?: boolean
-          place?: string | null
-          title?: string | null
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          amount?: number;
+          category?: Database["public"]["Enums"]["expense_category"];
+          created_at?: string;
+          driver_id?: string | null;
+          due_date?: string | null;
+          expense_date?: string;
+          file_path?: string | null;
+          fuel_log_id?: string | null;
+          id?: string;
+          notes?: string | null;
+          paid?: boolean;
+          place?: string | null;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "expenses_fuel_log_id_fkey"
-            columns: ["fuel_log_id"]
-            isOneToOne: false
-            referencedRelation: "fuel_logs"
-            referencedColumns: ["id"]
+            foreignKeyName: "expenses_fuel_log_id_fkey";
+            columns: ["fuel_log_id"];
+            isOneToOne: false;
+            referencedRelation: "fuel_logs";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       favorite_places: {
         Row: {
-          address: string
-          created_at: string
-          geofence_enabled: boolean
-          geofence_radius_m: number
-          icon: string
-          id: string
-          lat: number
-          lng: number
-          name: string
-          updated_at: string
-          user_id: string
-        }
+          address: string;
+          created_at: string;
+          geofence_enabled: boolean;
+          geofence_radius_m: number;
+          icon: string;
+          id: string;
+          lat: number;
+          lng: number;
+          name: string;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          address: string
-          created_at?: string
-          geofence_enabled?: boolean
-          geofence_radius_m?: number
-          icon?: string
-          id?: string
-          lat: number
-          lng: number
-          name: string
-          updated_at?: string
-          user_id: string
-        }
+          address: string;
+          created_at?: string;
+          geofence_enabled?: boolean;
+          geofence_radius_m?: number;
+          icon?: string;
+          id?: string;
+          lat: number;
+          lng: number;
+          name: string;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          address?: string
-          created_at?: string
-          geofence_enabled?: boolean
-          geofence_radius_m?: number
-          icon?: string
-          id?: string
-          lat?: number
-          lng?: number
-          name?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          address?: string;
+          created_at?: string;
+          geofence_enabled?: boolean;
+          geofence_radius_m?: number;
+          icon?: string;
+          id?: string;
+          lat?: number;
+          lng?: number;
+          name?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       fuel_logs: {
         Row: {
-          created_at: string
-          date: string
-          fuel_type: string
-          id: string
-          is_full_tank: boolean
-          liters_filled: number
-          mileage_at_fill: number
-          price_per_liter: number
-          receipt_url: string | null
-          total_cost: number
-          user_id: string
-          vehicle_id: string | null
-        }
+          created_at: string;
+          date: string;
+          fuel_type: string;
+          id: string;
+          is_full_tank: boolean;
+          liters_filled: number;
+          mileage_at_fill: number;
+          price_per_liter: number;
+          receipt_url: string | null;
+          total_cost: number;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          created_at?: string
-          date?: string
-          fuel_type?: string
-          id?: string
-          is_full_tank?: boolean
-          liters_filled: number
-          mileage_at_fill: number
-          price_per_liter: number
-          receipt_url?: string | null
-          total_cost: number
-          user_id: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          date?: string;
+          fuel_type?: string;
+          id?: string;
+          is_full_tank?: boolean;
+          liters_filled: number;
+          mileage_at_fill: number;
+          price_per_liter: number;
+          receipt_url?: string | null;
+          total_cost: number;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          created_at?: string
-          date?: string
-          fuel_type?: string
-          id?: string
-          is_full_tank?: boolean
-          liters_filled?: number
-          mileage_at_fill?: number
-          price_per_liter?: number
-          receipt_url?: string | null
-          total_cost?: number
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          date?: string;
+          fuel_type?: string;
+          id?: string;
+          is_full_tank?: boolean;
+          liters_filled?: number;
+          mileage_at_fill?: number;
+          price_per_liter?: number;
+          receipt_url?: string | null;
+          total_cost?: number;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "fuel_logs_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "fuel_logs_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       instructor_vehicles: {
         Row: {
-          created_at: string
-          id: string
-          org_id: string
-          user_id: string
-          vehicle_id: string
-        }
+          created_at: string;
+          id: string;
+          org_id: string;
+          user_id: string;
+          vehicle_id: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          org_id: string
-          user_id: string
-          vehicle_id: string
-        }
+          created_at?: string;
+          id?: string;
+          org_id: string;
+          user_id: string;
+          vehicle_id: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          org_id?: string
-          user_id?: string
-          vehicle_id?: string
-        }
+          created_at?: string;
+          id?: string;
+          org_id?: string;
+          user_id?: string;
+          vehicle_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "instructor_vehicles_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "instructor_vehicles_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "instructor_vehicles_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "instructor_vehicles_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       lessons: {
         Row: {
-          checklist: Json
-          created_at: string
-          duration_min: number
-          ended_at: string | null
-          id: string
-          instructor_id: string
-          notes: string | null
-          org_id: string
-          paid: boolean
-          price: number | null
-          scheduled_at: string
-          started_at: string | null
-          status: Database["public"]["Enums"]["lesson_status"]
-          student_id: string
-          trip_id: string | null
-          updated_at: string
-          vehicle_id: string | null
-        }
+          checklist: Json;
+          created_at: string;
+          duration_min: number;
+          ended_at: string | null;
+          id: string;
+          instructor_id: string;
+          notes: string | null;
+          org_id: string;
+          paid: boolean;
+          price: number | null;
+          scheduled_at: string;
+          started_at: string | null;
+          status: Database["public"]["Enums"]["lesson_status"];
+          student_id: string;
+          trip_id: string | null;
+          updated_at: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          checklist?: Json
-          created_at?: string
-          duration_min?: number
-          ended_at?: string | null
-          id?: string
-          instructor_id: string
-          notes?: string | null
-          org_id: string
-          paid?: boolean
-          price?: number | null
-          scheduled_at: string
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["lesson_status"]
-          student_id: string
-          trip_id?: string | null
-          updated_at?: string
-          vehicle_id?: string | null
-        }
+          checklist?: Json;
+          created_at?: string;
+          duration_min?: number;
+          ended_at?: string | null;
+          id?: string;
+          instructor_id: string;
+          notes?: string | null;
+          org_id: string;
+          paid?: boolean;
+          price?: number | null;
+          scheduled_at: string;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["lesson_status"];
+          student_id: string;
+          trip_id?: string | null;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          checklist?: Json
-          created_at?: string
-          duration_min?: number
-          ended_at?: string | null
-          id?: string
-          instructor_id?: string
-          notes?: string | null
-          org_id?: string
-          paid?: boolean
-          price?: number | null
-          scheduled_at?: string
-          started_at?: string | null
-          status?: Database["public"]["Enums"]["lesson_status"]
-          student_id?: string
-          trip_id?: string | null
-          updated_at?: string
-          vehicle_id?: string | null
-        }
+          checklist?: Json;
+          created_at?: string;
+          duration_min?: number;
+          ended_at?: string | null;
+          id?: string;
+          instructor_id?: string;
+          notes?: string | null;
+          org_id?: string;
+          paid?: boolean;
+          price?: number | null;
+          scheduled_at?: string;
+          started_at?: string | null;
+          status?: Database["public"]["Enums"]["lesson_status"];
+          student_id?: string;
+          trip_id?: string | null;
+          updated_at?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "lessons_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "lessons_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "lessons_student_id_fkey"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            foreignKeyName: "lessons_student_id_fkey";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "lessons_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
+            foreignKeyName: "lessons_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "lessons_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "lessons_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       maintenance_records: {
         Row: {
-          cost: number | null
-          created_at: string
-          file_path: string | null
-          id: string
-          interval_km: number | null
-          interval_months: number | null
-          mileage_at_service: number
-          notes: string | null
-          service_date: string
-          title: string | null
-          type: Database["public"]["Enums"]["maintenance_type"]
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-          workshop: string | null
-        }
+          cost: number | null;
+          created_at: string;
+          file_path: string | null;
+          id: string;
+          interval_km: number | null;
+          interval_months: number | null;
+          mileage_at_service: number;
+          notes: string | null;
+          service_date: string;
+          title: string | null;
+          type: Database["public"]["Enums"]["maintenance_type"];
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+          workshop: string | null;
+        };
         Insert: {
-          cost?: number | null
-          created_at?: string
-          file_path?: string | null
-          id?: string
-          interval_km?: number | null
-          interval_months?: number | null
-          mileage_at_service?: number
-          notes?: string | null
-          service_date?: string
-          title?: string | null
-          type?: Database["public"]["Enums"]["maintenance_type"]
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-          workshop?: string | null
-        }
+          cost?: number | null;
+          created_at?: string;
+          file_path?: string | null;
+          id?: string;
+          interval_km?: number | null;
+          interval_months?: number | null;
+          mileage_at_service?: number;
+          notes?: string | null;
+          service_date?: string;
+          title?: string | null;
+          type?: Database["public"]["Enums"]["maintenance_type"];
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+          workshop?: string | null;
+        };
         Update: {
-          cost?: number | null
-          created_at?: string
-          file_path?: string | null
-          id?: string
-          interval_km?: number | null
-          interval_months?: number | null
-          mileage_at_service?: number
-          notes?: string | null
-          service_date?: string
-          title?: string | null
-          type?: Database["public"]["Enums"]["maintenance_type"]
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-          workshop?: string | null
-        }
-        Relationships: []
-      }
+          cost?: number | null;
+          created_at?: string;
+          file_path?: string | null;
+          id?: string;
+          interval_km?: number | null;
+          interval_months?: number | null;
+          mileage_at_service?: number;
+          notes?: string | null;
+          service_date?: string;
+          title?: string | null;
+          type?: Database["public"]["Enums"]["maintenance_type"];
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+          workshop?: string | null;
+        };
+        Relationships: [];
+      };
       organization_invites: {
         Row: {
-          accepted_at: string | null
-          accepted_by: string | null
-          created_at: string
-          created_by: string
-          email: string | null
-          expires_at: string
-          id: string
-          org_id: string
-          role: Database["public"]["Enums"]["org_role"]
-          student_id: string | null
-          token: string
-        }
+          accepted_at: string | null;
+          accepted_by: string | null;
+          created_at: string;
+          created_by: string;
+          email: string | null;
+          expires_at: string;
+          id: string;
+          org_id: string;
+          role: Database["public"]["Enums"]["org_role"];
+          student_id: string | null;
+          token: string;
+        };
         Insert: {
-          accepted_at?: string | null
-          accepted_by?: string | null
-          created_at?: string
-          created_by: string
-          email?: string | null
-          expires_at?: string
-          id?: string
-          org_id: string
-          role?: Database["public"]["Enums"]["org_role"]
-          student_id?: string | null
-          token?: string
-        }
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          created_at?: string;
+          created_by: string;
+          email?: string | null;
+          expires_at?: string;
+          id?: string;
+          org_id: string;
+          role?: Database["public"]["Enums"]["org_role"];
+          student_id?: string | null;
+          token?: string;
+        };
         Update: {
-          accepted_at?: string | null
-          accepted_by?: string | null
-          created_at?: string
-          created_by?: string
-          email?: string | null
-          expires_at?: string
-          id?: string
-          org_id?: string
-          role?: Database["public"]["Enums"]["org_role"]
-          student_id?: string | null
-          token?: string
-        }
+          accepted_at?: string | null;
+          accepted_by?: string | null;
+          created_at?: string;
+          created_by?: string;
+          email?: string | null;
+          expires_at?: string;
+          id?: string;
+          org_id?: string;
+          role?: Database["public"]["Enums"]["org_role"];
+          student_id?: string | null;
+          token?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "organization_invites_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "organization_invites_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "organization_invites_student_fk"
-            columns: ["student_id"]
-            isOneToOne: false
-            referencedRelation: "students"
-            referencedColumns: ["id"]
+            foreignKeyName: "organization_invites_student_fk";
+            columns: ["student_id"];
+            isOneToOne: false;
+            referencedRelation: "students";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       organization_members: {
         Row: {
-          created_at: string
-          display_name: string | null
-          id: string
-          org_id: string
-          role: Database["public"]["Enums"]["org_role"]
-          user_id: string
-        }
+          created_at: string;
+          display_name: string | null;
+          id: string;
+          org_id: string;
+          role: Database["public"]["Enums"]["org_role"];
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          org_id: string
-          role: Database["public"]["Enums"]["org_role"]
-          user_id: string
-        }
+          created_at?: string;
+          display_name?: string | null;
+          id?: string;
+          org_id: string;
+          role: Database["public"]["Enums"]["org_role"];
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          display_name?: string | null
-          id?: string
-          org_id?: string
-          role?: Database["public"]["Enums"]["org_role"]
-          user_id?: string
-        }
+          created_at?: string;
+          display_name?: string | null;
+          id?: string;
+          org_id?: string;
+          role?: Database["public"]["Enums"]["org_role"];
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "organization_members_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "organization_members_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       organizations: {
         Row: {
-          created_at: string
-          id: string
-          kind: Database["public"]["Enums"]["org_kind"]
-          name: string
-          owner_id: string
-          updated_at: string
-        }
+          created_at: string;
+          id: string;
+          kind: Database["public"]["Enums"]["org_kind"];
+          name: string;
+          owner_id: string;
+          updated_at: string;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          kind?: Database["public"]["Enums"]["org_kind"]
-          name: string
-          owner_id: string
-          updated_at?: string
-        }
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["org_kind"];
+          name: string;
+          owner_id: string;
+          updated_at?: string;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          kind?: Database["public"]["Enums"]["org_kind"]
-          name?: string
-          owner_id?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          id?: string;
+          kind?: Database["public"]["Enums"]["org_kind"];
+          name?: string;
+          owner_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       place_automations: {
         Row: {
-          body_json: string | null
-          cooldown_seconds: number
-          created_at: string
-          enabled: boolean
-          header_name: string | null
-          header_value: string | null
-          id: string
-          label: string | null
-          last_fired_at: string | null
-          method: string
-          place_id: string
-          trigger: string
-          updated_at: string
-          url: string
-          user_id: string
-        }
+          body_json: string | null;
+          cooldown_seconds: number;
+          created_at: string;
+          enabled: boolean;
+          header_name: string | null;
+          header_value: string | null;
+          id: string;
+          label: string | null;
+          last_fired_at: string | null;
+          method: string;
+          place_id: string;
+          trigger: string;
+          updated_at: string;
+          url: string;
+          user_id: string;
+        };
         Insert: {
-          body_json?: string | null
-          cooldown_seconds?: number
-          created_at?: string
-          enabled?: boolean
-          header_name?: string | null
-          header_value?: string | null
-          id?: string
-          label?: string | null
-          last_fired_at?: string | null
-          method?: string
-          place_id: string
-          trigger: string
-          updated_at?: string
-          url: string
-          user_id: string
-        }
+          body_json?: string | null;
+          cooldown_seconds?: number;
+          created_at?: string;
+          enabled?: boolean;
+          header_name?: string | null;
+          header_value?: string | null;
+          id?: string;
+          label?: string | null;
+          last_fired_at?: string | null;
+          method?: string;
+          place_id: string;
+          trigger: string;
+          updated_at?: string;
+          url: string;
+          user_id: string;
+        };
         Update: {
-          body_json?: string | null
-          cooldown_seconds?: number
-          created_at?: string
-          enabled?: boolean
-          header_name?: string | null
-          header_value?: string | null
-          id?: string
-          label?: string | null
-          last_fired_at?: string | null
-          method?: string
-          place_id?: string
-          trigger?: string
-          updated_at?: string
-          url?: string
-          user_id?: string
-        }
+          body_json?: string | null;
+          cooldown_seconds?: number;
+          created_at?: string;
+          enabled?: boolean;
+          header_name?: string | null;
+          header_value?: string | null;
+          id?: string;
+          label?: string | null;
+          last_fired_at?: string | null;
+          method?: string;
+          place_id?: string;
+          trigger?: string;
+          updated_at?: string;
+          url?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "place_automations_place_id_fkey"
-            columns: ["place_id"]
-            isOneToOne: false
-            referencedRelation: "favorite_places"
-            referencedColumns: ["id"]
+            foreignKeyName: "place_automations_place_id_fkey";
+            columns: ["place_id"];
+            isOneToOne: false;
+            referencedRelation: "favorite_places";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       profiles: {
         Row: {
-          created_at: string
-          display_name: string | null
-          mode: Database["public"]["Enums"]["account_mode"]
-          onboarded_at: string | null
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          display_name: string | null;
+          mode: Database["public"]["Enums"]["account_mode"];
+          onboarded_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          display_name?: string | null
-          mode?: Database["public"]["Enums"]["account_mode"]
-          onboarded_at?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          display_name?: string | null;
+          mode?: Database["public"]["Enums"]["account_mode"];
+          onboarded_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          display_name?: string | null
-          mode?: Database["public"]["Enums"]["account_mode"]
-          onboarded_at?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          display_name?: string | null;
+          mode?: Database["public"]["Enums"]["account_mode"];
+          onboarded_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       push_subscriptions: {
         Row: {
-          auth: string
-          created_at: string
-          endpoint: string
-          id: string
-          p256dh: string
-          user_agent: string | null
-          user_id: string
-        }
+          auth: string;
+          created_at: string;
+          endpoint: string;
+          id: string;
+          p256dh: string;
+          user_agent: string | null;
+          user_id: string;
+        };
         Insert: {
-          auth: string
-          created_at?: string
-          endpoint: string
-          id?: string
-          p256dh: string
-          user_agent?: string | null
-          user_id: string
-        }
+          auth: string;
+          created_at?: string;
+          endpoint: string;
+          id?: string;
+          p256dh: string;
+          user_agent?: string | null;
+          user_id: string;
+        };
         Update: {
-          auth?: string
-          created_at?: string
-          endpoint?: string
-          id?: string
-          p256dh?: string
-          user_agent?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
+          auth?: string;
+          created_at?: string;
+          endpoint?: string;
+          id?: string;
+          p256dh?: string;
+          user_agent?: string | null;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       rides: {
         Row: {
-          amount: number
-          created_at: string
-          distance_km: number | null
-          duration_min: number | null
-          id: string
-          notes: string | null
-          occurred_at: string
-          platform: Database["public"]["Enums"]["ride_platform"]
-          shift_id: string | null
-          tip: number
-          trip_id: string | null
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          amount: number;
+          created_at: string;
+          distance_km: number | null;
+          duration_min: number | null;
+          id: string;
+          notes: string | null;
+          occurred_at: string;
+          platform: Database["public"]["Enums"]["ride_platform"];
+          shift_id: string | null;
+          tip: number;
+          trip_id: string | null;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          amount: number
-          created_at?: string
-          distance_km?: number | null
-          duration_min?: number | null
-          id?: string
-          notes?: string | null
-          occurred_at?: string
-          platform?: Database["public"]["Enums"]["ride_platform"]
-          shift_id?: string | null
-          tip?: number
-          trip_id?: string | null
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          amount: number;
+          created_at?: string;
+          distance_km?: number | null;
+          duration_min?: number | null;
+          id?: string;
+          notes?: string | null;
+          occurred_at?: string;
+          platform?: Database["public"]["Enums"]["ride_platform"];
+          shift_id?: string | null;
+          tip?: number;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          amount?: number
-          created_at?: string
-          distance_km?: number | null
-          duration_min?: number | null
-          id?: string
-          notes?: string | null
-          occurred_at?: string
-          platform?: Database["public"]["Enums"]["ride_platform"]
-          shift_id?: string | null
-          tip?: number
-          trip_id?: string | null
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          amount?: number;
+          created_at?: string;
+          distance_km?: number | null;
+          duration_min?: number | null;
+          id?: string;
+          notes?: string | null;
+          occurred_at?: string;
+          platform?: Database["public"]["Enums"]["ride_platform"];
+          shift_id?: string | null;
+          tip?: number;
+          trip_id?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "rides_shift_id_fkey"
-            columns: ["shift_id"]
-            isOneToOne: false
-            referencedRelation: "shifts"
-            referencedColumns: ["id"]
+            foreignKeyName: "rides_shift_id_fkey";
+            columns: ["shift_id"];
+            isOneToOne: false;
+            referencedRelation: "shifts";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "rides_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: false
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
+            foreignKeyName: "rides_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: false;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "rides_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "rides_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       safe_starts: {
         Row: {
-          created_at: string
-          driver_id: string | null
-          id: string
-          local_id: number
-          min_rpm: number | null
-          off_minutes: number | null
-          ready: boolean
-          ready_at: string | null
-          required: boolean
-          started_at: string
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          created_at: string;
+          driver_id: string | null;
+          id: string;
+          local_id: number;
+          min_rpm: number | null;
+          off_minutes: number | null;
+          ready: boolean;
+          ready_at: string | null;
+          required: boolean;
+          started_at: string;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          created_at?: string
-          driver_id?: string | null
-          id?: string
-          local_id: number
-          min_rpm?: number | null
-          off_minutes?: number | null
-          ready?: boolean
-          ready_at?: string | null
-          required?: boolean
-          started_at: string
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          driver_id?: string | null;
+          id?: string;
+          local_id: number;
+          min_rpm?: number | null;
+          off_minutes?: number | null;
+          ready?: boolean;
+          ready_at?: string | null;
+          required?: boolean;
+          started_at: string;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          created_at?: string
-          driver_id?: string | null
-          id?: string
-          local_id?: number
-          min_rpm?: number | null
-          off_minutes?: number | null
-          ready?: boolean
-          ready_at?: string | null
-          required?: boolean
-          started_at?: string
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          driver_id?: string | null;
+          id?: string;
+          local_id?: number;
+          min_rpm?: number | null;
+          off_minutes?: number | null;
+          ready?: boolean;
+          ready_at?: string | null;
+          required?: boolean;
+          started_at?: string;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "safe_starts_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
+            foreignKeyName: "safe_starts_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "safe_starts_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "safe_starts_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       shifts: {
         Row: {
-          created_at: string
-          end_mileage: number | null
-          ended_at: string | null
-          id: string
-          notes: string | null
-          start_mileage: number | null
-          started_at: string
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          created_at: string;
+          end_mileage: number | null;
+          ended_at: string | null;
+          id: string;
+          notes: string | null;
+          start_mileage: number | null;
+          started_at: string;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          created_at?: string
-          end_mileage?: number | null
-          ended_at?: string | null
-          id?: string
-          notes?: string | null
-          start_mileage?: number | null
-          started_at?: string
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          end_mileage?: number | null;
+          ended_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          start_mileage?: number | null;
+          started_at?: string;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          created_at?: string
-          end_mileage?: number | null
-          ended_at?: string | null
-          id?: string
-          notes?: string | null
-          start_mileage?: number | null
-          started_at?: string
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          end_mileage?: number | null;
+          ended_at?: string | null;
+          id?: string;
+          notes?: string | null;
+          start_mileage?: number | null;
+          started_at?: string;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "shifts_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "shifts_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       students: {
         Row: {
-          active: boolean
-          category: string | null
-          contracted_lessons: number
-          created_at: string
-          id: string
-          name: string
-          notes: string | null
-          org_id: string
-          phone: string | null
-          photo_path: string | null
-          renach: string | null
-          updated_at: string
-          user_id: string | null
-        }
+          active: boolean;
+          category: string | null;
+          contracted_lessons: number;
+          created_at: string;
+          id: string;
+          name: string;
+          notes: string | null;
+          org_id: string;
+          phone: string | null;
+          photo_path: string | null;
+          renach: string | null;
+          updated_at: string;
+          user_id: string | null;
+        };
         Insert: {
-          active?: boolean
-          category?: string | null
-          contracted_lessons?: number
-          created_at?: string
-          id?: string
-          name: string
-          notes?: string | null
-          org_id: string
-          phone?: string | null
-          photo_path?: string | null
-          renach?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
+          active?: boolean;
+          category?: string | null;
+          contracted_lessons?: number;
+          created_at?: string;
+          id?: string;
+          name: string;
+          notes?: string | null;
+          org_id: string;
+          phone?: string | null;
+          photo_path?: string | null;
+          renach?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
         Update: {
-          active?: boolean
-          category?: string | null
-          contracted_lessons?: number
-          created_at?: string
-          id?: string
-          name?: string
-          notes?: string | null
-          org_id?: string
-          phone?: string | null
-          photo_path?: string | null
-          renach?: string | null
-          updated_at?: string
-          user_id?: string | null
-        }
+          active?: boolean;
+          category?: string | null;
+          contracted_lessons?: number;
+          created_at?: string;
+          id?: string;
+          name?: string;
+          notes?: string | null;
+          org_id?: string;
+          phone?: string | null;
+          photo_path?: string | null;
+          renach?: string | null;
+          updated_at?: string;
+          user_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "students_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "students_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       tracker_events: {
         Row: {
-          created_at: string
-          id: string
-          lat: number | null
-          lng: number | null
-          metadata: Json | null
-          occurred_at: string
-          place_id: string | null
-          type: Database["public"]["Enums"]["tracker_event_type"]
-          user_id: string
-          vehicle_id: string | null
-        }
+          created_at: string;
+          id: string;
+          lat: number | null;
+          lng: number | null;
+          metadata: Json | null;
+          occurred_at: string;
+          place_id: string | null;
+          type: Database["public"]["Enums"]["tracker_event_type"];
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          created_at?: string
-          id?: string
-          lat?: number | null
-          lng?: number | null
-          metadata?: Json | null
-          occurred_at?: string
-          place_id?: string | null
-          type: Database["public"]["Enums"]["tracker_event_type"]
-          user_id: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          id?: string;
+          lat?: number | null;
+          lng?: number | null;
+          metadata?: Json | null;
+          occurred_at?: string;
+          place_id?: string | null;
+          type: Database["public"]["Enums"]["tracker_event_type"];
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          created_at?: string
-          id?: string
-          lat?: number | null
-          lng?: number | null
-          metadata?: Json | null
-          occurred_at?: string
-          place_id?: string | null
-          type?: Database["public"]["Enums"]["tracker_event_type"]
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          created_at?: string;
+          id?: string;
+          lat?: number | null;
+          lng?: number | null;
+          metadata?: Json | null;
+          occurred_at?: string;
+          place_id?: string | null;
+          type?: Database["public"]["Enums"]["tracker_event_type"];
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "tracker_events_place_id_fkey"
-            columns: ["place_id"]
-            isOneToOne: false
-            referencedRelation: "favorite_places"
-            referencedColumns: ["id"]
+            foreignKeyName: "tracker_events_place_id_fkey";
+            columns: ["place_id"];
+            isOneToOne: false;
+            referencedRelation: "favorite_places";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "tracker_events_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "tracker_events_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       tracker_pings: {
         Row: {
-          id: string
-          ignition: boolean | null
-          lat: number
-          lng: number
-          recorded_at: string
-          speed_kmh: number | null
-          user_id: string
-          vehicle_id: string | null
-        }
+          id: string;
+          ignition: boolean | null;
+          lat: number;
+          lng: number;
+          recorded_at: string;
+          speed_kmh: number | null;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          id?: string
-          ignition?: boolean | null
-          lat: number
-          lng: number
-          recorded_at?: string
-          speed_kmh?: number | null
-          user_id: string
-          vehicle_id?: string | null
-        }
+          id?: string;
+          ignition?: boolean | null;
+          lat: number;
+          lng: number;
+          recorded_at?: string;
+          speed_kmh?: number | null;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          id?: string
-          ignition?: boolean | null
-          lat?: number
-          lng?: number
-          recorded_at?: string
-          speed_kmh?: number | null
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          id?: string;
+          ignition?: boolean | null;
+          lat?: number;
+          lng?: number;
+          recorded_at?: string;
+          speed_kmh?: number | null;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "tracker_pings_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "tracker_pings_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       trip_coachings: {
         Row: {
-          comparison: string | null
-          created_at: string
-          grade: string
-          headline: string
-          highlight: string | null
-          id: string
-          model: string | null
-          summary: string
-          tips: Json
-          trip_id: string
-          user_id: string
-        }
+          comparison: string | null;
+          created_at: string;
+          grade: string;
+          headline: string;
+          highlight: string | null;
+          id: string;
+          model: string | null;
+          summary: string;
+          tips: Json;
+          trip_id: string;
+          user_id: string;
+        };
         Insert: {
-          comparison?: string | null
-          created_at?: string
-          grade: string
-          headline: string
-          highlight?: string | null
-          id?: string
-          model?: string | null
-          summary: string
-          tips?: Json
-          trip_id: string
-          user_id: string
-        }
+          comparison?: string | null;
+          created_at?: string;
+          grade: string;
+          headline: string;
+          highlight?: string | null;
+          id?: string;
+          model?: string | null;
+          summary: string;
+          tips?: Json;
+          trip_id: string;
+          user_id: string;
+        };
         Update: {
-          comparison?: string | null
-          created_at?: string
-          grade?: string
-          headline?: string
-          highlight?: string | null
-          id?: string
-          model?: string | null
-          summary?: string
-          tips?: Json
-          trip_id?: string
-          user_id?: string
-        }
+          comparison?: string | null;
+          created_at?: string;
+          grade?: string;
+          headline?: string;
+          highlight?: string | null;
+          id?: string;
+          model?: string | null;
+          summary?: string;
+          tips?: Json;
+          trip_id?: string;
+          user_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "trip_coachings_trip_id_fkey"
-            columns: ["trip_id"]
-            isOneToOne: true
-            referencedRelation: "trips"
-            referencedColumns: ["id"]
+            foreignKeyName: "trip_coachings_trip_id_fkey";
+            columns: ["trip_id"];
+            isOneToOne: true;
+            referencedRelation: "trips";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       trips: {
         Row: {
-          avg_speed_kmh: number | null
-          created_at: string
-          distance_km: number | null
-          driver_id: string | null
-          eco_events: Json
-          eco_score: number | null
-          end_lat: number | null
-          end_lng: number | null
-          end_time: string | null
-          estimated_cost: number | null
-          fuel_kmpl_used: number | null
-          fuel_liters: number | null
-          fuel_liters_device: number | null
-          fuel_source: string | null
-          hardware_source: string
-          harsh_accel_count: number
-          harsh_brake_count: number
-          harsh_corner_count: number
-          high_rpm_count: number
-          id: string
-          idle_seconds: number
-          max_speed_kmh: number | null
-          mileage_at_end: number | null
-          mileage_at_start: number | null
-          overspeed_count: number
-          route_data: Json | null
-          start_lat: number | null
-          start_lng: number | null
-          start_time: string
-          user_id: string
-          vehicle_id: string | null
-          wasted_cost: number | null
-          wasted_fuel_liters: number | null
-        }
+          avg_speed_kmh: number | null;
+          created_at: string;
+          distance_km: number | null;
+          driver_id: string | null;
+          eco_events: Json;
+          eco_score: number | null;
+          end_lat: number | null;
+          end_lng: number | null;
+          end_time: string | null;
+          estimated_cost: number | null;
+          fuel_kmpl_used: number | null;
+          fuel_liters: number | null;
+          fuel_liters_device: number | null;
+          fuel_source: string | null;
+          hardware_source: string;
+          harsh_accel_count: number;
+          harsh_brake_count: number;
+          harsh_corner_count: number;
+          high_rpm_count: number;
+          id: string;
+          idle_seconds: number;
+          max_speed_kmh: number | null;
+          mileage_at_end: number | null;
+          mileage_at_start: number | null;
+          overspeed_count: number;
+          route_data: Json | null;
+          start_lat: number | null;
+          start_lng: number | null;
+          start_time: string;
+          user_id: string;
+          vehicle_id: string | null;
+          wasted_cost: number | null;
+          wasted_fuel_liters: number | null;
+        };
         Insert: {
-          avg_speed_kmh?: number | null
-          created_at?: string
-          distance_km?: number | null
-          driver_id?: string | null
-          eco_events?: Json
-          eco_score?: number | null
-          end_lat?: number | null
-          end_lng?: number | null
-          end_time?: string | null
-          estimated_cost?: number | null
-          fuel_kmpl_used?: number | null
-          fuel_liters?: number | null
-          fuel_liters_device?: number | null
-          fuel_source?: string | null
-          hardware_source?: string
-          harsh_accel_count?: number
-          harsh_brake_count?: number
-          harsh_corner_count?: number
-          high_rpm_count?: number
-          id?: string
-          idle_seconds?: number
-          max_speed_kmh?: number | null
-          mileage_at_end?: number | null
-          mileage_at_start?: number | null
-          overspeed_count?: number
-          route_data?: Json | null
-          start_lat?: number | null
-          start_lng?: number | null
-          start_time: string
-          user_id: string
-          vehicle_id?: string | null
-          wasted_cost?: number | null
-          wasted_fuel_liters?: number | null
-        }
+          avg_speed_kmh?: number | null;
+          created_at?: string;
+          distance_km?: number | null;
+          driver_id?: string | null;
+          eco_events?: Json;
+          eco_score?: number | null;
+          end_lat?: number | null;
+          end_lng?: number | null;
+          end_time?: string | null;
+          estimated_cost?: number | null;
+          fuel_kmpl_used?: number | null;
+          fuel_liters?: number | null;
+          fuel_liters_device?: number | null;
+          fuel_source?: string | null;
+          hardware_source?: string;
+          harsh_accel_count?: number;
+          harsh_brake_count?: number;
+          harsh_corner_count?: number;
+          high_rpm_count?: number;
+          id?: string;
+          idle_seconds?: number;
+          max_speed_kmh?: number | null;
+          mileage_at_end?: number | null;
+          mileage_at_start?: number | null;
+          overspeed_count?: number;
+          route_data?: Json | null;
+          start_lat?: number | null;
+          start_lng?: number | null;
+          start_time: string;
+          user_id: string;
+          vehicle_id?: string | null;
+          wasted_cost?: number | null;
+          wasted_fuel_liters?: number | null;
+        };
         Update: {
-          avg_speed_kmh?: number | null
-          created_at?: string
-          distance_km?: number | null
-          driver_id?: string | null
-          eco_events?: Json
-          eco_score?: number | null
-          end_lat?: number | null
-          end_lng?: number | null
-          end_time?: string | null
-          estimated_cost?: number | null
-          fuel_kmpl_used?: number | null
-          fuel_liters?: number | null
-          fuel_liters_device?: number | null
-          fuel_source?: string | null
-          hardware_source?: string
-          harsh_accel_count?: number
-          harsh_brake_count?: number
-          harsh_corner_count?: number
-          high_rpm_count?: number
-          id?: string
-          idle_seconds?: number
-          max_speed_kmh?: number | null
-          mileage_at_end?: number | null
-          mileage_at_start?: number | null
-          overspeed_count?: number
-          route_data?: Json | null
-          start_lat?: number | null
-          start_lng?: number | null
-          start_time?: string
-          user_id?: string
-          vehicle_id?: string | null
-          wasted_cost?: number | null
-          wasted_fuel_liters?: number | null
-        }
+          avg_speed_kmh?: number | null;
+          created_at?: string;
+          distance_km?: number | null;
+          driver_id?: string | null;
+          eco_events?: Json;
+          eco_score?: number | null;
+          end_lat?: number | null;
+          end_lng?: number | null;
+          end_time?: string | null;
+          estimated_cost?: number | null;
+          fuel_kmpl_used?: number | null;
+          fuel_liters?: number | null;
+          fuel_liters_device?: number | null;
+          fuel_source?: string | null;
+          hardware_source?: string;
+          harsh_accel_count?: number;
+          harsh_brake_count?: number;
+          harsh_corner_count?: number;
+          high_rpm_count?: number;
+          id?: string;
+          idle_seconds?: number;
+          max_speed_kmh?: number | null;
+          mileage_at_end?: number | null;
+          mileage_at_start?: number | null;
+          overspeed_count?: number;
+          route_data?: Json | null;
+          start_lat?: number | null;
+          start_lng?: number | null;
+          start_time?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+          wasted_cost?: number | null;
+          wasted_fuel_liters?: number | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "trips_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
+            foreignKeyName: "trips_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "trips_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "trips_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       user_subscriptions: {
         Row: {
-          created_at: string
-          current_period_end: string | null
-          id: string
-          plan: Database["public"]["Enums"]["app_plan"]
-          provider: string | null
-          provider_customer_id: string | null
-          provider_subscription_id: string | null
-          status: Database["public"]["Enums"]["subscription_status"]
-          trial_ends_at: string | null
-          updated_at: string
-          user_id: string
-        }
+          created_at: string;
+          current_period_end: string | null;
+          id: string;
+          plan: Database["public"]["Enums"]["app_plan"];
+          provider: string | null;
+          provider_customer_id: string | null;
+          provider_subscription_id: string | null;
+          status: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at: string | null;
+          updated_at: string;
+          user_id: string;
+        };
         Insert: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: Database["public"]["Enums"]["app_plan"]
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
-          trial_ends_at?: string | null
-          updated_at?: string
-          user_id: string
-        }
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          plan?: Database["public"]["Enums"]["app_plan"];
+          provider?: string | null;
+          provider_customer_id?: string | null;
+          provider_subscription_id?: string | null;
+          status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
         Update: {
-          created_at?: string
-          current_period_end?: string | null
-          id?: string
-          plan?: Database["public"]["Enums"]["app_plan"]
-          provider?: string | null
-          provider_customer_id?: string | null
-          provider_subscription_id?: string | null
-          status?: Database["public"]["Enums"]["subscription_status"]
-          trial_ends_at?: string | null
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
+          created_at?: string;
+          current_period_end?: string | null;
+          id?: string;
+          plan?: Database["public"]["Enums"]["app_plan"];
+          provider?: string | null;
+          provider_customer_id?: string | null;
+          provider_subscription_id?: string | null;
+          status?: Database["public"]["Enums"]["subscription_status"];
+          trial_ends_at?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       vehicle_checkups: {
         Row: {
-          checked_at: string
-          created_at: string
-          driver_id: string | null
-          id: string
-          item: string
-          mileage_km: number | null
-          notes: string | null
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          checked_at: string;
+          created_at: string;
+          driver_id: string | null;
+          id: string;
+          item: string;
+          mileage_km: number | null;
+          notes: string | null;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          checked_at?: string
-          created_at?: string
-          driver_id?: string | null
-          id?: string
-          item: string
-          mileage_km?: number | null
-          notes?: string | null
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          checked_at?: string;
+          created_at?: string;
+          driver_id?: string | null;
+          id?: string;
+          item: string;
+          mileage_km?: number | null;
+          notes?: string | null;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          checked_at?: string
-          created_at?: string
-          driver_id?: string | null
-          id?: string
-          item?: string
-          mileage_km?: number | null
-          notes?: string | null
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
+          checked_at?: string;
+          created_at?: string;
+          driver_id?: string | null;
+          id?: string;
+          item?: string;
+          mileage_km?: number | null;
+          notes?: string | null;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "vehicle_checkups_driver_id_fkey"
-            columns: ["driver_id"]
-            isOneToOne: false
-            referencedRelation: "drivers"
-            referencedColumns: ["id"]
+            foreignKeyName: "vehicle_checkups_driver_id_fkey";
+            columns: ["driver_id"];
+            isOneToOne: false;
+            referencedRelation: "drivers";
+            referencedColumns: ["id"];
           },
           {
-            foreignKeyName: "vehicle_checkups_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "vehicle_checkups_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       vehicle_documents: {
         Row: {
-          amount: number | null
-          created_at: string
-          expires_on: string | null
-          file_path: string | null
-          id: string
-          issuer: string | null
-          notes: string | null
-          number: string | null
-          title: string | null
-          type: Database["public"]["Enums"]["vehicle_document_type"]
-          updated_at: string
-          user_id: string
-          vehicle_id: string | null
-        }
+          amount: number | null;
+          created_at: string;
+          expires_on: string | null;
+          file_path: string | null;
+          id: string;
+          issuer: string | null;
+          notes: string | null;
+          number: string | null;
+          title: string | null;
+          type: Database["public"]["Enums"]["vehicle_document_type"];
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string | null;
+        };
         Insert: {
-          amount?: number | null
-          created_at?: string
-          expires_on?: string | null
-          file_path?: string | null
-          id?: string
-          issuer?: string | null
-          notes?: string | null
-          number?: string | null
-          title?: string | null
-          type?: Database["public"]["Enums"]["vehicle_document_type"]
-          updated_at?: string
-          user_id: string
-          vehicle_id?: string | null
-        }
+          amount?: number | null;
+          created_at?: string;
+          expires_on?: string | null;
+          file_path?: string | null;
+          id?: string;
+          issuer?: string | null;
+          notes?: string | null;
+          number?: string | null;
+          title?: string | null;
+          type?: Database["public"]["Enums"]["vehicle_document_type"];
+          updated_at?: string;
+          user_id: string;
+          vehicle_id?: string | null;
+        };
         Update: {
-          amount?: number | null
-          created_at?: string
-          expires_on?: string | null
-          file_path?: string | null
-          id?: string
-          issuer?: string | null
-          notes?: string | null
-          number?: string | null
-          title?: string | null
-          type?: Database["public"]["Enums"]["vehicle_document_type"]
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string | null
-        }
-        Relationships: []
-      }
+          amount?: number | null;
+          created_at?: string;
+          expires_on?: string | null;
+          file_path?: string | null;
+          id?: string;
+          issuer?: string | null;
+          notes?: string | null;
+          number?: string | null;
+          title?: string | null;
+          type?: Database["public"]["Enums"]["vehicle_document_type"];
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string | null;
+        };
+        Relationships: [];
+      };
       vehicle_fuel_calibration: {
         Row: {
-          fuel_type: string
-          kmpl: number
-          last_fill_at: string | null
-          samples: number
-          updated_at: string
-          user_id: string
-          vehicle_id: string
-        }
+          fuel_type: string;
+          kmpl: number;
+          last_fill_at: string | null;
+          samples: number;
+          updated_at: string;
+          user_id: string;
+          vehicle_id: string;
+        };
         Insert: {
-          fuel_type: string
-          kmpl: number
-          last_fill_at?: string | null
-          samples?: number
-          updated_at?: string
-          user_id: string
-          vehicle_id: string
-        }
+          fuel_type: string;
+          kmpl: number;
+          last_fill_at?: string | null;
+          samples?: number;
+          updated_at?: string;
+          user_id: string;
+          vehicle_id: string;
+        };
         Update: {
-          fuel_type?: string
-          kmpl?: number
-          last_fill_at?: string | null
-          samples?: number
-          updated_at?: string
-          user_id?: string
-          vehicle_id?: string
-        }
+          fuel_type?: string;
+          kmpl?: number;
+          last_fill_at?: string | null;
+          samples?: number;
+          updated_at?: string;
+          user_id?: string;
+          vehicle_id?: string;
+        };
         Relationships: [
           {
-            foreignKeyName: "vehicle_fuel_calibration_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "vehicle_fuel_calibration_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       vehicle_shares: {
         Row: {
-          accepted_at: string | null
-          created_at: string
-          id: string
-          invited_email: string
-          label: string | null
-          owner_id: string
-          revoked_at: string | null
-          updated_at: string
-          vehicle_id: string
-          viewer_last_seen_at: string | null
-          viewer_user_id: string | null
-        }
+          accepted_at: string | null;
+          created_at: string;
+          id: string;
+          invited_email: string;
+          label: string | null;
+          owner_id: string;
+          revoked_at: string | null;
+          updated_at: string;
+          vehicle_id: string;
+          viewer_last_seen_at: string | null;
+          viewer_user_id: string | null;
+        };
         Insert: {
-          accepted_at?: string | null
-          created_at?: string
-          id?: string
-          invited_email: string
-          label?: string | null
-          owner_id: string
-          revoked_at?: string | null
-          updated_at?: string
-          vehicle_id: string
-          viewer_last_seen_at?: string | null
-          viewer_user_id?: string | null
-        }
+          accepted_at?: string | null;
+          created_at?: string;
+          id?: string;
+          invited_email: string;
+          label?: string | null;
+          owner_id: string;
+          revoked_at?: string | null;
+          updated_at?: string;
+          vehicle_id: string;
+          viewer_last_seen_at?: string | null;
+          viewer_user_id?: string | null;
+        };
         Update: {
-          accepted_at?: string | null
-          created_at?: string
-          id?: string
-          invited_email?: string
-          label?: string | null
-          owner_id?: string
-          revoked_at?: string | null
-          updated_at?: string
-          vehicle_id?: string
-          viewer_last_seen_at?: string | null
-          viewer_user_id?: string | null
-        }
+          accepted_at?: string | null;
+          created_at?: string;
+          id?: string;
+          invited_email?: string;
+          label?: string | null;
+          owner_id?: string;
+          revoked_at?: string | null;
+          updated_at?: string;
+          vehicle_id?: string;
+          viewer_last_seen_at?: string | null;
+          viewer_user_id?: string | null;
+        };
         Relationships: [
           {
-            foreignKeyName: "vehicle_shares_vehicle_id_fkey"
-            columns: ["vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
-            referencedColumns: ["id"]
+            foreignKeyName: "vehicle_shares_vehicle_id_fkey";
+            columns: ["vehicle_id"];
+            isOneToOne: false;
+            referencedRelation: "vehicles";
+            referencedColumns: ["id"];
           },
-        ]
-      }
+        ];
+      };
       vehicles: {
         Row: {
-          alert_engine_on: boolean
-          alert_geofence: boolean
-          alert_ignition: boolean
-          alert_motion_off: boolean
-          alert_signal_lost: boolean
-          avg_consumption_kmpl: number | null
-          consumption_ethanol_highway: number
-          consumption_ethanol_urban: number
-          consumption_gasoline_highway: number
-          consumption_gasoline_urban: number
-          created_at: string
-          current_mileage: number
-          eco_rpm_max: number
-          eco_rpm_min: number
-          engine: string | null
-          flespi_device_id: string | null
-          fuel_kind: string
-          gearbox: string | null
-          id: string
-          model_year: number | null
-          name: string
-          obd_device_id: string | null
-          obd_device_name: string | null
-          obd_first_paired_at: string | null
-          org_id: string | null
-          plate: string
-          signal_lost_notified_at: string | null
-          tank_l: number
-          tracker_mode: boolean
-          updated_at: string
-          user_id: string
-          zero_to_100_s: number
-        }
+          alert_engine_on: boolean;
+          alert_geofence: boolean;
+          alert_ignition: boolean;
+          alert_motion_off: boolean;
+          alert_signal_lost: boolean;
+          avg_consumption_kmpl: number | null;
+          consumption_ethanol_highway: number;
+          consumption_ethanol_urban: number;
+          consumption_gasoline_highway: number;
+          consumption_gasoline_urban: number;
+          created_at: string;
+          current_mileage: number;
+          eco_rpm_max: number;
+          eco_rpm_min: number;
+          engine: string | null;
+          flespi_device_id: string | null;
+          fuel_kind: string;
+          gearbox: string | null;
+          id: string;
+          model_year: number | null;
+          name: string;
+          obd_device_id: string | null;
+          obd_device_name: string | null;
+          obd_first_paired_at: string | null;
+          org_id: string | null;
+          plate: string;
+          signal_lost_notified_at: string | null;
+          tank_l: number;
+          tracker_mode: boolean;
+          updated_at: string;
+          user_id: string;
+          zero_to_100_s: number;
+        };
         Insert: {
-          alert_engine_on?: boolean
-          alert_geofence?: boolean
-          alert_ignition?: boolean
-          alert_motion_off?: boolean
-          alert_signal_lost?: boolean
-          avg_consumption_kmpl?: number | null
-          consumption_ethanol_highway?: number
-          consumption_ethanol_urban?: number
-          consumption_gasoline_highway?: number
-          consumption_gasoline_urban?: number
-          created_at?: string
-          current_mileage?: number
-          eco_rpm_max?: number
-          eco_rpm_min?: number
-          engine?: string | null
-          flespi_device_id?: string | null
-          fuel_kind?: string
-          gearbox?: string | null
-          id?: string
-          model_year?: number | null
-          name: string
-          obd_device_id?: string | null
-          obd_device_name?: string | null
-          obd_first_paired_at?: string | null
-          org_id?: string | null
-          plate: string
-          signal_lost_notified_at?: string | null
-          tank_l?: number
-          tracker_mode?: boolean
-          updated_at?: string
-          user_id: string
-          zero_to_100_s?: number
-        }
+          alert_engine_on?: boolean;
+          alert_geofence?: boolean;
+          alert_ignition?: boolean;
+          alert_motion_off?: boolean;
+          alert_signal_lost?: boolean;
+          avg_consumption_kmpl?: number | null;
+          consumption_ethanol_highway?: number;
+          consumption_ethanol_urban?: number;
+          consumption_gasoline_highway?: number;
+          consumption_gasoline_urban?: number;
+          created_at?: string;
+          current_mileage?: number;
+          eco_rpm_max?: number;
+          eco_rpm_min?: number;
+          engine?: string | null;
+          flespi_device_id?: string | null;
+          fuel_kind?: string;
+          gearbox?: string | null;
+          id?: string;
+          model_year?: number | null;
+          name: string;
+          obd_device_id?: string | null;
+          obd_device_name?: string | null;
+          obd_first_paired_at?: string | null;
+          org_id?: string | null;
+          plate: string;
+          signal_lost_notified_at?: string | null;
+          tank_l?: number;
+          tracker_mode?: boolean;
+          updated_at?: string;
+          user_id: string;
+          zero_to_100_s?: number;
+        };
         Update: {
-          alert_engine_on?: boolean
-          alert_geofence?: boolean
-          alert_ignition?: boolean
-          alert_motion_off?: boolean
-          alert_signal_lost?: boolean
-          avg_consumption_kmpl?: number | null
-          consumption_ethanol_highway?: number
-          consumption_ethanol_urban?: number
-          consumption_gasoline_highway?: number
-          consumption_gasoline_urban?: number
-          created_at?: string
-          current_mileage?: number
-          eco_rpm_max?: number
-          eco_rpm_min?: number
-          engine?: string | null
-          flespi_device_id?: string | null
-          fuel_kind?: string
-          gearbox?: string | null
-          id?: string
-          model_year?: number | null
-          name?: string
-          obd_device_id?: string | null
-          obd_device_name?: string | null
-          obd_first_paired_at?: string | null
-          org_id?: string | null
-          plate?: string
-          signal_lost_notified_at?: string | null
-          tank_l?: number
-          tracker_mode?: boolean
-          updated_at?: string
-          user_id?: string
-          zero_to_100_s?: number
-        }
+          alert_engine_on?: boolean;
+          alert_geofence?: boolean;
+          alert_ignition?: boolean;
+          alert_motion_off?: boolean;
+          alert_signal_lost?: boolean;
+          avg_consumption_kmpl?: number | null;
+          consumption_ethanol_highway?: number;
+          consumption_ethanol_urban?: number;
+          consumption_gasoline_highway?: number;
+          consumption_gasoline_urban?: number;
+          created_at?: string;
+          current_mileage?: number;
+          eco_rpm_max?: number;
+          eco_rpm_min?: number;
+          engine?: string | null;
+          flespi_device_id?: string | null;
+          fuel_kind?: string;
+          gearbox?: string | null;
+          id?: string;
+          model_year?: number | null;
+          name?: string;
+          obd_device_id?: string | null;
+          obd_device_name?: string | null;
+          obd_first_paired_at?: string | null;
+          org_id?: string | null;
+          plate?: string;
+          signal_lost_notified_at?: string | null;
+          tank_l?: number;
+          tracker_mode?: boolean;
+          updated_at?: string;
+          user_id?: string;
+          zero_to_100_s?: number;
+        };
         Relationships: [
           {
-            foreignKeyName: "vehicles_org_id_fkey"
-            columns: ["org_id"]
-            isOneToOne: false
-            referencedRelation: "organizations"
-            referencedColumns: ["id"]
+            foreignKeyName: "vehicles_org_id_fkey";
+            columns: ["org_id"];
+            isOneToOne: false;
+            referencedRelation: "organizations";
+            referencedColumns: ["id"];
           },
-        ]
-      }
-    }
+        ];
+      };
+    };
     Views: {
-      [_ in never]: never
-    }
+      [_ in never]: never;
+    };
     Functions: {
-      accept_org_invite: { Args: { _token: string }; Returns: string }
-      accept_vehicle_share: { Args: { _share_id: string }; Returns: boolean }
-      can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
+      accept_org_invite: { Args: { _token: string }; Returns: string };
+      accept_vehicle_share: { Args: { _share_id: string }; Returns: boolean };
+      can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean };
       current_plan: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_plan"]
-      }
+        Args: { _user_id: string };
+        Returns: Database["public"]["Enums"]["app_plan"];
+      };
       get_org_invite: {
-        Args: { _token: string }
+        Args: { _token: string };
         Returns: {
-          accepted: boolean
-          expired: boolean
-          org_kind: Database["public"]["Enums"]["org_kind"]
-          org_name: string
-          role: Database["public"]["Enums"]["org_role"]
-          student_name: string
-        }[]
-      }
+          accepted: boolean;
+          expired: boolean;
+          org_kind: Database["public"]["Enums"]["org_kind"];
+          org_name: string;
+          role: Database["public"]["Enums"]["org_role"];
+          student_name: string;
+        }[];
+      };
       has_org_role: {
         Args: {
-          _org_id: string
-          _role: Database["public"]["Enums"]["org_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+          _org_id: string;
+          _role: Database["public"]["Enums"]["org_role"];
+          _user_id: string;
+        };
+        Returns: boolean;
+      };
       is_org_member: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
+        Args: { _org_id: string; _user_id: string };
+        Returns: boolean;
+      };
       is_org_staff: {
-        Args: { _org_id: string; _user_id: string }
-        Returns: boolean
-      }
-      is_org_vehicle_staff: { Args: { _vehicle_id: string }; Returns: boolean }
-      my_student_ids: { Args: never; Returns: string[] }
+        Args: { _org_id: string; _user_id: string };
+        Returns: boolean;
+      };
+      is_org_vehicle_staff: { Args: { _vehicle_id: string }; Returns: boolean };
+      my_student_ids: { Args: never; Returns: string[] };
       org_team: {
-        Args: { _org_id: string }
+        Args: { _org_id: string };
         Returns: {
-          created_at: string
-          display_name: string
-          email: string
-          role: Database["public"]["Enums"]["org_role"]
-          user_id: string
-        }[]
-      }
+          created_at: string;
+          display_name: string;
+          email: string;
+          role: Database["public"]["Enums"]["org_role"];
+          user_id: string;
+        }[];
+      };
       recompute_fuel_calibration: {
-        Args: { _vehicle_id: string }
-        Returns: undefined
-      }
+        Args: { _vehicle_id: string };
+        Returns: undefined;
+      };
       touch_vehicle_share_seen: {
-        Args: { _share_id: string }
-        Returns: boolean
-      }
-    }
+        Args: { _share_id: string };
+        Returns: boolean;
+      };
+    };
     Enums: {
-      account_mode: "motorista" | "app" | "instrutor" | "autoescola"
-      app_plan: "free" | "pro" | "frota"
+      account_mode: "motorista" | "app" | "instrutor" | "autoescola";
+      app_plan: "free" | "pro" | "frota";
       expense_category:
         | "pedagio"
         | "estacionamento"
@@ -1671,8 +1665,8 @@ export type Database = {
         | "financiamento"
         | "acessorio"
         | "outro"
-        | "combustivel"
-      lesson_status: "agendada" | "em_andamento" | "concluida" | "cancelada"
+        | "combustivel";
+      lesson_status: "agendada" | "em_andamento" | "concluida" | "cancelada";
       maintenance_type:
         | "oleo"
         | "filtro_oleo"
@@ -1683,148 +1677,140 @@ export type Database = {
         | "freios"
         | "velas"
         | "revisao"
-        | "outro"
-      org_kind: "instrutor" | "autoescola"
-      org_role: "owner" | "instructor" | "student"
-      ride_platform: "uber" | "99" | "indrive" | "outra"
-      subscription_status: "active" | "trialing" | "canceled" | "past_due"
+        | "outro";
+      org_kind: "instrutor" | "autoescola";
+      org_role: "owner" | "instructor" | "student";
+      ride_platform: "uber" | "99" | "indrive" | "outra";
+      subscription_status: "active" | "trialing" | "canceled" | "past_due";
       tracker_event_type:
         | "ignition_on"
         | "ignition_off"
         | "motion_off_ignition"
         | "geofence_exit"
         | "signal_lost"
-        | "geofence_enter"
-      vehicle_document_type:
-        | "crlv"
-        | "seguro"
-        | "ipva"
-        | "licenciamento"
-        | "inspecao"
-        | "outro"
-    }
+        | "geofence_enter";
+      vehicle_document_type: "crlv" | "seguro" | "ipva" | "licenciamento" | "inspecao" | "outro";
+    };
     CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
+      [_ in never]: never;
+    };
+  };
+};
 
-type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">;
 
-type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">];
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
       DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
+      Row: infer R;
     }
     ? R
     : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] & DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R;
       }
       ? R
       : never
-    : never
+    : never;
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
+      Insert: infer I;
     }
     ? I
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
+        Insert: infer I;
       }
       ? I
       : never
-    : never
+    : never;
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends (DefaultSchemaTableNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
+      Update: infer U;
     }
     ? U
     : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
     ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
+        Update: infer U;
       }
       ? U
       : never
-    : never
+    : never;
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never) = never,
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
+    : never;
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
-    schema: keyof DatabaseWithoutInternals
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals;
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never) = never,
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends {
-  schema: keyof DatabaseWithoutInternals
+  schema: keyof DatabaseWithoutInternals;
 }
   ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+    : never;
 
 export const Constants = {
   public: {
@@ -1868,14 +1854,7 @@ export const Constants = {
         "signal_lost",
         "geofence_enter",
       ],
-      vehicle_document_type: [
-        "crlv",
-        "seguro",
-        "ipva",
-        "licenciamento",
-        "inspecao",
-        "outro",
-      ],
+      vehicle_document_type: ["crlv", "seguro", "ipva", "licenciamento", "inspecao", "outro"],
     },
   },
-} as const
+} as const;

@@ -38,10 +38,7 @@ function num(value: unknown): number | null {
  * Segmentos medidos, em ordem cronológica. `fuelType` filtra o combustível
  * ativo; quando omitido, considera todos.
  */
-export function measuredSegments(
-  logs: FullTankLog[],
-  fuelType?: string | null,
-): MeasuredSegment[] {
+export function measuredSegments(logs: FullTankLog[], fuelType?: string | null): MeasuredSegment[] {
   const full = logs
     .filter((l) => l.is_full_tank !== false)
     .filter((l) => (fuelType ? (l.fuel_type ?? "gasolina") === fuelType : true))

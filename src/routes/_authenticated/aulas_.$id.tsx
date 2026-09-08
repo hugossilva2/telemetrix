@@ -2,7 +2,16 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Check, Leaf, Link2, Play, Route as RouteIcon, Square, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Leaf,
+  Link2,
+  Play,
+  Route as RouteIcon,
+  Square,
+  Trash2,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +38,10 @@ export const Route = createFileRoute("/_authenticated/aulas_/$id")({
   head: () => ({
     meta: [
       { title: "Aula · Telemetrix" },
-      { name: "description", content: "Detalhe da aula: trajeto gravado, Eco Score, checklist e observações." },
+      {
+        name: "description",
+        content: "Detalhe da aula: trajeto gravado, Eco Score, checklist e observações.",
+      },
       { property: "og:title", content: "Aula · Telemetrix" },
       { property: "og:description", content: "Detalhe da aula prática." },
     ],
@@ -69,7 +81,9 @@ function AulaPage() {
     queryKey: ["lesson-trip-candidates", id, lesson?.started_at],
     enabled: !!lesson && !lesson.trip_id && lesson.status === "concluida",
     queryFn: async () => {
-      const from = new Date(new Date(lesson!.started_at ?? lesson!.scheduled_at).getTime() - 2 * 3_600_000).toISOString();
+      const from = new Date(
+        new Date(lesson!.started_at ?? lesson!.scheduled_at).getTime() - 2 * 3_600_000,
+      ).toISOString();
       const { data, error } = await supabase
         .from("trips")
         .select("id,start_time,end_time,distance_km,eco_score")
@@ -150,23 +164,38 @@ function AulaPage() {
         <Link to="/aulas" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
           <ArrowLeft className="size-3.5" /> Aulas
         </Link>
-        <span className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${LESSON_STATUS_CLASSES[lesson.status]}`}>
+        <span
+          className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${LESSON_STATUS_CLASSES[lesson.status]}`}
+        >
           {LESSON_STATUS_LABEL[lesson.status]}
         </span>
       </div>
 
       {lesson.status === "agendada" && (
         <div className="grid grid-cols-2 gap-2">
-          <Button className="h-11" onClick={() => startLesson.mutate(lesson)} disabled={startLesson.isPending}>
+          <Button
+            className="h-11"
+            onClick={() => startLesson.mutate(lesson)}
+            disabled={startLesson.isPending}
+          >
             <Play className="size-4" /> Iniciar aula
           </Button>
-          <Button variant="outline" className="h-11" onClick={() => save.mutate({ status: "cancelada" })}>
+          <Button
+            variant="outline"
+            className="h-11"
+            onClick={() => save.mutate({ status: "cancelada" })}
+          >
             Cancelar aula
           </Button>
         </div>
       )}
       {lesson.status === "em_andamento" && (
-        <Button variant="destructive" className="h-11 w-full" onClick={() => endLesson.mutate(lesson)} disabled={endLesson.isPending}>
+        <Button
+          variant="destructive"
+          className="h-11 w-full"
+          onClick={() => endLesson.mutate(lesson)}
+          disabled={endLesson.isPending}
+        >
           <Square className="size-4" /> Encerrar aula
         </Button>
       )}
@@ -181,17 +210,24 @@ function AulaPage() {
             <div className="mt-3 grid grid-cols-3 gap-2 text-center">
               <div className="rounded-xl bg-background/35 p-2">
                 <p className="text-[10px] text-muted-foreground">Eco Score</p>
-                <p className="font-mono text-xl font-bold text-primary">{trip.eco_score != null ? Math.round(trip.eco_score) : "—"}</p>
+                <p className="font-mono text-xl font-bold text-primary">
+                  {trip.eco_score != null ? Math.round(trip.eco_score) : "—"}
+                </p>
               </div>
               <div className="rounded-xl bg-background/35 p-2">
                 <p className="text-[10px] text-muted-foreground">Distância</p>
-                <p className="font-mono text-xl font-bold">{trip.distance_km != null ? `${formatDecimal(trip.distance_km)}` : "—"}</p>
+                <p className="font-mono text-xl font-bold">
+                  {trip.distance_km != null ? `${formatDecimal(trip.distance_km)}` : "—"}
+                </p>
                 <p className="text-[10px] text-muted-foreground">km</p>
               </div>
               <div className="rounded-xl bg-background/35 p-2">
                 <p className="text-[10px] text-muted-foreground">Eventos</p>
                 <p className="font-mono text-xl font-bold">
-                  {trip.harsh_brake_count + trip.harsh_accel_count + trip.harsh_corner_count + trip.overspeed_count}
+                  {trip.harsh_brake_count +
+                    trip.harsh_accel_count +
+                    trip.harsh_corner_count +
+                    trip.overspeed_count}
                 </p>
               </div>
             </div>
@@ -202,10 +238,18 @@ function AulaPage() {
               <li>Excesso de velocidade: {trip.overspeed_count}</li>
             </ul>
             <div className="mt-3 flex gap-2">
-              <Link to="/viagens/$id" params={{ id: trip.id }} className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-xs font-semibold text-primary-foreground">
+              <Link
+                to="/viagens/$id"
+                params={{ id: trip.id }}
+                className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-primary text-xs font-semibold text-primary-foreground"
+              >
                 <Leaf className="size-4" /> Ver mapa e eventos
               </Link>
-              <Button variant="ghost" className="h-10 text-xs" onClick={() => save.mutate({ trip_id: null })}>
+              <Button
+                variant="ghost"
+                className="h-10 text-xs"
+                onClick={() => save.mutate({ trip_id: null })}
+              >
                 Desvincular
               </Button>
             </div>
@@ -222,7 +266,9 @@ function AulaPage() {
                     type="button"
                     onClick={() => save.mutate({ trip_id: t.id })}
                     className={`flex w-full items-center gap-2 rounded-xl border p-2.5 text-left text-xs ${
-                      suggested?.id === t.id ? "border-primary/60 bg-primary/10" : "border-border/70 bg-background/35"
+                      suggested?.id === t.id
+                        ? "border-primary/60 bg-primary/10"
+                        : "border-border/70 bg-background/35"
                     }`}
                   >
                     <Link2 className="size-4 shrink-0 text-primary" />
@@ -238,7 +284,9 @@ function AulaPage() {
                 </li>
               ))}
               {candidates.isFetched && (candidates.data ?? []).length === 0 && (
-                <li className="text-xs text-muted-foreground">Nenhuma viagem fechada nesse horário ainda.</li>
+                <li className="text-xs text-muted-foreground">
+                  Nenhuma viagem fechada nesse horário ainda.
+                </li>
               )}
             </ul>
           </>
@@ -327,7 +375,12 @@ function AulaPage() {
             disabled={!dirty || save.isPending}
             onClick={() =>
               save.mutate(
-                { checklist: checklist as unknown as Database["public"]["Tables"]["lessons"]["Update"]["checklist"], notes: notes.trim() || null, price: p != null && Number.isFinite(p) ? p : null },
+                {
+                  checklist:
+                    checklist as unknown as Database["public"]["Tables"]["lessons"]["Update"]["checklist"],
+                  notes: notes.trim() || null,
+                  price: p != null && Number.isFinite(p) ? p : null,
+                },
                 { onSuccess: () => toast.success("Aula salva.") },
               )
             }

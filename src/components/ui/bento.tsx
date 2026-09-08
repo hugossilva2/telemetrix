@@ -15,7 +15,5 @@ export function BentoItem({
   className?: string;
   children: ReactNode;
 }) {
-  return (
-    <div className={cn("min-w-0", span === 2 && "col-span-2", className)}>{children}</div>
-  );
+  return <div className={cn("min-w-0", span === 2 && "col-span-2", className)}>{children}</div>;
 }

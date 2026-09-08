@@ -48,7 +48,6 @@ export function GaugeCluster({
   const ecoFrom = ecoRpmMin ?? 1500;
   const ecoTo = ecoRpmMax ?? 2500;
 
-
   return (
     <section className="card-surface p-4">
       <div className="grid grid-cols-3 gap-2">
@@ -69,7 +68,9 @@ export function GaugeCluster({
           label="RPM"
           value={revs}
           max={RPM_MAX}
-          arcClassName={revs !== undefined && revs >= RPM_REDLINE ? "text-destructive" : "text-warning"}
+          arcClassName={
+            revs !== undefined && revs >= RPM_REDLINE ? "text-destructive" : "text-warning"
+          }
           zones={[
             { from: ecoFrom, to: ecoTo, className: "text-success" },
             { from: RPM_REDLINE, to: RPM_MAX, className: "text-destructive" },
@@ -101,7 +102,6 @@ export function GaugeCluster({
             </span>
           )}
         </GaugeRing>
-
       </div>
       {off && (
         <p className="mt-2 text-center text-[11px] text-muted-foreground">

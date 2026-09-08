@@ -5,8 +5,6 @@ import type { MqttStatus } from "@/lib/flespi/types";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { SOURCE_SHORT } from "@/lib/telemetry/types";
 
-
-
 interface Props {
   ignitionOn?: boolean;
   status: MqttStatus;
@@ -15,7 +13,6 @@ interface Props {
   satellites?: number;
   hasFix?: boolean;
 }
-
 
 const statusText: Record<MqttStatus, string> = {
   idle: "Iniciando",
@@ -34,7 +31,6 @@ const statusDot: Record<MqttStatus, string> = {
   offline: "bg-muted-foreground",
   error: "bg-destructive",
 };
-
 
 function timeAgo(ts: number | null): string {
   if (!ts) return "aguardando dados";
@@ -60,7 +56,6 @@ export function StatusHeader({
   const { source } = useTelemetry();
   const SourceIcon = source === "elm327" ? Bluetooth : Cloud;
 
-
   // Tick a cada 1s para o "há Xs" andar mesmo sem mensagem nova.
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -69,9 +64,7 @@ export function StatusHeader({
   }, []);
 
   const secsSince =
-    lastMessageAt != null
-      ? Math.max(0, Math.floor((Date.now() - lastMessageAt) / 1000))
-      : null;
+    lastMessageAt != null ? Math.max(0, Math.floor((Date.now() - lastMessageAt) / 1000)) : null;
   // Telemetria chega a cada ~15s; acima de 30s consideramos sinal atrasado.
   const stale = secsSince != null && secsSince > 30;
 
@@ -145,5 +138,3 @@ export function StatusHeader({
     </div>
   );
 }
-
-

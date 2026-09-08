@@ -36,7 +36,6 @@ export interface TripPlan {
   kmpl?: number | null;
 }
 
-
 const KEY = "tripPlan:v1";
 
 function read(): TripPlan | null {
@@ -69,11 +68,7 @@ export const tripPlanStore = {
 };
 
 export function useTripPlan(): TripPlan | null {
-  return useSyncExternalStore(
-    tripPlanStore.subscribe,
-    tripPlanStore.get,
-    () => null,
-  );
+  return useSyncExternalStore(tripPlanStore.subscribe, tripPlanStore.get, () => null);
 }
 
 /** Decodifica uma polyline do Google em pares [lat, lng]. */

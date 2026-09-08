@@ -15,10 +15,7 @@ const OSM_ATTR = "&copy; OpenStreetMap";
 
 // Nota: os basemaps da CARTO passaram a exigir chave de API (marca d'água
 // "API KEY REQUIRED"). Usamos OpenStreetMap + filtro CSS para o modo escuro.
-export const MAP_STYLES: Record<
-  MapStyleId,
-  { label: string; layers: TileLayerConfig[] }
-> = {
+export const MAP_STYLES: Record<MapStyleId, { label: string; layers: TileLayerConfig[] }> = {
   dark: {
     label: "Escuro",
     layers: [

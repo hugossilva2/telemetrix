@@ -130,10 +130,10 @@
     var(--card) 55%
   );
   --shadow-card: 0 1px 0 0 oklch(1 0 0 / 6%) inset, 0 12px 28px -18px oklch(0 0 0 / 80%);
-  --shadow-glow: 0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent),
+  --shadow-glow:
+    0 0 0 1px color-mix(in oklab, var(--primary) 35%, transparent),
     0 12px 32px -14px color-mix(in oklab, var(--primary) 55%, transparent);
 }
-
 
 @layer base {
   * {
@@ -146,10 +146,10 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     background-image: radial-gradient(
-        90% 55% at 50% -10%,
-        color-mix(in oklab, var(--primary) 12%, transparent),
-        transparent 70%
-      );
+      90% 55% at 50% -10%,
+      color-mix(in oklab, var(--primary) 12%, transparent),
+      transparent 70%
+    );
     background-attachment: fixed;
   }
 
@@ -181,7 +181,6 @@
   letter-spacing: -0.02em;
 }
 
-
 /* Manter o mapa Leaflet abaixo de modais/overlays (Radix Dialog usa z-50). */
 .leaflet-pane,
 .leaflet-top,
@@ -202,7 +201,6 @@
 .leaflet-tile-pane .tiles-light {
   filter: saturate(0.45) brightness(1.04);
 }
-
 
 /* Mostradores do painel: arco desliza suavemente até o novo valor. */
 .gauge-arc {

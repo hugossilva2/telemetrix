@@ -5,10 +5,7 @@ import { MapPinned, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { toUserMessage } from "@/lib/errors/userMessage";
-import {
-  countTripsWithoutRoute,
-  rebuildTripRoutes,
-} from "@/lib/trips/rebuildRoutes.functions";
+import { countTripsWithoutRoute, rebuildTripRoutes } from "@/lib/trips/rebuildRoutes.functions";
 
 /** Reconstrói o traçado real das viagens antigas a partir dos pings gravados. */
 export function RebuildRoutesCard() {
@@ -64,9 +61,7 @@ export function RebuildRoutesCard() {
           : "Todas as viagens dos últimos 30 dias já têm o caminho real gravado."}
       </p>
       {running && (
-        <p className="mt-2 text-xs text-primary">
-          Reconstruindo… {done} viagem(ns) concluídas.
-        </p>
+        <p className="mt-2 text-xs text-primary">Reconstruindo… {done} viagem(ns) concluídas.</p>
       )}
       <Button
         className="mt-3"

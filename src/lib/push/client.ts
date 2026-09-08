@@ -9,15 +9,15 @@ function urlBase64ToUint8Array(base64: string): Uint8Array {
   return out;
 }
 
-export type PushSupport =
-  | "ok"
-  | "unsupported"
-  | "no-service-worker"
-  | "denied";
+export type PushSupport = "ok" | "unsupported" | "no-service-worker" | "denied";
 
 export function pushSupport(): PushSupport {
   if (typeof window === "undefined") return "unsupported";
-  if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+  if (
+    !("serviceWorker" in navigator) ||
+    !("PushManager" in window) ||
+    !("Notification" in window)
+  ) {
     return "unsupported";
   }
   if (Notification.permission === "denied") return "denied";
@@ -55,9 +55,7 @@ export async function enablePush(): Promise<void> {
 
   const reg = await readyRegistration();
   if (!reg) {
-    throw new Error(
-      "Instale o app na tela de início (app publicado) para ativar as notificações.",
-    );
+    throw new Error("Instale o app na tela de início (app publicado) para ativar as notificações.");
   }
 
   const permission = await Notification.requestPermission();

@@ -43,7 +43,9 @@ export function ProfitTodayCard() {
       <div className="mt-3 grid grid-cols-2 gap-3">
         <Link to="/lucro" className="rounded-xl border border-border/70 bg-background/35 p-3">
           <p className="text-[11px] text-muted-foreground">Hoje</p>
-          <p className={`mt-0.5 font-mono text-xl font-semibold ${today.profit < 0 ? "text-destructive" : ""}`}>
+          <p
+            className={`mt-0.5 font-mono text-xl font-semibold ${today.profit < 0 ? "text-destructive" : ""}`}
+          >
             {formatBRL(today.profit)}
           </p>
           <p className="text-[10px] text-muted-foreground">
@@ -53,7 +55,9 @@ export function ProfitTodayCard() {
         </Link>
         <Link to="/semana" className="rounded-xl border border-border/70 bg-background/35 p-3">
           <p className="text-[11px] text-muted-foreground">Semana (seg–dom)</p>
-          <p className={`mt-0.5 font-mono text-xl font-semibold ${week.profit < 0 ? "text-destructive" : ""}`}>
+          <p
+            className={`mt-0.5 font-mono text-xl font-semibold ${week.profit < 0 ? "text-destructive" : ""}`}
+          >
             {formatBRL(week.profit)}
           </p>
           <p className="text-[10px] text-muted-foreground">

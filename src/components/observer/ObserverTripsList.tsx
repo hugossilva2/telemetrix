@@ -32,23 +32,16 @@ export function ObserverTripsList({ vehicleId }: { vehicleId: string | null }) {
 
   return (
     <div className="card-surface p-4">
-      <h2 className="font-display text-sm font-semibold tracking-tight">
-        Últimas viagens
-      </h2>
+      <h2 className="font-display text-sm font-semibold tracking-tight">Últimas viagens</h2>
 
       {isLoading ? (
         <p className="mt-3 text-xs text-muted-foreground">Carregando…</p>
       ) : !trips || trips.length === 0 ? (
-        <p className="mt-3 text-xs text-muted-foreground">
-          Nenhuma viagem registrada ainda.
-        </p>
+        <p className="mt-3 text-xs text-muted-foreground">Nenhuma viagem registrada ainda.</p>
       ) : (
         <ul className="mt-3 space-y-2">
           {trips.map((t) => (
-            <li
-              key={t.id}
-              className="rounded-xl border border-border/60 bg-muted/25 p-3"
-            >
+            <li key={t.id} className="rounded-xl border border-border/60 bg-muted/25 p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-xs font-semibold">
                   {formatDateTime(t.start_time)}
@@ -68,10 +61,10 @@ export function ObserverTripsList({ vehicleId }: { vehicleId: string | null }) {
                 </span>
                 <span className="inline-flex items-center gap-1">
                   <Gauge className="size-3" />
-                  {t.avg_speed_kmh != null ? `${Math.round(Number(t.avg_speed_kmh))} km/h méd` : "—"}
-                  {t.max_speed_kmh != null
-                    ? ` · ${Math.round(Number(t.max_speed_kmh))} máx`
-                    : ""}
+                  {t.avg_speed_kmh != null
+                    ? `${Math.round(Number(t.avg_speed_kmh))} km/h méd`
+                    : "—"}
+                  {t.max_speed_kmh != null ? ` · ${Math.round(Number(t.max_speed_kmh))} máx` : ""}
                 </span>
               </div>
             </li>

@@ -61,7 +61,10 @@ export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) 
   const center = points[0] ?? ([-23.5505, -46.6333] as [number, number]);
 
   return (
-    <div ref={containerRef} style={{ position: "relative", height: "100%", width: "100%", background: "#0b1220" }}>
+    <div
+      ref={containerRef}
+      style={{ position: "relative", height: "100%", width: "100%", background: "#0b1220" }}
+    >
       <MapContainer
         center={center}
         zoom={14}
@@ -93,7 +96,6 @@ export default function TripMap({ start, end, trail, ecoEvents }: TripMapProps) 
         ))}
         <FitBounds points={points} />
       </MapContainer>
-
 
       <MapStyleControl value={mapStyle} onChange={setMapStyle} />
       <MapButtons containerRef={containerRef} />

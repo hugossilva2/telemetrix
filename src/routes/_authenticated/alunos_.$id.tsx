@@ -27,7 +27,10 @@ export const Route = createFileRoute("/_authenticated/alunos_/$id")({
   head: () => ({
     meta: [
       { title: "Aluno · Telemetrix" },
-      { name: "description", content: "Evolução do aluno: aulas feitas, próximas, pontos a treinar e financeiro." },
+      {
+        name: "description",
+        content: "Evolução do aluno: aulas feitas, próximas, pontos a treinar e financeiro.",
+      },
       { property: "og:title", content: "Aluno · Telemetrix" },
       { property: "og:description", content: "Evolução do aluno." },
     ],
@@ -71,7 +74,10 @@ function AlunoPage() {
   );
   const fin = useMemo(() => lessonFinancials(lessons.data ?? []), [lessons.data]);
   const openInvite = invites.data?.find(
-    (i) => i.student_id === id && !i.accepted_at && (!i.expires_at || new Date(i.expires_at) > new Date()),
+    (i) =>
+      i.student_id === id &&
+      !i.accepted_at &&
+      (!i.expires_at || new Date(i.expires_at) > new Date()),
   );
 
   const save = useMutation({
@@ -99,7 +105,10 @@ function AlunoPage() {
 
   const toggleActive = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("students").update({ active: !student?.active }).eq("id", id);
+      const { error } = await supabase
+        .from("students")
+        .update({ active: !student?.active })
+        .eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => invalidateSchool(qc),
@@ -121,7 +130,9 @@ function AlunoPage() {
 
   async function shareInvite() {
     try {
-      const token = openInvite?.token ?? (await createInvite.mutateAsync({ studentId: id, email: inviteEmail }));
+      const token =
+        openInvite?.token ??
+        (await createInvite.mutateAsync({ studentId: id, email: inviteEmail }));
       const url = inviteUrl(token);
       const text = `Olá${student ? `, ${student.name.split(" ")[0]}` : ""}! Acompanhe suas aulas no Telemetrix: ${url}`;
       if (typeof navigator !== "undefined" && navigator.share) {
@@ -131,7 +142,8 @@ function AlunoPage() {
         toast.success("Link do convite copiado!");
       }
     } catch (e) {
-      if ((e as Error)?.name !== "AbortError") toast.error(toUserMessage(e as Error, "Não foi possível gerar o convite."));
+      if ((e as Error)?.name !== "AbortError")
+        toast.error(toUserMessage(e as Error, "Não foi possível gerar o convite."));
     }
   }
 
@@ -153,7 +165,17 @@ function AlunoPage() {
   }
 
   return (
-    <AppShell title={student.name} subtitle={[student.category && `Categoria ${student.category}`, student.renach && `RENACH ${student.renach}`].filter(Boolean).join(" · ") || "Aluno"}>
+    <AppShell
+      title={student.name}
+      subtitle={
+        [
+          student.category && `Categoria ${student.category}`,
+          student.renach && `RENACH ${student.renach}`,
+        ]
+          .filter(Boolean)
+          .join(" · ") || "Aluno"
+      }
+    >
       <Link to="/alunos" className="inline-flex items-center gap-1 text-xs text-muted-foreground">
         <ArrowLeft className="size-3.5" /> Alunos
       </Link>
@@ -164,27 +186,37 @@ function AlunoPage() {
             <p className="text-xs text-muted-foreground">Aulas realizadas</p>
             <p className="font-mono text-3xl font-bold">
               {progress.done}
-              <span className="text-base font-medium text-muted-foreground">/{student.contracted_lessons}</span>
+              <span className="text-base font-medium text-muted-foreground">
+                /{student.contracted_lessons}
+              </span>
             </p>
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Eco Score médio</p>
-            <p className="font-mono text-2xl font-semibold text-primary">{progress.avgEco ?? "—"}</p>
+            <p className="font-mono text-2xl font-semibold text-primary">
+              {progress.avgEco ?? "—"}
+            </p>
           </div>
         </div>
         <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
           <div className="h-full rounded-full bg-primary" style={{ width: `${progress.pct}%` }} />
         </div>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          {progress.remaining > 0 ? `${progress.remaining} restantes` : "Carga contratada concluída"}
-          {progress.scheduled > 0 && ` · ${progress.scheduled} agendada${progress.scheduled === 1 ? "" : "s"}`}
+          {progress.remaining > 0
+            ? `${progress.remaining} restantes`
+            : "Carga contratada concluída"}
+          {progress.scheduled > 0 &&
+            ` · ${progress.scheduled} agendada${progress.scheduled === 1 ? "" : "s"}`}
         </p>
         {progress.weakSpots.length > 0 && (
           <div className="mt-3">
             <p className="text-[11px] font-semibold text-muted-foreground">Pontos a treinar</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {progress.weakSpots.map((w) => (
-                <span key={w.id} className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning">
+                <span
+                  key={w.id}
+                  className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning"
+                >
                   {CHECKLIST_ITEMS.find((c) => c.id === w.id)?.label ?? w.id}
                 </span>
               ))}
@@ -199,7 +231,12 @@ function AlunoPage() {
           >
             <CalendarPlus className="size-4" /> Agendar aula
           </Link>
-          <Button type="button" variant="outline" className="h-10" onClick={() => setEditing((v) => !v)}>
+          <Button
+            type="button"
+            variant="outline"
+            className="h-10"
+            onClick={() => setEditing((v) => !v)}
+          >
             <Pencil className="size-4" /> Editar
           </Button>
         </div>
@@ -215,7 +252,12 @@ function AlunoPage() {
         >
           <div className="space-y-1.5">
             <Label>Nome</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="h-11" required />
+            <Input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="h-11"
+              required
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -224,7 +266,11 @@ function AlunoPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Categoria</Label>
-              <Input value={category} onChange={(e) => setCategory(e.target.value.toUpperCase())} className="h-11" />
+              <Input
+                value={category}
+                onChange={(e) => setCategory(e.target.value.toUpperCase())}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label>RENACH</Label>
@@ -232,7 +278,13 @@ function AlunoPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Aulas contratadas</Label>
-              <Input type="number" min="0" value={contracted} onChange={(e) => setContracted(e.target.value)} className="h-11" />
+              <Input
+                type="number"
+                min="0"
+                value={contracted}
+                onChange={(e) => setContracted(e.target.value)}
+                className="h-11"
+              />
             </div>
           </div>
           <div className="space-y-1.5">
@@ -266,11 +318,14 @@ function AlunoPage() {
           <h2 className="text-sm font-semibold">Acesso do aluno</h2>
         </div>
         {student.user_id ? (
-          <p className="mt-1 text-xs text-success">O aluno já entrou e vê a área “Meu progresso”.</p>
+          <p className="mt-1 text-xs text-success">
+            O aluno já entrou e vê a área “Meu progresso”.
+          </p>
         ) : (
           <>
             <p className="mt-1 text-xs text-muted-foreground">
-              Envie o link; o aluno cria a conta e passa a ver aulas, trajetos e a pontuação de direção.
+              Envie o link; o aluno cria a conta e passa a ver aulas, trajetos e a pontuação de
+              direção.
             </p>
             <div className="mt-2 flex gap-2">
               <Input
@@ -281,14 +336,23 @@ function AlunoPage() {
                 className="h-10 text-sm"
                 disabled={!!openInvite}
               />
-              <Button type="button" className="h-10 shrink-0" onClick={shareInvite} disabled={createInvite.isPending}>
+              <Button
+                type="button"
+                className="h-10 shrink-0"
+                onClick={shareInvite}
+                disabled={createInvite.isPending}
+              >
                 <Share2 className="size-4" /> {openInvite ? "Reenviar" : "Convidar"}
               </Button>
             </div>
             {openInvite && (
               <button
                 type="button"
-                onClick={() => navigator.clipboard.writeText(inviteUrl(openInvite.token)).then(() => toast.success("Link copiado!"))}
+                onClick={() =>
+                  navigator.clipboard
+                    .writeText(inviteUrl(openInvite.token))
+                    .then(() => toast.success("Link copiado!"))
+                }
                 className="mt-2 flex w-full items-center gap-2 truncate rounded-lg bg-muted/60 px-2 py-1.5 text-left text-[11px] text-muted-foreground"
               >
                 <Copy className="size-3 shrink-0" />
@@ -308,11 +372,17 @@ function AlunoPage() {
           </div>
           <div className="rounded-xl bg-background/35 p-2">
             <p className="text-[10px] text-muted-foreground">Recebido</p>
-            <p className="font-mono text-sm font-semibold text-success">{formatBRL(fin.received)}</p>
+            <p className="font-mono text-sm font-semibold text-success">
+              {formatBRL(fin.received)}
+            </p>
           </div>
           <div className="rounded-xl bg-background/35 p-2">
             <p className="text-[10px] text-muted-foreground">Pendente</p>
-            <p className={`font-mono text-sm font-semibold ${fin.pending > 0 ? "text-warning" : ""}`}>{formatBRL(fin.pending)}</p>
+            <p
+              className={`font-mono text-sm font-semibold ${fin.pending > 0 ? "text-warning" : ""}`}
+            >
+              {formatBRL(fin.pending)}
+            </p>
           </div>
         </div>
       </section>

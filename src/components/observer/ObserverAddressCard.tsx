@@ -18,8 +18,7 @@ export function ObserverAddressCard({
   const geocode = useServerFn(reverseGeocode);
 
   // Arredonda para ~11 m: evita refazer a chamada a cada ping.
-  const key =
-    lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : null;
+  const key = lat != null && lng != null ? `${lat.toFixed(4)},${lng.toFixed(4)}` : null;
 
   const { data, isLoading } = useQuery({
     queryKey: ["observer-address", key],
@@ -55,13 +54,9 @@ export function ObserverAddressCard({
           <MapPin className="size-4.5" />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="font-display text-sm font-semibold tracking-tight">
-            Onde o veículo está
-          </h2>
+          <h2 className="font-display text-sm font-semibold tracking-tight">Onde o veículo está</h2>
           <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
-            {isLoading
-              ? "Buscando endereço…"
-              : (address ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`)}
+            {isLoading ? "Buscando endereço…" : (address ?? `${lat.toFixed(5)}, ${lng.toFixed(5)}`)}
           </p>
         </div>
       </div>

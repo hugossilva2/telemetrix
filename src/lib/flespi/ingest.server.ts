@@ -10,11 +10,7 @@ import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
  * app aberto e mesmo que a Flespi não esteja com o webhook configurado.
  */
 
-import {
-  IDLE_SPEED_KMH,
-  MIN_DISTANCE_KM,
-  MIN_DURATION_S,
-} from "@/lib/trips/thresholds";
+import { IDLE_SPEED_KMH, MIN_DISTANCE_KM, MIN_DURATION_S } from "@/lib/trips/thresholds";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { summarizeEco } from "@/lib/eco/score";
 
@@ -80,7 +76,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
       .eq("device_id", deviceId);
     if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
   }
-
 
   let processed = 0;
   let skippedNoDevice = 0;
@@ -521,7 +516,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             continue;
           }
 
-
           const durationH = durationS / 3600;
           const avgSpeed = durationH > 0 ? distanceKm / durationH : 0;
 
@@ -654,9 +648,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           const newTripId = tripRows?.[0]?.id;
           if (newTripId) {
             try {
-              const { buildRouteDataFromPings } = await import(
-                "@/lib/trips/trailFromPings.server"
-              );
+              const { buildRouteDataFromPings } = await import("@/lib/trips/trailFromPings.server");
               const routeData = await buildRouteDataFromPings(supabaseAdmin, {
                 vehicleId: vehicle.id,
                 startIso: state.start_time as string,
@@ -679,7 +671,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           await clearTripFields(deviceId);
           processed++;
           continue;
-
         }
 
         // Atualização durante viagem em andamento.

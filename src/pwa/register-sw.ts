@@ -36,7 +36,8 @@ export function registerServiceWorker() {
       .getRegistrations()
       .then((regs) => {
         regs.forEach((r) => {
-          const scriptURL = r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
+          const scriptURL =
+            r.active?.scriptURL || r.installing?.scriptURL || r.waiting?.scriptURL || "";
           if (scriptURL.endsWith("/sw.js")) r.unregister();
         });
       })

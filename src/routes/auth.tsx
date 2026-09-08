@@ -32,7 +32,9 @@ function AuthPage() {
   const navigate = useNavigate();
   const { redirect } = Route.useSearch();
   const go = (fallback: "/inicio" | "/perfil-de-uso") =>
-    redirect ? navigate({ href: redirect, replace: true }) : navigate({ to: fallback, replace: true });
+    redirect
+      ? navigate({ href: redirect, replace: true })
+      : navigate({ to: fallback, replace: true });
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

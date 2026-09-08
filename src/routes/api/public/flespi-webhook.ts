@@ -26,7 +26,6 @@ export const Route = createFileRoute("/api/public/flespi-webhook")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-
         let body: unknown;
         try {
           body = await request.json();

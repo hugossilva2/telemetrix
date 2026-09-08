@@ -20,8 +20,7 @@ export interface UseMyLocationResult {
 export function useMyLocation(enabled = true): UseMyLocationResult {
   const [position, setPosition] = useState<MyLocation | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const supported =
-    typeof navigator !== "undefined" && "geolocation" in navigator;
+  const supported = typeof navigator !== "undefined" && "geolocation" in navigator;
 
   useEffect(() => {
     if (!enabled || !supported) return;

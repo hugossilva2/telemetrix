@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { CheckCircle2, ChevronDown, Gauge, History, ShieldAlert, Trash2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
-import {
-  SAFE_START_RPM_LIMIT,
-  useSafeStart,
-} from "@/lib/tracker/safeStart";
+import { SAFE_START_RPM_LIMIT, useSafeStart } from "@/lib/tracker/safeStart";
 import { useSafeStartHistory } from "@/lib/tracker/safeStartHistory";
 
 interface Props {
@@ -32,17 +29,13 @@ export function SafeStartCard({ ignitionOn, engineRpm }: Props) {
   return (
     <div
       className={`mt-4 rounded-2xl border p-4 transition-colors ${
-        ok
-          ? "border-success/40 bg-success/10"
-          : "border-destructive/40 bg-destructive/10"
+        ok ? "border-success/40 bg-success/10" : "border-destructive/40 bg-destructive/10"
       }`}
     >
       <div className="flex items-center gap-3">
         <span
           className={`grid size-11 place-items-center rounded-full ${
-            ok
-              ? "bg-success/20 text-success"
-              : "bg-destructive/20 text-destructive animate-pulse"
+            ok ? "bg-success/20 text-success" : "bg-destructive/20 text-destructive animate-pulse"
           }`}
         >
           {ok ? <CheckCircle2 className="size-5" /> : <ShieldAlert className="size-5" />}

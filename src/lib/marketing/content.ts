@@ -204,7 +204,8 @@ export const USE_CASES: Record<UseCase["slug"], UseCase> = {
     ],
     screens: ["relatorio", "abastecer", "viagens"],
     plan: "pro",
-    planReason: "Histórico completo, relatórios semanais e coach de direção para economizar combustível.",
+    planReason:
+      "Histórico completo, relatórios semanais e coach de direção para economizar combustível.",
   },
   instrutor: {
     slug: "instrutor",

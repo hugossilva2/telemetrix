@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Elm327Client, isWebBluetoothSupported } from "@/lib/obd/elm327";
 import { obdDeviceStore, type SavedObdDevice } from "@/lib/obd/device";
-import {
-  FAST_PIDS,
-  SLOW_PIDS,
-  PID_MAF,
-  fuelRateLph,
-  parsePidResponse,
-} from "@/lib/obd/pids";
+import { FAST_PIDS, SLOW_PIDS, PID_MAF, fuelRateLph, parsePidResponse } from "@/lib/obd/pids";
 import type { VehicleTelemetry } from "@/lib/flespi/types";
 import type { TelemetryStatus } from "@/lib/telemetry/types";
 
@@ -29,7 +23,6 @@ export interface UseOBD2LocalResult {
   disconnect: () => void;
 }
 
-
 const POLL_INTERVAL_MS = 500;
 const IGNITION_RPM_THRESHOLD = 300;
 
@@ -48,14 +41,12 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
   const [savedDevice, setSavedDevice] = useState<SavedObdDevice | null>(null);
   const [progress, setProgress] = useState<string | null>(null);
 
-
   useEffect(() => {
     setSavedDevice(obdDeviceStore.get());
     return obdDeviceStore.subscribe(setSavedDevice);
   }, []);
 
   const forgetDevice = useCallback(() => obdDeviceStore.forget(), []);
-
 
   const clientRef = useRef<Elm327Client | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -190,7 +181,6 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     }
   }, [pollOnce, stopPolling, supported]);
 
-
   // GPS do celular: posição, velocidade e rumo enquanto o modo estiver ativo.
   useEffect(() => {
     if (!enabled || typeof navigator === "undefined" || !navigator.geolocation) return;
@@ -210,7 +200,8 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
               ? pos.coords.heading
               : prev.headingDeg,
           // Velocidade do CAN tem prioridade; GPS é fallback.
-          speedKmh: prev.canSpeedKmh ?? (gpsSpeed !== undefined ? Math.round(gpsSpeed) : prev.speedKmh),
+          speedKmh:
+            prev.canSpeedKmh ?? (gpsSpeed !== undefined ? Math.round(gpsSpeed) : prev.speedKmh),
         }));
         setLastMessageAt(Date.now());
       },
@@ -249,7 +240,6 @@ export function useOBD2Local(enabled: boolean): UseOBD2LocalResult {
     progress,
     forgetDevice,
     fuelLph,
-
 
     connect,
     disconnect,

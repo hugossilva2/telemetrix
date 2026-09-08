@@ -6,7 +6,13 @@ import { StyledTileLayers } from "./StyledTileLayers";
 import { makeCarIcon, startIcon } from "./icons";
 import { useMapStyle } from "@/lib/map/tiles";
 
-function AutoFit({ points, follow }: { points: [number, number][]; follow: [number, number] | null }) {
+function AutoFit({
+  points,
+  follow,
+}: {
+  points: [number, number][];
+  follow: [number, number] | null;
+}) {
   const map = useMap();
   useEffect(() => {
     if (follow) {

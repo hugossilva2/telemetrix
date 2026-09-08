@@ -64,12 +64,13 @@ export function InstallAppCard() {
         </>
       ) : isIOS ? (
         <p className="text-xs text-muted-foreground">
-          No iPhone: toque em <strong>Compartilhar</strong> → <strong>Adicionar à Tela de Início</strong>.
+          No iPhone: toque em <strong>Compartilhar</strong> →{" "}
+          <strong>Adicionar à Tela de Início</strong>.
         </p>
       ) : (
         <p className="text-xs text-muted-foreground">
-          Abra este site no Chrome/Edge do Android e toque em <strong>“Instalar app”</strong> no menu.
-          Para gerar um <strong>.apk</strong> assinado, acesse{" "}
+          Abra este site no Chrome/Edge do Android e toque em <strong>“Instalar app”</strong> no
+          menu. Para gerar um <strong>.apk</strong> assinado, acesse{" "}
           <a
             href="https://www.pwabuilder.com/reportcard?site=https://drive-wise-69.lovable.app"
             target="_blank"

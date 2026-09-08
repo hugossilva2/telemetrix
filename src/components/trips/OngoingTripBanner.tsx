@@ -16,13 +16,9 @@ export function OngoingTripBanner() {
 
   if (!open) return null;
 
-  const durationS = Math.max(
-    0,
-    Math.floor((now - new Date(open.startTime).getTime()) / 1000),
-  );
+  const durationS = Math.max(0, Math.floor((now - new Date(open.startTime).getTime()) / 1000));
 
   const distanceKm = openTripDistanceKm(open);
-
 
   return (
     <div className="mt-3 flex items-center gap-3 rounded-2xl border border-success/30 bg-success/10 p-3">
@@ -30,9 +26,7 @@ export function OngoingTripBanner() {
         <RouteIcon className="size-4" />
       </div>
       <div className="flex-1">
-        <div className="text-xs uppercase tracking-wide text-success">
-          Viagem em andamento
-        </div>
+        <div className="text-xs uppercase tracking-wide text-success">Viagem em andamento</div>
         <div className="text-sm font-medium tabular-nums">
           {formatDurationSeconds(durationS)}
           {distanceKm !== null && (

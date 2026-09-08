@@ -19,7 +19,13 @@ export function EcoScoreRing({
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <svg width={size} height={size} className="-rotate-90" role="img" aria-label={`Nota ${value}`}>
+      <svg
+        width={size}
+        height={size}
+        className="-rotate-90"
+        role="img"
+        aria-label={`Nota ${value}`}
+      >
         <circle
           cx={size / 2}
           cy={size / 2}

@@ -90,15 +90,7 @@ function fmtAge(ms: number | null): string {
   return `${Math.floor(h / 24)} d ${h % 24} h`;
 }
 
-function Row({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string | null;
-}) {
+function Row({ label, value, hint }: { label: string; value: string; hint?: string | null }) {
   return (
     <div className="flex items-start justify-between gap-3 border-b border-border/50 py-2 last:border-0">
       <span className="text-xs text-muted-foreground">{label}</span>
@@ -140,9 +132,7 @@ function DiagnosticoPage() {
   const transportMs =
     originalMs != null && lastMessageAt != null ? lastMessageAt - originalMs : null;
 
-  const serverLastMs = data?.state?.lastMessageAt
-    ? Date.parse(data.state.lastMessageAt)
-    : null;
+  const serverLastMs = data?.state?.lastMessageAt ? Date.parse(data.state.lastMessageAt) : null;
   const health = signalHealth({
     lastMessageMs: serverLastMs ?? originalMs,
     nowMs: now,
@@ -180,7 +170,11 @@ function DiagnosticoPage() {
             <Row
               label="Horário original da mensagem"
               value={originalMs ? fmtDateTime(new Date(originalMs).toISOString()) : "—"}
-              hint={originalMs ? `relógio do rastreador · ${fmtAge(now - originalMs)} atrás` : "o aparelho não enviou timestamp"}
+              hint={
+                originalMs
+                  ? `relógio do rastreador · ${fmtAge(now - originalMs)} atrás`
+                  : "o aparelho não enviou timestamp"
+              }
             />
             <Row
               label="Latência até o app"
@@ -191,7 +185,16 @@ function DiagnosticoPage() {
                   : "entre gerar o dado e chegar aqui"
               }
             />
-            <Row label="Motor" value={telemetry.ignitionOn === true ? "Ligado" : telemetry.ignitionOn === false ? "Desligado" : "—"} />
+            <Row
+              label="Motor"
+              value={
+                telemetry.ignitionOn === true
+                  ? "Ligado"
+                  : telemetry.ignitionOn === false
+                    ? "Desligado"
+                    : "—"
+              }
+            />
             <Row
               label="GPS"
               value={
@@ -247,7 +250,11 @@ function DiagnosticoPage() {
             <Row
               label="Veículo"
               value={data?.vehicle?.name ?? vehicle?.name ?? "—"}
-              hint={data?.vehicle?.deviceId ? `device ${data.vehicle.deviceId}` : "sem rastreador vinculado"}
+              hint={
+                data?.vehicle?.deviceId
+                  ? `device ${data.vehicle.deviceId}`
+                  : "sem rastreador vinculado"
+              }
             />
             <Row
               label="Última mensagem gravada"
@@ -307,7 +314,6 @@ function DiagnosticoPage() {
         </section>
 
         <RebuildRoutesCard />
-
 
         <p className="flex items-start gap-2 px-1 text-[11px] text-muted-foreground">
           <Activity className="mt-0.5 size-3.5 shrink-0" />

@@ -130,7 +130,8 @@ function PrecosPage() {
               Qual plano para o seu uso?
             </h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Você escolhe o perfil ao criar a conta; os limites abaixo são os que valem para cada um.
+              Você escolhe o perfil ao criar a conta; os limites abaixo são os que valem para cada
+              um.
             </p>
             <div className="mt-5 grid gap-4 md:grid-cols-2">
               {ACCOUNT_MODES.map((m) => {

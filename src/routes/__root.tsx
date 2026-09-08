@@ -82,16 +82,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       {
         name: "viewport",
-        content:
-          "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
+        content: "width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1",
       },
       { name: "theme-color", content: "#0b1220" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { title: "Telemetrix" },
-      { name: "description", content: "Telemetrix — telemetria veicular em tempo real via Flespi." },
+      {
+        name: "description",
+        content: "Telemetrix — telemetria veicular em tempo real via Flespi.",
+      },
       { property: "og:title", content: "Telemetrix" },
-      { property: "og:description", content: "Telemetrix — telemetria veicular em tempo real via Flespi." },
+      {
+        property: "og:description",
+        content: "Telemetrix — telemetria veicular em tempo real via Flespi.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -142,7 +147,10 @@ function RootComponent() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Rotas públicas de marketing e login não usam a navegação do app.
   const publicPaths = ["/", "/auth", "/demo", "/recursos", "/precos"];
-  const showNav = !publicPaths.includes(pathname) && !pathname.startsWith("/casos-de-uso") && !pathname.startsWith("/convite/");
+  const showNav =
+    !publicPaths.includes(pathname) &&
+    !pathname.startsWith("/casos-de-uso") &&
+    !pathname.startsWith("/convite/");
 
   useEffect(() => {
     registerServiceWorker();

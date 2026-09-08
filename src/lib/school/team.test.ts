@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { conflictsForNew, findLessonConflicts, fleetStats, instructorStats, type TeamLesson } from "./team";
+import {
+  conflictsForNew,
+  findLessonConflicts,
+  fleetStats,
+  instructorStats,
+  type TeamLesson,
+} from "./team";
 
 const mk = (p: Partial<TeamLesson> & { id: string; scheduled_at: string }): TeamLesson => ({
   status: "agendada",
@@ -37,8 +43,16 @@ describe("findLessonConflicts", () => {
   });
   it("conflictsForNew só devolve conflitos do rascunho", () => {
     const c = conflictsForNew(
-      [mk({ id: "a", scheduled_at: "2026-09-02T10:00:00Z" }), mk({ id: "b", scheduled_at: "2026-09-02T10:20:00Z" })],
-      { scheduled_at: "2026-09-02T10:30:00Z", duration_min: 50, instructor_id: "i9", vehicle_id: "v1" },
+      [
+        mk({ id: "a", scheduled_at: "2026-09-02T10:00:00Z" }),
+        mk({ id: "b", scheduled_at: "2026-09-02T10:20:00Z" }),
+      ],
+      {
+        scheduled_at: "2026-09-02T10:30:00Z",
+        duration_min: 50,
+        instructor_id: "i9",
+        vehicle_id: "v1",
+      },
     );
     expect(c).toHaveLength(2);
     expect(c.every((x) => x.kind === "veiculo")).toBe(true);
@@ -51,12 +65,26 @@ describe("instructorStats", () => {
       mk({ id: "1", scheduled_at: "x", status: "concluida", trip_eco_score: 90, price: 100 }),
       mk({ id: "2", scheduled_at: "x", status: "concluida", trip_eco_score: 70, price: 100 }),
       mk({ id: "3", scheduled_at: "x", status: "agendada" }),
-      mk({ id: "4", scheduled_at: "x", instructor_id: "i2", status: "concluida", trip_eco_score: 95, price: 120 }),
+      mk({
+        id: "4",
+        scheduled_at: "x",
+        instructor_id: "i2",
+        status: "concluida",
+        trip_eco_score: 95,
+        price: 120,
+      }),
       mk({ id: "5", scheduled_at: "x", instructor_id: "i2", status: "cancelada" }),
     ]);
     expect(s[0].instructor_id).toBe("i2");
     expect(s[0]).toMatchObject({ lessons: 1, done: 1, revenue: 120, avgEco: 95, score: 97 });
-    expect(s[1]).toMatchObject({ instructor_id: "i1", lessons: 3, done: 2, hours: 1.7, revenue: 200, avgEco: 80 });
+    expect(s[1]).toMatchObject({
+      instructor_id: "i1",
+      lessons: 3,
+      done: 2,
+      hours: 1.7,
+      revenue: 200,
+      avgEco: 80,
+    });
     expect(s[1].score).toBe(Math.round(80 * 0.7 + (2 / 3) * 100 * 0.3));
   });
 });
@@ -76,7 +104,15 @@ describe("fleetStats", () => {
         mk({ id: "c", scheduled_at: "x", status: "agendada" }),
       ],
     );
-    expect(s[0]).toEqual({ vehicle_id: "v1", km: 20, liters: 2, fuelCost: 12, lessons: 2, costPerLesson: 6, kmPerLesson: 10 });
+    expect(s[0]).toEqual({
+      vehicle_id: "v1",
+      km: 20,
+      liters: 2,
+      fuelCost: 12,
+      lessons: 2,
+      costPerLesson: 6,
+      kmPerLesson: 10,
+    });
     expect(s[1]).toMatchObject({ vehicle_id: "v2", km: 3, lessons: 0, costPerLesson: null });
   });
 });

@@ -1,7 +1,12 @@
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ACCOUNT_MODE_INFO, parseAccountMode, type AccountMode, type AccountModeInfo } from "./mode";
+import {
+  ACCOUNT_MODE_INFO,
+  parseAccountMode,
+  type AccountMode,
+  type AccountModeInfo,
+} from "./mode";
 
 export const PROFILE_QUERY_KEY = ["profile", "me"] as const;
 

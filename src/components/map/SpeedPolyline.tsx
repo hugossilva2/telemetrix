@@ -95,7 +95,12 @@ export function SpeedLegend() {
       {items.map((it) => (
         <span
           key={it.label}
-          style={{ display: "inline-flex", alignItems: "center", gap: 4, fontVariantNumeric: "tabular-nums" }}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+            fontVariantNumeric: "tabular-nums",
+          }}
         >
           <span
             style={{

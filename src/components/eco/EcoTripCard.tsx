@@ -20,8 +20,7 @@ export interface EcoTripData {
 export function parseEcoEvents(raw: unknown): EcoEvent[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(
-    (e): e is EcoEvent =>
-      !!e && typeof e === "object" && typeof (e as EcoEvent).type === "string",
+    (e): e is EcoEvent => !!e && typeof e === "object" && typeof (e as EcoEvent).type === "string",
   );
 }
 
@@ -48,8 +47,8 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
   if (trip.eco_score == null && total === 0 && !trip.idle_seconds) {
     return (
       <div className="card-surface p-4 text-sm text-muted-foreground">
-        Esta viagem foi registrada antes da pontuação de direção. As próximas já
-        virão com o Eco Score.
+        Esta viagem foi registrada antes da pontuação de direção. As próximas já virão com o Eco
+        Score.
       </div>
     );
   }
@@ -98,33 +97,38 @@ export function EcoTripCard({ trip }: { trip: EcoTripData }) {
 
       {events.length > 0 && (
         <ul className="mt-4 space-y-1.5">
-          {events.slice(-25).reverse().map((e, i) => (
-            <li
-              key={`${e.t}-${i}`}
-              className="flex items-center justify-between gap-2 rounded-lg bg-background/40 px-2 py-1.5 text-xs"
-            >
-              <span className="flex min-w-0 items-center gap-1.5">
-                {e.type === "harsh_brake" ? (
-                  <TrendingDown className={`size-3.5 shrink-0 ${ECO_EVENT_COLOR[e.type]}`} />
-                ) : (
-                  <Gauge className={`size-3.5 shrink-0 ${ECO_EVENT_COLOR[e.type]}`} />
-                )}
-                <span className="truncate">
-                  {ECO_EVENT_LABEL[e.type]}
-                  {e.severity === "severe" && (
-                    <span className="ml-1 text-[10px] font-semibold text-destructive">severo</span>
+          {events
+            .slice(-25)
+            .reverse()
+            .map((e, i) => (
+              <li
+                key={`${e.t}-${i}`}
+                className="flex items-center justify-between gap-2 rounded-lg bg-background/40 px-2 py-1.5 text-xs"
+              >
+                <span className="flex min-w-0 items-center gap-1.5">
+                  {e.type === "harsh_brake" ? (
+                    <TrendingDown className={`size-3.5 shrink-0 ${ECO_EVENT_COLOR[e.type]}`} />
+                  ) : (
+                    <Gauge className={`size-3.5 shrink-0 ${ECO_EVENT_COLOR[e.type]}`} />
                   )}
+                  <span className="truncate">
+                    {ECO_EVENT_LABEL[e.type]}
+                    {e.severity === "severe" && (
+                      <span className="ml-1 text-[10px] font-semibold text-destructive">
+                        severo
+                      </span>
+                    )}
+                  </span>
                 </span>
-              </span>
-              <span className="shrink-0 tabular-nums text-muted-foreground">
-                {new Date(e.t).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}{" "}
-                · {Math.round(e.speedBefore)}→{Math.round(e.speedAfter)} km/h
-              </span>
-            </li>
-          ))}
+                <span className="shrink-0 tabular-nums text-muted-foreground">
+                  {new Date(e.t).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}{" "}
+                  · {Math.round(e.speedBefore)}→{Math.round(e.speedAfter)} km/h
+                </span>
+              </li>
+            ))}
         </ul>
       )}
     </div>

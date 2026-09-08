@@ -2,9 +2,17 @@ import { describe, expect, it } from "vitest";
 import { computeStatus, daysUntilAtPace, defaultIntervalKm, HEAVY_WARN_KM } from "./rules";
 
 const rec = {
-  id: "1", type: "oleo" as const, title: null, service_date: "2026-08-01",
-  mileage_at_service: 50000, interval_km: 5000, interval_months: null,
-  cost: null, workshop: null, notes: null, file_path: null,
+  id: "1",
+  type: "oleo" as const,
+  title: null,
+  service_date: "2026-08-01",
+  mileage_at_service: 50000,
+  interval_km: 5000,
+  interval_months: null,
+  cost: null,
+  workshop: null,
+  notes: null,
+  file_path: null,
 };
 
 describe("manutenção por rodagem alta", () => {

@@ -16,12 +16,7 @@ import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
-import {
-  expectedKmpl,
-  fuelLabel,
-  type FuelKind,
-  type VehicleSpec,
-} from "@/lib/vehicles/specs";
+import { expectedKmpl, fuelLabel, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import {
   MIN_MEASURED_SEGMENTS,
@@ -120,8 +115,7 @@ function Delta({ value, unit, invert }: { value: number | null; unit: string; in
   }
   const good = invert ? value < 0 : value > 0;
   const Icon = value > 0 ? ArrowUpRight : value < 0 ? ArrowDownRight : Minus;
-  const cls =
-    value === 0 ? "text-muted-foreground" : good ? "text-success" : "text-destructive";
+  const cls = value === 0 ? "text-muted-foreground" : good ? "text-success" : "text-destructive";
   return (
     <span className={`inline-flex items-center gap-0.5 text-[11px] font-medium ${cls}`}>
       <Icon className="size-3" />
@@ -261,8 +255,8 @@ export function TrendsDashboard() {
         <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
       ) : active.length === 0 ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
-          Ainda não há viagens registradas nesse período. Os gráficos aparecem
-          automaticamente na primeira viagem com o motor ligado.
+          Ainda não há viagens registradas nesse período. Os gráficos aparecem automaticamente na
+          primeira viagem com o motor ligado.
         </div>
       ) : (
         <>
@@ -345,8 +339,8 @@ export function TrendsDashboard() {
                     Estimado (cálculo do app)
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="h-0.5 w-4 rounded border-t border-dashed border-warning" /> Meta
-                    Inmetro
+                    <span className="h-0.5 w-4 rounded border-t border-dashed border-warning" />{" "}
+                    Meta Inmetro
                   </span>
                 </div>
                 <div className="h-44">
@@ -356,7 +350,11 @@ export function TrendsDashboard() {
                       <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
                       <YAxis {...axis} />
                       {avgTarget ? (
-                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                        <ReferenceLine
+                          y={avgTarget}
+                          stroke="var(--warning)"
+                          strokeDasharray="4 4"
+                        />
                       ) : null}
                       <Tooltip content={<ChartTooltip suffix=" km/L" />} />
                       <Line
@@ -395,7 +393,11 @@ export function TrendsDashboard() {
                       <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
                       <YAxis {...axis} />
                       {avgTarget ? (
-                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                        <ReferenceLine
+                          y={avgTarget}
+                          stroke="var(--warning)"
+                          strokeDasharray="4 4"
+                        />
                       ) : null}
                       <Tooltip content={<ChartTooltip suffix=" km/L" />} />
                       <Line
@@ -418,7 +420,6 @@ export function TrendsDashboard() {
               </>
             )}
           </section>
-
 
           <section className="card-surface p-3">
             <header className="mb-2 flex items-center justify-between">

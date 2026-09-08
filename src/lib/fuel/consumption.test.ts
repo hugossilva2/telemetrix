@@ -24,7 +24,12 @@ describe("resolveKmpl", () => {
   });
 
   it("cai para a ficha técnica quando nada foi preenchido", () => {
-    const r = resolveKmpl({ calibration: null, vehicleKmpl: null, fuel: "gasolina", avgSpeedKmh: 90 });
+    const r = resolveKmpl({
+      calibration: null,
+      vehicleKmpl: null,
+      fuel: "gasolina",
+      avgSpeedKmh: 90,
+    });
     expect(r.source).toBe("ficha");
     expect(r.kmpl).toBeCloseTo(expectedKmpl({ fuel: "gasolina", avgSpeedKmh: 90 }), 5);
     expect(r.kmpl).toBeGreaterThan(0);

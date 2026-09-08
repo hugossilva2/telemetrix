@@ -18,7 +18,6 @@ import type { FlespiMessage } from "@/lib/flespi/ingest.server";
 const MAX_MESSAGES = 500;
 const LOOKBACK_S = 15 * 60;
 
-
 async function fetchMessages(deviceId: string, fromS: number) {
   const { flespiAuthHeaders } = await import("@/lib/flespi/config.server");
   const params = new URLSearchParams({

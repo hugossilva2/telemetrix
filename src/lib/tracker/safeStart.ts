@@ -150,7 +150,6 @@ export function useSafeStart(
     }
   };
 
-
   // Tick de 1s para o contador andar sem depender de novas mensagens MQTT.
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 1000);
@@ -258,9 +257,10 @@ export function useSafeStart(
   const remainingSeconds = Math.ceil((SAFE_START_STABLE_MS - elapsedStable) / 1000);
 
   return {
-    phase: stableSince.current == null && rpm != null && rpm >= SAFE_START_RPM_LIMIT
-      ? "revving"
-      : "warming",
+    phase:
+      stableSince.current == null && rpm != null && rpm >= SAFE_START_RPM_LIMIT
+        ? "revving"
+        : "warming",
     progress,
     remainingSeconds,
     offMinutes: offMinutes.current,

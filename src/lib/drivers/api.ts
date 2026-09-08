@@ -23,9 +23,7 @@ const TRIP_COLUMNS =
 /** URL assinada da foto do motorista (bucket privado). */
 export async function driverPhotoUrl(path: string | null): Promise<string | null> {
   if (!path) return null;
-  const { data, error } = await supabase.storage
-    .from(DOCS_BUCKET)
-    .createSignedUrl(path, 60 * 60);
+  const { data, error } = await supabase.storage.from(DOCS_BUCKET).createSignedUrl(path, 60 * 60);
   if (error) return null;
   return data?.signedUrl ?? null;
 }

@@ -1,18 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AlertTriangle, Car, ChevronLeft, ChevronRight, Fuel, GraduationCap, Trophy } from "lucide-react";
+import {
+  AlertTriangle,
+  Car,
+  ChevronLeft,
+  ChevronRight,
+  Fuel,
+  GraduationCap,
+  Trophy,
+} from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { useLessons, useMySchool, type LessonRecord } from "@/lib/school/api";
 import { memberName, useFleet, useFleetTrips, useTeam } from "@/lib/school/teamApi";
-import { findLessonConflicts, fleetStats, instructorStats, type TeamLesson } from "@/lib/school/team";
+import {
+  findLessonConflicts,
+  fleetStats,
+  instructorStats,
+  type TeamLesson,
+} from "@/lib/school/team";
 import { lessonFinancials } from "@/lib/school/lessons";
 
 export const Route = createFileRoute("/_authenticated/escola")({
   head: () => ({
     meta: [
       { title: "Visão da escola · Telemetrix" },
-      { name: "description", content: "Aulas por instrutor, km e combustível por carro, custo por aula e ranking de instrutores." },
+      {
+        name: "description",
+        content:
+          "Aulas por instrutor, km e combustível por carro, custo por aula e ranking de instrutores.",
+      },
       { property: "og:title", content: "Visão da escola · Telemetrix" },
       { property: "og:description", content: "Painel do dono da autoescola." },
     ],
@@ -35,7 +52,11 @@ function EscolaPage() {
     const d = new Date();
     const f = new Date(d.getFullYear(), d.getMonth() + offset, 1);
     const t = new Date(d.getFullYear(), d.getMonth() + offset + 1, 1);
-    return { from: f, to: t, label: f.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) };
+    return {
+      from: f,
+      to: t,
+      label: f.toLocaleDateString("pt-BR", { month: "long", year: "numeric" }),
+    };
   }, [offset]);
 
   const fleetIds = (fleet.data?.fleet ?? []).map((v) => v.id);
@@ -52,9 +73,15 @@ function EscolaPage() {
     [lessons.data, from, to],
   );
   const stats = useMemo(() => instructorStats(monthLessons), [monthLessons]);
-  const fleetRows = useMemo(() => fleetStats(fleetIds, trips.data ?? [], monthLessons), [fleetIds, trips.data, monthLessons]);
+  const fleetRows = useMemo(
+    () => fleetStats(fleetIds, trips.data ?? [], monthLessons),
+    [fleetIds, trips.data, monthLessons],
+  );
   const fin = useMemo(() => lessonFinancials(monthLessons), [monthLessons]);
-  const conflicts = useMemo(() => findLessonConflicts((lessons.data ?? []).map(toTeam)), [lessons.data]);
+  const conflicts = useMemo(
+    () => findLessonConflicts((lessons.data ?? []).map(toTeam)),
+    [lessons.data],
+  );
   const totalFuel = fleetRows.reduce((s, r) => s + r.fuelCost, 0);
   const totalKm = fleetRows.reduce((s, r) => s + r.km, 0);
   const done = monthLessons.filter((l) => l.status === "concluida").length;
@@ -63,7 +90,12 @@ function EscolaPage() {
   return (
     <AppShell title="Visão da escola" subtitle={school?.name}>
       <div className="flex items-center justify-between rounded-xl bg-muted/60 p-1">
-        <button type="button" aria-label="Mês anterior" className="grid size-9 place-items-center rounded-lg" onClick={() => setOffset((o) => o - 1)}>
+        <button
+          type="button"
+          aria-label="Mês anterior"
+          className="grid size-9 place-items-center rounded-lg"
+          onClick={() => setOffset((o) => o - 1)}
+        >
           <ChevronLeft className="size-4" />
         </button>
         <span className="text-sm font-semibold capitalize">{label}</span>
@@ -86,7 +118,9 @@ function EscolaPage() {
         <div className="card-surface p-3">
           <p className="text-[10px] text-muted-foreground">Faturado</p>
           <p className="font-mono text-2xl font-bold">{formatBRL(fin.billed)}</p>
-          {fin.pending > 0 && <p className="text-[10px] text-warning">{formatBRL(fin.pending)} pendente</p>}
+          {fin.pending > 0 && (
+            <p className="text-[10px] text-warning">{formatBRL(fin.pending)} pendente</p>
+          )}
         </div>
         <div className="card-surface p-3">
           <p className="text-[10px] text-muted-foreground">Km da frota</p>
@@ -112,9 +146,15 @@ function EscolaPage() {
               return (
                 <li key={`${c.a}-${c.b}`} className="text-xs">
                   <Link to="/aulas/$id" params={{ id: c.a }} className="font-semibold text-primary">
-                    {new Date(a.scheduled_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                    {new Date(a.scheduled_at).toLocaleString("pt-BR", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </Link>{" "}
-                  {a.student?.name} × {b.student?.name} — mesmo {c.kind === "instrutor" ? "instrutor" : "carro"}
+                  {a.student?.name} × {b.student?.name} — mesmo{" "}
+                  {c.kind === "instrutor" ? "instrutor" : "carro"}
                 </li>
               );
             })}
@@ -131,12 +171,19 @@ function EscolaPage() {
         ) : (
           <ul className="mt-2 space-y-2">
             {stats.map((s, i) => (
-              <li key={s.instructor_id} className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-3">
-                <span className={`grid size-8 shrink-0 place-items-center rounded-full font-mono text-sm font-bold ${i === 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+              <li
+                key={s.instructor_id}
+                className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-3"
+              >
+                <span
+                  className={`grid size-8 shrink-0 place-items-center rounded-full font-mono text-sm font-bold ${i === 0 ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}
+                >
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{memberName(team.data, s.instructor_id)}</p>
+                  <p className="truncate text-sm font-semibold">
+                    {memberName(team.data, s.instructor_id)}
+                  </p>
                   <p className="text-[11px] text-muted-foreground">
                     {s.done}/{s.lessons} aulas · {formatDecimal(s.hours)} h · {formatBRL(s.revenue)}
                     {s.avgEco != null && ` · eco ${s.avgEco}`}
@@ -165,12 +212,20 @@ function EscolaPage() {
             {fleetRows.map((r) => {
               const v = fleet.data?.fleet.find((x) => x.id === r.vehicle_id);
               return (
-                <li key={r.vehicle_id} className="rounded-xl border border-border/70 bg-background/35 p-3">
+                <li
+                  key={r.vehicle_id}
+                  className="rounded-xl border border-border/70 bg-background/35 p-3"
+                >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-semibold">
-                      {v?.name} <span className="font-mono text-[11px] text-muted-foreground">{v?.plate}</span>
+                      {v?.name}{" "}
+                      <span className="font-mono text-[11px] text-muted-foreground">
+                        {v?.plate}
+                      </span>
                     </p>
-                    <span className="text-xs text-muted-foreground">{r.lessons} aula{r.lessons === 1 ? "" : "s"}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {r.lessons} aula{r.lessons === 1 ? "" : "s"}
+                    </span>
                   </div>
                   <div className="mt-2 grid grid-cols-3 gap-2 text-center">
                     <div>
@@ -185,7 +240,9 @@ function EscolaPage() {
                     </div>
                     <div>
                       <p className="text-[10px] text-muted-foreground">R$/aula</p>
-                      <p className="font-mono text-sm font-semibold">{r.costPerLesson != null ? formatBRL(r.costPerLesson) : "—"}</p>
+                      <p className="font-mono text-sm font-semibold">
+                        {r.costPerLesson != null ? formatBRL(r.costPerLesson) : "—"}
+                      </p>
                     </div>
                   </div>
                 </li>

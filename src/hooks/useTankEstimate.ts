@@ -92,7 +92,6 @@ export function useTankEstimate(): UseTankEstimate {
     return candidates.length > 0 ? Math.max(...candidates) : null;
   }, [vehicle?.current_mileage, telemetry.mileageKm, fills]);
 
-
   const historical = useMemo(() => historicalKmpl(fills, fuel), [fills, fuel]);
   const fallbackKmpl = useMemo(() => {
     const avg = Number(vehicle?.avg_consumption_kmpl);

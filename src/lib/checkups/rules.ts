@@ -1,11 +1,4 @@
-import {
-  Droplets,
-  Lightbulb,
-  Sparkles,
-  Thermometer,
-  CircleDot,
-  SprayCan,
-} from "lucide-react";
+import { Droplets, Lightbulb, Sparkles, Thermometer, CircleDot, SprayCan } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export type CheckupItem =
@@ -200,7 +193,8 @@ export function vehicleHealth(input: HealthInput): HealthResult {
   score -= input.docsExpired * 10;
   score = Math.max(0, Math.min(100, Math.round(score)));
 
-  if (score >= 85) return { score, label: "Excelente", color: "text-success", stroke: "var(--success)" };
+  if (score >= 85)
+    return { score, label: "Excelente", color: "text-success", stroke: "var(--success)" };
   if (score >= 65) return { score, label: "Boa", color: "text-primary", stroke: "var(--primary)" };
   if (score >= 45)
     return { score, label: "Atenção", color: "text-warning", stroke: "var(--warning)" };

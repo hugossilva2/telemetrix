@@ -44,7 +44,11 @@ export function useTeam(orgId: string | null | undefined) {
   });
 }
 
-export function memberName(members: TeamMember[] | undefined, userId: string, fallback = "Instrutor"): string {
+export function memberName(
+  members: TeamMember[] | undefined,
+  userId: string,
+  fallback = "Instrutor",
+): string {
   const m = members?.find((x) => x.user_id === userId);
   return m?.display_name || m?.email || fallback;
 }
@@ -158,7 +162,10 @@ export function useToggleAssignment(orgId: string | null | undefined) {
       if (input.on) {
         const { error } = await supabase
           .from("instructor_vehicles")
-          .upsert({ org_id: orgId, user_id: input.userId, vehicle_id: input.vehicleId }, { onConflict: "org_id,user_id,vehicle_id" });
+          .upsert(
+            { org_id: orgId, user_id: input.userId, vehicle_id: input.vehicleId },
+            { onConflict: "org_id,user_id,vehicle_id" },
+          );
         if (error) throw error;
       } else {
         const { error } = await supabase
@@ -188,7 +195,12 @@ export interface FleetTripRow {
 export function useFleetTrips(vehicleIds: string[], from: Date, to: Date) {
   const key = vehicleIds.slice().sort().join(",");
   return useQuery({
-    queryKey: [...FLEET_TRIPS_KEY, key, from.toISOString().slice(0, 10), to.toISOString().slice(0, 10)],
+    queryKey: [
+      ...FLEET_TRIPS_KEY,
+      key,
+      from.toISOString().slice(0, 10),
+      to.toISOString().slice(0, 10),
+    ],
     enabled: vehicleIds.length > 0,
     queryFn: async (): Promise<FleetTripRow[]> => {
       const { data, error } = await supabase

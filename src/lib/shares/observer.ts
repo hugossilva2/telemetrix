@@ -15,10 +15,7 @@ export function useIsObserver() {
       if (!uid) return false;
 
       const [{ count: ownedCount }, { count: sharedCount }] = await Promise.all([
-        supabase
-          .from("vehicles")
-          .select("id", { count: "exact", head: true })
-          .eq("user_id", uid),
+        supabase.from("vehicles").select("id", { count: "exact", head: true }).eq("user_id", uid),
         supabase
           .from("vehicle_shares")
           .select("id", { count: "exact", head: true })

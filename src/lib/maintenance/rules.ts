@@ -4,13 +4,49 @@
  */
 export const MAINTENANCE_TYPES = [
   { value: "oleo", label: "Troca de óleo", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
-  { value: "filtro_oleo", label: "Filtro de óleo", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
-  { value: "filtro_ar", label: "Filtro de ar", defaultKm: 15000, heavyKm: 10000, defaultMonths: 12 },
-  { value: "filtro_combustivel", label: "Filtro de combustível", defaultKm: 20000, heavyKm: 15000, defaultMonths: 24 },
-  { value: "correia", label: "Correia dentada", defaultKm: 60000, heavyKm: 50000, defaultMonths: 48 },
+  {
+    value: "filtro_oleo",
+    label: "Filtro de óleo",
+    defaultKm: 10000,
+    heavyKm: 5000,
+    defaultMonths: 12,
+  },
+  {
+    value: "filtro_ar",
+    label: "Filtro de ar",
+    defaultKm: 15000,
+    heavyKm: 10000,
+    defaultMonths: 12,
+  },
+  {
+    value: "filtro_combustivel",
+    label: "Filtro de combustível",
+    defaultKm: 20000,
+    heavyKm: 15000,
+    defaultMonths: 24,
+  },
+  {
+    value: "correia",
+    label: "Correia dentada",
+    defaultKm: 60000,
+    heavyKm: 50000,
+    defaultMonths: 48,
+  },
   { value: "pneus", label: "Rodízio de pneus", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
-  { value: "freios", label: "Freios / pastilhas", defaultKm: 30000, heavyKm: 20000, defaultMonths: 24 },
-  { value: "velas", label: "Velas de ignição", defaultKm: 40000, heavyKm: 30000, defaultMonths: 36 },
+  {
+    value: "freios",
+    label: "Freios / pastilhas",
+    defaultKm: 30000,
+    heavyKm: 20000,
+    defaultMonths: 24,
+  },
+  {
+    value: "velas",
+    label: "Velas de ignição",
+    defaultKm: 40000,
+    heavyKm: 30000,
+    defaultMonths: 36,
+  },
   { value: "revisao", label: "Revisão geral", defaultKm: 10000, heavyKm: 5000, defaultMonths: 12 },
   { value: "outro", label: "Outro", defaultKm: null, heavyKm: null, defaultMonths: null },
 ] as const;
@@ -163,7 +199,10 @@ export function latestByType(records: MaintenanceRecord[]): MaintenanceRecord[] 
  * Dias estimados até vencer pelos km, dado o ritmo semanal de rodagem.
  * Retorna null sem ritmo ou sem km restantes.
  */
-export function daysUntilAtPace(remainingKm: number | null, kmPerWeek: number | null): number | null {
+export function daysUntilAtPace(
+  remainingKm: number | null,
+  kmPerWeek: number | null,
+): number | null {
   if (remainingKm == null || kmPerWeek == null || !(kmPerWeek > 0)) return null;
   if (remainingKm <= 0) return 0;
   return Math.round((remainingKm / kmPerWeek) * 7);

@@ -140,7 +140,8 @@ export const PLANS: PlanInfo[] = [
       motorista: "Vários carros da família com motoristas, ranking e documentos por veículo.",
       app: "Mais de um carro na praça, motoristas parceiros e ranking de direção.",
       instrutor: "Mais de um carro de aula e alunos sem limite.",
-      autoescola: "Frota completa, instrutores e alunos ilimitados, visão do dono por carro e instrutor.",
+      autoescola:
+        "Frota completa, instrutores e alunos ilimitados, visão do dono por carro e instrutor.",
     },
   },
 ];
@@ -241,6 +242,7 @@ export function limitValueLabel(key: keyof PlanLimits, limits: PlanLimits): stri
   if (key === "historyDays") return Number.isFinite(v) ? `${v} dias` : "Completo";
   if (key === "ridesPerMonth") return Number.isFinite(v) ? `${v}/mês` : "Ilimitadas";
   if (key === "maxStudents") return limitLabel(v);
-  if (key === "maxInstructors") return Number.isFinite(v) ? (v === 0 ? "Só o dono" : String(v)) : "Ilimitados";
+  if (key === "maxInstructors")
+    return Number.isFinite(v) ? (v === 0 ? "Só o dono" : String(v)) : "Ilimitados";
   return limitLabel(v);
 }

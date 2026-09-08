@@ -200,7 +200,11 @@ export function useLesson(id: string | undefined) {
     queryKey: [...LESSONS_KEY, "one", id],
     enabled: !!id,
     queryFn: async (): Promise<LessonRecord | null> => {
-      const { data, error } = await supabase.from("lessons").select(LESSON_SELECT).eq("id", id!).maybeSingle();
+      const { data, error } = await supabase
+        .from("lessons")
+        .select(LESSON_SELECT)
+        .eq("id", id!)
+        .maybeSingle();
       if (error) throw error;
       return data ? normalizeLesson(data as unknown as Record<string, unknown>) : null;
     },
@@ -259,7 +263,8 @@ export function useCreateStudentInvite(orgId: string | null | undefined) {
 }
 
 export function inviteUrl(token: string): string {
-  const origin = typeof window !== "undefined" ? window.location.origin : "https://telemetrix.lovable.app";
+  const origin =
+    typeof window !== "undefined" ? window.location.origin : "https://telemetrix.lovable.app";
   return `${origin}/convite/${token}`;
 }
 
@@ -277,7 +282,9 @@ export function useMyEnrollments() {
         .select(`${STUDENT_SELECT},org:organizations(id,name,kind)`)
         .eq("user_id", uid);
       if (error) throw error;
-      return (data ?? []) as (StudentRecord & { org: { id: string; name: string; kind: OrgKind } | null })[];
+      return (data ?? []) as (StudentRecord & {
+        org: { id: string; name: string; kind: OrgKind } | null;
+      })[];
     },
   });
   return { ...q, enrollments: q.data ?? [] };

@@ -30,7 +30,8 @@ export interface ShiftRecord {
   notes: string | null;
 }
 
-const RIDE_SELECT = "id,vehicle_id,shift_id,trip_id,platform,amount,tip,distance_km,duration_min,occurred_at,notes";
+const RIDE_SELECT =
+  "id,vehicle_id,shift_id,trip_id,platform,amount,tip,distance_km,duration_min,occurred_at,notes";
 const SHIFT_SELECT = "id,vehicle_id,started_at,ended_at,start_mileage,end_mileage,notes";
 
 /** Corridas desde `since` (ISO); padrão: últimos 60 dias. */

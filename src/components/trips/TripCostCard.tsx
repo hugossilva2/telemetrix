@@ -147,15 +147,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   );
 }
 
-function Row({
-  icon,
-  label,
-  value,
-}: {
-  icon: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <dt className="flex min-w-0 items-center gap-1.5 text-muted-foreground">

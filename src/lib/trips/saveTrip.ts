@@ -68,21 +68,24 @@ export async function saveClosedTrip(
     getDefaultDriverId(userId),
   ]);
 
-  // Evita duplicar o que o webhook possa ter gravado (janela de ±3 min).
+  // Evita duplicar o que o rastreador possa ter gravado: descarta se já existe
+  // viagem do mesmo veículo cruzando este intervalo (mesma regra do servidor).
   // Restrito ao usuário e ao veículo: o RLS também mostra viagens compartilhadas
   // e de frota, que não devem descartar uma viagem legítima.
   {
+    const endIso = new Date().toISOString();
     let q = supabase
       .from("trips")
       .select("id")
       .eq("user_id", userId)
-      .gte("start_time", new Date(startMs - 3 * 60_000).toISOString())
-      .lte("start_time", new Date(startMs + 3 * 60_000).toISOString())
+      .lt("start_time", endIso)
+      .gt("end_time", new Date(startMs).toISOString())
       .limit(1);
     q = vehicle?.id ? q.eq("vehicle_id", vehicle.id) : q.is("vehicle_id", null);
     const { data: existing } = await q;
     if (existing && existing.length > 0) return "duplicate";
   }
+
 
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;

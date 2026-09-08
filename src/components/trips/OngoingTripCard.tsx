@@ -16,6 +16,7 @@ import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
+import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
@@ -124,7 +125,7 @@ export function OngoingTripCard() {
 
   const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
   const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
-  const { kmpl } = resolveKmpl({
+  const { kmpl, source: fuelSource } = resolveKmpl({
     calibration: vehicleInfo?.calibration ?? null,
     vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
     spec,
@@ -238,6 +239,13 @@ export function OngoingTripCard() {
         <KpiTile Icon={RouteIcon} label="Distância" value={`${distanceKm.toFixed(2)} km`} />
         <KpiTile Icon={Fuel} label="Consumo" value={`${liters.toFixed(2)} L`} />
         <KpiTile Icon={Wallet} label="Custo" value={`R$ ${cost.toFixed(2)}`} />
+      </div>
+
+      <div className="flex items-center justify-between gap-2 border-t border-success/20 px-3 py-1.5">
+        <FuelSourceBadge source={fuelSource} as="text" />
+        <span className="text-[10px] tabular-nums text-muted-foreground">
+          {kmpl.toFixed(1)} km/L
+        </span>
       </div>
     </section>
   );

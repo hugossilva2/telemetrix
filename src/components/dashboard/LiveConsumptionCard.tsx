@@ -5,6 +5,7 @@ import { haversineKm } from "@/lib/trips/geo";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
+import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -66,7 +67,7 @@ export function LiveConsumptionCard() {
 
   const DEFAULT_PRICE = 5.89;
   const avgSpeedKmh = null;
-  const { kmpl } = resolveKmpl({
+  const { kmpl, source } = resolveKmpl({
     calibration: data?.calibration ?? null,
     vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
     spec,
@@ -89,8 +90,11 @@ export function LiveConsumptionCard() {
           <Fuel className="size-3.5" />
           Consumo em tempo real
         </div>
-        <div className="text-[10px] text-muted-foreground">
-          {kmpl.toFixed(1)} km/L · {BRL.format(price)}/L
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
+          <FuelSourceBadge source={source} />
+          <span>
+            {kmpl.toFixed(1)} km/L · {BRL.format(price)}/L
+          </span>
         </div>
       </div>
 

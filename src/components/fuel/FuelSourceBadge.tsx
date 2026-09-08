@@ -2,7 +2,15 @@ import { BadgeCheck, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /** Espelha trips.fuel_source. */
-export type FuelSourceValue = "calibrado" | "ficha" | "device" | "padrao" | null | undefined;
+export type FuelSourceValue =
+  | "calibrado"
+  | "ficha"
+  | "device"
+  | "padrao"
+  /** medido em tempo real na viagem atual */
+  | "viagem"
+  | null
+  | undefined;
 
 export function fuelSourceText(source: FuelSourceValue): string | null {
   switch (source) {
@@ -10,6 +18,8 @@ export function fuelSourceText(source: FuelSourceValue): string | null {
       return "medido nos seus abastecimentos";
     case "device":
       return "medido pelo sensor do carro";
+    case "viagem":
+      return "medido nesta viagem";
     case "ficha":
     case "padrao":
       return "estimado pela ficha técnica";
@@ -19,7 +29,7 @@ export function fuelSourceText(source: FuelSourceValue): string | null {
 }
 
 function isMeasured(source: FuelSourceValue) {
-  return source === "calibrado" || source === "device";
+  return source === "calibrado" || source === "device" || source === "viagem";
 }
 
 /** Selo discreto explicando de onde veio o km/L exibido. */

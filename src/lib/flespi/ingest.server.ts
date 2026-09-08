@@ -3,6 +3,12 @@ import { accumIncrementKm, haversineKm, resolveTripDistanceKm } from "@/lib/fles
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
 
+/** Estado persistido em `device_trip_state.geofence_state`. */
+export type GeofenceState = {
+  last_motion_off_at?: string;
+  places?: Record<string, boolean>;
+};
+
 /**
  * Núcleo de ingestão de mensagens do rastreador Flespi.
  * Usado pelo webhook (`/api/public/flespi-webhook`) e pelo coletor periódico
@@ -321,7 +327,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
 
         // ---------- tracker_events: movimento com motor desligado ----------
         if (ign === false && typeof speed === "number" && speed >= MOTION_SPEED_THRESHOLD) {
-          const lastMotion = (state?.geofence_state as any)?.last_motion_off_at as
+          const lastMotion = (state?.geofence_state as GeofenceState | null)?.last_motion_off_at as
             | string
             | undefined;
           const lastMotionMs = lastMotion ? new Date(lastMotion).getTime() : 0;
@@ -340,7 +346,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             });
             // persistir cooldown no geofence_state
             const nextGeo = {
-              ...((state?.geofence_state as any) ?? {}),
+              ...((state?.geofence_state as GeofenceState | null) ?? {}),
               last_motion_off_at: nowIso,
             };
             await supabaseAdmin.from("device_trip_state").upsert({
@@ -358,7 +364,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           if (vehicle.alert_geofence !== false) {
             const places = await getPlacesForUser(vehicle.user_id as string);
             if (places && places.length > 0) {
-              const geoState = (state?.geofence_state as any) ?? {};
+              const geoState: GeofenceState = (state?.geofence_state as GeofenceState | null) ?? {};
               const placesState: Record<string, boolean> = geoState.places ?? {};
               const nextPlaces: Record<string, boolean> = { ...placesState };
               let changed = false;

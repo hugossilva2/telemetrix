@@ -22,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatKm } from "@/lib/format";
 import { formatDate } from "@/lib/docs/expiry";
 import { MAINTENANCE_LABEL } from "@/lib/maintenance/rules";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 import {
   EXPENSE_COLOR,
   EXPENSE_LABEL,
@@ -51,10 +52,13 @@ export const Route = createFileRoute("/_authenticated/relatorio")({
 
 interface FuelRow {
   id: string;
+  vehicle_id: string;
   date: string;
   liters_filled: number;
   total_cost: number;
   price_per_liter: number;
+  is_full_tank: boolean;
+  fuel_type: string;
 }
 interface MaintRow {
   id: string;
@@ -79,16 +83,20 @@ interface TripRow {
 }
 
 function useMonthData(key: string) {
+  const { vehicleId } = useActiveVehicle();
   const { start, end } = monthRange(key);
   return useQuery({
-    queryKey: ["report", key],
+    queryKey: ["report", key, vehicleId],
+    enabled: Boolean(vehicleId),
     queryFn: async () => {
+      if (!vehicleId) throw new Error("Selecione um veículo para consultar o relatório.");
       const startTs = `${start}T00:00:00.000Z`;
       const endTs = `${end}T23:59:59.999Z`;
       const [fuel, maint, exp, trips] = await Promise.all([
         supabase
           .from("fuel_logs")
-          .select("id,date,liters_filled,total_cost,price_per_liter")
+          .select("id,vehicle_id,date,liters_filled,total_cost,price_per_liter,is_full_tank,fuel_type")
+          .eq("vehicle_id", vehicleId)
           .gte("date", startTs)
           .lte("date", endTs),
         supabase

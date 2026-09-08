@@ -34,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/abastecimento")({
 
 interface FuelLog {
   id: string;
+  vehicle_id: string;
   date: string;
   price_per_liter: number;
   liters_filled: number;
@@ -61,7 +62,7 @@ function toLocalDatetimeInput(d: Date) {
 
 function AbastecimentoPage() {
   const { telemetry } = useTelemetry();
-  const { fuel: vehicleFuel } = useActiveVehicle();
+  const { fuel: vehicleFuel, vehicleId } = useActiveVehicle();
   const qc = useQueryClient();
 
   const [price, setPrice] = useState("");
@@ -104,13 +105,16 @@ function AbastecimentoPage() {
   }, [price, total]);
 
   const { data: logs = [] } = useQuery<FuelLog[]>({
-    queryKey: ["fuel_logs"],
+    queryKey: ["fuel_logs", vehicleId],
+    enabled: Boolean(vehicleId),
     queryFn: async () => {
+      if (!vehicleId) return [];
       const { data, error } = await supabase
         .from("fuel_logs")
         .select(
-          "id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill,receipt_url,is_full_tank,fuel_type",
+          "id,vehicle_id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill,receipt_url,is_full_tank,fuel_type",
         )
+        .eq("vehicle_id", vehicleId)
         .order("date", { ascending: true });
       if (error) throw error;
       return data as FuelLog[];
@@ -147,6 +151,9 @@ function AbastecimentoPage() {
 
   const save = useMutation({
     mutationFn: async () => {
+      if (!vehicleId) {
+        throw new Error("Selecione ou cadastre um veículo antes de salvar o abastecimento.");
+      }
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) throw new Error("Sessão expirada");
       const priceNum = parseFloat(price);
@@ -180,6 +187,7 @@ function AbastecimentoPage() {
         const { error } = await supabase
           .from("fuel_logs")
           .update({
+            vehicle_id: vehicleId,
             date: isoDate,
             price_per_liter: priceNum,
             liters_filled: litersNum,
@@ -204,6 +212,7 @@ function AbastecimentoPage() {
         .from("fuel_logs")
         .insert({
           user_id: userData.user.id,
+          vehicle_id: vehicleId,
           date: isoDate,
           price_per_liter: priceNum,
           liters_filled: litersNum,
@@ -475,7 +484,17 @@ function AbastecimentoPage() {
           <span className="font-mono font-medium">{liters > 0 ? liters.toFixed(2) : "—"} L</span>
         </div>
 
-        <Button type="submit" size="lg" className="w-full" disabled={save.isPending}>
+        {!vehicleId ? (
+          <p className="text-sm text-destructive">
+            Selecione ou cadastre um veículo antes de salvar o abastecimento.
+          </p>
+        ) : null}
+        <Button
+          type="submit"
+          size="lg"
+          className="w-full"
+          disabled={save.isPending || !vehicleId}
+        >
           {save.isPending
             ? "Salvando…"
             : editingId

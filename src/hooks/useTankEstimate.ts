@@ -58,17 +58,21 @@ export function useTankEstimate(): UseTankEstimate {
     queryFn: async (): Promise<FuelFill[]> => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) return [];
+      if (!uid || !vehicleId) return [];
       const { data, error } = await supabase
         .from("fuel_logs")
-        .select("date,liters_filled,mileage_at_fill")
+        .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type,vehicle_id")
         .eq("user_id", uid)
+        .eq("vehicle_id", vehicleId)
         .order("date", { ascending: false })
         .limit(40);
       if (error) throw error;
       return (data ?? []).map((r) => ({
         date: r.date as string,
         liters: Number(r.liters_filled) || 0,
+        isFullTank: r.is_full_tank,
+        fuelType: r.fuel_type,
+        vehicleId: r.vehicle_id,
         odometerKm:
           r.mileage_at_fill != null && Number(r.mileage_at_fill) > 0
             ? Number(r.mileage_at_fill)
@@ -89,7 +93,7 @@ export function useTankEstimate(): UseTankEstimate {
   }, [vehicle?.current_mileage, telemetry.mileageKm, fills]);
 
 
-  const historical = useMemo(() => historicalKmpl(fills), [fills]);
+  const historical = useMemo(() => historicalKmpl(fills, fuel), [fills, fuel]);
   const fallbackKmpl = useMemo(() => {
     const avg = Number(vehicle?.avg_consumption_kmpl);
     if (Number.isFinite(avg) && avg > 0) return avg;

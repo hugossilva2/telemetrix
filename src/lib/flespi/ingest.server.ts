@@ -528,7 +528,8 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           );
 
           if (distanceKm < MIN_DISTANCE_KM && durationS < MIN_DURATION_S) {
-            await clearTripFields(deviceId);
+            await clearTripFields(deviceId, nowIso);
+
             continue;
           }
 

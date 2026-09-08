@@ -23,6 +23,7 @@ import { parseRouteData } from "@/lib/trips/routeData";
 import { formatDateTime, formatDurationBetween, formatTime } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 import { TripCoachCard } from "@/components/coach/TripCoachCard";
+import { useTripsList } from "@/lib/trips/tripsList";
 
 const TripMap = lazy(() => import("@/components/trips/TripMap"));
 
@@ -78,11 +79,6 @@ type TripDetail = {
   route_data: unknown;
 };
 
-type TripRow = Pick<
-  TripDetail,
-  "id" | "start_time" | "distance_km" | "fuel_liters" | "estimated_cost"
->;
-
 function TripDetailPage() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
@@ -102,18 +98,7 @@ function TripDetailPage() {
     },
   });
 
-  const { data: allTrips } = useQuery({
-    queryKey: ["trips-list"],
-    queryFn: async (): Promise<TripRow[]> => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select("id,start_time,distance_km,fuel_liters,estimated_cost")
-        .order("start_time", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as TripRow[];
-    },
-  });
+  const { data: allTrips } = useTripsList();
 
   const savedTrail = useMemo(() => {
     const parsed = parseRouteData(trip?.route_data);

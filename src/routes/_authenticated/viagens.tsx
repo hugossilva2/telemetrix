@@ -22,6 +22,7 @@ import { estimateTripCost } from "@/lib/trips/cost";
 import { formatDateTime, formatDurationBetween } from "@/lib/trips/format";
 import { DeleteTripButton } from "@/components/trips/DeleteTripButton";
 import { useSubscription } from "@/lib/billing/subscription";
+import { TRIPS_LIST_KEY, useTripsList, type TripListRow } from "@/lib/trips/tripsList";
 
 export const Route = createFileRoute("/_authenticated/viagens")({
   head: () => ({
@@ -41,16 +42,7 @@ export const Route = createFileRoute("/_authenticated/viagens")({
   component: ViagensPage,
 });
 
-type TripRow = {
-  id: string;
-  start_time: string;
-  end_time: string | null;
-  distance_km: number | null;
-  avg_speed_kmh: number | null;
-  fuel_liters: number | null;
-  estimated_cost: number | null;
-  eco_score: number | null;
-};
+type TripRow = TripListRow;
 
 function getTripStartMs(t: TripRow) {
   return new Date(t.start_time).getTime();
@@ -98,27 +90,14 @@ function ViagensPage() {
     ? Date.now() - limits.historyDays * 86_400_000
     : null;
 
-  const { data: trips, isLoading } = useQuery({
-    queryKey: ["trips-list"],
-    queryFn: async (): Promise<TripRow[]> => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select(
-          "id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost,eco_score",
-        )
-        .order("start_time", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as TripRow[];
-    },
-  });
+  const { data: trips, isLoading } = useTripsList();
 
   const queryClient = useQueryClient();
   const runBackfill = useServerFn(backfillTripsFromFlespi);
   const backfill = useMutation({
     mutationFn: () => runBackfill({ data: { days: 30 } }),
     onSuccess: (res) => {
-      queryClient.invalidateQueries({ queryKey: ["trips-list"] });
+      queryClient.invalidateQueries({ queryKey: TRIPS_LIST_KEY });
       if (res.imported > 0) {
         toast.success(`${res.imported} viagem(ns) importada(s) do rastreador`);
       } else {

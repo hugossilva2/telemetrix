@@ -11,6 +11,7 @@ import { useLiveAutonomy } from "@/hooks/useLiveAutonomy";
 import { useTankEstimate } from "@/hooks/useTankEstimate";
 import { useOdometerSync } from "@/hooks/useOdometerSync";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 import { getRouteEta, nearbyGasStations } from "@/lib/places.functions";
 import {
   FUEL_STAGE_CLASS,
@@ -123,9 +124,10 @@ export function AutonomyCard() {
             {live.kmpl != null ? live.kmpl.toFixed(1) : "—"}
             <span className="ml-1 text-xs font-normal text-muted-foreground">km/L</span>
           </div>
-          <div className="text-[10px] text-muted-foreground">
-            {live.source === "medido" ? "medido nesta viagem" : "estimado pela condução"}
-          </div>
+          <FuelSourceBadge
+            as="text"
+            source={live.source === "medido" ? "viagem" : "ficha"}
+          />
         </div>
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Tanque</div>

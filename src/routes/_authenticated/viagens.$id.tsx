@@ -15,6 +15,7 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
+import { FuelSourceBadge, type FuelSourceValue } from "@/components/fuel/FuelSourceBadge";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { EcoTripCard, parseEcoEvents } from "@/components/eco/EcoTripCard";
 import { EcoEventsChart } from "@/components/eco/EcoEventsChart";
@@ -61,6 +62,8 @@ type TripDetail = {
   mileage_at_start: number | null;
   mileage_at_end: number | null;
   fuel_liters: number | null;
+  fuel_source: string | null;
+  fuel_kmpl_used: number | null;
   estimated_cost: number | null;
   eco_score: number | null;
   harsh_brake_count: number | null;
@@ -90,7 +93,7 @@ function TripDetailPage() {
       const { data, error } = await supabase
         .from("trips")
         .select(
-          "id,vehicle_id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
+          "id,vehicle_id,start_time,end_time,start_lat,start_lng,end_lat,end_lng,distance_km,hardware_source,avg_speed_kmh,max_speed_kmh,mileage_at_start,mileage_at_end,fuel_liters,fuel_source,fuel_kmpl_used,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,eco_events,route_data",
         )
         .eq("id", id)
         .maybeSingle();
@@ -399,6 +402,7 @@ function TripDetailPage() {
                     ? `${formatDecimal(trip.fuel_liters)} L`
                     : "—"
               }
+              hint={<FuelSourceBadge source={trip.fuel_source as FuelSourceValue} as="text" />}
             />
             <Stat
               Icon={Fuel}
@@ -537,11 +541,13 @@ function Stat({
   label,
   value,
   highlight,
+  hint,
 }: {
   Icon: typeof Clock;
   label: string;
   value: string;
   highlight?: boolean;
+  hint?: React.ReactNode;
 }) {
   return (
     <div className="card-surface p-3">
@@ -552,6 +558,7 @@ function Stat({
       <div className={`mt-1 text-lg font-semibold tabular-nums ${highlight ? "text-success" : ""}`}>
         {value}
       </div>
+      {hint ? <div className="mt-0.5">{hint}</div> : null}
     </div>
   );
 }

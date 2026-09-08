@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatBRL, formatDecimal } from "@/lib/format";
 import type { PlanCostResult } from "@/lib/trips/cost";
+import { FuelSourceBadge, type FuelSourceValue } from "@/components/fuel/FuelSourceBadge";
 import { cn } from "@/lib/utils";
 
 interface Props {
@@ -17,6 +18,8 @@ interface Props {
   onKmplChange: (v: number) => void;
   onReset?: () => void;
   canReset?: boolean;
+  /** Procedência do km/L sugerido (trips.fuel_source). */
+  fuelSource?: FuelSourceValue;
 }
 
 function parseNumber(raw: string, max: number) {
@@ -37,6 +40,7 @@ export function TripCostCard({
   onKmplChange,
   onReset,
   canReset,
+  fuelSource,
 }: Props) {
   return (
     <section className="card-surface p-3">
@@ -122,7 +126,9 @@ export function TripCostCard({
         </div>
       </dl>
 
-      <p className="mt-2 text-[11px] text-muted-foreground">
+      <FuelSourceBadge source={fuelSource} as="text" className="mt-2" />
+
+      <p className="mt-1 text-[11px] text-muted-foreground">
         {formatDecimal(cost.distanceKm)} km {roundTrip ? "(ida e volta)" : "(só ida)"} ·{" "}
         {cost.costPerKm != null ? `${formatBRL(cost.costPerKm)}/km` : "—"}
       </p>

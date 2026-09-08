@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -18,7 +16,20 @@ import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
-import { expectedKmpl, fuelLabel } from "@/lib/vehicles/specs";
+import {
+  expectedKmpl,
+  fuelLabel,
+  type FuelKind,
+  type VehicleSpec,
+} from "@/lib/vehicles/specs";
+import { useActiveVehicle } from "@/lib/vehicles/active";
+import {
+  MIN_MEASURED_SEGMENTS,
+  measuredAvgKmpl,
+  measuredSegments,
+  weeklyMeasuredKmpl,
+  type FullTankLog,
+} from "@/lib/fuel/measured";
 import { lastWeeks, weekKey, weekLabel } from "@/lib/reports/week";
 
 interface TrendTrip {
@@ -38,7 +49,12 @@ export interface WeekPoint {
   km: number;
   liters: number;
   score: number | null;
+  /** km/L da fonte mais confiável disponível (medido, se houver). */
   kmpl: number | null;
+  /** km/L medido pelos abastecimentos cheio-a-cheio. */
+  measuredKmpl: number | null;
+  /** km/L derivado dos litros estimados das viagens. */
+  estimatedKmpl: number | null;
   target: number | null;
   efficiency: number | null;
   idleMin: number;
@@ -46,7 +62,13 @@ export interface WeekPoint {
 
 const nf1 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 
-function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof getEcoSettings>["fuel"]): WeekPoint[] {
+function buildWeeks(
+  trips: TrendTrip[],
+  weeks: string[],
+  fuel: FuelKind,
+  spec: VehicleSpec | undefined,
+  measuredByWeek: Map<string, number>,
+): WeekPoint[] {
   const byWeek = new Map<string, TrendTrip[]>();
   for (const k of weeks) byWeek.set(k, []);
   for (const t of trips) {
@@ -70,8 +92,11 @@ function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof
         ? withSpeed.reduce((s, t) => s + Number(t.avg_speed_kmh) * Number(t.distance_km), 0) /
           totalKmSpeed
         : null;
-    const kmpl = liters > 0.05 && km > 0 ? km / liters : null;
-    const target = km > 0 ? expectedKmpl({ fuel, avgSpeedKmh: avgSpeed }) : null;
+    const estimatedKmpl = liters > 0.05 && km > 0 ? km / liters : null;
+    const measuredKmpl = measuredByWeek.get(k) ?? null;
+    const kmpl = measuredKmpl ?? estimatedKmpl;
+    const target =
+      km > 0 || measuredKmpl != null ? expectedKmpl({ fuel, avgSpeedKmh: avgSpeed, spec }) : null;
     return {
       key: k,
       label: weekLabel(k),
@@ -80,6 +105,8 @@ function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof
       liters,
       score,
       kmpl,
+      measuredKmpl,
+      estimatedKmpl,
       target,
       efficiency: kmpl != null && target ? (kmpl / target) * 100 : null,
       idleMin: rows.reduce((s, t) => s + Number(t.idle_seconds || 0), 0) / 60,
@@ -161,7 +188,9 @@ function ChartTooltip({
 
 export function TrendsDashboard() {
   const [range, setRange] = useState<"8" | "12" | "26">("12");
-  const fuel = useMemo(() => getEcoSettings().fuel, []);
+  const { vehicle, spec, fuel: vehicleFuel } = useActiveVehicle();
+  const fallbackFuel = useMemo(() => getEcoSettings().fuel, []);
+  const fuel = vehicleFuel ?? fallbackFuel;
   const weeks = useMemo(() => lastWeeks(Number(range)).reverse(), [range]);
 
   const { data, isLoading } = useQuery({
@@ -179,8 +208,32 @@ export function TrendsDashboard() {
     },
   });
 
-  const points = useMemo(() => buildWeeks(data ?? [], weeks, fuel), [data, weeks, fuel]);
-  const active = points.filter((p) => p.trips > 0);
+  // Abastecimentos completos do combustível ativo: base do km/L medido.
+  const { data: fills } = useQuery({
+    queryKey: ["trends-fuel-logs", vehicle?.id ?? null, fuel],
+    queryFn: async (): Promise<FullTankLog[]> => {
+      let q = supabase
+        .from("fuel_logs")
+        .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
+        .order("date", { ascending: true })
+        .limit(1000);
+      if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as FullTankLog[];
+    },
+    staleTime: 60_000,
+  });
+
+  const segments = useMemo(() => measuredSegments(fills ?? [], fuel), [fills, fuel]);
+  const measuredByWeek = useMemo(() => weeklyMeasuredKmpl(segments), [segments]);
+  const hasMeasured = segments.length >= MIN_MEASURED_SEGMENTS;
+
+  const points = useMemo(
+    () => buildWeeks(data ?? [], weeks, fuel, spec, measuredByWeek),
+    [data, weeks, fuel, spec, measuredByWeek],
+  );
+  const active = points.filter((p) => p.trips > 0 || p.measuredKmpl != null);
   const cur = active[active.length - 1];
   const prev = active[active.length - 2];
 
@@ -192,6 +245,7 @@ export function TrendsDashboard() {
       ? active.reduce((s, p) => s + (p.target ?? 0), 0) /
         Math.max(1, active.filter((p) => p.target != null).length)
       : null;
+  const avgMeasured = measuredAvgKmpl(segments);
 
   return (
     <div className="space-y-3">
@@ -220,7 +274,7 @@ export function TrendsDashboard() {
               unit=" pts"
             />
             <Kpi
-              label="Consumo"
+              label={hasMeasured ? "Consumo medido" : "Consumo estimado"}
               value={cur?.kmpl != null ? `${nf1.format(cur.kmpl)} km/L` : "—"}
               delta={diff(cur?.kmpl, prev?.kmpl)}
               unit=" km/L"
@@ -279,21 +333,92 @@ export function TrendsDashboard() {
                 {avgTarget ? ` · meta ${nf1.format(avgTarget)}` : ""}
               </span>
             </header>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
-                  <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
-                  <YAxis {...axis} />
-                  {avgTarget ? (
-                    <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
-                  ) : null}
-                  <Tooltip content={<ChartTooltip suffix=" km/L" />} cursor={{ fill: "var(--muted)" }} />
-                  <Bar dataKey="kmpl" name="km/L" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {hasMeasured ? (
+              <>
+                <div className="mb-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded bg-primary" /> Medido
+                    {avgMeasured ? ` · média ${nf1.format(avgMeasured)}` : ""}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded border-t border-dashed border-muted-foreground" />
+                    Estimado (cálculo do app)
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded border-t border-dashed border-warning" /> Meta
+                    Inmetro
+                  </span>
+                </div>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
+                      <YAxis {...axis} />
+                      {avgTarget ? (
+                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                      ) : null}
+                      <Tooltip content={<ChartTooltip suffix=" km/L" />} />
+                      <Line
+                        type="monotone"
+                        dataKey="measuredKmpl"
+                        name="Medido (abastecimentos)"
+                        stroke="var(--primary)"
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: "var(--primary)" }}
+                        connectNulls
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="estimatedKmpl"
+                        name="Estimado (cálculo do app)"
+                        stroke="var(--muted-foreground)"
+                        strokeWidth={1.5}
+                        strokeDasharray="4 3"
+                        dot={false}
+                        connectNulls
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  A linha cheia vem dos seus abastecimentos de tanque cheio. A tracejada é apenas a
+                  estimativa do app, para comparação.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
+                      <YAxis {...axis} />
+                      {avgTarget ? (
+                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                      ) : null}
+                      <Tooltip content={<ChartTooltip suffix=" km/L" />} />
+                      <Line
+                        type="monotone"
+                        dataKey="estimatedKmpl"
+                        name="Estimado (cálculo do app)"
+                        stroke="var(--muted-foreground)"
+                        strokeWidth={1.5}
+                        strokeDasharray="4 3"
+                        dot={false}
+                        connectNulls
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-2 rounded-xl border border-border/60 bg-muted/30 p-2 text-[11px] text-muted-foreground">
+                  Só a estimativa está disponível. Registre dois abastecimentos com o tanque cheio
+                  do mesmo combustível para ver seu consumo real aqui.
+                </p>
+              </>
+            )}
           </section>
+
 
           <section className="card-surface p-3">
             <header className="mb-2 flex items-center justify-between">

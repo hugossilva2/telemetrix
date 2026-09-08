@@ -230,10 +230,12 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           .eq("device_id", deviceId)
           .maybeSingle();
 
-        // Guarda contra mensagens fora de ordem (Flespi pode enfileirar).
-        if (state?.updated_at) {
-          const stateMs = new Date(state.updated_at as string).getTime();
-          if (tsMs < stateMs - 1000) {
+        // Guarda contra mensagens fora de ordem / reprocessadas. Comparar com
+        // `last_message_at` (horário da última mensagem lida do rastreador) e não
+        // com `updated_at`, que é o relógio do servidor e descartava mensagens boas.
+        if (state?.last_message_at) {
+          const stateMs = new Date(state.last_message_at as string).getTime();
+          if (tsMs <= stateMs) {
             skippedOutOfOrder++;
             console.log(
               "[flespi-webhook] skip: out-of-order",
@@ -241,11 +243,12 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
               "msg",
               nowIso,
               "state",
-              state.updated_at,
+              state.last_message_at,
             );
             continue;
           }
         }
+
 
         console.log(
           "[flespi-webhook]",

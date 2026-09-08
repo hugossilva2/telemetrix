@@ -177,7 +177,9 @@ function ChartTooltip({
 
 export function TrendsDashboard() {
   const [range, setRange] = useState<"8" | "12" | "26">("12");
-  const fuel = useMemo(() => getEcoSettings().fuel, []);
+  const { vehicle, spec, fuel: vehicleFuel } = useActiveVehicle();
+  const fallbackFuel = useMemo(() => getEcoSettings().fuel, []);
+  const fuel = vehicleFuel ?? fallbackFuel;
   const weeks = useMemo(() => lastWeeks(Number(range)).reverse(), [range]);
 
   const { data, isLoading } = useQuery({
@@ -195,8 +197,32 @@ export function TrendsDashboard() {
     },
   });
 
-  const points = useMemo(() => buildWeeks(data ?? [], weeks, fuel), [data, weeks, fuel]);
-  const active = points.filter((p) => p.trips > 0);
+  // Abastecimentos completos do combustível ativo: base do km/L medido.
+  const { data: fills } = useQuery({
+    queryKey: ["trends-fuel-logs", vehicle?.id ?? null, fuel],
+    queryFn: async (): Promise<FullTankLog[]> => {
+      let q = supabase
+        .from("fuel_logs")
+        .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
+        .order("date", { ascending: true })
+        .limit(1000);
+      if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
+      const { data, error } = await q;
+      if (error) throw error;
+      return (data ?? []) as FullTankLog[];
+    },
+    staleTime: 60_000,
+  });
+
+  const segments = useMemo(() => measuredSegments(fills ?? [], fuel), [fills, fuel]);
+  const measuredByWeek = useMemo(() => weeklyMeasuredKmpl(segments), [segments]);
+  const hasMeasured = segments.length >= MIN_MEASURED_SEGMENTS;
+
+  const points = useMemo(
+    () => buildWeeks(data ?? [], weeks, fuel, spec, measuredByWeek),
+    [data, weeks, fuel, spec, measuredByWeek],
+  );
+  const active = points.filter((p) => p.trips > 0 || p.measuredKmpl != null);
   const cur = active[active.length - 1];
   const prev = active[active.length - 2];
 
@@ -208,6 +234,7 @@ export function TrendsDashboard() {
       ? active.reduce((s, p) => s + (p.target ?? 0), 0) /
         Math.max(1, active.filter((p) => p.target != null).length)
       : null;
+  const avgMeasured = measuredAvgKmpl(segments);
 
   return (
     <div className="space-y-3">

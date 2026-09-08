@@ -12,7 +12,7 @@ import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
-import { tripFuelLiters } from "@/lib/fuel/consumption";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 import { useFuelRefs } from "@/lib/fuel/useFuelRefs";
 import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 
@@ -24,6 +24,10 @@ export function OngoingTripCard() {
   const { vehicle, spec, fuel } = useActiveVehicle();
   const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
+  const fuelRefs = useFuelRefs(vehicle?.id, fuel, {
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+  });
 
   useEffect(() => {
     if (!open) return;
@@ -90,8 +94,15 @@ export function OngoingTripCard() {
     distanceKm = haversineKm(open.startLat, open.startLng, open.lastLat, open.lastLng);
   }
 
-  const kmpl = fuelRefs.kmpl;
-  const fuelSource = fuelRefs.source;
+  const price = fuelRefs.pricePerLiter;
+  const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
+  const { kmpl, source: fuelSource } = resolveKmpl({
+    calibration: fuelRefs.calibration,
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+    fuel,
+    avgSpeedKmh,
+  });
   const liters = tripFuelLiters({ distanceKm, kmpl, idleSeconds: open.idleSeconds ?? 0 }) ?? 0;
   const cost = liters * price;
 

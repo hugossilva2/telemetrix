@@ -57,8 +57,10 @@ export function useLiveTripTracker() {
     if (ign === true && closeTimer.current) {
       clearTimeout(closeTimer.current);
       closeTimer.current = null;
+      pendingClose.current = null;
       if (tripStore.get()) return;
     }
+
 
     // OFF -> ON: abre viagem local
     const shouldOpen =

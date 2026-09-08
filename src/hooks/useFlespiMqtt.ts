@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import mqtt, { type MqttClient } from "mqtt";
-import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
+import { FLESPI_BROKER_URL, flespiMqttToken, flespiTopics } from "@/lib/flespi/config";
 import { mergeTelemetry, parseFlespiMessage, parseFlespiStateTopic } from "@/lib/flespi/parse";
 import { fetchLastKnownTelemetry } from "@/lib/flespi/lastKnown";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 import type { MqttStatus, VehicleTelemetry } from "@/lib/flespi/types";
 
@@ -15,24 +16,28 @@ export interface UseFlespiMqttResult {
 
 /**
  * Conecta ao broker MQTT do Flespi via WebSocket e escuta a telemetria do
- * device configurado. Reconexão automática com backoff exponencial é gerida
- * pela própria biblioteca `mqtt` (reconnectPeriod).
+ * device do veículo ativo (`vehicles.flespi_device_id`). Reconexão automática
+ * com backoff exponencial é gerida pela própria biblioteca `mqtt`.
  *
+ * Sem token de cliente (`VITE_FLESPI_MQTT_TOKEN`) ou sem device configurado,
+ * degrada em silêncio: não conecta e o app segue com o polling do servidor.
  * Somente executa no browser — retorna estado inicial no SSR.
  */
 export function useFlespiMqtt(): UseFlespiMqttResult {
+  const { vehicle } = useActiveVehicle();
+  const deviceId = vehicle?.flespi_device_id ?? null;
   const [status, setStatus] = useState<MqttStatus>("idle");
   const [telemetry, setTelemetry] = useState<VehicleTelemetry>({});
   const [lastMessageAt, setLastMessageAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const clientRef = useRef<MqttClient | null>(null);
 
-  // Seed inicial: última mensagem conhecida via REST, para não ficar
+  // Seed inicial: última mensagem conhecida via servidor, para não ficar
   // "aguardando posição" enquanto o rastreador está parado/dormindo.
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === "undefined" || !deviceId) return;
     let cancelled = false;
-    fetchLastKnownTelemetry().then((last) => {
+    fetchLastKnownTelemetry(deviceId).then((last) => {
       if (cancelled || !last) return;
       const { receivedAt, ...tele } = last;
       setTelemetry((prev) => mergeTelemetry(tele, prev));
@@ -41,18 +46,24 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [deviceId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+
+    const token = flespiMqttToken();
+    if (!token || !deviceId) {
+      // Degradação silenciosa: o rastreamento continua pelo polling.
+      setStatus("idle");
+      return;
+    }
 
     setStatus("connecting");
     let reconnectDelay = 1000;
     const maxDelay = 30000;
 
-
-    const client = mqtt.connect(FLESPI_CONFIG.brokerUrl, {
-      username: FLESPI_CONFIG.token,
+    const client = mqtt.connect(FLESPI_BROKER_URL, {
+      username: token,
       password: "",
       clean: true,
       keepalive: 30,
@@ -68,19 +79,10 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
       client.options.reconnectPeriod = reconnectDelay;
       setStatus("connected");
       setError(null);
-      // Assina o tópico configurado + variantes conhecidas do Flespi
-      // (message tem ou não sufixo, e state/telemetry publica em outro caminho).
-      const topics = [
-        FLESPI_TOPIC,
-        `flespi/message/gw/devices/${FLESPI_CONFIG.deviceId}`,
-        `flespi/state/gw/devices/${FLESPI_CONFIG.deviceId}/telemetry/#`,
-      ];
-      client.subscribe(topics, { qos: 0 }, (err, granted) => {
+      client.subscribe(flespiTopics(deviceId), { qos: 0 }, (err) => {
         if (err) {
           setError(`Falha ao inscrever: ${err.message}`);
           console.warn("[flespi] subscribe error", err);
-        } else {
-          console.log("[flespi] subscribed", granted);
         }
       });
     });
@@ -102,7 +104,6 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
 
     client.on("message", (topic, payload) => {
       const raw = payload.toString();
-      console.log("[flespi] message", topic, raw.slice(0, 200));
       const parsed = topic.includes("/telemetry/")
         ? parseFlespiStateTopic(topic, raw)
         : parseFlespiMessage(raw);
@@ -115,7 +116,7 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
       client.end(true);
       clientRef.current = null;
     };
-  }, []);
+  }, [deviceId]);
 
   return { status, telemetry, lastMessageAt, error };
 }

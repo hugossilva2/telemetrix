@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
+import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -65,7 +66,7 @@ export function LiveConsumptionCard() {
     }
   }
 
-  const DEFAULT_PRICE = 5.89;
+  const DEFAULT_PRICE = DEFAULT_GAS_PRICE_PER_LITER;
   const avgSpeedKmh = null;
   const { kmpl, source } = resolveKmpl({
     calibration: data?.calibration ?? null,
@@ -75,8 +76,9 @@ export function LiveConsumptionCard() {
     avgSpeedKmh,
   });
   const priceFromLog = data?.pricePerLiter != null ? Number(data.pricePerLiter) : null;
-  const price = priceFromLog ?? DEFAULT_PRICE;
-  const usingFallbackPrice = priceFromLog === null;
+  const price = Number(priceFromLog) || DEFAULT_PRICE;
+  const usingFallbackPrice = !(Number(priceFromLog) > 0);
+
   const liters =
     distanceKm !== null
       ? tripFuelLiters({ distanceKm, kmpl, idleSeconds: open?.idleSeconds ?? 0 })

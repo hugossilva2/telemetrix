@@ -51,15 +51,6 @@ export async function saveClosedTrip(
 
   if (distanceKm < MIN_DISTANCE_KM && durationS < MIN_DURATION_S) return "skipped";
 
-  // Evita duplicar o que o webhook possa ter gravado (janela de ±3 min).
-  const { data: existing } = await supabase
-    .from("trips")
-    .select("id")
-    .gte("start_time", new Date(startMs - 3 * 60_000).toISOString())
-    .lte("start_time", new Date(startMs + 3 * 60_000).toISOString())
-    .limit(1);
-  if (existing && existing.length > 0) return "duplicate";
-
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     (() => {
       const activeId = getActiveVehicleId();
@@ -78,10 +69,28 @@ export async function saveClosedTrip(
     getDefaultDriverId(userId),
   ]);
 
+  // Evita duplicar o que o webhook possa ter gravado (janela de ±3 min).
+  // Restrito ao usuário e ao veículo: o RLS também mostra viagens compartilhadas
+  // e de frota, que não devem descartar uma viagem legítima.
+  {
+    let q = supabase
+      .from("trips")
+      .select("id")
+      .eq("user_id", userId)
+      .gte("start_time", new Date(startMs - 3 * 60_000).toISOString())
+      .lte("start_time", new Date(startMs + 3 * 60_000).toISOString())
+      .limit(1);
+    q = vehicle?.id ? q.eq("vehicle_id", vehicle.id) : q.is("vehicle_id", null);
+    const { data: existing } = await q;
+    if (existing && existing.length > 0) return "duplicate";
+  }
+
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
-  const fuel = getFuelKind();
+  // vehicles.fuel_kind é a fonte de verdade; localStorage só como cache offline.
+  const fuel = parseFuelKind(vehicle?.fuel_kind) ?? getFuelKind();
   const spec = specFromVehicleRow(vehicle);
+
 
   // Calibração medida cheio-a-cheio do veículo, quando existir.
   const { data: calibration } = vehicle?.id

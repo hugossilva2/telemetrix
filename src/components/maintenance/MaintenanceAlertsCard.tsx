@@ -14,23 +14,9 @@ import {
   MAINTENANCE_LABEL,
   type MaintenanceRecord,
 } from "@/lib/maintenance/rules";
+import { notifyOncePerDay } from "@/lib/notify/dailyOnce";
 
 const NOTIFIED_KEY = "maintenanceNotified:v1";
-
-function alreadyNotifiedToday(key: string) {
-  if (typeof window === "undefined") return true;
-  const today = new Date().toISOString().slice(0, 10);
-  try {
-    const raw = window.localStorage.getItem(NOTIFIED_KEY);
-    const map = raw ? (JSON.parse(raw) as Record<string, string>) : {};
-    if (map[key] === today) return true;
-    map[key] = today;
-    window.localStorage.setItem(NOTIFIED_KEY, JSON.stringify(map));
-    return false;
-  } catch {
-    return true;
-  }
-}
 
 /**
  * Mostra itens de manutenção vencidos ou próximos do vencimento,
@@ -54,7 +40,7 @@ export function MaintenanceAlertsCard() {
   useEffect(() => {
     for (const a of alerts) {
       const key = `${a.record.id}:${a.info.status}`;
-      if (alreadyNotifiedToday(key)) continue;
+      if (notifyOncePerDay(NOTIFIED_KEY, key)) continue;
       const label = MAINTENANCE_LABEL[a.record.type] ?? a.record.type;
       if (a.info.status === "overdue") {
         toast.error(`${label} vencida`, { description: a.info.message });

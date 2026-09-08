@@ -18,14 +18,7 @@ import {
   FUEL_STAGE_LABEL,
   REFUEL_ALERT_PCT,
 } from "@/lib/eco/autonomy";
-
-function formatEta(seconds: number): string {
-  const m = Math.max(1, Math.round(seconds / 60));
-  if (m < 60) return `${m} min`;
-  const h = Math.floor(m / 60);
-  const rest = m % 60;
-  return rest === 0 ? `${h} h` : `${h}h${rest.toString().padStart(2, "0")}`;
-}
+import { formatEta } from "@/lib/format";
 
 function mapsUrl(lat: number, lng: number, placeId: string) {
   return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${placeId}&travelmode=driving`;
@@ -254,7 +247,7 @@ export function AutonomyCard() {
                           {p.distanceKm.toFixed(1)} km
                         </span>
                         <span className="block text-[10px] text-muted-foreground">
-                          {seconds != null ? formatEta(seconds) : "—"}
+                          {seconds != null ? formatEta(seconds, 1) : "—"}
                         </span>
                       </span>
                       <Navigation className="size-3.5 shrink-0 text-muted-foreground" />

@@ -46,7 +46,7 @@ export interface VehicleSpec {
   ecoRpm: { min: number; max: number };
 }
 
-export const CRONOS_1_3_2022: VehicleSpec = {
+const CRONOS_1_3_2022: VehicleSpec = {
   name: "Fiat Cronos Drive 1.3",
   year: 2022,
   engine: "1.3 Firefly Flex",
@@ -88,10 +88,7 @@ export const CRONOS_1_3_2022: VehicleSpec = {
 };
 
 /** Ficha padrão usada quando o veículo ativo ainda não tem dados próprios. */
-export const DEFAULT_SPEC = CRONOS_1_3_2022;
-
-/** @deprecated use o veículo ativo (`useActiveVehicle().spec`). */
-export const ACTIVE_SPEC = DEFAULT_SPEC;
+export const DEFAULT_SPEC: VehicleSpec = CRONOS_1_3_2022;
 
 /** Colunas de ficha técnica gravadas na tabela `vehicles`. */
 export interface VehicleSpecRow {
@@ -153,7 +150,7 @@ export function specFromVehicleRow(row: VehicleSpecRow | null | undefined): Vehi
  * Aceleração máxima "de fábrica": 100 km/h em 11,5 s ≈ 8,7 km/h/s.
  * Passar disso só acontece com abuso de embreagem/giro.
  */
-export function referenceAccelKmhPerS(spec: VehicleSpec = ACTIVE_SPEC) {
+export function referenceAccelKmhPerS(spec: VehicleSpec = DEFAULT_SPEC) {
   return 100 / spec.zeroTo100S;
 }
 
@@ -173,7 +170,7 @@ function fuelRange(spec: VehicleSpec, fuel: FuelKind) {
 export function expectedKmpl({
   fuel = "misto",
   avgSpeedKmh,
-  spec = ACTIVE_SPEC,
+  spec = DEFAULT_SPEC,
 }: {
   fuel?: FuelKind;
   avgSpeedKmh?: number | null;

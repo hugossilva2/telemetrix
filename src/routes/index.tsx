@@ -15,7 +15,8 @@ import {
   Wrench,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PLANS, priceLabel } from "@/lib/billing/plans";
+import { PLANS } from "@/lib/billing/plans";
+import { PlanCard } from "@/components/marketing/PlanCard";
 import { OG_SCREENSHOT, SCREENSHOTS } from "@/lib/demo/screens";
 import { USE_CASE_LIST } from "@/lib/marketing/content";
 import { ScreenShot } from "@/components/marketing/ScreenShot";
@@ -284,38 +285,7 @@ function LandingPage() {
             </p>
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {PLANS.map((plan) => (
-                <article
-                  key={plan.id}
-                  className={`card-surface flex flex-col p-5 ${
-                    plan.highlight ? "border-primary/50" : ""
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-display text-lg font-bold">{plan.name}</h3>
-                    {plan.highlight && (
-                      <span className="rounded-full border border-primary/40 bg-primary/10 px-2 py-0.5 text-[11px] font-semibold text-primary">
-                        Mais escolhido
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">{plan.tagline}</p>
-                  <p className="mt-3 font-display text-2xl font-bold tabular-nums">
-                    {priceLabel(plan)}
-                  </p>
-                  <ul className="mt-4 flex-1 space-y-2 text-sm">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex gap-2">
-                        <Check className="mt-0.5 size-4 shrink-0 text-primary" />
-                        <span className="text-muted-foreground">{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button asChild className="mt-5" variant={plan.highlight ? "default" : "outline"}>
-                    <Link to="/auth">
-                      {plan.priceMonthly > 0 ? `Assinar ${plan.name}` : "Começar grátis"}
-                    </Link>
-                  </Button>
-                </article>
+                <PlanCard key={plan.id} plan={plan} />
               ))}
             </div>
           </div>

@@ -172,13 +172,16 @@ describe("summarizeEco com ficha do veículo ativo", () => {
   };
 
   it("usa o consumo da ficha do veículo informado", () => {
-    const base = summarizeEco({ events: [], idleSeconds: 0, distanceKm: 100 });
-    const custom = summarizeEco({ events: [], idleSeconds: 0, distanceKm: 100, spec });
-    expect(base.score).toBe(custom.score);
-    const ev = [{ type: "harsh_brake", severity: "severe", at: 0, value: 0 }] as never;
-    const a = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 100 });
-    const b = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 100, spec });
-    expect(b.wastedFuelLiters).not.toBe(a.wastedFuelLiters);
+    // Muitos eventos em pouca distância: o teto de 25% depende do km/L da ficha.
+    const ev = Array.from({ length: 20 }, () => ({
+      type: "harsh_brake",
+      severity: "severe",
+      at: 0,
+      value: 0,
+    })) as never;
+    const a = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 1 });
+    const b = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 1, spec });
+    expect(b.wastedFuelLiters).toBeGreaterThan(a.wastedFuelLiters);
   });
 
   it("usa a faixa de giro econômica do veículo informado", () => {

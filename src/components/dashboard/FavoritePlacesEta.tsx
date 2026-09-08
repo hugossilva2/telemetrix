@@ -1,12 +1,16 @@
 import { Link } from "@tanstack/react-router";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
+import { useQueries } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { MapPin, Plus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { haversineKm } from "@/lib/trips/geo";
+import { useFavoritePlaces } from "@/lib/places/useFavoritePlaces";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { getRouteEta } from "@/lib/places.functions";
 import { iconFor } from "@/routes/_authenticated/lugares";
 import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
+
+const ETA_PLACE_LIMIT = 4;
 
 function formatEta(seconds: number): string {
   const m = Math.round(seconds / 60);
@@ -22,18 +26,7 @@ export function FavoritePlacesEta() {
   const startTrip = useStartTripDialog();
 
 
-  const { data: places = [] } = useQuery({
-    queryKey: ["favorite_places"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("favorite_places")
-        .select("*")
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-    staleTime: 60_000,
-  });
+  const { data: allPlaces = [] } = useFavoritePlaces();
 
   const lat = telemetry.latitude;
   const lng = telemetry.longitude;
@@ -44,12 +37,23 @@ export function FavoritePlacesEta() {
     ? `${(lat! * 100).toFixed(0)}_${(lng! * 100).toFixed(0)}`
     : "none";
 
+  // Teto de chamadas de rota: só os 4 locais mais próximos, a cada 3 minutos.
+  const places = useMemo(() => {
+    if (!hasOrigin) return allPlaces.slice(0, ETA_PLACE_LIMIT);
+    return [...allPlaces]
+      .sort(
+        (a, b) =>
+          haversineKm(lat!, lng!, a.lat, a.lng) - haversineKm(lat!, lng!, b.lat, b.lng),
+      )
+      .slice(0, ETA_PLACE_LIMIT);
+  }, [allPlaces, hasOrigin, originKey]);
+
   const etaQueries = useQueries({
     queries: places.map((p) => ({
       queryKey: ["favorite_places_eta", p.id, originKey],
       enabled: hasOrigin,
-      staleTime: 60_000,
-      refetchInterval: 90_000,
+      staleTime: 120_000,
+      refetchInterval: 180_000,
       queryFn: () =>
         eta({
           data: {
@@ -60,7 +64,7 @@ export function FavoritePlacesEta() {
     })),
   });
 
-  if (places.length === 0) {
+  if (allPlaces.length === 0) {
     return (
       <section className="contents">
         <Link

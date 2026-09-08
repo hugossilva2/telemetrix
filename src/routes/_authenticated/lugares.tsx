@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
+import { FAVORITE_PLACES_KEY, useFavoritePlaces } from "@/lib/places/useFavoritePlaces";
 import { getPlaceDetails, searchPlaces, type PlaceSuggestion } from "@/lib/places.functions";
 import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 import { PlaceAutomationPanel } from "@/components/places/PlaceAutomationPanel";
@@ -61,17 +62,7 @@ function LugaresPage() {
     return () => clearTimeout(t);
   }, [query]);
 
-  const { data: places = [] } = useQuery({
-    queryKey: ["favorite_places"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("favorite_places")
-        .select("*")
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return data;
-    },
-  });
+  const { data: places = [] } = useFavoritePlaces();
 
   const { data: suggestions = [] } = useQuery({
     queryKey: ["places-suggest", debounced],
@@ -102,7 +93,7 @@ function LugaresPage() {
       setName("");
       setQuery("");
       setSelected(null);
-      qc.invalidateQueries({ queryKey: ["favorite_places"] });
+      qc.invalidateQueries({ queryKey: FAVORITE_PLACES_KEY });
       qc.invalidateQueries({ queryKey: ["favorite_places_eta"] });
     },
     onError: (e: Error) =>
@@ -118,7 +109,7 @@ function LugaresPage() {
     },
     onSuccess: () => {
       toast.success("Local removido");
-      qc.invalidateQueries({ queryKey: ["favorite_places"] });
+      qc.invalidateQueries({ queryKey: FAVORITE_PLACES_KEY });
       qc.invalidateQueries({ queryKey: ["favorite_places_eta"] });
     },
     onError: (e: Error) =>

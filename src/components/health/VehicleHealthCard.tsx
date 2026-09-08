@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Activity, ChevronRight } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useMaintenanceRecords } from "@/lib/maintenance/useMaintenanceRecords";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useCheckups } from "@/components/checkups/CheckupButtons";
 import {
@@ -24,19 +25,7 @@ export function VehicleHealthCard() {
   const currentMileage = telemetry.mileageKm ?? null;
   const { data: checkupRecords = [] } = useCheckups();
 
-  const { data: maintenance = [] } = useQuery<MaintenanceRecord[]>({
-    queryKey: ["maintenance"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("maintenance_records")
-        .select(
-          "id,type,title,service_date,mileage_at_service,interval_km,interval_months,cost,workshop,notes,file_path",
-        )
-        .order("service_date", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as MaintenanceRecord[];
-    },
-  });
+  const { data: maintenance = [] } = useMaintenanceRecords();
 
   const { data: docs = [] } = useQuery<{ id: string; title: string | null; type: string; expires_on: string | null }[]>({
     queryKey: ["health-docs"],

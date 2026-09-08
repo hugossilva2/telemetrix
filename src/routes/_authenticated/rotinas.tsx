@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { ClipboardCheck } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -44,8 +44,11 @@ function alreadyNotifiedToday(key: string) {
 
 function RotinasPage() {
   const { data: records = [] } = useCheckups();
-  const summary = summarizeCheckups(records);
-  const pending = summary.filter((s) => s.info.status === "pending");
+  const summary = useMemo(() => summarizeCheckups(records), [records]);
+  const pending = useMemo(
+    () => summary.filter((s) => s.info.status === "pending"),
+    [summary],
+  );
 
   useEffect(() => {
     for (const p of pending) {

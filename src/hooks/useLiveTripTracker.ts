@@ -32,10 +32,20 @@ export function useLiveTripTracker() {
   // Só encerramos se a ignição ficar desligada por mais que este período.
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const IGNITION_OFF_GRACE_MS = 1 * 60_000;
+  // Rotina de encerramento pendente: se o app fechar durante a tolerância,
+  // disparamos na hora em vez de perder a viagem.
+  const pendingClose = useRef<(() => void) | null>(null);
 
   useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+      const run = pendingClose.current;
+      pendingClose.current = null;
+      if (run) run();
+    }
   }, []);
+
 
   useEffect(() => {
     const ign = telemetry.ignitionOn;
@@ -47,8 +57,10 @@ export function useLiveTripTracker() {
     if (ign === true && closeTimer.current) {
       clearTimeout(closeTimer.current);
       closeTimer.current = null;
+      pendingClose.current = null;
       if (tripStore.get()) return;
     }
+
 
     // OFF -> ON: abre viagem local
     const shouldOpen =
@@ -98,8 +110,9 @@ export function useLiveTripTracker() {
     // for girada de novo dentro da tolerância, a viagem continua.
     if ((prev === true || prev === undefined) && ign === false) {
       if (!tripStore.get() || closeTimer.current) return;
-      closeTimer.current = setTimeout(() => {
+      const closeNow = () => {
         closeTimer.current = null;
+        pendingClose.current = null;
         const closing = tripStore.get();
         tripStore.set(null);
         void notifyTrackerEvent({ data: { type: "ignition_off" } }).catch(() => {});
@@ -125,8 +138,11 @@ export function useLiveTripTracker() {
               toast.error("Não foi possível salvar a viagem");
             });
         }
-      }, IGNITION_OFF_GRACE_MS);
+      };
+      pendingClose.current = closeNow;
+      closeTimer.current = setTimeout(closeNow, IGNITION_OFF_GRACE_MS);
     }
+
 
 
 

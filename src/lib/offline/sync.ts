@@ -6,10 +6,6 @@ const MAX_ATTEMPTS = 8;
 let running = false;
 let lastResult: { synced: number; failed: number; at: number } | null = null;
 
-export function getLastSyncResult() {
-  return lastResult;
-}
-
 export function isOnline(): boolean {
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }

@@ -75,10 +75,6 @@ export const CHECKUP_LABEL: Record<string, string> = Object.fromEntries(
   CHECKUPS.map((c) => [c.value, c.label]),
 );
 
-export function checkupDef(item: string): CheckupDef | undefined {
-  return CHECKUPS.find((c) => c.value === item);
-}
-
 export interface CheckupRecord {
   id: string;
   item: string;

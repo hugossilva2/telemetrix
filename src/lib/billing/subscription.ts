@@ -71,8 +71,3 @@ export function useSubscription(): SubscriptionState {
 }
 
 /** Atalho: o plano atual libera determinado recurso? */
-export function useFeature(feature: keyof PlanLimits): boolean {
-  const { limits } = useSubscription();
-  const value = limits[feature];
-  return typeof value === "boolean" ? value : Number(value) > 0;
-}

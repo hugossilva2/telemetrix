@@ -73,13 +73,6 @@ export const offlineQueue = {
 };
 
 /** Quantidade de itens aguardando sincronização. */
-export function useOfflineQueueCount(): number {
-  return useSyncExternalStore(
-    offlineQueue.subscribe,
-    () => offlineQueue.count(),
-    () => 0,
-  );
-}
 
 /** Lista reativa da fila offline. */
 export function useOfflineQueue(): QueuedItem[] {

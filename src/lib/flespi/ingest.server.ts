@@ -10,8 +10,14 @@ import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
  * app aberto e mesmo que a Flespi não esteja com o webhook configurado.
  */
 
-const MIN_DISTANCE_KM = 0.1;
-const MIN_DURATION_S = 60;
+import {
+  IDLE_SPEED_KMH,
+  MIN_DISTANCE_KM,
+  MIN_DURATION_S,
+} from "@/lib/trips/thresholds";
+import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
+import { summarizeEco } from "@/lib/eco/score";
+
 const MOTION_SPEED_THRESHOLD = 3; // km/h — considera "em movimento"
 const MOTION_ALERT_COOLDOWN_MS = 5 * 60 * 1000; // 5 min entre alertas de movimento
 const PING_MIN_INTERVAL_MS = 20 * 1000; // grava ping no máximo a cada 20s

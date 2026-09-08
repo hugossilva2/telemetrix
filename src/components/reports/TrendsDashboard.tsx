@@ -3,8 +3,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   CartesianGrid,
   Line,
   LineChart,
@@ -18,7 +16,20 @@ import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
-import { expectedKmpl, fuelLabel } from "@/lib/vehicles/specs";
+import {
+  expectedKmpl,
+  fuelLabel,
+  type FuelKind,
+  type VehicleSpec,
+} from "@/lib/vehicles/specs";
+import { useActiveVehicle } from "@/lib/vehicles/active";
+import {
+  MIN_MEASURED_SEGMENTS,
+  measuredAvgKmpl,
+  measuredSegments,
+  weeklyMeasuredKmpl,
+  type FullTankLog,
+} from "@/lib/fuel/measured";
 import { lastWeeks, weekKey, weekLabel } from "@/lib/reports/week";
 
 interface TrendTrip {

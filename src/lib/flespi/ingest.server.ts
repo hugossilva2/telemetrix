@@ -58,6 +58,30 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { sendTrackerEventPush } = await import("@/lib/push/send.server");
 
+  /**
+   * Fecha a viagem no estado do device limpando só os campos da viagem.
+   * Apagar a linha faria o poll seguinte reprocessar a janela e reenviar
+   * eventos de cerca (push repetido), por isso preservamos last_message_at
+   * e geofence_state.
+   */
+  async function clearTripFields(deviceId: string) {
+    const { error } = await supabaseAdmin
+      .from("device_trip_state")
+      .update({
+        ignition_on: false,
+        start_time: null,
+        start_lat: null,
+        start_lng: null,
+        mileage_at_start: null,
+        accum_distance_km: 0,
+        max_speed_kmh: 0,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("device_id", deviceId);
+    if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
+  }
+
+
   let processed = 0;
   let skippedNoDevice = 0;
   let skippedUnknownVehicle = 0;

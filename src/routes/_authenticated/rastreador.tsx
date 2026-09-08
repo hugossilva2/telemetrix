@@ -1,7 +1,7 @@
 import { createFileRoute, ClientOnly, Link } from "@tanstack/react-router";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { AlertTriangle, LogIn, LogOut, MapPinOff, Plus, Radar, ShieldAlert } from "lucide-react";
+import { Plus, Radar } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
@@ -20,6 +20,7 @@ import { useTelemetry } from "@/hooks/useTelemetry";
 import { useParkedSpot } from "@/lib/tracker/parked";
 import { DistanceToCarCard } from "@/components/tracker/DistanceToCarCard";
 import { useMyLocation } from "@/hooks/useMyLocation";
+import { EVENT_META } from "@/lib/tracker/events";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -42,51 +43,6 @@ export const Route = createFileRoute("/_authenticated/rastreador")({
 });
 
 type TrackerEvent = Tables<"tracker_events">;
-
-const EVENT_META: Record<
-  TrackerEvent["type"],
-  { label: string; Icon: typeof LogIn; color: string; bg: string }
-> = {
-  ignition_on: { label: "Motor ligado", Icon: LogIn, color: "text-success", bg: "bg-success/10" },
-  ignition_off: {
-    label: "Motor desligado",
-    Icon: LogOut,
-    color: "text-muted-foreground",
-    bg: "bg-muted",
-  },
-  motion_off_ignition: {
-    label: "Movimento suspeito",
-    Icon: ShieldAlert,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-  },
-  geofence_enter: {
-    label: "Chegou na cerca",
-    Icon: LogIn,
-    color: "text-chart-3",
-    bg: "bg-chart-3/10",
-  },
-  geofence_exit: {
-    label: "Saiu da cerca",
-    Icon: AlertTriangle,
-    color: "text-warning",
-    bg: "bg-warning/10",
-  },
-
-  signal_lost: {
-    label: "Sinal perdido",
-    Icon: MapPinOff,
-    color: "text-orange-500",
-    bg: "bg-orange-500/10",
-  },
-};
-
-const dtf = new Intl.DateTimeFormat("pt-BR", {
-  hour: "2-digit",
-  minute: "2-digit",
-  day: "2-digit",
-  month: "2-digit",
-});
 
 function RastreadorPage() {
   const { telemetry, status, lastMessageAt } = useTelemetry();

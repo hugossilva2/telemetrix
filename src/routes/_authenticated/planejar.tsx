@@ -19,7 +19,6 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { searchPlaces, getPlaceDetails, type PlaceSuggestion } from "@/lib/places.functions";
 import { planRoute } from "@/lib/trips/planRoute.functions";
@@ -30,7 +29,7 @@ import {
   type PlanStop,
   type TripPlan,
 } from "@/lib/trips/plan";
-import { DEFAULT_GAS_PRICE_PER_LITER, estimatePlanCost } from "@/lib/trips/cost";
+import { estimatePlanCost } from "@/lib/trips/cost";
 import { TripCostCard } from "@/components/trips/TripCostCard";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { formatBRL, formatDecimal } from "@/lib/format";

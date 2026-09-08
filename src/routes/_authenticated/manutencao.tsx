@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { FileText, Trash2, Wrench } from "lucide-react";
+import { MAINTENANCE_KEY, useMaintenanceRecords } from "@/lib/maintenance/useMaintenanceRecords";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,19 +97,7 @@ function ManutencaoPage() {
     setIntervalMonths(preset?.defaultMonths != null ? String(preset.defaultMonths) : "");
   };
 
-  const { data: records = [], isLoading } = useQuery<MaintenanceRecord[]>({
-    queryKey: ["maintenance"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("maintenance_records")
-        .select(
-          "id,type,title,service_date,mileage_at_service,interval_km,interval_months,cost,workshop,notes,file_path",
-        )
-        .order("service_date", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as MaintenanceRecord[];
-    },
-  });
+  const { data: records = [], isLoading } = useMaintenanceRecords();
 
   const upcoming = useMemo(() => {
     const items = latestByType(records).map((r) => ({
@@ -156,7 +145,7 @@ function ManutencaoPage() {
       setFile(null);
       setDate(todayInput());
       setMileage(currentMileage != null ? currentMileage.toFixed(0) : "");
-      qc.invalidateQueries({ queryKey: ["maintenance"] });
+      qc.invalidateQueries({ queryKey: MAINTENANCE_KEY });
     },
     onError: (e: Error) =>
       toast.error(
@@ -174,7 +163,7 @@ function ManutencaoPage() {
     },
     onSuccess: () => {
       toast.success("Registro removido.");
-      qc.invalidateQueries({ queryKey: ["maintenance"] });
+      qc.invalidateQueries({ queryKey: MAINTENANCE_KEY });
     },
     onError: (e: Error) =>
       toast.error(

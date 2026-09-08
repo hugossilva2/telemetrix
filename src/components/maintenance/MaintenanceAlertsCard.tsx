@@ -3,7 +3,7 @@ import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronRight, Wrench } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useMaintenanceRecords } from "@/lib/maintenance/useMaintenanceRecords";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { useAccountMode } from "@/lib/account/profile";
 import {
@@ -42,17 +42,7 @@ export function MaintenanceAlertsCard() {
   const { mode } = useAccountMode();
   const statusOpts = mode === "app" ? { warnKm: HEAVY_WARN_KM } : {};
 
-  const { data: records = [] } = useQuery<MaintenanceRecord[]>({
-    queryKey: ["maintenance"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("maintenance_records")
-        .select("id,type,title,service_date,mileage_at_service,interval_km,interval_months,cost,workshop,notes,file_path")
-        .order("service_date", { ascending: false });
-      if (error) throw error;
-      return (data ?? []) as MaintenanceRecord[];
-    },
-  });
+  const { data: records = [] } = useMaintenanceRecords();
 
   const alerts = useMemo(() => {
     return latestByType(records)

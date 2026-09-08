@@ -29,8 +29,7 @@ export default defineConfig({
           navigateFallbackDenylist: [/^\/api\//, /^\/~oauth/],
           runtimeCaching: [
             {
-              urlPattern: ({ request, sameOrigin }) =>
-                sameOrigin && request.mode === "navigate",
+              urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === "navigate",
               handler: "NetworkFirst",
               options: {
                 cacheName: "html-navigations",

@@ -18,7 +18,13 @@ export const SceneRoute = () => {
   return (
     <AbsoluteFill style={{ fontFamily: body }}>
       <svg width={1080} height={1080} style={{ position: "absolute", inset: 0 }}>
-        <path d={ROUTE} fill="none" stroke="rgba(240,255,250,0.10)" strokeWidth={16} strokeLinecap="round" />
+        <path
+          d={ROUTE}
+          fill="none"
+          stroke="rgba(240,255,250,0.10)"
+          strokeWidth={16}
+          strokeLinecap="round"
+        />
         <path
           d={ROUTE}
           fill="none"
@@ -41,7 +47,9 @@ export const SceneRoute = () => {
           opacity: interpolate(frame, [0, 16], [0, 1], { extrapolateRight: "clamp" }),
         }}
       >
-        <span style={{ fontSize: 26, letterSpacing: 5, textTransform: "uppercase", color: C.primary }}>
+        <span
+          style={{ fontSize: 26, letterSpacing: 5, textTransform: "uppercase", color: C.primary }}
+        >
           viagens automáticas
         </span>
         <h2
@@ -55,8 +63,7 @@ export const SceneRoute = () => {
           }}
         >
           Liga o carro,
-          <br />
-          o app registra tudo
+          <br />o app registra tudo
         </h2>
       </div>
 
@@ -95,7 +102,15 @@ export const SceneRoute = () => {
             ["custo", `R$ ${cost.toFixed(2)}`],
           ].map(([k, v]) => (
             <div key={k}>
-              <p style={{ margin: 0, fontSize: 22, color: C.muted, textTransform: "uppercase", letterSpacing: 2 }}>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 22,
+                  color: C.muted,
+                  textTransform: "uppercase",
+                  letterSpacing: 2,
+                }}
+              >
                 {k}
               </p>
               <p

@@ -1,4 +1,11 @@
-import { AbsoluteFill, Sequence, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import {
+  AbsoluteFill,
+  Sequence,
+  interpolate,
+  spring,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
 import { C } from "../theme";
 import { Gauge } from "../components/Gauge";
 import { display, body } from "../fonts";

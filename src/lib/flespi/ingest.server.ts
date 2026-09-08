@@ -458,9 +458,11 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           }
         }
 
-        // Abre viagem: OFF→ON ou primeira observação já ligada sem estado.
-        const shouldOpen =
-          ign === true && (prevIgn === false || prevIgn === null || state?.start_time == null);
+        // Abre viagem SOMENTE em transição real desligado→ligado (ou na primeira
+        // mensagem de um device sem estado nenhum). Antes bastava "sem viagem
+        // aberta", o que fazia uma releitura da mesma janela abrir viagem de novo.
+        const shouldOpen = ign === true && (state == null || prevIgn !== true);
+
 
         // Fecha viagem: ON→OFF (ou primeira observação desligada com viagem aberta).
         const shouldClose = ign === false && state?.start_time != null;

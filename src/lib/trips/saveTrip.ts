@@ -15,8 +15,8 @@ import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
 import { buildRouteData } from "@/lib/trips/routeData";
 import { getActiveVehicleId, VEHICLE_SELECT } from "@/lib/vehicles/active";
 
-const MIN_DISTANCE_KM = 0.2;
-const MIN_DURATION_S = 60;
+import { MIN_DISTANCE_KM, MIN_DURATION_S } from "@/lib/trips/thresholds";
+
 
 function trailDistanceKm(trip: OpenTrip) {
   let km = 0;

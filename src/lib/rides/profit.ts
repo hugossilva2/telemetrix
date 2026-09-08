@@ -106,7 +106,9 @@ export function profitSummary(
   now = new Date(),
 ): ProfitSummary {
   const rides = input.rides.filter((r) => inPeriod(r.occurred_at, p));
-  const fuelCost = input.fuel.filter((c) => inPeriod(c.date, p)).reduce((s, c) => s + n(c.amount), 0);
+  const fuelCost = input.fuel
+    .filter((c) => inPeriod(c.date, p))
+    .reduce((s, c) => s + n(c.amount), 0);
   const otherCost = input.expenses
     .filter((c) => inPeriod(c.date, p))
     .reduce((s, c) => s + n(c.amount), 0);

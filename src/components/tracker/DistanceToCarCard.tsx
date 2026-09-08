@@ -33,8 +33,7 @@ export function DistanceToCarCard({ carLat, carLng, usingParked }: Props) {
   const { position, error, supported } = useMyLocation();
 
   const hasCar = typeof carLat === "number" && typeof carLng === "number";
-  const km =
-    position && hasCar ? haversineKm(position.lat, position.lng, carLat!, carLng!) : null;
+  const km = position && hasCar ? haversineKm(position.lat, position.lng, carLat!, carLng!) : null;
   const bearing = position && hasCar ? bearingLabel(position, carLat!, carLng!) : null;
 
   return (

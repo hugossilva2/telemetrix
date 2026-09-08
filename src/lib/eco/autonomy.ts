@@ -56,7 +56,7 @@ export function styleAdjustedKmpl({
 }): number {
   const base = expectedKmpl({ fuel, avgSpeedKmh, spec });
   const s = Number(score);
-  const factor = Number.isFinite(s) ? 0.7 + 0.3 * Math.max(0, Math.min(100, s)) / 100 : 1;
+  const factor = Number.isFinite(s) ? 0.7 + (0.3 * Math.max(0, Math.min(100, s))) / 100 : 1;
   return base * factor;
 }
 

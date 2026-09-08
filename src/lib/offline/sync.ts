@@ -6,19 +6,13 @@ const MAX_ATTEMPTS = 8;
 let running = false;
 let lastResult: { synced: number; failed: number; at: number } | null = null;
 
-export function getLastSyncResult() {
-  return lastResult;
-}
-
 export function isOnline(): boolean {
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }
 
 async function pushItem(item: QueuedItem): Promise<boolean> {
   if (item.kind !== "trip") return true;
-  const { error } = await supabase
-    .from("trips")
-    .insert(item.payload as never);
+  const { error } = await supabase.from("trips").insert(item.payload as never);
   if (!error) return true;
   // Erros de validação/permite descarte após muitas tentativas
   await offlineQueue.markFailure(item, error.message);

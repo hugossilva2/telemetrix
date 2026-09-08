@@ -43,7 +43,10 @@ export async function sendPushToUser(
     subs.map(async (s) => {
       try {
         const req = await buildPushPayload(
-          { data: { ...payload } as Record<string, string | undefined>, options: { ttl: 60 * 60, urgency: "high", topic: payload.tag } },
+          {
+            data: { ...payload } as Record<string, string | undefined>,
+            options: { ttl: 60 * 60, urgency: "high", topic: payload.tag },
+          },
           {
             endpoint: s.endpoint,
             expirationTime: null,
@@ -80,14 +83,26 @@ export async function sendPushToUser(
 
 const EVENT_COPY: Record<string, { title: string; body: string; url: string }> = {
   ignition_on: { title: "Veículo ligado", body: "A ignição foi acionada.", url: "/rastreador" },
-  ignition_off: { title: "Veículo desligado", body: "A ignição foi desligada.", url: "/rastreador" },
+  ignition_off: {
+    title: "Veículo desligado",
+    body: "A ignição foi desligada.",
+    url: "/rastreador",
+  },
   motion_off_ignition: {
     title: "Movimento com motor desligado",
     body: "O veículo se moveu sem a ignição ligada.",
     url: "/rastreador",
   },
-  geofence_enter: { title: "Chegou em um local salvo", body: "O veículo entrou na cerca virtual.", url: "/rastreador" },
-  geofence_exit: { title: "Saiu de um local salvo", body: "O veículo saiu da cerca virtual.", url: "/rastreador" },
+  geofence_enter: {
+    title: "Chegou em um local salvo",
+    body: "O veículo entrou na cerca virtual.",
+    url: "/rastreador",
+  },
+  geofence_exit: {
+    title: "Saiu de um local salvo",
+    body: "O veículo saiu da cerca virtual.",
+    url: "/rastreador",
+  },
   signal_lost: {
     title: "Sinal perdido",
     body: "Sem comunicação com o veículo há mais de 10 minutos.",
@@ -108,9 +123,7 @@ async function observerIdsForVehicle(vehicleId: string): Promise<string[]> {
     console.error("observadores do veículo:", error.message);
     return [];
   }
-  return Array.from(
-    new Set((data ?? []).map((r) => r.viewer_user_id as string).filter(Boolean)),
-  );
+  return Array.from(new Set((data ?? []).map((r) => r.viewer_user_id as string).filter(Boolean)));
 }
 
 /** Notificação padronizada para um evento do rastreador. */
@@ -138,9 +151,7 @@ export async function sendTrackerEventPush(
 
   // Espelha o alerta para as contas observadoras do veículo (somente leitura).
   if (extra?.vehicleId) {
-    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter(
-      (id) => id !== userId,
-    );
+    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter((id) => id !== userId);
     for (const observerId of observers) {
       const r = await sendPushToUser(observerId, {
         title: `Telemetrix · ${copy.title}`,
@@ -175,9 +186,7 @@ export async function sendLongTripAlertPush(
   });
 
   if (extra?.vehicleId) {
-    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter(
-      (id) => id !== userId,
-    );
+    const observers = (await observerIdsForVehicle(extra.vehicleId)).filter((id) => id !== userId);
     for (const observerId of observers) {
       const r = await sendPushToUser(observerId, {
         title: `Telemetrix · ${alert.title}`,

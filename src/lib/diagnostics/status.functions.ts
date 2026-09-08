@@ -134,7 +134,9 @@ export const getDiagnostics = createServerFn({ method: "POST" })
               const m = (eventRes.data.metadata ?? {}) as Record<string, unknown>;
               return {
                 last_message_at:
-                  typeof m["last_message_at"] === "string" ? (m["last_message_at"] as string) : null,
+                  typeof m["last_message_at"] === "string"
+                    ? (m["last_message_at"] as string)
+                    : null,
                 threshold_min: Number.isFinite(Number(m["threshold_min"]))
                   ? Number(m["threshold_min"])
                   : null,

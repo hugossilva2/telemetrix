@@ -26,15 +26,23 @@ export function LessonListItem({
         <p className="font-mono text-sm font-semibold">{time}</p>
       </div>
       <div className="min-w-0 flex-1">
-        {!hideStudent && <p className="truncate text-sm font-semibold">{lesson.student?.name ?? "Aluno"}</p>}
+        {!hideStudent && (
+          <p className="truncate text-sm font-semibold">{lesson.student?.name ?? "Aluno"}</p>
+        )}
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-          <span className={`rounded-full border px-1.5 py-px text-[10px] font-medium ${LESSON_STATUS_CLASSES[lesson.status]}`}>
+          <span
+            className={`rounded-full border px-1.5 py-px text-[10px] font-medium ${LESSON_STATUS_CLASSES[lesson.status]}`}
+          >
             {LESSON_STATUS_LABEL[lesson.status]}
           </span>
           <span className="text-[11px] text-muted-foreground">{lesson.duration_min} min</span>
-          {instructorName && <span className="text-[11px] text-muted-foreground">· {instructorName}</span>}
+          {instructorName && (
+            <span className="text-[11px] text-muted-foreground">· {instructorName}</span>
+          )}
           {!studentView && lesson.vehicle && (
-            <span className="font-mono text-[10px] text-muted-foreground">{lesson.vehicle.plate}</span>
+            <span className="font-mono text-[10px] text-muted-foreground">
+              {lesson.vehicle.plate}
+            </span>
           )}
           {lesson.trip?.eco_score != null && (
             <span className="inline-flex items-center gap-0.5 text-[11px] text-primary">
@@ -56,7 +64,11 @@ export function LessonListItem({
   }
   return (
     <li>
-      <Link to="/aulas/$id" params={{ id: lesson.id }} className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50">
+      <Link
+        to="/aulas/$id"
+        params={{ id: lesson.id }}
+        className="flex items-center gap-3 px-4 py-3 hover:bg-accent/50"
+      >
         {inner}
       </Link>
     </li>

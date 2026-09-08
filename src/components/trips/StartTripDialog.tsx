@@ -62,13 +62,7 @@ export function StartTripDialog({ open, onOpenChange, place, etaInfo }: StartTri
           <AlertDialogDescription asChild>
             <div className="space-y-2">
               {etaInfo}
-              <p
-                className={
-                  ignitionOn
-                    ? "text-success"
-                    : "text-muted-foreground"
-                }
-              >
+              <p className={ignitionOn ? "text-success" : "text-muted-foreground"}>
                 {ignitionOn
                   ? "Motor ligado — a viagem será monitorada agora."
                   : "Motor desligado — a viagem começará ao ligar o carro."}

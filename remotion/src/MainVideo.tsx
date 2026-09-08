@@ -22,15 +22,24 @@ export const MainVideo = () => (
       <TransitionSeries.Sequence durationInFrames={D[0]}>
         <SceneHook />
       </TransitionSeries.Sequence>
-      <TransitionSeries.Transition presentation={wipe({ direction: "from-bottom" })} timing={timing} />
+      <TransitionSeries.Transition
+        presentation={wipe({ direction: "from-bottom" })}
+        timing={timing}
+      />
       <TransitionSeries.Sequence durationInFrames={D[1]}>
         <SceneGauges />
       </TransitionSeries.Sequence>
-      <TransitionSeries.Transition presentation={wipe({ direction: "from-left" })} timing={timing} />
+      <TransitionSeries.Transition
+        presentation={wipe({ direction: "from-left" })}
+        timing={timing}
+      />
       <TransitionSeries.Sequence durationInFrames={D[2]}>
         <SceneRoute />
       </TransitionSeries.Sequence>
-      <TransitionSeries.Transition presentation={wipe({ direction: "from-right" })} timing={timing} />
+      <TransitionSeries.Transition
+        presentation={wipe({ direction: "from-right" })}
+        timing={timing}
+      />
       <TransitionSeries.Sequence durationInFrames={D[3]}>
         <SceneScreens />
       </TransitionSeries.Sequence>

@@ -77,7 +77,9 @@ function ManutencaoPage() {
   const [title, setTitle] = useState("");
   const [date, setDate] = useState(todayInput);
   const [mileage, setMileage] = useState("");
-  const [intervalKm, setIntervalKm] = useState(() => String(defaultIntervalKm("oleo", mode === "app") ?? ""));
+  const [intervalKm, setIntervalKm] = useState(() =>
+    String(defaultIntervalKm("oleo", mode === "app") ?? ""),
+  );
   const [intervalMonths, setIntervalMonths] = useState("12");
   const [cost, setCost] = useState("");
   const [workshop, setWorkshop] = useState("");

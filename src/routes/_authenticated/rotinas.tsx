@@ -31,10 +31,7 @@ const NOTIFIED_KEY = "checkupNotified:v1";
 function RotinasPage() {
   const { data: records = [] } = useCheckups();
   const summary = useMemo(() => summarizeCheckups(records), [records]);
-  const pending = useMemo(
-    () => summary.filter((s) => s.info.status === "pending"),
-    [summary],
-  );
+  const pending = useMemo(() => summary.filter((s) => s.info.status === "pending"), [summary]);
 
   useEffect(() => {
     for (const p of pending) {

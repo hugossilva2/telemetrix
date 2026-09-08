@@ -157,7 +157,12 @@ export function lessonFinancials(lessons: LessonLike[]): LessonFinancials {
     else pendingCount += 1;
   }
   const r2 = (v: number) => Math.round(v * 100) / 100;
-  return { billed: r2(billed), received: r2(received), pending: r2(billed - received), pendingCount };
+  return {
+    billed: r2(billed),
+    received: r2(received),
+    pending: r2(billed - received),
+    pendingCount,
+  };
 }
 
 export interface TripCandidate {

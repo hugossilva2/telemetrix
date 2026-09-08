@@ -171,7 +171,6 @@ function AjustesPage() {
         </Link>
       </div>
 
-
       <form
         onSubmit={(e) => {
           e.preventDefault();

@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  dailyEarnings,
-  dayPeriod,
-  profitSummary,
-  shiftHours,
-  shiftKm,
-  weekPeriod,
-} from "./profit";
+import { dailyEarnings, dayPeriod, profitSummary, shiftHours, shiftKm, weekPeriod } from "./profit";
 
 const P = { start: new Date("2026-09-01T00:00:00"), end: new Date("2026-09-08T00:00:00") };
 
@@ -15,9 +8,30 @@ describe("profitSummary", () => {
     const s = profitSummary(
       {
         rides: [
-          { occurred_at: "2026-09-02T10:00:00", platform: "uber", amount: 30, tip: 5, distance_km: 10, duration_min: 20 },
-          { occurred_at: "2026-09-03T10:00:00", platform: "99", amount: 20, tip: 0, distance_km: 5, duration_min: 10 },
-          { occurred_at: "2026-08-30T10:00:00", platform: "uber", amount: 999, tip: 0, distance_km: 1, duration_min: 1 },
+          {
+            occurred_at: "2026-09-02T10:00:00",
+            platform: "uber",
+            amount: 30,
+            tip: 5,
+            distance_km: 10,
+            duration_min: 20,
+          },
+          {
+            occurred_at: "2026-09-03T10:00:00",
+            platform: "99",
+            amount: 20,
+            tip: 0,
+            distance_km: 5,
+            duration_min: 10,
+          },
+          {
+            occurred_at: "2026-08-30T10:00:00",
+            platform: "uber",
+            amount: 999,
+            tip: 0,
+            distance_km: 1,
+            duration_min: 1,
+          },
         ],
         shifts: [],
         fuel: [{ date: "2026-09-02T12:00:00", amount: 15 }],
@@ -41,9 +55,23 @@ describe("profitSummary", () => {
   it("usa horas e km dos turnos quando existem", () => {
     const s = profitSummary(
       {
-        rides: [{ occurred_at: "2026-09-02T10:00:00", platform: "uber", amount: 100, tip: 0, distance_km: 20, duration_min: 30 }],
+        rides: [
+          {
+            occurred_at: "2026-09-02T10:00:00",
+            platform: "uber",
+            amount: 100,
+            tip: 0,
+            distance_km: 20,
+            duration_min: 30,
+          },
+        ],
         shifts: [
-          { started_at: "2026-09-02T08:00:00", ended_at: "2026-09-02T12:00:00", start_mileage: 1000, end_mileage: 1050 },
+          {
+            started_at: "2026-09-02T08:00:00",
+            ended_at: "2026-09-02T12:00:00",
+            start_mileage: 1000,
+            end_mileage: 1050,
+          },
         ],
         fuel: [],
         expenses: [],
@@ -67,11 +95,34 @@ describe("profitSummary", () => {
 describe("shiftHours / shiftKm", () => {
   it("turno aberto conta até agora e recorta no período", () => {
     const now = new Date("2026-09-02T10:00:00");
-    const h = shiftHours([{ started_at: "2026-08-31T22:00:00", ended_at: null, start_mileage: null, end_mileage: null }], P, now);
+    const h = shiftHours(
+      [
+        {
+          started_at: "2026-08-31T22:00:00",
+          ended_at: null,
+          start_mileage: null,
+          end_mileage: null,
+        },
+      ],
+      P,
+      now,
+    );
     expect(h).toBe(34);
   });
   it("ignora odômetro inválido", () => {
-    expect(shiftKm([{ started_at: "2026-09-02T08:00:00", ended_at: "2026-09-02T09:00:00", start_mileage: 100, end_mileage: 90 }], P)).toBe(0);
+    expect(
+      shiftKm(
+        [
+          {
+            started_at: "2026-09-02T08:00:00",
+            ended_at: "2026-09-02T09:00:00",
+            start_mileage: 100,
+            end_mileage: 90,
+          },
+        ],
+        P,
+      ),
+    ).toBe(0);
   });
 });
 
@@ -88,7 +139,16 @@ describe("períodos", () => {
   });
   it("dailyEarnings gera seg–dom", () => {
     const days = dailyEarnings(
-      [{ occurred_at: "2026-09-02T10:00:00", platform: "uber", amount: 10, tip: 0, distance_km: null, duration_min: null }],
+      [
+        {
+          occurred_at: "2026-09-02T10:00:00",
+          platform: "uber",
+          amount: 10,
+          tip: 0,
+          distance_km: null,
+          duration_min: null,
+        },
+      ],
       weekPeriod(new Date("2026-09-02T15:00:00")),
     );
     expect(days.map((d) => d.label)).toEqual(["seg", "ter", "qua", "qui", "sex", "sáb", "dom"]);
@@ -102,14 +162,35 @@ describe("weeklyBreakdown / kmPerWeek", () => {
     const p = weekPeriodFromKey("2026-08-31");
     const days = weeklyBreakdown(
       [
-        { occurred_at: "2026-08-31T10:00:00", platform: "uber", amount: 30, tip: 0, distance_km: 10, duration_min: 30 },
-        { occurred_at: "2026-09-06T10:00:00", platform: "99", amount: 20, tip: 5, distance_km: 5, duration_min: 30 },
+        {
+          occurred_at: "2026-08-31T10:00:00",
+          platform: "uber",
+          amount: 30,
+          tip: 0,
+          distance_km: 10,
+          duration_min: 30,
+        },
+        {
+          occurred_at: "2026-09-06T10:00:00",
+          platform: "99",
+          amount: 20,
+          tip: 5,
+          distance_km: 5,
+          duration_min: 30,
+        },
       ],
       [],
       p,
     );
     expect(days).toHaveLength(7);
-    expect(days[0]).toMatchObject({ label: "seg", date: "2026-08-31", rides: 1, earnings: 30, km: 10, hours: 0.5 });
+    expect(days[0]).toMatchObject({
+      label: "seg",
+      date: "2026-08-31",
+      rides: 1,
+      earnings: 30,
+      km: 10,
+      hours: 0.5,
+    });
     expect(days[6]).toMatchObject({ label: "dom", date: "2026-09-06", rides: 1, earnings: 25 });
     expect(days[3].rides).toBe(0);
   });
@@ -119,8 +200,22 @@ describe("weeklyBreakdown / kmPerWeek", () => {
     const now = new Date("2026-09-02T12:00:00");
     const km = kmPerWeek(
       [
-        { occurred_at: "2026-09-01T10:00:00", platform: "uber", amount: 1, tip: 0, distance_km: 100, duration_min: 1 },
-        { occurred_at: "2026-08-20T10:00:00", platform: "uber", amount: 1, tip: 0, distance_km: 300, duration_min: 1 },
+        {
+          occurred_at: "2026-09-01T10:00:00",
+          platform: "uber",
+          amount: 1,
+          tip: 0,
+          distance_km: 100,
+          duration_min: 1,
+        },
+        {
+          occurred_at: "2026-08-20T10:00:00",
+          platform: "uber",
+          amount: 1,
+          tip: 0,
+          distance_km: 300,
+          duration_min: 1,
+        },
       ],
       [],
       4,

@@ -14,7 +14,12 @@ export const SceneOutro = () => {
 
   return (
     <AbsoluteFill
-      style={{ fontFamily: body, alignItems: "center", justifyContent: "center", textAlign: "center" }}
+      style={{
+        fontFamily: body,
+        alignItems: "center",
+        justifyContent: "center",
+        textAlign: "center",
+      }}
     >
       <div
         style={{

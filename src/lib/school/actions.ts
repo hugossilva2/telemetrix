@@ -58,7 +58,12 @@ export function useEndLesson() {
     onSuccess: ({ linked }) => {
       toast.success(
         linked ? "Aula encerrada e trajeto vinculado." : "Aula encerrada.",
-        linked ? undefined : { description: "Quando a viagem fechar, vincule-a na aula para ver o trajeto e o Eco Score." },
+        linked
+          ? undefined
+          : {
+              description:
+                "Quando a viagem fechar, vincule-a na aula para ver o trajeto e o Eco Score.",
+            },
       );
       invalidateSchool(qc);
     },

@@ -19,7 +19,9 @@ export function SchoolSetupCard() {
     <section className="card-surface p-4">
       <div className="flex items-center gap-2">
         <School className="size-5 text-primary" />
-        <h2 className="text-sm font-semibold">{isSchool ? "Cadastrar autoescola" : "Configurar minha escola"}</h2>
+        <h2 className="text-sm font-semibold">
+          {isSchool ? "Cadastrar autoescola" : "Configurar minha escola"}
+        </h2>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
         {isSchool
@@ -27,7 +29,9 @@ export function SchoolSetupCard() {
           : "Seus alunos e aulas ficam organizados aqui. Só você tem acesso."}
       </p>
       <div className="mt-3 space-y-1.5">
-        <Label htmlFor="school-name">{isSchool ? "Nome da autoescola" : "Nome (como os alunos veem)"}</Label>
+        <Label htmlFor="school-name">
+          {isSchool ? "Nome da autoescola" : "Nome (como os alunos veem)"}
+        </Label>
         <Input
           id="school-name"
           value={name}
@@ -44,7 +48,8 @@ export function SchoolSetupCard() {
             { name, kind: isSchool ? "autoescola" : "instrutor" },
             {
               onSuccess: () => toast.success("Tudo pronto! Agora cadastre seus alunos."),
-              onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível criar a escola.")),
+              onError: (e: Error) =>
+                toast.error(toUserMessage(e, "Não foi possível criar a escola.")),
             },
           )
         }

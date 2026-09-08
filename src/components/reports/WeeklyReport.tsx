@@ -15,13 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatKm } from "@/lib/format";
 import { downloadCsv, toCsv } from "@/lib/expenses/categories";
 import { estimateTripCost } from "@/lib/trips/cost";
-import {
-  nextWeek,
-  previousWeek,
-  weekKey,
-  weekLabel,
-  weekRange,
-} from "@/lib/reports/week";
+import { nextWeek, previousWeek, weekKey, weekLabel, weekRange } from "@/lib/reports/week";
 import {
   CHECKUP_LABEL,
   checkupClasses,
@@ -114,8 +108,7 @@ function aggregate(d?: { trips: WeekTrip[]; fuel: WeekFuel[] }) {
   const litersUsed = trips.reduce((s, t) => s + Number(t.fuel_liters || 0), 0);
   const tripCost = trips.reduce(
     (s, t) =>
-      s +
-      (estimateTripCost({ estimatedCost: t.estimated_cost, fuelLiters: t.fuel_liters }) ?? 0),
+      s + (estimateTripCost({ estimatedCost: t.estimated_cost, fuelLiters: t.fuel_liters }) ?? 0),
     0,
   );
 
@@ -269,7 +262,13 @@ export function WeeklyReport() {
         >
           <ChevronRight className="size-4" />
         </Button>
-        <Button variant="outline" size="icon" className="size-11 shrink-0" onClick={exportCsv} aria-label="Exportar CSV">
+        <Button
+          variant="outline"
+          size="icon"
+          className="size-11 shrink-0"
+          onClick={exportCsv}
+          aria-label="Exportar CSV"
+        >
           <Download className="size-4" />
         </Button>
       </div>

@@ -32,7 +32,9 @@ export function TelemetryCard({
         <span className="truncate text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
-        <span className={cn("grid size-8 shrink-0 place-items-center rounded-full", accentBg[accent])}>
+        <span
+          className={cn("grid size-8 shrink-0 place-items-center rounded-full", accentBg[accent])}
+        >
           <Icon className="size-4" />
         </span>
       </div>

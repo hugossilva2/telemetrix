@@ -46,7 +46,6 @@ export function HeroVideo({ className }: Props) {
           <source src={heroVideoWebm.url} type="video/webm" />
           <source src={heroVideo.url} type="video/mp4" />
         </video>
-
       )}
       <figcaption className="pt-2 text-center text-xs text-muted-foreground">
         Telemetrix em ação · dados fictícios

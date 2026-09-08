@@ -31,7 +31,6 @@ export function DataSourceCard() {
   const { source, setSource } = useTelemetrySource();
   const { status, deviceName, supported, disconnect, savedDevice, forgetDevice } = useTelemetry();
 
-
   return (
     <section className="card-surface p-4">
       <header className="mb-3 flex items-center gap-2 text-sm font-medium">
@@ -51,9 +50,7 @@ export function DataSourceCard() {
               key={value}
               htmlFor={`src-${value}`}
               className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 transition-colors ${
-                active
-                  ? "border-primary/60 bg-primary/5"
-                  : "border-border/70 hover:border-border"
+                active ? "border-primary/60 bg-primary/5" : "border-border/70 hover:border-border"
               }`}
             >
               <RadioGroupItem value={value} id={`src-${value}`} className="mt-1" />
@@ -75,7 +72,7 @@ export function DataSourceCard() {
         <div className="mt-3 space-y-2 rounded-xl border border-border/70 bg-background/35 px-3 py-2.5 text-xs text-muted-foreground">
           <div className="flex items-center justify-between gap-2">
             <span className="truncate">
-              {deviceName ?? savedDevice?.name
+              {(deviceName ?? savedDevice?.name)
                 ? `Adaptador: ${deviceName ?? savedDevice?.name}`
                 : "Nenhum adaptador memorizado"}
             </span>
@@ -94,8 +91,8 @@ export function DataSourceCard() {
           )}
           {supported === false && (
             <p className="text-warning">
-              Este navegador não suporta Web Bluetooth. Use o Chrome no Android, com o app aberto
-              em uma aba (não dentro do preview).
+              Este navegador não suporta Web Bluetooth. Use o Chrome no Android, com o app aberto em
+              uma aba (não dentro do preview).
             </p>
           )}
           <div className="flex flex-wrap gap-2">
@@ -112,7 +109,6 @@ export function DataSourceCard() {
           </div>
         </div>
       )}
-
     </section>
   );
 }

@@ -56,15 +56,7 @@ function ScreenHeader({ title, subtitle }: { title: string; subtitle: string }) 
   );
 }
 
-function Row({
-  label,
-  value,
-  strong,
-}: {
-  label: string;
-  value: string;
-  strong?: boolean;
-}) {
+function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
       <span className="text-muted-foreground">{label}</span>
@@ -80,7 +72,10 @@ function PainelScreen() {
   const liters = (DEMO_LIVE.fuelPct / 100) * v.tankL;
   return (
     <div className="space-y-3">
-      <ScreenHeader title={v.name} subtitle={`${v.plate} · motor ligado · ${DEMO_LIVE.updatedAgo}`} />
+      <ScreenHeader
+        title={v.name}
+        subtitle={`${v.plate} · motor ligado · ${DEMO_LIVE.updatedAgo}`}
+      />
 
       <section className="card-surface p-4">
         <div className="grid grid-cols-3 gap-2">
@@ -117,9 +112,7 @@ function PainelScreen() {
             <span className="font-display text-xl font-bold tabular-nums">
               {DEMO_LIVE.fuelPct}%
             </span>
-            <span className="block text-[10px] text-muted-foreground">
-              {liters.toFixed(0)} L
-            </span>
+            <span className="block text-[10px] text-muted-foreground">{liters.toFixed(0)} L</span>
           </GaugeRing>
         </div>
       </section>
@@ -409,11 +402,13 @@ function RastreioScreen() {
               <span className="w-10 shrink-0 text-[11px] tabular-nums text-muted-foreground">
                 {e.at}
               </span>
-              <span className={cn("size-2 shrink-0 translate-y-1.5 rounded-full", {
-                "bg-success": e.tone === "ok",
-                "bg-warning": e.tone === "warn",
-                "bg-primary": e.tone === "info",
-              })} />
+              <span
+                className={cn("size-2 shrink-0 translate-y-1.5 rounded-full", {
+                  "bg-success": e.tone === "ok",
+                  "bg-warning": e.tone === "warn",
+                  "bg-primary": e.tone === "info",
+                })}
+              />
               <span className="text-muted-foreground">{e.label}</span>
             </li>
           ))}

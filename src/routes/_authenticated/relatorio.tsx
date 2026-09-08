@@ -95,7 +95,9 @@ function useMonthData(key: string) {
       const [fuel, maint, exp, trips] = await Promise.all([
         supabase
           .from("fuel_logs")
-          .select("id,vehicle_id,date,liters_filled,total_cost,price_per_liter,is_full_tank,fuel_type")
+          .select(
+            "id,vehicle_id,date,liters_filled,total_cost,price_per_liter,is_full_tank,fuel_type",
+          )
           .eq("vehicle_id", vehicleId)
           .gte("date", startTs)
           .lte("date", endTs),

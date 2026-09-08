@@ -3,7 +3,12 @@ import { useMemo } from "react";
 import { CalendarDays, GraduationCap, Leaf, Route as RouteIcon } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { useMyEnrollments, useMyLessons } from "@/lib/school/api";
-import { CHECKLIST_ITEMS, CHECKLIST_MARK_LABEL, parseChecklist, studentProgress } from "@/lib/school/lessons";
+import {
+  CHECKLIST_ITEMS,
+  CHECKLIST_MARK_LABEL,
+  parseChecklist,
+  studentProgress,
+} from "@/lib/school/lessons";
 import { formatDateTime } from "@/lib/trips/format";
 import { formatDecimal } from "@/lib/format";
 
@@ -11,7 +16,11 @@ export const Route = createFileRoute("/_authenticated/aluno")({
   head: () => ({
     meta: [
       { title: "Meu progresso · Telemetrix" },
-      { name: "description", content: "Suas aulas feitas e próximas, trajetos, pontuação de direção e observações do instrutor." },
+      {
+        name: "description",
+        content:
+          "Suas aulas feitas e próximas, trajetos, pontuação de direção e observações do instrutor.",
+      },
       { property: "og:title", content: "Meu progresso · Telemetrix" },
       { property: "og:description", content: "Área do aluno." },
     ],
@@ -23,7 +32,7 @@ function AlunoAreaPage() {
   const { enrollments, isLoading } = useMyEnrollments();
   const lessons = useMyLessons(enrollments.length > 0);
   const contracted = enrollments.reduce((s, e) => s + e.contracted_lessons, 0);
-  const all = lessons.data ?? [];
+  const all = useMemo(() => lessons.data ?? [], [lessons.data]);
   const progress = useMemo(
     () =>
       studentProgress(
@@ -64,7 +73,9 @@ function AlunoAreaPage() {
             <p className="text-xs text-muted-foreground">Aulas realizadas</p>
             <p className="font-mono text-4xl font-bold">
               {progress.done}
-              {contracted > 0 && <span className="text-base font-medium text-muted-foreground">/{contracted}</span>}
+              {contracted > 0 && (
+                <span className="text-base font-medium text-muted-foreground">/{contracted}</span>
+              )}
             </p>
           </div>
           <div className="text-right">
@@ -82,7 +93,10 @@ function AlunoAreaPage() {
             <p className="text-[11px] font-semibold text-muted-foreground">Para treinar</p>
             <div className="mt-1 flex flex-wrap gap-1.5">
               {progress.weakSpots.map((w) => (
-                <span key={w.id} className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning">
+                <span
+                  key={w.id}
+                  className="rounded-full border border-warning/30 bg-warning/10 px-2 py-0.5 text-[11px] text-warning"
+                >
                   {CHECKLIST_ITEMS.find((c) => c.id === w.id)?.label ?? w.id}
                 </span>
               ))}
@@ -100,7 +114,10 @@ function AlunoAreaPage() {
         ) : (
           <ul className="mt-2 space-y-2">
             {upcoming.map((l) => (
-              <li key={l.id} className="flex items-center justify-between rounded-xl border border-border/70 bg-background/35 p-3">
+              <li
+                key={l.id}
+                className="flex items-center justify-between rounded-xl border border-border/70 bg-background/35 p-3"
+              >
                 <span className="text-sm font-semibold">{formatDateTime(l.scheduled_at)}</span>
                 <span className="text-xs text-muted-foreground">{l.duration_min} min</span>
               </li>
@@ -112,7 +129,9 @@ function AlunoAreaPage() {
       <section className="card-surface p-0">
         <h2 className="px-4 pt-4 text-sm font-semibold">Aulas feitas</h2>
         {done.length === 0 ? (
-          <p className="p-4 text-xs text-muted-foreground">Sua primeira aula ainda vai aparecer aqui.</p>
+          <p className="p-4 text-xs text-muted-foreground">
+            Sua primeira aula ainda vai aparecer aqui.
+          </p>
         ) : (
           <ul className="mt-2 divide-y divide-border/60">
             {done.map((l) => {
@@ -134,8 +153,10 @@ function AlunoAreaPage() {
                       className="mt-1 inline-flex items-center gap-1 text-[11px] text-primary"
                     >
                       <RouteIcon className="size-3" />
-                      {l.trip.distance_km != null ? `${formatDecimal(l.trip.distance_km)} km` : "trajeto"} ·{" "}
-                      {l.trip.harsh_brake_count} freada(s) brusca(s) · ver mapa
+                      {l.trip.distance_km != null
+                        ? `${formatDecimal(l.trip.distance_km)} km`
+                        : "trajeto"}{" "}
+                      · {l.trip.harsh_brake_count} freada(s) brusca(s) · ver mapa
                     </Link>
                   )}
                   {checks.length > 0 && (
@@ -151,12 +172,17 @@ function AlunoAreaPage() {
                                 : "border-destructive/30 text-destructive"
                           }`}
                         >
-                          {CHECKLIST_ITEMS.find((i) => i.id === c.id)?.label ?? c.id}: {CHECKLIST_MARK_LABEL[c.mark]}
+                          {CHECKLIST_ITEMS.find((i) => i.id === c.id)?.label ?? c.id}:{" "}
+                          {CHECKLIST_MARK_LABEL[c.mark]}
                         </span>
                       ))}
                     </div>
                   )}
-                  {l.notes && <p className="mt-1.5 whitespace-pre-wrap text-xs text-muted-foreground">“{l.notes}”</p>}
+                  {l.notes && (
+                    <p className="mt-1.5 whitespace-pre-wrap text-xs text-muted-foreground">
+                      “{l.notes}”
+                    </p>
+                  )}
                 </li>
               );
             })}

@@ -1,11 +1,5 @@
 import type { EcoEvent, EcoEventType, EcoSeverity } from "./detect";
-import {
-  DEFAULT_SPEC,
-  expectedKmpl,
-  type FuelKind,
-  type VehicleSpec,
-} from "@/lib/vehicles/specs";
-
+import { DEFAULT_SPEC, expectedKmpl, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
 
 /** Penalidade por evento (pontos por 100 km). */
 const PENALTY: Record<EcoEventType, Record<EcoSeverity, number>> = {
@@ -130,7 +124,6 @@ export function summarizeEco({
   // Combustível extra pelo estilo, limitado a 25% do consumo da viagem.
   const tripLiters = effectiveKmpl > 0 ? km / effectiveKmpl : 0;
   const wastedFuelLiters = Math.min(wasted, tripLiters * 0.25);
-
 
   return {
     score,

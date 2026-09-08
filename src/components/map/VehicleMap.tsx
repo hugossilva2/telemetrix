@@ -8,7 +8,14 @@ import { PlannedRouteLayer, type PlannedRoute } from "./PlannedRouteLayer";
 import { StyledTileLayers } from "./StyledTileLayers";
 import { detectStops, formatStopDuration } from "@/lib/map/stops";
 import { useMapStyle } from "@/lib/map/tiles";
-import { makeCarIcon, maxSpeedIcon, myLocationIcon, parkedIcon, startIcon, stopIcon } from "./icons";
+import {
+  makeCarIcon,
+  maxSpeedIcon,
+  myLocationIcon,
+  parkedIcon,
+  startIcon,
+  stopIcon,
+} from "./icons";
 import { haversineKm } from "@/lib/trips/geo";
 
 export type TrailPoint = [number, number];
@@ -21,11 +28,7 @@ function Recenter({ lat, lng, follow }: { lat: number; lng: number; follow: bool
   return null;
 }
 
-function ImperativeCenter({
-  bind,
-}: {
-  bind: (fn: (lat: number, lng: number) => void) => void;
-}) {
+function ImperativeCenter({ bind }: { bind: (fn: (lat: number, lng: number) => void) => void }) {
   const map = useMap();
   useEffect(() => {
     bind((lat, lng) => map.setView([lat, lng], map.getZoom(), { animate: true }));
@@ -97,7 +100,10 @@ export default function VehicleMap({
   const secondsAgo = lastUpdate ? Math.max(0, Math.round((Date.now() - lastUpdate) / 1000)) : null;
 
   return (
-    <div ref={containerRef} style={{ position: "relative", height: "100%", width: "100%", background: "#0b1220" }}>
+    <div
+      ref={containerRef}
+      style={{ position: "relative", height: "100%", width: "100%", background: "#0b1220" }}
+    >
       <MapContainer
         center={center}
         zoom={16}
@@ -270,7 +276,13 @@ export default function VehicleMap({
         <HudPill label={`Rota: ${distanceKm.toFixed(2)} km`} />
         <HudPill
           dot={status === "connected" ? "#22c55e" : "#ef4444"}
-          label={status === "connected" ? (secondsAgo != null ? `↻ ${secondsAgo}s` : "Ao vivo") : "Offline"}
+          label={
+            status === "connected"
+              ? secondsAgo != null
+                ? `↻ ${secondsAgo}s`
+                : "Ao vivo"
+              : "Offline"
+          }
         />
       </div>
 
@@ -281,9 +293,7 @@ export default function VehicleMap({
         follow={follow}
         onToggleFollow={() => setFollow((v) => !v)}
         onRecenter={
-          hasPosition
-            ? () => recenterRef.current(lat as number, lng as number)
-            : undefined
+          hasPosition ? () => recenterRef.current(lat as number, lng as number) : undefined
         }
       />
 

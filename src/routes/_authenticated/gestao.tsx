@@ -96,18 +96,38 @@ const links: { to: string; label: string; desc: string; Icon: LucideIcon }[] = [
 const appModeLinks: typeof links = [
   { to: "/corridas", label: "Corridas", desc: "Lançamento rápido e turnos", Icon: CarTaxiFront },
   { to: "/lucro", label: "Meu lucro", desc: "Ganhos − gastos, R$/km e R$/hora", Icon: PiggyBank },
-  { to: "/semana", label: "Semana", desc: "Relatório seg–dom, como no app de corridas", Icon: CalendarRange },
+  {
+    to: "/semana",
+    label: "Semana",
+    desc: "Relatório seg–dom, como no app de corridas",
+    Icon: CalendarRange,
+  },
   { to: "/rastreador", label: "Rastreio", desc: "Localização, alertas e geofences", Icon: Radar },
-  { to: "/viagens", label: "Viagens", desc: "Histórico gravado pelo OBD/rastreador", Icon: RouteIcon },
+  {
+    to: "/viagens",
+    label: "Viagens",
+    desc: "Histórico gravado pelo OBD/rastreador",
+    Icon: RouteIcon,
+  },
 ];
 
 const schoolLinks: typeof links = [
-  { to: "/escola", label: "Visão da escola", desc: "Aulas por instrutor, km e custo por carro", Icon: School },
+  {
+    to: "/escola",
+    label: "Visão da escola",
+    desc: "Aulas por instrutor, km e custo por carro",
+    Icon: School,
+  },
   { to: "/equipe", label: "Equipe e frota", desc: "Instrutores, convites e carros", Icon: Users },
 ];
 
 const teachingLinks: typeof links = [
-  { to: "/aulas", label: "Aulas", desc: "Agenda, iniciar/encerrar e checklist", Icon: CalendarDays },
+  {
+    to: "/aulas",
+    label: "Aulas",
+    desc: "Agenda, iniciar/encerrar e checklist",
+    Icon: CalendarDays,
+  },
   { to: "/alunos", label: "Alunos", desc: "Cadastro, convite e evolução", Icon: GraduationCap },
   { to: "/rastreador", label: "Rastreio", desc: "Localização, alertas e geofences", Icon: Radar },
 ];

@@ -19,7 +19,11 @@ export const Route = createFileRoute("/_authenticated/lucro")({
   head: () => ({
     meta: [
       { title: "Meu lucro · Telemetrix" },
-      { name: "description", content: "Ganhos menos combustível e despesas: lucro por dia, semana e mês, R$/km e R$/hora." },
+      {
+        name: "description",
+        content:
+          "Ganhos menos combustível e despesas: lucro por dia, semana e mês, R$/km e R$/hora.",
+      },
       { property: "og:title", content: "Meu lucro · Telemetrix" },
       { property: "og:description", content: "Lucro real do motorista de app." },
     ],
@@ -99,8 +103,16 @@ function LucroPage() {
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <Kpi label="R$/km" value={summary.profitPerKm != null ? formatBRL(summary.profitPerKm) : "—"} hint={`${summary.km.toLocaleString("pt-BR")} km`} />
-          <Kpi label="R$/hora" value={summary.profitPerHour != null ? formatBRL(summary.profitPerHour) : "—"} hint={`${summary.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h de turno`} />
+          <Kpi
+            label="R$/km"
+            value={summary.profitPerKm != null ? formatBRL(summary.profitPerKm) : "—"}
+            hint={`${summary.km.toLocaleString("pt-BR")} km`}
+          />
+          <Kpi
+            label="R$/hora"
+            value={summary.profitPerHour != null ? formatBRL(summary.profitPerHour) : "—"}
+            hint={`${summary.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h de turno`}
+          />
         </div>
       </section>
 
@@ -114,9 +126,28 @@ function LucroPage() {
       </Link>
 
       <section className="card-surface divide-y divide-border/60 p-0">
-        <Row Icon={Car} label="Ganhos" hint={summary.tips > 0 ? `inclui ${formatBRL(summary.tips)} em gorjetas` : "corridas + gorjetas"} value={formatBRL(summary.earnings)} />
-        <Row Icon={Fuel} label="Combustível" hint="abastecimentos do período" value={`− ${formatBRL(summary.fuelCost)}`} />
-        <Row Icon={Wallet} label="Outros gastos" hint="pedágio, lavagem, manutenção…" value={`− ${formatBRL(summary.otherCost)}`} />
+        <Row
+          Icon={Car}
+          label="Ganhos"
+          hint={
+            summary.tips > 0
+              ? `inclui ${formatBRL(summary.tips)} em gorjetas`
+              : "corridas + gorjetas"
+          }
+          value={formatBRL(summary.earnings)}
+        />
+        <Row
+          Icon={Fuel}
+          label="Combustível"
+          hint="abastecimentos do período"
+          value={`− ${formatBRL(summary.fuelCost)}`}
+        />
+        <Row
+          Icon={Wallet}
+          label="Outros gastos"
+          hint="pedágio, lavagem, manutenção…"
+          value={`− ${formatBRL(summary.otherCost)}`}
+        />
       </section>
 
       {chart.length > 0 && (
@@ -129,7 +160,12 @@ function LucroPage() {
                 <Tooltip
                   cursor={{ fill: "var(--accent)" }}
                   formatter={(v: number) => [formatBRL(v), "Ganhos"]}
-                  contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                  contentStyle={{
+                    background: "var(--card)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    fontSize: 12,
+                  }}
                 />
                 <Bar dataKey="value" fill="var(--primary)" radius={[6, 6, 0, 0]} />
               </BarChart>

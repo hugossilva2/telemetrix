@@ -20,11 +20,4 @@ export interface VehicleTelemetry {
   timestamp?: number; // epoch em segundos, se disponível
 }
 
-
-export type MqttStatus =
-  | "idle"
-  | "connecting"
-  | "connected"
-  | "reconnecting"
-  | "offline"
-  | "error";
+export type MqttStatus = "idle" | "connecting" | "connected" | "reconnecting" | "offline" | "error";

@@ -46,14 +46,18 @@ function PerfilDeUsoPage() {
           if (isTeachingMode(selected)) {
             try {
               await ensureSchool.mutateAsync({
-                name: displayName.trim() || (selected === "autoescola" ? "Minha autoescola" : "Minha escola"),
+                name:
+                  displayName.trim() ||
+                  (selected === "autoescola" ? "Minha autoescola" : "Minha escola"),
                 kind: selected as "instrutor" | "autoescola",
               });
             } catch {
               /* a tela de Aulas/Alunos oferece criar depois */
             }
           }
-          toast.success(needsOnboarding ? "Tudo pronto! Bem-vindo ao Telemetrix." : "Perfil de uso atualizado.");
+          toast.success(
+            needsOnboarding ? "Tudo pronto! Bem-vindo ao Telemetrix." : "Perfil de uso atualizado.",
+          );
           navigate({ to: needsOnboarding ? "/inicio" : "/ajustes", replace: true });
         },
         onError: (e: Error) =>

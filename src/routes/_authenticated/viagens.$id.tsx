@@ -140,9 +140,7 @@ function TripDetailPage() {
     },
   });
 
-  const routeTrail =
-    savedTrail ?? (pingTrail && pingTrail.length > 1 ? pingTrail : undefined);
-
+  const routeTrail = savedTrail ?? (pingTrail && pingTrail.length > 1 ? pingTrail : undefined);
 
   const ecoEvents = useMemo(() => (trip ? parseEcoEvents(trip.eco_events) : []), [trip]);
 

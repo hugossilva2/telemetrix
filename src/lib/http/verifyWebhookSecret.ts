@@ -25,9 +25,7 @@ export function verifyWebhookSecret(request: Request, url?: URL): boolean {
   if (!expected) return false;
 
   const parsedUrl = url ?? new URL(request.url);
-  const provided =
-    request.headers.get("x-webhook-secret") ??
-    parsedUrl.searchParams.get("secret");
+  const provided = request.headers.get("x-webhook-secret") ?? parsedUrl.searchParams.get("secret");
   if (!provided) return false;
 
   return timingSafeEqualStrings(provided, expected);

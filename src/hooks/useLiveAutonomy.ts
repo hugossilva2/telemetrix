@@ -40,7 +40,6 @@ const MAX_SAMPLES = 60;
  * estimado pelos abastecimentos entra no lugar da leitura do OBD).
  */
 export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
-
   const { telemetry } = useTelemetry();
   const { spec, fuel } = useActiveVehicle();
 
@@ -127,8 +126,7 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
     smoothed.current = on ? smooth(smoothed.current, raw) : smoothed.current;
     const kmpl = smoothed.current ?? raw;
 
-    const obdPct =
-      typeof fuelLevel === "number" && Number.isFinite(fuelLevel) ? fuelLevel : null;
+    const obdPct = typeof fuelLevel === "number" && Number.isFinite(fuelLevel) ? fuelLevel : null;
     const estimatedPct =
       typeof fallbackFuelPct === "number" && Number.isFinite(fallbackFuelPct)
         ? Math.max(0, Math.min(100, fallbackFuelPct))
@@ -166,5 +164,4 @@ export function useLiveAutonomy(fallbackFuelPct?: number | null): LiveAutonomy {
     spec,
     fuel,
   ]);
-
 }

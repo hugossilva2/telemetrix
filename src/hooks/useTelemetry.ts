@@ -40,4 +40,3 @@ export function useTelemetry(): UseTelemetryResult {
     disconnect: state.disconnect,
   };
 }
-

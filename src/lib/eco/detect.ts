@@ -6,14 +6,9 @@
 // chegam a cada ~6 s. Se um dia as chaves nativas aparecerem, o parser
 // preenche `greenDrivingType/Value` e a detecção nativa tem prioridade.
 
-import {
-  DEFAULT_SPEC,
-  referenceAccelKmhPerS,
-  type VehicleSpec,
-} from "@/lib/vehicles/specs";
+import { DEFAULT_SPEC, referenceAccelKmhPerS, type VehicleSpec } from "@/lib/vehicles/specs";
 
 export type EcoEventType =
-
   | "harsh_brake"
   | "harsh_accel"
   | "harsh_corner"
@@ -81,7 +76,6 @@ export function thresholdsFromSpec(spec: VehicleSpec = DEFAULT_SPEC): EcoThresho
 }
 
 export const DEFAULT_ECO_THRESHOLDS: EcoThresholds = thresholdsFromSpec();
-
 
 const MIN_DT_S = 1;
 const MAX_DT_S = 30;
@@ -164,14 +158,10 @@ export function detectBetween(
   }
 
   // Curva: aceleração lateral estimada = v * (Δrumo em rad/s)
-  if (
-    typeof prev.heading === "number" &&
-    typeof cur.heading === "number" &&
-    cur.speed > 15
-  ) {
+  if (typeof prev.heading === "number" && typeof cur.heading === "number" && cur.speed > 15) {
     const deg = headingDelta(prev.heading, cur.heading);
     const omega = (deg * Math.PI) / 180 / dt; // rad/s
-    const vMs = ((prev.speed + cur.speed) / 2) / 3.6;
+    const vMs = (prev.speed + cur.speed) / 2 / 3.6;
     const lateralG = (vMs * omega) / G;
     if (lateralG >= th.lateralG) {
       events.push({
@@ -192,11 +182,7 @@ export function detectBetween(
     });
   }
 
-  if (
-    typeof cur.rpm === "number" &&
-    cur.rpm > th.maxRpm &&
-    (prev.rpm ?? 0) <= th.maxRpm
-  ) {
+  if (typeof cur.rpm === "number" && cur.rpm > th.maxRpm && (prev.rpm ?? 0) <= th.maxRpm) {
     events.push({
       ...base,
       type: "high_rpm",

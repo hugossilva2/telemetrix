@@ -7,12 +7,24 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { formatBRL } from "@/lib/format";
 import { useActiveVehicle } from "@/lib/vehicles/active";
-import { invalidateSchool, useLessons, useMySchool, useStudents, type LessonRecord } from "@/lib/school/api";
+import {
+  invalidateSchool,
+  useLessons,
+  useMySchool,
+  useStudents,
+  type LessonRecord,
+} from "@/lib/school/api";
 import { lessonFinancials, lessonsOfDay } from "@/lib/school/lessons";
 import { LessonListItem } from "@/components/school/LessonListItem";
 import { SchoolSetupCard } from "@/components/school/SchoolSetupCard";
@@ -27,7 +39,11 @@ export const Route = createFileRoute("/_authenticated/aulas")({
   head: () => ({
     meta: [
       { title: "Aulas · Telemetrix" },
-      { name: "description", content: "Agenda de aulas práticas: agende, inicie e encerre; a viagem gravada vira o trajeto avaliado." },
+      {
+        name: "description",
+        content:
+          "Agenda de aulas práticas: agende, inicie e encerre; a viagem gravada vira o trajeto avaliado.",
+      },
       { property: "og:title", content: "Aulas · Telemetrix" },
       { property: "og:description", content: "Agenda de aulas do instrutor." },
     ],
@@ -81,15 +97,20 @@ function AulasPage() {
   });
   const [tab, setTab] = useState<"proximas" | "historico">("proximas");
 
-  const allSchool = lessons.data ?? [];
+  const allSchool = useMemo(() => lessons.data ?? [], [lessons.data]);
   // Instrutor de autoescola vê por padrão só as próprias aulas; o dono vê tudo.
-  const all = isSchool && !isOwner && onlyMine && meId ? allSchool.filter((l) => l.instructor_id === meId) : allSchool;
+  const all =
+    isSchool && !isOwner && onlyMine && meId
+      ? allSchool.filter((l) => l.instructor_id === meId)
+      : allSchool;
   const today = useMemo(() => lessonsOfDay(all), [all]);
 
   const fleetCars = fleet.data?.fleet ?? [];
   const allowedCars =
     isSchool && !isOwner && (assignments.data ?? []).some((a) => a.user_id === meId)
-      ? fleetCars.filter((v) => (assignments.data ?? []).some((a) => a.user_id === meId && a.vehicle_id === v.id))
+      ? fleetCars.filter((v) =>
+          (assignments.data ?? []).some((a) => a.user_id === meId && a.vehicle_id === v.id),
+        )
       : fleetCars;
   const chosenVehicle = lessonVehicleId || (allowedCars.length > 0 ? allowedCars[0].id : vehicleId);
   const draftConflicts = useMemo(() => {
@@ -107,7 +128,9 @@ function AulasPage() {
   const inProgress = all.find((l) => l.status === "em_andamento") ?? null;
   const now = Date.now();
   const upcoming = all
-    .filter((l) => l.status === "agendada" && new Date(l.scheduled_at).getTime() >= now - 3 * 3_600_000)
+    .filter(
+      (l) => l.status === "agendada" && new Date(l.scheduled_at).getTime() >= now - 3 * 3_600_000,
+    )
     .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at));
   const history = all.filter((l) => !upcoming.includes(l) && l.status !== "em_andamento");
   const monthFin = useMemo(() => {
@@ -163,8 +186,17 @@ function AulasPage() {
   const activeStudents = (students.data ?? []).filter((s) => s.active);
 
   return (
-    <AppShell title="Aulas" subtitle={`${today.length} hoje · ${upcoming.length} agendada${upcoming.length === 1 ? "" : "s"}`}>
-      {inProgress && <InProgressCard lesson={inProgress} onEnd={() => endLesson.mutate(inProgress)} ending={endLesson.isPending} />}
+    <AppShell
+      title="Aulas"
+      subtitle={`${today.length} hoje · ${upcoming.length} agendada${upcoming.length === 1 ? "" : "s"}`}
+    >
+      {inProgress && (
+        <InProgressCard
+          lesson={inProgress}
+          onEnd={() => endLesson.mutate(inProgress)}
+          ending={endLesson.isPending}
+        />
+      )}
 
       {!inProgress && today.length > 0 && (
         <section className="card-surface border-primary/30 p-4">
@@ -173,20 +205,36 @@ function AulasPage() {
           </h2>
           <ul className="mt-2 space-y-2">
             {today.map((l) => (
-              <li key={l.id} className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-2.5">
+              <li
+                key={l.id}
+                className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-2.5"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{l.student?.name}</p>
                   <p className="text-[11px] text-muted-foreground">
-                    {new Date(l.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {l.duration_min} min
+                    {new Date(l.scheduled_at).toLocaleTimeString("pt-BR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}{" "}
+                    · {l.duration_min} min
                     {l.status === "concluida" && " · concluída"}
                   </p>
                 </div>
                 {l.status === "agendada" ? (
-                  <Button size="sm" className="h-9" disabled={startLesson.isPending} onClick={() => startLesson.mutate(l)}>
+                  <Button
+                    size="sm"
+                    className="h-9"
+                    disabled={startLesson.isPending}
+                    onClick={() => startLesson.mutate(l)}
+                  >
                     <Play className="size-4" /> Iniciar
                   </Button>
                 ) : (
-                  <Link to="/aulas/$id" params={{ id: l.id }} className="text-xs font-semibold text-primary">
+                  <Link
+                    to="/aulas/$id"
+                    params={{ id: l.id }}
+                    className="text-xs font-semibold text-primary"
+                  >
                     Ver
                   </Link>
                 )}
@@ -199,7 +247,12 @@ function AulasPage() {
       {isSchool && !isOwner && (
         <label className="flex items-center justify-between text-xs text-muted-foreground">
           <span>Mostrar só as minhas aulas</span>
-          <input type="checkbox" className="size-4 accent-primary" checked={onlyMine} onChange={(e) => setOnlyMine(e.target.checked)} />
+          <input
+            type="checkbox"
+            className="size-4 accent-primary"
+            checked={onlyMine}
+            onChange={(e) => setOnlyMine(e.target.checked)}
+          />
         </label>
       )}
 
@@ -216,7 +269,12 @@ function AulasPage() {
             </button>
           ))}
         </div>
-        <Button type="button" className="h-11 shrink-0" onClick={() => setOpen((v) => !v)} disabled={activeStudents.length === 0}>
+        <Button
+          type="button"
+          className="h-11 shrink-0"
+          onClick={() => setOpen((v) => !v)}
+          disabled={activeStudents.length === 0}
+        >
           <Plus className="size-4" /> Agendar
         </Button>
       </div>
@@ -292,23 +350,47 @@ function AulasPage() {
           )}
           <div className="space-y-1.5">
             <Label htmlFor="ls-when">Data e hora</Label>
-            <Input id="ls-when" type="datetime-local" value={when} onChange={(e) => setWhen(e.target.value)} className="h-11" required />
+            <Input
+              id="ls-when"
+              type="datetime-local"
+              value={when}
+              onChange={(e) => setWhen(e.target.value)}
+              className="h-11"
+              required
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="ls-dur">Duração (min)</Label>
-              <Input id="ls-dur" type="number" inputMode="numeric" min="10" step="5" value={duration} onChange={(e) => setDuration(e.target.value)} className="h-11" />
+              <Input
+                id="ls-dur"
+                type="number"
+                inputMode="numeric"
+                min="10"
+                step="5"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ls-price">Valor (R$)</Label>
-              <Input id="ls-price" inputMode="decimal" placeholder="0,00" value={price} onChange={(e) => setPrice(e.target.value)} className="h-11" />
+              <Input
+                id="ls-price"
+                inputMode="decimal"
+                placeholder="0,00"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="h-11"
+              />
             </div>
           </div>
           {draftConflicts.length > 0 && (
             <p className="flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/10 p-2 text-[11px] text-warning">
               <AlertTriangle className="mt-px size-3.5 shrink-0" />
-              Conflito de horário: {draftConflicts[0].kind === "instrutor" ? "este instrutor" : "este carro"} já tem aula nesse período.
-              Você ainda pode agendar.
+              Conflito de horário:{" "}
+              {draftConflicts[0].kind === "instrutor" ? "este instrutor" : "este carro"} já tem aula
+              nesse período. Você ainda pode agendar.
             </p>
           )}
           <div className="flex gap-2">
@@ -327,7 +409,9 @@ function AulasPage() {
           <p className="p-4 text-xs text-muted-foreground">Carregando aulas…</p>
         ) : (tab === "proximas" ? upcoming : history).length === 0 ? (
           <p className="p-4 text-xs text-muted-foreground">
-            {tab === "proximas" ? "Nenhuma aula agendada." : "Sem aulas anteriores nos últimos 90 dias."}
+            {tab === "proximas"
+              ? "Nenhuma aula agendada."
+              : "Sem aulas anteriores nos últimos 90 dias."}
           </p>
         ) : (
           <ul className="divide-y divide-border/60">
@@ -335,7 +419,11 @@ function AulasPage() {
               <LessonListItem
                 key={l.id}
                 lesson={l}
-                instructorName={isSchool && (isOwner || !onlyMine) ? memberName(team.data, l.instructor_id) : undefined}
+                instructorName={
+                  isSchool && (isOwner || !onlyMine)
+                    ? memberName(team.data, l.instructor_id)
+                    : undefined
+                }
               />
             ))}
           </ul>
@@ -351,14 +439,20 @@ function AulasPage() {
           </div>
           <div className="rounded-xl bg-background/35 p-2">
             <p className="text-[10px] text-muted-foreground">Recebido</p>
-            <p className="font-mono text-sm font-semibold text-success">{formatBRL(monthFin.received)}</p>
+            <p className="font-mono text-sm font-semibold text-success">
+              {formatBRL(monthFin.received)}
+            </p>
           </div>
           <div className="rounded-xl bg-background/35 p-2">
             <p className="text-[10px] text-muted-foreground">Pendente</p>
-            <p className={`font-mono text-sm font-semibold ${monthFin.pending > 0 ? "text-warning" : ""}`}>
+            <p
+              className={`font-mono text-sm font-semibold ${monthFin.pending > 0 ? "text-warning" : ""}`}
+            >
               {formatBRL(monthFin.pending)}
             </p>
-            {monthFin.pendingCount > 0 && <p className="text-[10px] text-muted-foreground">{monthFin.pendingCount} aula(s)</p>}
+            {monthFin.pendingCount > 0 && (
+              <p className="text-[10px] text-muted-foreground">{monthFin.pendingCount} aula(s)</p>
+            )}
           </div>
         </div>
       </section>
@@ -366,7 +460,15 @@ function AulasPage() {
   );
 }
 
-function InProgressCard({ lesson, onEnd, ending }: { lesson: LessonRecord; onEnd: () => void; ending: boolean }) {
+function InProgressCard({
+  lesson,
+  onEnd,
+  ending,
+}: {
+  lesson: LessonRecord;
+  onEnd: () => void;
+  ending: boolean;
+}) {
   const startedMs = lesson.started_at ? new Date(lesson.started_at).getTime() : Date.now();
   const elapsed = Math.max(0, Math.round((Date.now() - startedMs) / 60000));
   return (
@@ -377,13 +479,21 @@ function InProgressCard({ lesson, onEnd, ending }: { lesson: LessonRecord; onEnd
           <Play className="relative size-5" />
         </span>
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">Aula em andamento</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wide text-primary">
+            Aula em andamento
+          </p>
           <p className="truncate text-sm font-semibold">{lesson.student?.name}</p>
           <p className="text-[11px] text-muted-foreground">
             {elapsed} min · previsto {lesson.duration_min} min
           </p>
         </div>
-        <Button type="button" variant="destructive" className="h-10" onClick={onEnd} disabled={ending}>
+        <Button
+          type="button"
+          variant="destructive"
+          className="h-10"
+          onClick={onEnd}
+          disabled={ending}
+        >
           <Square className="size-4" /> Encerrar
         </Button>
       </div>

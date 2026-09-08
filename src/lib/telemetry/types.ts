@@ -25,7 +25,6 @@ export interface TelemetryState {
   forgetDevice?: () => void;
 }
 
-
 export const SOURCE_LABEL: Record<TelemetrySource, string> = {
   fmc003: "Equipamento dedicado (nuvem)",
   elm327: "Adaptador OBD-II (Bluetooth)",

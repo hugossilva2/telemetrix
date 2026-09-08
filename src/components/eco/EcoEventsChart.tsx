@@ -57,9 +57,7 @@ export function EcoEventsChart({ events }: { events: EcoEvent[] }) {
 
   return (
     <div className="card-surface p-4">
-      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-        Perfil da viagem
-      </p>
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Perfil da viagem</p>
       <div className="mt-3 h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
@@ -111,10 +109,7 @@ export function EcoEventsChart({ events }: { events: EcoEvent[] }) {
             key={type}
             className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground"
           >
-            <span
-              className="inline-block size-2 rounded-full"
-              style={{ background: HEX[type] }}
-            />
+            <span className="inline-block size-2 rounded-full" style={{ background: HEX[type] }} />
             {ECO_EVENT_LABEL[type]}
           </span>
         ))}

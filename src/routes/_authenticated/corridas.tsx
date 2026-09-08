@@ -16,12 +16,7 @@ import { LimitCounter, PlanLimitCard } from "@/components/billing/PlanLimitCard"
 import { countInMonth, limitStatus } from "@/lib/billing/plans";
 import { useSubscription } from "@/lib/billing/subscription";
 import { useTelemetry } from "@/hooks/useTelemetry";
-import {
-  invalidateRides,
-  useOpenShift,
-  useRides,
-  type RideRecord,
-} from "@/lib/rides/api";
+import { invalidateRides, useOpenShift, useRides, type RideRecord } from "@/lib/rides/api";
 import {
   RIDE_PLATFORMS,
   dayPeriod,
@@ -34,7 +29,10 @@ export const Route = createFileRoute("/_authenticated/corridas")({
   head: () => ({
     meta: [
       { title: "Corridas · Telemetrix" },
-      { name: "description", content: "Lance corridas Uber/99 em 2 toques e controle seus turnos." },
+      {
+        name: "description",
+        content: "Lance corridas Uber/99 em 2 toques e controle seus turnos.",
+      },
       { property: "og:title", content: "Corridas · Telemetrix" },
       { property: "og:description", content: "Corridas e turnos do motorista de app." },
     ],
@@ -120,7 +118,9 @@ function CorridasPage() {
       const value = num(amount);
       if (!(value !== null && value > 0)) throw new Error("Informe o valor da corrida.");
       if (!editingId && rideLimit.atLimit) {
-        throw new Error(`Seu plano permite ${rideLimit.max} corridas por mês. Faça upgrade para lançar sem limite.`);
+        throw new Error(
+          `Seu plano permite ${rideLimit.max} corridas por mês. Faça upgrade para lançar sem limite.`,
+        );
       }
       const payload = {
         platform,
@@ -211,7 +211,9 @@ function CorridasPage() {
           <Clock className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">{openShift ? "Turno em andamento" : "Sem turno aberto"}</p>
+          <p className="text-sm font-semibold">
+            {openShift ? "Turno em andamento" : "Sem turno aberto"}
+          </p>
           <p className="truncate text-xs text-muted-foreground">
             {openShift
               ? `${Math.floor(shiftElapsed / 60)}h${String(shiftElapsed % 60).padStart(2, "0")} · ${today.rides} corrida(s) hoje`
@@ -245,13 +247,18 @@ function CorridasPage() {
         </div>
       </div>
 
-      <Link to="/lucro" className="flex items-center gap-3 card-surface p-3 transition-colors hover:bg-accent">
+      <Link
+        to="/lucro"
+        className="flex items-center gap-3 card-surface p-3 transition-colors hover:bg-accent"
+      >
         <div className="grid size-10 place-items-center rounded-full bg-primary/10 text-primary">
           <PiggyBank className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium">Meu lucro</p>
-          <p className="truncate text-xs text-muted-foreground">Ganhos − combustível − gastos · R$/km e R$/hora</p>
+          <p className="truncate text-xs text-muted-foreground">
+            Ganhos − combustível − gastos · R$/km e R$/hora
+          </p>
         </div>
       </Link>
 
@@ -273,7 +280,11 @@ function CorridasPage() {
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold">{editingId ? "Editar corrida" : "Nova corrida"}</h2>
           {editingId && (
-            <button type="button" onClick={resetForm} className="text-xs font-medium text-muted-foreground">
+            <button
+              type="button"
+              onClick={resetForm}
+              className="text-xs font-medium text-muted-foreground"
+            >
               Cancelar edição
             </button>
           )}
@@ -331,24 +342,55 @@ function CorridasPage() {
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="ride-tip">Gorjeta</Label>
-              <Input id="ride-tip" type="number" inputMode="decimal" step="0.01" min="0" value={tip} onChange={(e) => setTip(e.target.value)} className="h-11" />
+              <Input
+                id="ride-tip"
+                type="number"
+                inputMode="decimal"
+                step="0.01"
+                min="0"
+                value={tip}
+                onChange={(e) => setTip(e.target.value)}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ride-min">Minutos</Label>
-              <Input id="ride-min" type="number" inputMode="numeric" min="0" value={minutes} onChange={(e) => setMinutes(e.target.value)} className="h-11" />
+              <Input
+                id="ride-min"
+                type="number"
+                inputMode="numeric"
+                min="0"
+                value={minutes}
+                onChange={(e) => setMinutes(e.target.value)}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="ride-when">Quando</Label>
-              <Input id="ride-when" type="datetime-local" value={when || nowLocalInput()} onChange={(e) => setWhen(e.target.value)} className="h-11 text-xs" />
+              <Input
+                id="ride-when"
+                type="datetime-local"
+                value={when || nowLocalInput()}
+                onChange={(e) => setWhen(e.target.value)}
+                className="h-11 text-xs"
+              />
             </div>
           </div>
         ) : (
-          <button type="button" onClick={() => setShowMore(true)} className="text-xs font-medium text-primary">
+          <button
+            type="button"
+            onClick={() => setShowMore(true)}
+            className="text-xs font-medium text-primary"
+          >
             + gorjeta, minutos e horário
           </button>
         )}
 
-        <Button type="submit" className="h-12 w-full text-base" disabled={save.isPending || (!editingId && rideLimit.atLimit)}>
+        <Button
+          type="submit"
+          className="h-12 w-full text-base"
+          disabled={save.isPending || (!editingId && rideLimit.atLimit)}
+        >
           {save.isPending ? "Salvando..." : editingId ? "Salvar alterações" : "Registrar corrida"}
         </Button>
       </form>

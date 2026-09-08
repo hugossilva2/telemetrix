@@ -49,7 +49,6 @@ export function VehicleSwitcher() {
             <Crown className="size-3.5" /> Planos e limites
           </Link>
         </DropdownMenuItem>
-
       </DropdownMenuContent>
     </DropdownMenu>
   );

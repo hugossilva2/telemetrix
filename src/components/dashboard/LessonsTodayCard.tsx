@@ -38,13 +38,18 @@ export function LessonsTodayCard() {
       </header>
 
       {inProgress ? (
-        <Link to="/aulas" className="mt-3 flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3">
+        <Link
+          to="/aulas"
+          className="mt-3 flex items-center gap-3 rounded-xl border border-primary/40 bg-primary/10 p-3"
+        >
           <span className="relative grid size-9 place-items-center rounded-full bg-primary/15 text-primary">
             <span className="absolute inset-0 animate-ping rounded-full bg-primary/20" />
             <Play className="relative size-4" />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[10px] font-semibold uppercase tracking-wide text-primary">Em andamento</span>
+            <span className="block text-[10px] font-semibold uppercase tracking-wide text-primary">
+              Em andamento
+            </span>
             <span className="block truncate text-sm font-semibold">{inProgress.student?.name}</span>
           </span>
         </Link>
@@ -56,7 +61,11 @@ export function LessonsTodayCard() {
           <span className="min-w-0 flex-1">
             <span className="block text-[10px] text-muted-foreground">Próxima aula</span>
             <span className="block truncate text-sm font-semibold">
-              {new Date(next.scheduled_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} · {next.student?.name}
+              {new Date(next.scheduled_at).toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}{" "}
+              · {next.student?.name}
             </span>
           </span>
           <button
@@ -73,11 +82,18 @@ export function LessonsTodayCard() {
       )}
 
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <Link to="/aulas" className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/70 bg-background/35 text-xs font-semibold">
+        <Link
+          to="/aulas"
+          className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/70 bg-background/35 text-xs font-semibold"
+        >
           <CalendarDays className="size-4 text-primary" /> Agenda
         </Link>
-        <Link to="/alunos" className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/70 bg-background/35 text-xs font-semibold">
-          <Users className="size-4 text-primary" /> {activeStudents} aluno{activeStudents === 1 ? "" : "s"}
+        <Link
+          to="/alunos"
+          className="flex h-10 items-center justify-center gap-2 rounded-xl border border-border/70 bg-background/35 text-xs font-semibold"
+        >
+          <Users className="size-4 text-primary" /> {activeStudents} aluno
+          {activeStudents === 1 ? "" : "s"}
         </Link>
       </div>
     </section>

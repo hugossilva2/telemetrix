@@ -88,8 +88,6 @@ function ObdBridge({ publish }: { publish: Publish }) {
   return null;
 }
 
-
-
 export function TelemetryProvider({ children }: { children: ReactNode }) {
   const { source } = useTelemetrySource();
   const [state, setState] = useState<TelemetryState>(initialState);
@@ -101,11 +99,7 @@ export function TelemetryProvider({ children }: { children: ReactNode }) {
 
   return (
     <TelemetryContext.Provider value={state}>
-      {source === "elm327" ? (
-        <ObdBridge publish={setState} />
-      ) : (
-        <FlespiBridge publish={setState} />
-      )}
+      {source === "elm327" ? <ObdBridge publish={setState} /> : <FlespiBridge publish={setState} />}
       {children}
     </TelemetryContext.Provider>
   );

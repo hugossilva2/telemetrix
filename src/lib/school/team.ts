@@ -35,7 +35,8 @@ export function findLessonConflicts(lessons: TeamLesson[]): LessonConflict[] {
       const A = active[i];
       const B = active[j];
       if (A.instructor_id === B.instructor_id) out.push({ a: A.id, b: B.id, kind: "instrutor" });
-      else if (A.vehicle_id && A.vehicle_id === B.vehicle_id) out.push({ a: A.id, b: B.id, kind: "veiculo" });
+      else if (A.vehicle_id && A.vehicle_id === B.vehicle_id)
+        out.push({ a: A.id, b: B.id, kind: "veiculo" });
     }
   }
   return out;
@@ -44,7 +45,12 @@ export function findLessonConflicts(lessons: TeamLesson[]): LessonConflict[] {
 /** Conflitos de uma aula nova (ainda sem id) contra a agenda existente. */
 export function conflictsForNew(
   lessons: TeamLesson[],
-  draft: { scheduled_at: string; duration_min: number; instructor_id: string; vehicle_id: string | null },
+  draft: {
+    scheduled_at: string;
+    duration_min: number;
+    instructor_id: string;
+    vehicle_id: string | null;
+  },
 ): LessonConflict[] {
   return findLessonConflicts([
     ...lessons,
@@ -74,7 +80,9 @@ export function instructorStats(lessons: TeamLesson[]): InstructorStat[] {
   const out: InstructorStat[] = [];
   for (const [instructor_id, ls] of by) {
     const done = ls.filter((l) => l.status === "concluida");
-    const ecos = done.map((l) => l.trip_eco_score).filter((v): v is number => typeof v === "number");
+    const ecos = done
+      .map((l) => l.trip_eco_score)
+      .filter((v): v is number => typeof v === "number");
     const avgEco = ecos.length ? Math.round(ecos.reduce((a, b) => a + b, 0) / ecos.length) : null;
     const hours = done.reduce((s, l) => s + l.duration_min, 0) / 60;
     const revenue = done.reduce((s, l) => s + (l.price ?? 0), 0);
@@ -111,14 +119,20 @@ export interface FleetStat {
   kmPerLesson: number | null;
 }
 
-export function fleetStats(vehicleIds: string[], trips: FleetTrip[], lessons: TeamLesson[]): FleetStat[] {
+export function fleetStats(
+  vehicleIds: string[],
+  trips: FleetTrip[],
+  lessons: TeamLesson[],
+): FleetStat[] {
   return vehicleIds
     .map((vehicle_id) => {
       const t = trips.filter((x) => x.vehicle_id === vehicle_id);
       const km = t.reduce((s, x) => s + (x.distance_km ?? 0), 0);
       const liters = t.reduce((s, x) => s + (x.fuel_liters ?? 0), 0);
       const fuelCost = t.reduce((s, x) => s + (x.estimated_cost ?? 0), 0);
-      const done = lessons.filter((l) => l.vehicle_id === vehicle_id && l.status === "concluida").length;
+      const done = lessons.filter(
+        (l) => l.vehicle_id === vehicle_id && l.status === "concluida",
+      ).length;
       return {
         vehicle_id,
         km: Math.round(km * 10) / 10,

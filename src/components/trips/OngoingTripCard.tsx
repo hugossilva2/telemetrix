@@ -81,7 +81,6 @@ export function OngoingTripCard() {
 
   const distanceKm = openTripDistanceKm(open) ?? 0;
 
-
   const price = fuelRefs.pricePerLiter;
   const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
   const { kmpl, source: fuelSource } = resolveKmpl({

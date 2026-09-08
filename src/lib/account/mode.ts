@@ -62,9 +62,7 @@ export const ACCOUNT_MODE_INFO: Record<AccountMode, AccountModeInfo> = {
 };
 
 export function parseAccountMode(value: string | null | undefined): AccountMode {
-  return value === "app" || value === "instrutor" || value === "autoescola"
-    ? value
-    : "motorista";
+  return value === "app" || value === "instrutor" || value === "autoescola" ? value : "motorista";
 }
 
 /** Modos de ensino compartilham a estrutura de "escola". */

@@ -16,9 +16,7 @@ export async function uploadDocFile(file: File, folder: string): Promise<string>
 }
 
 export async function openDocFile(path: string) {
-  const { data, error } = await supabase.storage
-    .from(DOCS_BUCKET)
-    .createSignedUrl(path, 60 * 5);
+  const { data, error } = await supabase.storage.from(DOCS_BUCKET).createSignedUrl(path, 60 * 5);
   if (error) throw error;
   window.open(data.signedUrl, "_blank", "noopener,noreferrer");
 }

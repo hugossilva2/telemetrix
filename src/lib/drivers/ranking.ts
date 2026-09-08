@@ -57,7 +57,9 @@ export function useDriverRanking() {
       return ((drivers.data ?? []) as DriverRow[])
         .map((driver) => ({
           driver,
-          result: computeDriverScore(tripsBy.get(driver.id) ?? [], startsBy.get(driver.id) ?? [], { fuel: getFuelKind() }),
+          result: computeDriverScore(tripsBy.get(driver.id) ?? [], startsBy.get(driver.id) ?? [], {
+            fuel: getFuelKind(),
+          }),
         }))
         .sort((a, b) => {
           const sa = a.result.score ?? -1;

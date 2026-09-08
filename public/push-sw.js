@@ -29,7 +29,10 @@ self.addEventListener("notificationclick", (event) => {
 
   event.waitUntil(
     (async () => {
-      const clientsList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      const clientsList = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
       for (const client of clientsList) {
         if (new URL(client.url).origin === self.location.origin) {
           await client.focus();

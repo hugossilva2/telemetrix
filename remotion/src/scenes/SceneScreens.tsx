@@ -1,4 +1,13 @@
-import { AbsoluteFill, Img, Sequence, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import {
+  AbsoluteFill,
+  Img,
+  Sequence,
+  interpolate,
+  spring,
+  staticFile,
+  useCurrentFrame,
+  useVideoConfig,
+} from "remotion";
 import { C } from "../theme";
 import { display, body } from "../fonts";
 
@@ -42,8 +51,16 @@ export const SceneScreens = () => {
 
   return (
     <AbsoluteFill style={{ fontFamily: body, alignItems: "center", justifyContent: "center" }}>
-      <div style={{ textAlign: "center", opacity: title, transform: `translateY(${(1 - title) * -20}px)` }}>
-        <span style={{ fontSize: 26, letterSpacing: 5, textTransform: "uppercase", color: C.primary }}>
+      <div
+        style={{
+          textAlign: "center",
+          opacity: title,
+          transform: `translateY(${(1 - title) * -20}px)`,
+        }}
+      >
+        <span
+          style={{ fontSize: 26, letterSpacing: 5, textTransform: "uppercase", color: C.primary }}
+        >
           telas reais do app
         </span>
         <h2

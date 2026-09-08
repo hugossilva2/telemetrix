@@ -18,8 +18,6 @@ import {
  * para não repetir até o sinal voltar (o webhook limpa a flag).
  */
 
-
-
 export const Route = createFileRoute("/api/public/tracker-heartbeat")({
   server: {
     handlers: {
@@ -28,10 +26,7 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
           return new Response("Unauthorized", { status: 401 });
         }
 
-
-        const { supabaseAdmin } = await import(
-          "@/integrations/supabase/client.server"
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { sendTrackerEventPush } = await import("@/lib/push/send.server");
 
         const nowMs = Date.now();
@@ -41,7 +36,9 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
 
         const { data: vehicles } = await supabaseAdmin
           .from("vehicles")
-          .select("id,user_id,flespi_device_id,alert_signal_lost,tracker_mode,signal_lost_notified_at")
+          .select(
+            "id,user_id,flespi_device_id,alert_signal_lost,tracker_mode,signal_lost_notified_at",
+          )
           .eq("tracker_mode", true)
           .eq("alert_signal_lost", true)
           .not("flespi_device_id", "is", null);
@@ -63,8 +60,7 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
           if (!lastMsg) continue; // nunca recebemos mensagem — não alertar
           const lastMsgMs = new Date(lastMsg as string).getTime();
           // Estacionado o keep-alive é horário; só alerta após um silêncio longo.
-          const effectiveCutoffMs =
-            state?.ignition_on === true ? cutoffMs : parkedCutoffMs;
+          const effectiveCutoffMs = state?.ignition_on === true ? cutoffMs : parkedCutoffMs;
           if (lastMsgMs > effectiveCutoffMs) continue; // ainda em dia
 
           // Não repetir alertas em sequência (keep-alive limpa a flag do veículo).
@@ -73,10 +69,7 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             .select("id")
             .eq("vehicle_id", v.id as string)
             .eq("type", "signal_lost")
-            .gte(
-              "occurred_at",
-              new Date(nowMs - REALERT_COOLDOWN_MIN * 60 * 1000).toISOString(),
-            )
+            .gte("occurred_at", new Date(nowMs - REALERT_COOLDOWN_MIN * 60 * 1000).toISOString())
             .limit(1)
             .maybeSingle();
           if (recentAlert) continue;
@@ -102,7 +95,9 @@ export const Route = createFileRoute("/api/public/tracker-heartbeat")({
             .update({ signal_lost_notified_at: new Date().toISOString() })
             .eq("id", v.id);
 
-          await sendTrackerEventPush(v.user_id as string, "signal_lost", { vehicleId: v.id as string });
+          await sendTrackerEventPush(v.user_id as string, "signal_lost", {
+            vehicleId: v.id as string,
+          });
 
           flagged++;
         }

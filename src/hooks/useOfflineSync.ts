@@ -22,7 +22,9 @@ export function useOfflineSync() {
       const { synced } = await flushOfflineQueue();
       if (cancelled || synced === 0) return;
       toast.success(
-        synced === 1 ? "1 registro offline sincronizado" : `${synced} registros offline sincronizados`,
+        synced === 1
+          ? "1 registro offline sincronizado"
+          : `${synced} registros offline sincronizados`,
       );
       queryClient.invalidateQueries({ queryKey: ["trips-list"] });
     };

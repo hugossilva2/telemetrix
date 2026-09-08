@@ -46,6 +46,8 @@ export function DestinationSearch({ bias, onPick, placeholder = "Para onde vamos
       }
     }, 350);
     return () => window.clearTimeout(timer);
+    // `bias` é um objeto novo a cada render; dependemos só das coordenadas.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, bias?.lat, bias?.lng]);
 
   const handlePick = async (s: PlaceSuggestion) => {

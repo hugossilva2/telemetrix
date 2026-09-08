@@ -17,7 +17,6 @@ import { getActiveVehicleId, VEHICLE_SELECT } from "@/lib/vehicles/active";
 
 import { MIN_DISTANCE_KM, MIN_DURATION_S } from "@/lib/trips/thresholds";
 
-
 function trailDistanceKm(trip: OpenTrip) {
   let km = 0;
   for (let i = 1; i < trip.trail.length; i++) {
@@ -90,7 +89,6 @@ export async function saveClosedTrip(
   // vehicles.fuel_kind é a fonte de verdade; localStorage só como cache offline.
   const fuel = vehicle?.fuel_kind ? parseFuelKind(vehicle.fuel_kind) : getFuelKind();
   const spec = specFromVehicleRow(vehicle);
-
 
   // Calibração medida cheio-a-cheio do veículo, quando existir.
   const { data: calibration } = vehicle?.id

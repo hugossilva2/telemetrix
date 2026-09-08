@@ -93,7 +93,6 @@ export function isWebBluetoothSupported(): boolean {
   return typeof navigator !== "undefined" && "bluetooth" in navigator;
 }
 
-
 export class Elm327Client {
   private device: BluetoothDevice | null = null;
   private writeChar: BluetoothRemoteGATTCharacteristic | null = null;
@@ -118,7 +117,6 @@ export class Elm327Client {
   get deviceId(): string | null {
     return this.device?.id ?? null;
   }
-
 
   get connected(): boolean {
     return !!this.device?.gatt?.connected && !!this.writeChar;
@@ -210,7 +208,6 @@ export class Elm327Client {
     this.events.onStatus?.("connected");
   }
 
-
   private handleDisconnect = () => {
     this.writeChar = null;
     this.notifyChar = null;
@@ -279,7 +276,6 @@ export class Elm327Client {
       );
     }
   }
-
 
   disconnect() {
     this.closed = true;

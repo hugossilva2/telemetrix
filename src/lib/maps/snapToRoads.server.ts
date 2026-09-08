@@ -43,9 +43,11 @@ async function snapBatch(points: SnapInput[], offset: number): Promise<SnappedPo
 
   if (res.status === 403) {
     const details: Array<{ reason?: string }> =
-      ((await res.json().catch(() => ({}))) as {
-        error?: { details?: Array<{ reason?: string }> };
-      })?.error?.details ?? [];
+      (
+        (await res.json().catch(() => ({}))) as {
+          error?: { details?: Array<{ reason?: string }> };
+        }
+      )?.error?.details ?? [];
     const reason = details.find((d) => d.reason)?.reason;
     if (reason === "API_KEY_HTTP_REFERRER_BLOCKED") {
       throw new Error(
@@ -83,10 +85,7 @@ async function snapBatch(points: SnapInput[], offset: number): Promise<SnappedPo
  *
  * @param maxPoints trava de custo — cada 100 pontos = 1 requisição Google.
  */
-export async function snapTrail(
-  points: SnapInput[],
-  maxPoints = 5000,
-): Promise<SnapResult> {
+export async function snapTrail(points: SnapInput[], maxPoints = 5000): Promise<SnapResult> {
   const raw = (points ?? []).filter(
     (p) =>
       typeof p?.lat === "number" &&

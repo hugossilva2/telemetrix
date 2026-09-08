@@ -7,7 +7,13 @@ import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { invalidateSchool, useLessons, useMySchool, useStudents } from "@/lib/school/api";
@@ -21,7 +27,10 @@ export const Route = createFileRoute("/_authenticated/alunos")({
   head: () => ({
     meta: [
       { title: "Alunos · Telemetrix" },
-      { name: "description", content: "Cadastro de alunos, categoria, RENACH e aulas contratadas x realizadas." },
+      {
+        name: "description",
+        content: "Cadastro de alunos, categoria, RENACH e aulas contratadas x realizadas.",
+      },
       { property: "og:title", content: "Alunos · Telemetrix" },
       { property: "og:description", content: "Seus alunos e a evolução de cada um." },
     ],
@@ -71,7 +80,9 @@ function AlunosPage() {
       if (!school) throw new Error("Escola não encontrada");
       if (!name.trim()) throw new Error("Informe o nome do aluno.");
       if (studentLimit.atLimit) {
-        throw new Error(`Seu plano permite ${studentLimit.max} alunos ativos. Faça upgrade para cadastrar mais.`);
+        throw new Error(
+          `Seu plano permite ${studentLimit.max} alunos ativos. Faça upgrade para cadastrar mais.`,
+        );
       }
       const { error } = await supabase.from("students").insert({
         org_id: school.id,
@@ -139,12 +150,24 @@ function AlunosPage() {
           <h2 className="text-sm font-semibold">Novo aluno</h2>
           <div className="space-y-1.5">
             <Label htmlFor="st-name">Nome</Label>
-            <Input id="st-name" value={name} onChange={(e) => setName(e.target.value)} required className="h-11" />
+            <Input
+              id="st-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="h-11"
+            />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="st-phone">Telefone</Label>
-              <Input id="st-phone" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="h-11" />
+              <Input
+                id="st-phone"
+                inputMode="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="st-cat">Categoria</Label>
@@ -165,7 +188,12 @@ function AlunosPage() {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="st-renach">RENACH / processo</Label>
-              <Input id="st-renach" value={renach} onChange={(e) => setRenach(e.target.value)} className="h-11" />
+              <Input
+                id="st-renach"
+                value={renach}
+                onChange={(e) => setRenach(e.target.value)}
+                className="h-11"
+              />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="st-contracted">Aulas contratadas</Label>
@@ -225,14 +253,21 @@ function AlunosPage() {
                           </span>
                         )}
                         {!s.active && (
-                          <span className="rounded-full bg-muted px-1.5 text-[10px] text-muted-foreground">inativo</span>
+                          <span className="rounded-full bg-muted px-1.5 text-[10px] text-muted-foreground">
+                            inativo
+                          </span>
                         )}
                         {s.user_id && (
-                          <span className="rounded-full bg-success/10 px-1.5 text-[10px] text-success">login</span>
+                          <span className="rounded-full bg-success/10 px-1.5 text-[10px] text-success">
+                            login
+                          </span>
                         )}
                       </span>
                       <span className="mt-1 block h-1.5 overflow-hidden rounded-full bg-muted">
-                        <span className="block h-full rounded-full bg-primary" style={{ width: `${p?.pct ?? 0}%` }} />
+                        <span
+                          className="block h-full rounded-full bg-primary"
+                          style={{ width: `${p?.pct ?? 0}%` }}
+                        />
                       </span>
                       <span className="mt-0.5 block text-[11px] text-muted-foreground">
                         {p?.done ?? 0}/{s.contracted_lessons} aulas

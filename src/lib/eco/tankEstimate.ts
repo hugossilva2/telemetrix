@@ -72,7 +72,6 @@ export function litersAddedAfter(anchor: TankAnchor, fills: FuelFill[]): number 
   }, 0);
 }
 
-
 /**
  * Nível estimado do tanque agora. `null` quando falta calibração, odômetro
  * atual ou consumo válido.

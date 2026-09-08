@@ -17,9 +17,9 @@ const L = (p: Partial<LessonLike> & { scheduled_at: string }): LessonLike => ({
 
 describe("parseChecklist", () => {
   it("aceita apenas entradas válidas", () => {
-    expect(parseChecklist([{ id: "baliza", mark: "ok" }, { id: "x", mark: "zzz" }, null, 1])).toEqual([
-      { id: "baliza", mark: "ok" },
-    ]);
+    expect(
+      parseChecklist([{ id: "baliza", mark: "ok" }, { id: "x", mark: "zzz" }, null, 1]),
+    ).toEqual([{ id: "baliza", mark: "ok" }]);
     expect(parseChecklist("nope")).toEqual([]);
   });
 });
@@ -27,8 +27,19 @@ describe("parseChecklist", () => {
 describe("studentProgress", () => {
   const now = new Date("2026-08-30T12:00:00Z");
   const lessons: LessonLike[] = [
-    L({ scheduled_at: "2026-08-20T10:00:00Z", trip_eco_score: 80, checklist: [{ id: "baliza", mark: "nao" }] }),
-    L({ scheduled_at: "2026-08-22T10:00:00Z", trip_eco_score: 90, checklist: [{ id: "baliza", mark: "atencao" }, { id: "embreagem", mark: "atencao" }] }),
+    L({
+      scheduled_at: "2026-08-20T10:00:00Z",
+      trip_eco_score: 80,
+      checklist: [{ id: "baliza", mark: "nao" }],
+    }),
+    L({
+      scheduled_at: "2026-08-22T10:00:00Z",
+      trip_eco_score: 90,
+      checklist: [
+        { id: "baliza", mark: "atencao" },
+        { id: "embreagem", mark: "atencao" },
+      ],
+    }),
     L({ scheduled_at: "2026-09-01T10:00:00Z", status: "agendada" }),
     L({ scheduled_at: "2026-08-25T10:00:00Z", status: "cancelada" }),
   ];
@@ -68,10 +79,14 @@ describe("matchTripForLesson", () => {
     { id: "long", start_time: "2026-08-30T10:10:00Z", end_time: "2026-08-30T10:50:00Z" },
   ];
   it("prefere a viagem mais longa dentro da janela", () => {
-    expect(matchTripForLesson(trips, "2026-08-30T10:00:00Z", "2026-08-30T11:00:00Z")?.id).toBe("long");
+    expect(matchTripForLesson(trips, "2026-08-30T10:00:00Z", "2026-08-30T11:00:00Z")?.id).toBe(
+      "long",
+    );
   });
   it("ignora viagens fora da tolerância", () => {
-    expect(matchTripForLesson(trips.slice(0, 1), "2026-08-30T10:00:00Z", "2026-08-30T11:00:00Z")).toBeNull();
+    expect(
+      matchTripForLesson(trips.slice(0, 1), "2026-08-30T10:00:00Z", "2026-08-30T11:00:00Z"),
+    ).toBeNull();
   });
   it("aceita viagem iniciada até 15 min antes", () => {
     const t = [{ id: "pre", start_time: "2026-08-30T09:50:00Z", end_time: "2026-08-30T10:30:00Z" }];
@@ -84,7 +99,15 @@ describe("lessonsOfDay", () => {
     const day = new Date(2026, 7, 30, 15);
     const mk = (h: number, status: LessonLike["status"] = "agendada") =>
       L({ scheduled_at: new Date(2026, 7, 30, h).toISOString(), status });
-    const res = lessonsOfDay([mk(14), mk(9), mk(11, "cancelada"), L({ scheduled_at: new Date(2026, 7, 31, 9).toISOString(), status: "agendada" })], day);
+    const res = lessonsOfDay(
+      [
+        mk(14),
+        mk(9),
+        mk(11, "cancelada"),
+        L({ scheduled_at: new Date(2026, 7, 31, 9).toISOString(), status: "agendada" }),
+      ],
+      day,
+    );
     expect(res.map((l) => new Date(l.scheduled_at).getHours())).toEqual([9, 14]);
   });
 });

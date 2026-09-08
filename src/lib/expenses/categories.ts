@@ -47,7 +47,12 @@ export const EXPENSE_CATEGORIES: {
 }[] = [
   { value: "combustivel", label: "Combustível", Icon: Fuel, color: "var(--chart-1)" },
   { value: "pedagio", label: "Pedágio", Icon: TrafficCone, color: "var(--chart-1)" },
-  { value: "estacionamento", label: "Estacionamento", Icon: ParkingCircle, color: "var(--chart-2)" },
+  {
+    value: "estacionamento",
+    label: "Estacionamento",
+    Icon: ParkingCircle,
+    color: "var(--chart-2)",
+  },
   { value: "lavagem", label: "Lavagem", Icon: Droplets, color: "var(--chart-3)" },
   { value: "multa", label: "Multa", Icon: ReceiptText, color: "var(--destructive)" },
   { value: "seguro", label: "Seguro", Icon: ShieldCheck, color: "var(--chart-4)" },

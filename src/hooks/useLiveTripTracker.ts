@@ -6,11 +6,7 @@ import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";
 import { saveClosedTrip } from "@/lib/trips/saveTrip";
-import {
-  detectBetween,
-  idleBetween,
-  type EcoSample,
-} from "@/lib/eco/detect";
+import { detectBetween, idleBetween, type EcoSample } from "@/lib/eco/detect";
 import { ECO_EVENT_LABEL } from "@/lib/eco/score";
 import { getEcoSettings } from "@/lib/eco/settings";
 import { notifyTrackerEvent } from "@/lib/push/push.functions";
@@ -36,16 +32,18 @@ export function useLiveTripTracker() {
   // disparamos na hora em vez de perder a viagem.
   const pendingClose = useRef<(() => void) | null>(null);
 
-  useEffect(() => () => {
-    if (closeTimer.current) {
-      clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-      const run = pendingClose.current;
-      pendingClose.current = null;
-      if (run) run();
-    }
-  }, []);
-
+  useEffect(
+    () => () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+        const run = pendingClose.current;
+        pendingClose.current = null;
+        if (run) run();
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     const ign = telemetry.ignitionOn;
@@ -61,13 +59,11 @@ export function useLiveTripTracker() {
       if (tripStore.get()) return;
     }
 
-
     // OFF -> ON: abre viagem local
     const shouldOpen =
-      ((prev === false && ign === true) ||
-        (prev === undefined && ign === true)) && !tripStore.get();
+      ((prev === false && ign === true) || (prev === undefined && ign === true)) &&
+      !tripStore.get();
     if (shouldOpen) {
-
       lastSample.current = null;
       const open: OpenTrip = {
         startTime: new Date().toISOString(),
@@ -81,17 +77,18 @@ export function useLiveTripTracker() {
         ecoEvents: [],
         idleSeconds: 0,
         trail:
-          typeof telemetry.latitude === "number" &&
-          typeof telemetry.longitude === "number"
-            ? [{
-                lat: telemetry.latitude,
-                lng: telemetry.longitude,
-                speed: telemetry.speedKmh ?? null,
-                heading: telemetry.headingDeg ?? null,
-                rpm: telemetry.engineRpm ?? null,
-                load: telemetry.engineLoad ?? null,
-                t: Date.now(),
-              }]
+          typeof telemetry.latitude === "number" && typeof telemetry.longitude === "number"
+            ? [
+                {
+                  lat: telemetry.latitude,
+                  lng: telemetry.longitude,
+                  speed: telemetry.speedKmh ?? null,
+                  heading: telemetry.headingDeg ?? null,
+                  rpm: telemetry.engineRpm ?? null,
+                  load: telemetry.engineLoad ?? null,
+                  t: Date.now(),
+                },
+              ]
             : [],
       };
       tripStore.set(open);
@@ -142,11 +139,15 @@ export function useLiveTripTracker() {
       pendingClose.current = closeNow;
       closeTimer.current = setTimeout(closeNow, IGNITION_OFF_GRACE_MS);
     }
-
-
-
-
-  }, [telemetry.ignitionOn, telemetry.latitude, telemetry.longitude, telemetry.mileageKm, telemetry.speedKmh]);
+    // Efeito guiado pela ignição/posição; os demais valores são só anotações do ponto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    telemetry.ignitionOn,
+    telemetry.latitude,
+    telemetry.longitude,
+    telemetry.mileageKm,
+    telemetry.speedKmh,
+  ]);
 
   // Atualiza últimos dados + rastro enquanto motor ligado
   useEffect(() => {
@@ -204,10 +205,7 @@ export function useLiveTripTracker() {
     }
 
     // Adiciona ponto ao trail se moveu >5m desde o último
-    if (
-      typeof telemetry.latitude === "number" &&
-      typeof telemetry.longitude === "number"
-    ) {
+    if (typeof telemetry.latitude === "number" && typeof telemetry.longitude === "number") {
       const last = open.trail[open.trail.length - 1];
       const pt: TrailPoint = {
         lat: telemetry.latitude,
@@ -218,17 +216,16 @@ export function useLiveTripTracker() {
         load: telemetry.engineLoad ?? null,
         t: Date.now(),
       };
-      const shouldAppend =
-        !last || haversineKm(last.lat, last.lng, pt.lat, pt.lng) >= 0.005;
+      const shouldAppend = !last || haversineKm(last.lat, last.lng, pt.lat, pt.lng) >= 0.005;
       if (shouldAppend && Date.now() - lastTrailAt.current > 500) {
         lastTrailAt.current = Date.now();
-        next.trail = next.trail.length >= 500
-          ? [...next.trail.slice(-499), pt]
-          : [...next.trail, pt];
+        next.trail =
+          next.trail.length >= 500 ? [...next.trail.slice(-499), pt] : [...next.trail, pt];
       }
     }
 
     tripStore.set(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     telemetry.latitude,
     telemetry.longitude,

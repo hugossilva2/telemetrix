@@ -50,7 +50,6 @@ function readInitial(): OpenTrip | null {
   }
 }
 
-
 let current: OpenTrip | null = readInitial();
 const listeners = new Set<() => void>();
 
@@ -72,9 +71,10 @@ export const tripStore = {
   },
   appendTrail(pt: TrailPoint) {
     if (!current) return;
-    const trail = current.trail.length >= MAX_TRAIL
-      ? [...current.trail.slice(-MAX_TRAIL + 1), pt]
-      : [...current.trail, pt];
+    const trail =
+      current.trail.length >= MAX_TRAIL
+        ? [...current.trail.slice(-MAX_TRAIL + 1), pt]
+        : [...current.trail, pt];
     this.set({ ...current, trail });
   },
   appendEcoEvents(events: EcoEvent[], extraIdleSeconds = 0) {
@@ -87,7 +87,6 @@ export const tripStore = {
       idleSeconds: current.idleSeconds + Math.max(0, extraIdleSeconds),
     });
   },
-
 
   subscribe(l: () => void) {
     listeners.add(l);

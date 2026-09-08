@@ -12,7 +12,10 @@ export const Route = createFileRoute("/convite/$token")({
   head: () => ({
     meta: [
       { title: "Convite · Telemetrix" },
-      { name: "description", content: "Você foi convidado para acompanhar suas aulas no Telemetrix." },
+      {
+        name: "description",
+        content: "Você foi convidado para acompanhar suas aulas no Telemetrix.",
+      },
       { property: "og:title", content: "Convite · Telemetrix" },
       { property: "og:description", content: "Aceite o convite do seu instrutor ou autoescola." },
       { property: "og:type", content: "website" },
@@ -22,7 +25,11 @@ export const Route = createFileRoute("/convite/$token")({
   component: ConvitePage,
 });
 
-const ROLE_LABEL: Record<string, string> = { student: "aluno", instructor: "instrutor", owner: "responsável" };
+const ROLE_LABEL: Record<string, string> = {
+  student: "aluno",
+  instructor: "instrutor",
+  owner: "responsável",
+};
 
 function ConvitePage() {
   const { token } = Route.useParams();
@@ -51,7 +58,10 @@ function ConvitePage() {
       // Conta de aluno entra direto sem escolher perfil de uso.
       const { data: u } = await supabase.auth.getUser();
       if (u.user && invite.data?.role === "student") {
-        await supabase.from("profiles").update({ onboarded_at: new Date().toISOString() }).eq("user_id", u.user.id);
+        await supabase
+          .from("profiles")
+          .update({ onboarded_at: new Date().toISOString() })
+          .eq("user_id", u.user.id);
       }
     },
     onSuccess: () => {
@@ -68,7 +78,11 @@ function ConvitePage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="card-surface w-full max-w-sm p-6 text-center">
         <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
-          {invite.data?.org_kind === "autoescola" ? <School className="size-7" /> : <GraduationCap className="size-7" />}
+          {invite.data?.org_kind === "autoescola" ? (
+            <School className="size-7" />
+          ) : (
+            <GraduationCap className="size-7" />
+          )}
         </div>
         <h1 className="mt-4 font-display text-xl font-semibold">Convite Telemetrix</h1>
 
@@ -99,7 +113,9 @@ function ConvitePage() {
             </Link>
           </>
         ) : invite.data.expired ? (
-          <p className="mt-2 text-sm text-destructive">Convite expirado. Peça um novo ao seu instrutor.</p>
+          <p className="mt-2 text-sm text-destructive">
+            Convite expirado. Peça um novo ao seu instrutor.
+          </p>
         ) : (
           <>
             <p className="mt-2 text-sm text-muted-foreground">
@@ -118,7 +134,11 @@ function ConvitePage() {
                 ? "Sua conta passa para o perfil Instrutor e você verá a agenda, os alunos e os carros da escola."
                 : "Você verá suas aulas, trajetos, pontuação de direção e as observações do instrutor."}
             </p>
-            <Button className="mt-4 h-11 w-full" onClick={() => accept.mutate()} disabled={accept.isPending}>
+            <Button
+              className="mt-4 h-11 w-full"
+              onClick={() => accept.mutate()}
+              disabled={accept.isPending}
+            >
               {accept.isPending ? "Aceitando…" : "Aceitar convite"}
             </Button>
           </>

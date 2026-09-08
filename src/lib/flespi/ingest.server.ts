@@ -3,6 +3,12 @@ import { accumIncrementKm, haversineKm, resolveTripDistanceKm } from "@/lib/fles
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
 
+/** Estado persistido em `device_trip_state.geofence_state`. */
+export type GeofenceState = {
+  last_motion_off_at?: string;
+  places?: Record<string, boolean>;
+};
+
 /**
  * Núcleo de ingestão de mensagens do rastreador Flespi.
  * Usado pelo webhook (`/api/public/flespi-webhook`) e pelo coletor periódico
@@ -10,11 +16,7 @@ import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
  * app aberto e mesmo que a Flespi não esteja com o webhook configurado.
  */
 
-import {
-  IDLE_SPEED_KMH,
-  MIN_DISTANCE_KM,
-  MIN_DURATION_S,
-} from "@/lib/trips/thresholds";
+import { IDLE_SPEED_KMH, MIN_DISTANCE_KM, MIN_DURATION_S } from "@/lib/trips/thresholds";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { summarizeEco } from "@/lib/eco/score";
 
@@ -80,7 +82,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
       .eq("device_id", deviceId);
     if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
   }
-
 
   let processed = 0;
   let skippedNoDevice = 0;
@@ -326,7 +327,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
 
         // ---------- tracker_events: movimento com motor desligado ----------
         if (ign === false && typeof speed === "number" && speed >= MOTION_SPEED_THRESHOLD) {
-          const lastMotion = (state?.geofence_state as any)?.last_motion_off_at as
+          const lastMotion = (state?.geofence_state as GeofenceState | null)?.last_motion_off_at as
             | string
             | undefined;
           const lastMotionMs = lastMotion ? new Date(lastMotion).getTime() : 0;
@@ -345,7 +346,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             });
             // persistir cooldown no geofence_state
             const nextGeo = {
-              ...((state?.geofence_state as any) ?? {}),
+              ...((state?.geofence_state as GeofenceState | null) ?? {}),
               last_motion_off_at: nowIso,
             };
             await supabaseAdmin.from("device_trip_state").upsert({
@@ -363,7 +364,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           if (vehicle.alert_geofence !== false) {
             const places = await getPlacesForUser(vehicle.user_id as string);
             if (places && places.length > 0) {
-              const geoState = (state?.geofence_state as any) ?? {};
+              const geoState: GeofenceState = (state?.geofence_state as GeofenceState | null) ?? {};
               const placesState: Record<string, boolean> = geoState.places ?? {};
               const nextPlaces: Record<string, boolean> = { ...placesState };
               let changed = false;
@@ -521,7 +522,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             continue;
           }
 
-
           const durationH = durationS / 3600;
           const avgSpeed = durationH > 0 ? distanceKm / durationH : 0;
 
@@ -654,9 +654,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           const newTripId = tripRows?.[0]?.id;
           if (newTripId) {
             try {
-              const { buildRouteDataFromPings } = await import(
-                "@/lib/trips/trailFromPings.server"
-              );
+              const { buildRouteDataFromPings } = await import("@/lib/trips/trailFromPings.server");
               const routeData = await buildRouteDataFromPings(supabaseAdmin, {
                 vehicleId: vehicle.id,
                 startIso: state.start_time as string,
@@ -679,7 +677,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           await clearTripFields(deviceId);
           processed++;
           continue;
-
         }
 
         // Atualização durante viagem em andamento.

@@ -145,7 +145,6 @@ export function specFromVehicleRow(row: VehicleSpecRow | null | undefined): Vehi
   };
 }
 
-
 /**
  * Aceleração máxima "de fábrica": 100 km/h em 11,5 s ≈ 8,7 km/h/s.
  * Passar disso só acontece com abuso de embreagem/giro.

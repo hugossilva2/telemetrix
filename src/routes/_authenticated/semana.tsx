@@ -19,7 +19,8 @@ export const Route = createFileRoute("/_authenticated/semana")({
       { title: "Relatório semanal · Telemetrix" },
       {
         name: "description",
-        content: "Semana de segunda a domingo: ganhos, corridas, horas online, km e lucro líquido do motorista de app.",
+        content:
+          "Semana de segunda a domingo: ganhos, corridas, horas online, km e lucro líquido do motorista de app.",
       },
       { property: "og:title", content: "Relatório semanal · Telemetrix" },
       { property: "og:description", content: "Sua semana seg–dom no formato do app de corridas." },
@@ -74,7 +75,11 @@ function SemanaPage() {
         <div className="text-center">
           <p className="text-sm font-semibold">{weekLabel(key)}</p>
           <p className="text-[10px] text-muted-foreground">
-            {key === thisWeek ? "semana atual" : key === previousWeek(thisWeek) ? "semana passada" : "seg – dom"}
+            {key === thisWeek
+              ? "semana atual"
+              : key === previousWeek(thisWeek)
+                ? "semana passada"
+                : "seg – dom"}
           </p>
         </div>
         <button
@@ -97,12 +102,24 @@ function SemanaPage() {
 
         <div className="mt-4 grid grid-cols-3 gap-2">
           <Stat label="Corridas" value={String(cur.rides)} />
-          <Stat label="Horas online" value={cur.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} />
-          <Stat label="Km rodados" value={cur.km.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} />
+          <Stat
+            label="Horas online"
+            value={cur.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}
+          />
+          <Stat
+            label="Km rodados"
+            value={cur.km.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}
+          />
         </div>
         <div className="mt-2 grid grid-cols-3 gap-2">
-          <Stat label="R$/corrida" value={cur.earningsPerRide != null ? formatBRL(cur.earningsPerRide) : "—"} />
-          <Stat label="R$/hora" value={cur.profitPerHour != null ? formatBRL(cur.profitPerHour) : "—"} />
+          <Stat
+            label="R$/corrida"
+            value={cur.earningsPerRide != null ? formatBRL(cur.earningsPerRide) : "—"}
+          />
+          <Stat
+            label="R$/hora"
+            value={cur.profitPerHour != null ? formatBRL(cur.profitPerHour) : "—"}
+          />
           <Stat label="R$/km" value={cur.profitPerKm != null ? formatBRL(cur.profitPerKm) : "—"} />
         </div>
       </section>
@@ -112,7 +129,9 @@ function SemanaPage() {
         <ul className="mt-3 space-y-2">
           {days.map((d) => (
             <li key={d.date} className="flex items-center gap-3">
-              <span className="w-8 text-xs font-semibold uppercase text-muted-foreground">{d.label}</span>
+              <span className="w-8 text-xs font-semibold uppercase text-muted-foreground">
+                {d.label}
+              </span>
               <div className="min-w-0 flex-1">
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
@@ -122,8 +141,10 @@ function SemanaPage() {
                 </div>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">
                   {d.rides} corrida{d.rides === 1 ? "" : "s"}
-                  {d.hours > 0 && ` · ${d.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h`}
-                  {d.km > 0 && ` · ${d.km.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} km`}
+                  {d.hours > 0 &&
+                    ` · ${d.hours.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} h`}
+                  {d.km > 0 &&
+                    ` · ${d.km.toLocaleString("pt-BR", { maximumFractionDigits: 0 })} km`}
                 </p>
               </div>
               <span className="font-mono text-sm font-semibold">{formatBRL(d.earnings)}</span>
@@ -133,15 +154,29 @@ function SemanaPage() {
       </section>
 
       <section className="card-surface divide-y divide-border/60 p-0">
-        <Line label="Ganhos" hint={cur.tips > 0 ? `inclui ${formatBRL(cur.tips)} em gorjetas` : "corridas + gorjetas"} value={formatBRL(cur.earnings)} />
-        <Line label="Combustível" hint="abastecimentos da semana" value={`− ${formatBRL(cur.fuelCost)}`} />
-        <Line label="Outros gastos" hint="pedágio, lavagem, manutenção…" value={`− ${formatBRL(cur.otherCost)}`} />
+        <Line
+          label="Ganhos"
+          hint={cur.tips > 0 ? `inclui ${formatBRL(cur.tips)} em gorjetas` : "corridas + gorjetas"}
+          value={formatBRL(cur.earnings)}
+        />
+        <Line
+          label="Combustível"
+          hint="abastecimentos da semana"
+          value={`− ${formatBRL(cur.fuelCost)}`}
+        />
+        <Line
+          label="Outros gastos"
+          hint="pedágio, lavagem, manutenção…"
+          value={`− ${formatBRL(cur.otherCost)}`}
+        />
         <div className="flex items-center justify-between px-4 py-3">
           <div>
             <p className="text-sm font-semibold">Lucro líquido</p>
             <Delta label="vs. semana anterior" cur={cur.profit} prev={prev.profit} money compact />
           </div>
-          <p className={`font-mono text-lg font-bold ${cur.profit < 0 ? "text-destructive" : "text-primary"}`}>
+          <p
+            className={`font-mono text-lg font-bold ${cur.profit < 0 ? "text-destructive" : "text-primary"}`}
+          >
             {formatBRL(cur.profit)}
           </p>
         </div>
@@ -183,7 +218,9 @@ function SemanaPage() {
                 <span className="font-medium">{weekLabel(k)}</span>
                 <span className="font-mono">
                   {s.rides} · {formatBRL(s.earnings)} ·{" "}
-                  <span className={s.profit < 0 ? "text-destructive" : ""}>{formatBRL(s.profit)}</span>
+                  <span className={s.profit < 0 ? "text-destructive" : ""}>
+                    {formatBRL(s.profit)}
+                  </span>
                 </span>
               </button>
             </li>

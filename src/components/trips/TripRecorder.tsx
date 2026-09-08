@@ -4,7 +4,6 @@ import { useOfflineSync } from "@/hooks/useOfflineSync";
 import { useLivePublish } from "@/hooks/useLivePublish";
 import { useLongTripMonitor } from "@/hooks/useLongTripMonitor";
 
-
 /**
  * Mantém o estado local da viagem (tripStore) enquanto o app estiver aberto,
  * para alimentar cronômetro, mini-mapa e consumo em tempo real na UI.

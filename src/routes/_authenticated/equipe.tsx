@@ -27,7 +27,11 @@ export const Route = createFileRoute("/_authenticated/equipe")({
   head: () => ({
     meta: [
       { title: "Equipe e frota · Telemetrix" },
-      { name: "description", content: "Convide instrutores, monte a frota da autoescola e defina quem dirige qual carro." },
+      {
+        name: "description",
+        content:
+          "Convide instrutores, monte a frota da autoescola e defina quem dirige qual carro.",
+      },
       { property: "og:title", content: "Equipe e frota · Telemetrix" },
       { property: "og:description", content: "Instrutores, carros e vínculos da autoescola." },
     ],
@@ -71,7 +75,10 @@ function EquipePage() {
   const instructors = (team.data ?? []).filter((m) => m.role === "instructor");
   const owner = (team.data ?? []).find((m) => m.role === "owner");
   const openInvites = (invites.data ?? []).filter((i) => i.role === "instructor" && !i.accepted_at);
-  const instructorLimit = limitStatus(instructors.length + openInvites.length, limits.maxInstructors);
+  const instructorLimit = limitStatus(
+    instructors.length + openInvites.length,
+    limits.maxInstructors,
+  );
   const fleetCars = fleet.data?.fleet ?? [];
   const myCars = fleet.data?.mine ?? [];
   const has = (userId: string, vehicleId: string) =>
@@ -83,13 +90,17 @@ function EquipePage() {
       <section className="card-surface p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <Users className="size-4 text-primary" /> Instrutores
-          <span className="ml-auto text-[11px] font-normal text-muted-foreground">{instructors.length + (owner ? 1 : 0)}</span>
+          <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+            {instructors.length + (owner ? 1 : 0)}
+          </span>
         </h2>
         <ul className="mt-2 space-y-2">
           {owner && (
             <li className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-3">
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold">{owner.display_name || owner.email}</p>
+                <p className="truncate text-sm font-semibold">
+                  {owner.display_name || owner.email}
+                </p>
                 <p className="text-[11px] text-muted-foreground">Responsável · também dá aulas</p>
               </div>
             </li>
@@ -107,9 +118,14 @@ function EquipePage() {
                     aria-label="Remover instrutor"
                     className="grid size-9 place-items-center rounded-lg text-destructive hover:bg-destructive/10"
                     onClick={() => {
-                      if (confirm("Remover este instrutor da escola? As aulas dele ficam no histórico.")) {
+                      if (
+                        confirm(
+                          "Remover este instrutor da escola? As aulas dele ficam no histórico.",
+                        )
+                      ) {
                         removeMember.mutate(m.user_id, {
-                          onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível remover.")),
+                          onError: (e: Error) =>
+                            toast.error(toUserMessage(e, "Não foi possível remover.")),
                         });
                       }
                     }}
@@ -127,9 +143,13 @@ function EquipePage() {
                         key={v.id}
                         type="button"
                         disabled={!isOwner || toggle.isPending}
-                        onClick={() => toggle.mutate({ userId: m.user_id, vehicleId: v.id, on: !on })}
+                        onClick={() =>
+                          toggle.mutate({ userId: m.user_id, vehicleId: v.id, on: !on })
+                        }
                         className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium transition ${
-                          on ? "border-primary/40 bg-primary/10 text-primary" : "border-border text-muted-foreground"
+                          on
+                            ? "border-primary/40 bg-primary/10 text-primary"
+                            : "border-border text-muted-foreground"
                         }`}
                       >
                         {on ? <Check className="size-3" /> : <Car className="size-3" />}
@@ -142,13 +162,18 @@ function EquipePage() {
             </li>
           ))}
           {instructors.length === 0 && !team.isLoading && (
-            <li className="text-xs text-muted-foreground">Nenhum instrutor ainda. Convide abaixo.</li>
+            <li className="text-xs text-muted-foreground">
+              Nenhum instrutor ainda. Convide abaixo.
+            </li>
           )}
         </ul>
 
         {isOwner && (
           <div className="mt-3">
-            <LimitCounter status={instructorLimit} noun="instrutores (contando convites em aberto)" />
+            <LimitCounter
+              status={instructorLimit}
+              noun="instrutores (contando convites em aberto)"
+            />
             <PlanLimitCard
               plan={plan}
               status={instructorLimit}
@@ -177,7 +202,8 @@ function EquipePage() {
                     setEmail("");
                     void copy(url);
                   },
-                  onError: (er: Error) => toast.error(toUserMessage(er, "Não foi possível criar o convite.")),
+                  onError: (er: Error) =>
+                    toast.error(toUserMessage(er, "Não foi possível criar o convite.")),
                 },
               );
             }}
@@ -199,19 +225,30 @@ function EquipePage() {
               </Button>
             </div>
             {lastLink && (
-              <button type="button" onClick={() => copy(lastLink)} className="flex w-full items-center gap-2 truncate text-left text-[11px] text-primary">
+              <button
+                type="button"
+                onClick={() => copy(lastLink)}
+                className="flex w-full items-center gap-2 truncate text-left text-[11px] text-primary"
+              >
                 <Copy className="size-3 shrink-0" /> {lastLink}
               </button>
             )}
             <p className="text-[11px] text-muted-foreground">
-              O instrutor abre o link, entra com a conta dele e passa a ver a agenda da escola. Se informar o e-mail, só essa conta consegue aceitar.
+              O instrutor abre o link, entra com a conta dele e passa a ver a agenda da escola. Se
+              informar o e-mail, só essa conta consegue aceitar.
             </p>
             {openInvites.length > 0 && (
               <ul className="space-y-1 pt-1">
                 {openInvites.map((i) => (
                   <li key={i.id} className="flex items-center justify-between text-[11px]">
-                    <span className="truncate text-muted-foreground">{i.email ?? "link aberto"} · aguardando</span>
-                    <button type="button" className="font-semibold text-primary" onClick={() => copy(inviteUrl(i.token))}>
+                    <span className="truncate text-muted-foreground">
+                      {i.email ?? "link aberto"} · aguardando
+                    </span>
+                    <button
+                      type="button"
+                      className="font-semibold text-primary"
+                      onClick={() => copy(inviteUrl(i.token))}
+                    >
                       copiar link
                     </button>
                   </li>
@@ -226,16 +263,22 @@ function EquipePage() {
       <section className="card-surface p-4">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
           <Car className="size-4 text-primary" /> Frota da escola
-          <span className="ml-auto text-[11px] font-normal text-muted-foreground">{fleetCars.length} carro{fleetCars.length === 1 ? "" : "s"}</span>
+          <span className="ml-auto text-[11px] font-normal text-muted-foreground">
+            {fleetCars.length} carro{fleetCars.length === 1 ? "" : "s"}
+          </span>
         </h2>
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Carros na frota aparecem para os instrutores ao agendar aulas, e as viagens deles entram nos relatórios da escola.
+          Carros na frota aparecem para os instrutores ao agendar aulas, e as viagens deles entram
+          nos relatórios da escola.
         </p>
         <ul className="mt-2 space-y-2">
           {[...fleetCars, ...myCars].map((v) => {
             const inFleet = v.org_id === school?.id;
             return (
-              <li key={v.id} className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-3">
+              <li
+                key={v.id}
+                className="flex items-center gap-3 rounded-xl border border-border/70 bg-background/35 p-3"
+              >
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold">{v.name}</p>
                   <p className="font-mono text-[11px] text-muted-foreground">{v.plate}</p>
@@ -248,12 +291,17 @@ function EquipePage() {
                     onCheckedChange={(on) =>
                       setInFleet.mutate(
                         { vehicleId: v.id, inFleet: on },
-                        { onError: (e: Error) => toast.error(toUserMessage(e, "Não foi possível atualizar a frota.")) },
+                        {
+                          onError: (e: Error) =>
+                            toast.error(toUserMessage(e, "Não foi possível atualizar a frota.")),
+                        },
                       )
                     }
                   />
                 ) : (
-                  <span className="text-[11px] text-muted-foreground">{inFleet ? "na frota" : ""}</span>
+                  <span className="text-[11px] text-muted-foreground">
+                    {inFleet ? "na frota" : ""}
+                  </span>
                 )}
               </li>
             );
@@ -270,7 +318,10 @@ function EquipePage() {
       </section>
 
       {isOwner && (
-        <Link to="/escola" className="card-surface flex items-center justify-between p-4 text-sm font-semibold">
+        <Link
+          to="/escola"
+          className="card-surface flex items-center justify-between p-4 text-sm font-semibold"
+        >
           Visão da escola: aulas por instrutor, km e custo por carro
           <span className="text-primary">Abrir</span>
         </Link>

@@ -38,9 +38,7 @@ export function PlanCard({
         ))}
       </ul>
       <Button asChild className="mt-5" variant={plan.highlight ? "default" : "outline"}>
-        <Link to="/auth">
-          {plan.priceMonthly > 0 ? `Assinar ${plan.name}` : "Começar grátis"}
-        </Link>
+        <Link to="/auth">{plan.priceMonthly > 0 ? `Assinar ${plan.name}` : "Começar grátis"}</Link>
       </Button>
     </article>
   );

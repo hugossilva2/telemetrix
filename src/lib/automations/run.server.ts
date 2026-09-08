@@ -1,3 +1,6 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/integrations/supabase/types";
+
 /**
  * Execução de automações de cerca virtual (webhook de saída para casa
  * inteligente). Roda somente no servidor: a URL e o cabeçalho de autenticação
@@ -120,9 +123,7 @@ export async function callAutomation(
   }
 }
 
-type AdminClient = {
-  from: (table: string) => any;
-};
+type AdminClient = SupabaseClient<Database>;
 
 /**
  * Dispara todas as automações ativas de um local para um gatilho, respeitando

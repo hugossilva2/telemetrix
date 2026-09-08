@@ -44,6 +44,13 @@ export const Route = createFileRoute("/_authenticated/rastreador")({
 
 type TrackerEvent = Tables<"tracker_events">;
 
+const dtf = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
 function RastreadorPage() {
   const { telemetry, status, lastMessageAt } = useTelemetry();
   const parked = useParkedSpot(telemetry.latitude, telemetry.longitude, telemetry.ignitionOn);

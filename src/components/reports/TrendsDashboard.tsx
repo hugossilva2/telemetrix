@@ -38,7 +38,12 @@ export interface WeekPoint {
   km: number;
   liters: number;
   score: number | null;
+  /** km/L da fonte mais confiável disponível (medido, se houver). */
   kmpl: number | null;
+  /** km/L medido pelos abastecimentos cheio-a-cheio. */
+  measuredKmpl: number | null;
+  /** km/L derivado dos litros estimados das viagens. */
+  estimatedKmpl: number | null;
   target: number | null;
   efficiency: number | null;
   idleMin: number;
@@ -46,7 +51,13 @@ export interface WeekPoint {
 
 const nf1 = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 
-function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof getEcoSettings>["fuel"]): WeekPoint[] {
+function buildWeeks(
+  trips: TrendTrip[],
+  weeks: string[],
+  fuel: FuelKind,
+  spec: VehicleSpec | undefined,
+  measuredByWeek: Map<string, number>,
+): WeekPoint[] {
   const byWeek = new Map<string, TrendTrip[]>();
   for (const k of weeks) byWeek.set(k, []);
   for (const t of trips) {
@@ -70,8 +81,11 @@ function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof
         ? withSpeed.reduce((s, t) => s + Number(t.avg_speed_kmh) * Number(t.distance_km), 0) /
           totalKmSpeed
         : null;
-    const kmpl = liters > 0.05 && km > 0 ? km / liters : null;
-    const target = km > 0 ? expectedKmpl({ fuel, avgSpeedKmh: avgSpeed }) : null;
+    const estimatedKmpl = liters > 0.05 && km > 0 ? km / liters : null;
+    const measuredKmpl = measuredByWeek.get(k) ?? null;
+    const kmpl = measuredKmpl ?? estimatedKmpl;
+    const target =
+      km > 0 || measuredKmpl != null ? expectedKmpl({ fuel, avgSpeedKmh: avgSpeed, spec }) : null;
     return {
       key: k,
       label: weekLabel(k),
@@ -80,6 +94,8 @@ function buildWeeks(trips: TrendTrip[], weeks: string[], fuel: ReturnType<typeof
       liters,
       score,
       kmpl,
+      measuredKmpl,
+      estimatedKmpl,
       target,
       efficiency: kmpl != null && target ? (kmpl / target) * 100 : null,
       idleMin: rows.reduce((s, t) => s + Number(t.idle_seconds || 0), 0) / 60,

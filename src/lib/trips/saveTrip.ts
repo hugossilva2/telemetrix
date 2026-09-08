@@ -4,7 +4,8 @@ import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getFuelKind } from "@/lib/eco/settings";
-import { expectedKmpl } from "@/lib/vehicles/specs";
+import { specFromVehicleRow } from "@/lib/vehicles/specs";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
@@ -12,7 +13,7 @@ import { offlineQueue } from "@/lib/offline/queue";
 import { isOnline } from "@/lib/offline/sync";
 import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
 import { buildRouteData } from "@/lib/trips/routeData";
-import { getActiveVehicleId } from "@/lib/vehicles/active";
+import { getActiveVehicleId, VEHICLE_SELECT } from "@/lib/vehicles/active";
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -153,6 +154,8 @@ export async function saveClosedTrip(
     mileage_at_start: trip.mileageAtStart,
     mileage_at_end: trip.lastMileage,
     fuel_liters: fuelLiters,
+    fuel_kmpl_used: kmpl,
+    fuel_source: fuelSource,
     estimated_cost: estimatedCost,
     eco_score: eco.score,
     harsh_brake_count: eco.counts.harsh_brake,

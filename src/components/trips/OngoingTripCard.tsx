@@ -16,13 +16,14 @@ import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { getFuelKind } from "@/lib/eco/settings";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
 
 export function OngoingTripCard() {
   const open = useOpenTrip();
   const { telemetry } = useTelemetry();
-  const { vehicle } = useActiveVehicle();
+  const { vehicle, spec, fuel } = useActiveVehicle();
   const { active: destination, pending: pendingDestination } = useTripDestination();
   const [now, setNow] = useState(() => Date.now());
 
@@ -33,12 +34,12 @@ export function OngoingTripCard() {
   }, [open]);
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["ongoing-trip-vehicle", vehicle?.id ?? null],
+    queryKey: ["ongoing-trip-vehicle", vehicle?.id ?? null, fuel],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: f }] = await Promise.all([
+      if (!uid) return { calibration: null, price: DEFAULT_GAS_PRICE_PER_LITER };
+      const [{ data: f }, { data: calibration }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -46,9 +47,17 @@ export function OngoingTripCard() {
           .order("date", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        vehicle?.id
+          ? supabase
+              .from("vehicle_fuel_calibration")
+              .select("kmpl,samples,fuel_type")
+              .eq("vehicle_id", vehicle.id)
+              .eq("fuel_type", fuel)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
       return {
-        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
+        calibration,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },
@@ -114,12 +123,18 @@ export function OngoingTripCard() {
     distanceKm = haversineKm(open.startLat, open.startLng, open.lastLat, open.lastLng);
   }
 
-  const kmpl = vehicleInfo?.kmpl ?? 10;
   const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
-  const liters = kmpl > 0 ? distanceKm / kmpl : 0;
+  const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
+  const { kmpl } = resolveKmpl({
+    calibration: vehicleInfo?.calibration ?? null,
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+    fuel,
+    avgSpeedKmh,
+  });
+  const liters = tripFuelLiters({ distanceKm, kmpl, idleSeconds: open.idleSeconds ?? 0 }) ?? 0;
   const cost = liters * price;
 
-  const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
   const eco = summarizeEco({
     events: open.ecoEvents ?? [],
     idleSeconds: open.idleSeconds ?? 0,

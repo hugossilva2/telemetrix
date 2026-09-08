@@ -4,7 +4,7 @@ import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getFuelKind } from "@/lib/eco/settings";
-import { specFromVehicleRow } from "@/lib/vehicles/specs";
+import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 
 import { getDefaultDriverId } from "@/lib/drivers/api";
@@ -88,7 +88,7 @@ export async function saveClosedTrip(
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
   // vehicles.fuel_kind é a fonte de verdade; localStorage só como cache offline.
-  const fuel = parseFuelKind(vehicle?.fuel_kind) ?? getFuelKind();
+  const fuel = vehicle?.fuel_kind ? parseFuelKind(vehicle.fuel_kind) : getFuelKind();
   const spec = specFromVehicleRow(vehicle);
 
 

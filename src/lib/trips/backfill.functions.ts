@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { FLESPI_CONFIG } from "@/lib/flespi/config";
 import { haversineKm } from "@/lib/trips/geo";
 import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { reconstructTrips, type FlespiMessage } from "@/lib/trips/reconstruct";
@@ -29,9 +28,22 @@ export const backfillTripsFromFlespi = createServerFn({ method: "POST" })
       }),
     });
 
+    const { data: activeVehicle } = await supabase
+      .from("vehicles")
+      .select("flespi_device_id")
+      .eq("user_id", userId)
+      .not("flespi_device_id", "is", null)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    const deviceId = activeVehicle?.flespi_device_id;
+    if (!deviceId) {
+      throw new Error("Nenhum veículo com rastreador configurado");
+    }
+    const { flespiAuthHeaders } = await import("@/lib/flespi/config.server");
     const res = await fetch(
-      `https://flespi.io/gw/devices/${FLESPI_CONFIG.deviceId}/messages?${params}`,
-      { headers: { Authorization: `FlespiToken ${FLESPI_CONFIG.token}` } },
+      `https://flespi.io/gw/devices/${encodeURIComponent(deviceId)}/messages?${params}`,
+      { headers: flespiAuthHeaders() },
     );
     if (!res.ok) {
       throw new Error(`Flespi respondeu ${res.status}`);

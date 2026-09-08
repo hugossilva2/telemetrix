@@ -622,7 +622,24 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             typeof speed === "number" ? speed : 0,
           );
 
+          // Barreira antiduplicidade: se já existe viagem deste veículo cruzando
+          // este intervalo, este fechamento é reprocessamento — não grava de novo.
+          const { data: overlapping } = await supabaseAdmin
+            .from("trips")
+            .select("id")
+            .eq("vehicle_id", vehicle.id)
+            .lt("start_time", nowIso)
+            .gt("end_time", state.start_time as string)
+            .limit(1);
+          if (overlapping && overlapping.length > 0) {
+            console.log("[ingest] fechamento ignorado: viagem sobreposta já existe", deviceId);
+            skippedDuplicate++;
+            await clearTripFields(deviceId, nowIso);
+            continue;
+          }
+
           // Reentrega do mesmo fechamento é no-op (unique vehicle_id + start_time).
+
           const { data: tripRows, error: tripError } = await supabaseAdmin
             .from("trips")
             .upsert(

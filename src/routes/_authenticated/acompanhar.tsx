@@ -1,20 +1,7 @@
 import { ClientOnly, createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  Car,
-  Clock,
-  Eye,
-  Gauge,
-  LogIn,
-  LogOut,
-  MapPinOff,
-  Radar,
-  Route as RouteIcon,
-  ShieldAlert,
-  Zap,
-} from "lucide-react";
+import { Car, Clock, Eye, Gauge, Radar, Route as RouteIcon, Zap } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -22,6 +9,9 @@ import { SignOutButton } from "@/components/auth/SignOutButton";
 import { ObserverAddressCard } from "@/components/observer/ObserverAddressCard";
 import { ObserverTripsList } from "@/components/observer/ObserverTripsList";
 import { PushNotificationsCard } from "@/components/settings/PushNotificationsCard";
+import { EVENT_META } from "@/lib/tracker/events";
+import { haversineKm } from "@/lib/trips/geo";
+import { formatClockFromMs } from "@/lib/trips/format";
 
 const VehicleMap = lazy(() => import("@/components/map/VehicleMap"));
 
@@ -46,43 +36,6 @@ export const Route = createFileRoute("/_authenticated/acompanhar")({
 
 type TrackerEvent = Tables<"tracker_events">;
 
-const EVENT_META: Record<
-  TrackerEvent["type"],
-  { label: string; Icon: typeof LogIn; color: string; bg: string }
-> = {
-  ignition_on: { label: "Motor ligado", Icon: LogIn, color: "text-success", bg: "bg-success/10" },
-  ignition_off: {
-    label: "Motor desligado",
-    Icon: LogOut,
-    color: "text-muted-foreground",
-    bg: "bg-muted",
-  },
-  motion_off_ignition: {
-    label: "Movimento suspeito",
-    Icon: ShieldAlert,
-    color: "text-destructive",
-    bg: "bg-destructive/10",
-  },
-  geofence_enter: {
-    label: "Chegou na cerca",
-    Icon: LogIn,
-    color: "text-chart-3",
-    bg: "bg-chart-3/10",
-  },
-  geofence_exit: {
-    label: "Saiu da cerca",
-    Icon: AlertTriangle,
-    color: "text-warning",
-    bg: "bg-warning/10",
-  },
-  signal_lost: {
-    label: "Sinal perdido",
-    Icon: MapPinOff,
-    color: "text-orange-500",
-    bg: "bg-orange-500/10",
-  },
-};
-
 const dtf = new Intl.DateTimeFormat("pt-BR", {
   day: "2-digit",
   month: "2-digit",
@@ -99,25 +52,6 @@ function relative(iso: string | null | undefined) {
   const h = Math.floor(min / 60);
   if (h < 24) return `${h}h atrás`;
   return dtf.format(new Date(iso));
-}
-
-function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
-  const R = 6371;
-  const dLat = ((b.lat - a.lat) * Math.PI) / 180;
-  const dLng = ((b.lng - a.lng) * Math.PI) / 180;
-  const la1 = (a.lat * Math.PI) / 180;
-  const la2 = (b.lat * Math.PI) / 180;
-  const h = Math.sin(dLat / 2) ** 2 + Math.cos(la1) * Math.cos(la2) * Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(h));
-}
-
-function formatDuration(ms: number) {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(total / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
 }
 
 /** Relógio de 1s usado apenas quando há viagem em andamento. */
@@ -284,7 +218,7 @@ function FollowPage() {
     for (let i = 0; i < pts.length; i++) {
       const s = pts[i].speed_kmh != null ? Number(pts[i].speed_kmh) : 0;
       if (s > max) max = s;
-      if (i > 0) distance += haversineKm(pts[i - 1], pts[i]);
+      if (i > 0) distance += haversineKm(pts[i - 1].lat, pts[i - 1].lng, pts[i].lat, pts[i].lng);
     }
     const elapsedMs = now - startMs;
     const hours = elapsedMs / 3_600_000;
@@ -361,7 +295,7 @@ function FollowPage() {
         />
         <Tile
           label="Viagem"
-          value={live ? formatDuration(live.elapsedMs) : "parado"}
+          value={live ? formatClockFromMs(live.elapsedMs) : "parado"}
           tone={live ? "success" : "muted"}
           Icon={Radar}
         />
@@ -383,7 +317,7 @@ function FollowPage() {
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <LiveStat label="Duração" value={formatDuration(live.elapsedMs)} Icon={Clock} />
+            <LiveStat label="Duração" value={formatClockFromMs(live.elapsedMs)} Icon={Clock} />
             <LiveStat label="Distância" value={`${live.distance.toFixed(1)} km`} Icon={RouteIcon} />
             <LiveStat label="Média" value={`${Math.round(live.avgSpeed)} km/h`} Icon={Gauge} />
             <LiveStat label="Máxima" value={`${Math.round(live.maxSpeed)} km/h`} Icon={Zap} />

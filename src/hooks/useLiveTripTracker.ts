@@ -32,10 +32,20 @@ export function useLiveTripTracker() {
   // Só encerramos se a ignição ficar desligada por mais que este período.
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const IGNITION_OFF_GRACE_MS = 1 * 60_000;
+  // Rotina de encerramento pendente: se o app fechar durante a tolerância,
+  // disparamos na hora em vez de perder a viagem.
+  const pendingClose = useRef<(() => void) | null>(null);
 
   useEffect(() => () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+      const run = pendingClose.current;
+      pendingClose.current = null;
+      if (run) run();
+    }
   }, []);
+
 
   useEffect(() => {
     const ign = telemetry.ignitionOn;

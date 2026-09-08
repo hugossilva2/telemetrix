@@ -16,7 +16,7 @@ export interface VehicleRecord {
   name: string;
   plate: string;
   current_mileage: number;
-  avg_consumption_kmpl: number;
+  avg_consumption_kmpl: number | null;
   flespi_device_id: string | null;
   obd_device_name: string | null;
   tracker_mode: boolean;

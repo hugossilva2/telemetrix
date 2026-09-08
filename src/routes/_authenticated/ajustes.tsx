@@ -35,7 +35,7 @@ type VehicleRow = {
   plate: string;
   current_mileage: number;
   alert_engine_on: boolean;
-  avg_consumption_kmpl: number;
+  avg_consumption_kmpl: number | null;
   flespi_device_id: string | null;
   tracker_mode: boolean;
   alert_ignition: boolean;

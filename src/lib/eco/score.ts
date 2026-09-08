@@ -22,9 +22,6 @@ const WASTE_L: Record<EcoEventType, Record<EcoSeverity, number>> = {
   high_rpm: { moderate: 0.015, severe: 0.03 },
 };
 
-/** Consumo em marcha lenta de um motor 1.0-2.0: ~0,7 L por hora parado. */
-const IDLE_L_PER_HOUR = 0.7;
-
 export const ECO_EVENT_LABEL: Record<EcoEventType, string> = {
   harsh_brake: "Freada brusca",
   harsh_accel: "Aceleração agressiva",
@@ -111,10 +108,12 @@ export function summarizeEco({
     }
   }
 
-  // Marcha lenta: 1 ponto a cada 5 min parado com motor ligado
+  // Marcha lenta: 1 ponto a cada 5 min parado com motor ligado.
+  // O consumo da marcha lenta já entra em trips.fuel_liters (ver
+  // src/lib/fuel/consumption.ts), então NÃO é somado aqui — wasted_fuel_liters
+  // representa apenas o desperdício por eventos de condução.
   const idleMinutes = Math.max(0, idleSeconds) / 60;
   penalty += idleMinutes / 5;
-  wasted += (idleMinutes / 60) * IDLE_L_PER_HOUR;
 
   // Normaliza por 100 km: viagens longas não são punidas pelo tamanho.
   const km = Math.max(distanceKm, 1);

@@ -7,6 +7,8 @@ const log = (date: string, mileage: number, liters: number, cost: number): FuelL
   liters_filled: liters,
   total_cost: cost,
   price_per_liter: cost / liters,
+  is_full_tank: true,
+  fuel_type: "gasolina",
 });
 
 describe("fuelMetrics", () => {
@@ -46,5 +48,23 @@ describe("fuelMetrics", () => {
     ]);
     expect(m.avgKmpl).toBeCloseTo(10, 2);
     expect(m.avgCostPerKm).toBeCloseTo(0.6, 3);
+  });
+
+  it("ignora abastecimento parcial entre dois tanques cheios", () => {
+    const partial = { ...log("2026-08-05T10:00:00Z", 1150, 10, 60), is_full_tank: false };
+    const m = fuelMetrics([
+      log("2026-08-01T10:00:00Z", 1000, 30, 180),
+      partial,
+      log("2026-08-10T10:00:00Z", 1300, 30, 180),
+    ]);
+    expect(m.points).toHaveLength(1);
+    expect(m.lastKmpl).toBe(10);
+  });
+
+  it("não cria trecho entre combustíveis diferentes", () => {
+    const ethanol = { ...log("2026-08-10T10:00:00Z", 1300, 30, 150), fuel_type: "etanol" };
+    const m = fuelMetrics([log("2026-08-01T10:00:00Z", 1000, 30, 180), ethanol]);
+    expect(m.points).toHaveLength(0);
+    expect(m.avgKmpl).toBeNull();
   });
 });

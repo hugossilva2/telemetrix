@@ -10,6 +10,8 @@ export interface FuelLogPoint {
   liters_filled: number;
   total_cost: number;
   mileage_at_fill: number;
+  is_full_tank: boolean;
+  fuel_type: string;
 }
 
 export interface FuelMetricPoint {
@@ -34,7 +36,7 @@ export interface FuelMetricsSummary {
 
 /** Espera os abastecimentos em qualquer ordem; ordena por data internamente. */
 export function fuelMetrics(logs: FuelLogPoint[]): FuelMetricsSummary {
-  const sorted = [...logs].sort(
+  const sorted = logs.filter((log) => log.is_full_tank).sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
   const points: FuelMetricPoint[] = [];
@@ -45,6 +47,7 @@ export function fuelMetrics(logs: FuelLogPoint[]): FuelMetricsSummary {
   for (let i = 1; i < sorted.length; i++) {
     const prev = sorted[i - 1];
     const cur = sorted[i];
+    if (prev.fuel_type !== cur.fuel_type) continue;
     const distanceKm = Number(cur.mileage_at_fill) - Number(prev.mileage_at_fill);
     const liters = Number(cur.liters_filled);
     const cost = Number(cur.total_cost);

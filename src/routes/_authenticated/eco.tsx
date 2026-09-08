@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Award, Flame, Leaf, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
@@ -13,6 +13,7 @@ import type { EcoEventType } from "@/lib/eco/detect";
 import { DEFAULT_ECO_SETTINGS, getEcoSettings, saveEcoSettings } from "@/lib/eco/settings";
 import { VehicleSpecCard } from "@/components/vehicles/VehicleSpecCard";
 import { fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
+import { useActiveVehicle, useInvalidateVehicles } from "@/lib/vehicles/active";
 
 import { formatBRL, formatDecimal } from "@/lib/format";
 import { formatDateTime } from "@/lib/trips/format";
@@ -150,6 +151,22 @@ function EcoPage() {
   }, [trips]);
 
   const [settings, setSettings] = useState(() => getEcoSettings());
+  const { vehicle, fuel: activeFuel } = useActiveVehicle();
+  const invalidateVehicles = useInvalidateVehicles();
+
+  // Fonte de verdade do combustível: vehicles.fuel_kind do veículo ativo.
+  const setFuel = useMutation({
+    mutationFn: async (next: FuelKind) => {
+      if (!vehicle) throw new Error("Cadastre um veículo antes de escolher o combustível.");
+      const { error } = await supabase
+        .from("vehicles")
+        .update({ fuel_kind: next })
+        .eq("id", vehicle.id);
+      if (error) throw error;
+    },
+    onSuccess: () => invalidateVehicles(),
+    onError: (e: Error) => toast.error(e.message || "Não foi possível salvar o combustível."),
+  });
 
   const diff =
     stats?.curAvg != null && stats?.lastAvg != null ? stats.curAvg - stats.lastAvg : null;
@@ -298,7 +315,7 @@ function EcoPage() {
       <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Ficha técnica do veículo
       </h2>
-      <VehicleSpecCard fuel={settings.fuel} />
+      <VehicleSpecCard fuel={activeFuel} />
 
       <h2 className="mb-2 mt-6 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
         Ajustes da pontuação
@@ -307,16 +324,18 @@ function EcoPage() {
         <div>
           <Label className="text-sm">Combustível em uso</Label>
           <p className="text-[11px] text-muted-foreground">
-            Define a meta de consumo (Inmetro) usada nos scores.
+            Define a meta de consumo (Inmetro) usada nos scores. Fica salvo no veículo, então
+            observadores e outros aparelhos veem a mesma meta.
           </p>
           <div className="mt-2 grid grid-cols-3 gap-2">
             {(["etanol", "gasolina", "misto"] as FuelKind[]).map((f) => (
               <button
                 key={f}
                 type="button"
-                onClick={() => setSettings({ ...settings, fuel: f })}
+                onClick={() => setFuel.mutate(f)}
+                disabled={setFuel.isPending || !vehicle}
                 className={`rounded-xl border px-2 py-2 text-xs font-medium transition-colors ${
-                  settings.fuel === f
+                  activeFuel === f
                     ? "border-primary/50 bg-primary/12 text-primary"
                     : "border-border bg-background/35 text-muted-foreground"
                 }`}

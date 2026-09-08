@@ -4,7 +4,8 @@ import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import type { OpenTrip } from "@/lib/trips/store";
 import { summarizeEco } from "@/lib/eco/score";
 import { getFuelKind } from "@/lib/eco/settings";
-import { expectedKmpl } from "@/lib/vehicles/specs";
+import { specFromVehicleRow } from "@/lib/vehicles/specs";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 
 import { getDefaultDriverId } from "@/lib/drivers/api";
 import { telemetrySourceStore } from "@/lib/telemetry/source";
@@ -12,7 +13,7 @@ import { offlineQueue } from "@/lib/offline/queue";
 import { isOnline } from "@/lib/offline/sync";
 import { snapToRoads } from "@/lib/maps/snapToRoads.functions";
 import { buildRouteData } from "@/lib/trips/routeData";
-import { getActiveVehicleId } from "@/lib/vehicles/active";
+import { getActiveVehicleId, VEHICLE_SELECT } from "@/lib/vehicles/active";
 
 const MIN_DISTANCE_KM = 0.2;
 const MIN_DURATION_S = 60;
@@ -62,7 +63,7 @@ export async function saveClosedTrip(
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     (() => {
       const activeId = getActiveVehicleId();
-      const q = supabase.from("vehicles").select("id,avg_consumption_kmpl").eq("user_id", userId);
+      const q = supabase.from("vehicles").select(VEHICLE_SELECT).eq("user_id", userId);
       return activeId
         ? q.eq("id", activeId).maybeSingle()
         : q.order("created_at", { ascending: true }).limit(1).maybeSingle();
@@ -80,10 +81,28 @@ export async function saveClosedTrip(
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
   const fuel = getFuelKind();
-  // Sem consumo cadastrado, usa a meta Inmetro da ficha técnica do veículo.
-  const kmpl = Number(vehicle?.avg_consumption_kmpl) || expectedKmpl({ fuel, avgSpeedKmh });
+
+  // Calibração medida cheio-a-cheio do veículo, quando existir.
+  const { data: calibration } = vehicle?.id
+    ? await supabase
+        .from("vehicle_fuel_calibration")
+        .select("kmpl,samples,fuel_type")
+        .eq("vehicle_id", vehicle.id)
+        .eq("fuel_type", fuel)
+        .maybeSingle()
+    : { data: null };
+
+  // Fonte única: calibração medida → consumo cadastrado → ficha técnica.
+  const { kmpl, source: fuelSource } = resolveKmpl({
+    calibration,
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec: specFromVehicleRow(vehicle),
+    fuel,
+    avgSpeedKmh,
+  });
   const price = Number(lastFuel?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER;
-  const fuelLiters = kmpl > 0 ? distanceKm / kmpl : null;
+  const idleSeconds = trip.idleSeconds ?? 0;
+  const fuelLiters = tripFuelLiters({ distanceKm, kmpl, idleSeconds });
   const estimatedCost = fuelLiters != null ? fuelLiters * price : null;
 
   const eco = summarizeEco({
@@ -135,6 +154,8 @@ export async function saveClosedTrip(
     mileage_at_start: trip.mileageAtStart,
     mileage_at_end: trip.lastMileage,
     fuel_liters: fuelLiters,
+    fuel_kmpl_used: kmpl,
+    fuel_source: fuelSource,
     estimated_cost: estimatedCost,
     eco_score: eco.score,
     harsh_brake_count: eco.counts.harsh_brake,

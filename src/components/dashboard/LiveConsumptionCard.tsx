@@ -4,6 +4,7 @@ import { useOpenTrip } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { supabase } from "@/integrations/supabase/client";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
 
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -12,15 +13,15 @@ const BRL = new Intl.NumberFormat("pt-BR", {
 
 export function LiveConsumptionCard() {
   const open = useOpenTrip();
-  const { vehicle } = useActiveVehicle();
+  const { vehicle, spec, fuel } = useActiveVehicle();
 
   const { data } = useQuery({
-    queryKey: ["live-consumption-refs", vehicle?.id ?? null],
+    queryKey: ["live-consumption-refs", vehicle?.id ?? null, fuel],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) return { pricePerLiter: null, kmpl: 10 };
-      const [{ data: lastFuel }] = await Promise.all([
+      if (!uid) return { pricePerLiter: null, calibration: null };
+      const [{ data: lastFuel }, { data: calibration }] = await Promise.all([
         supabase
           .from("fuel_logs")
           .select("price_per_liter")
@@ -28,10 +29,18 @@ export function LiveConsumptionCard() {
           .order("date", { ascending: false })
           .limit(1)
           .maybeSingle(),
+        vehicle?.id
+          ? supabase
+              .from("vehicle_fuel_calibration")
+              .select("kmpl,samples,fuel_type")
+              .eq("vehicle_id", vehicle.id)
+              .eq("fuel_type", fuel)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
       return {
         pricePerLiter: lastFuel?.price_per_liter ?? null,
-        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
+        calibration,
       };
     },
     staleTime: 60_000,
@@ -56,11 +65,21 @@ export function LiveConsumptionCard() {
   }
 
   const DEFAULT_PRICE = 5.89;
-  const kmpl = data?.kmpl ?? 10;
+  const avgSpeedKmh = null;
+  const { kmpl } = resolveKmpl({
+    calibration: data?.calibration ?? null,
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+    fuel,
+    avgSpeedKmh,
+  });
   const priceFromLog = data?.pricePerLiter != null ? Number(data.pricePerLiter) : null;
   const price = priceFromLog ?? DEFAULT_PRICE;
   const usingFallbackPrice = priceFromLog === null;
-  const liters = distanceKm !== null ? distanceKm / kmpl : null;
+  const liters =
+    distanceKm !== null
+      ? tripFuelLiters({ distanceKm, kmpl, idleSeconds: open?.idleSeconds ?? 0 })
+      : null;
   const cost = liters !== null ? liters * price : null;
 
   return (

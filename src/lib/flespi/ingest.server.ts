@@ -1,5 +1,7 @@
 import { fireAutomationsForPlace } from "@/lib/automations/run.server";
 import { accumIncrementKm, haversineKm, resolveTripDistanceKm } from "@/lib/flespi/distance";
+import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
+import { parseFuelKind, specFromVehicleRow } from "@/lib/vehicles/specs";
 
 /**
  * Núcleo de ingestão de mensagens do rastreador Flespi.
@@ -63,6 +65,15 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
     id: string;
     user_id: string;
     avg_consumption_kmpl: number | null;
+    fuel_kind: string | null;
+    model_year: number | null;
+    engine: string | null;
+    gearbox: string | null;
+    zero_to_100_s: number | null;
+    consumption_ethanol_urban: number | null;
+    consumption_ethanol_highway: number | null;
+    consumption_gasoline_urban: number | null;
+    consumption_gasoline_highway: number | null;
     signal_lost_notified_at: string | null;
     alert_geofence: boolean | null;
   };
@@ -80,7 +91,9 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
     if (vehicleCache.has(deviceId)) return vehicleCache.get(deviceId) ?? null;
     const { data } = await supabaseAdmin
       .from("vehicles")
-      .select("id,user_id,avg_consumption_kmpl,signal_lost_notified_at,alert_geofence")
+      .select(
+        "id,user_id,avg_consumption_kmpl,fuel_kind,model_year,engine,gearbox,zero_to_100_s,consumption_ethanol_urban,consumption_ethanol_highway,consumption_gasoline_urban,consumption_gasoline_highway,signal_lost_notified_at,alert_geofence",
+      )
       .eq("flespi_device_id", deviceId)
       .maybeSingle();
     const v = (data as CachedVehicle | null) ?? null;
@@ -489,9 +502,24 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             .limit(1)
             .maybeSingle();
 
-          const kmpl = Number(vehicle.avg_consumption_kmpl) || 10;
+          const fuelKind = parseFuelKind(vehicle.fuel_kind);
+          const { data: calibration } = await supabaseAdmin
+            .from("vehicle_fuel_calibration")
+            .select("kmpl,samples,fuel_type")
+            .eq("vehicle_id", vehicle.id)
+            .eq("fuel_type", fuelKind)
+            .maybeSingle();
+
+          // Fonte única: calibração medida → consumo cadastrado → ficha técnica.
+          const { kmpl, source: fuelSource } = resolveKmpl({
+            calibration,
+            vehicleKmpl: vehicle.avg_consumption_kmpl,
+            spec: specFromVehicleRow(vehicle),
+            fuel: fuelKind,
+            avgSpeedKmh: avgSpeed,
+          });
           const price = Number(lastFuel?.price_per_liter) || 5.89;
-          const fuelLiters = kmpl > 0 ? distanceKm / kmpl : null;
+          const fuelLiters = tripFuelLiters({ distanceKm, kmpl });
           const estimatedCost = fuelLiters !== null && price > 0 ? fuelLiters * price : null;
 
           const maxSpeed = Math.max(
@@ -518,6 +546,8 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
                 mileage_at_start: state.mileage_at_start,
                 mileage_at_end: endMileage,
                 fuel_liters: fuelLiters,
+                fuel_kmpl_used: kmpl,
+                fuel_source: fuelSource,
                 estimated_cost: estimatedCost,
               },
               { onConflict: "vehicle_id,start_time", ignoreDuplicates: true },

@@ -1,6 +1,6 @@
 import { Fuel, DollarSign } from "lucide-react";
 import { useOpenTrip } from "@/lib/trips/store";
-import { haversineKm } from "@/lib/trips/geo";
+import { openTripDistanceKm } from "@/lib/trips/openTrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { tripFuelLiters } from "@/lib/fuel/consumption";
 import { useFuelRefs } from "@/lib/fuel/useFuelRefs";
@@ -21,23 +21,8 @@ export function LiveConsumptionCard() {
     avgSpeedKmh: null,
   });
 
-  let distanceKm: number | null = null;
-  if (open) {
-    if (
-      typeof open.mileageAtStart === "number" &&
-      typeof open.lastMileage === "number" &&
-      open.lastMileage >= open.mileageAtStart
-    ) {
-      distanceKm = open.lastMileage - open.mileageAtStart;
-    } else if (
-      typeof open.startLat === "number" &&
-      typeof open.startLng === "number" &&
-      typeof open.lastLat === "number" &&
-      typeof open.lastLng === "number"
-    ) {
-      distanceKm = haversineKm(open.startLat, open.startLng, open.lastLat, open.lastLng);
-    }
-  }
+  const distanceKm = openTripDistanceKm(open);
+
 
   const usingFallbackPrice = !hasPriceFromLog;
 

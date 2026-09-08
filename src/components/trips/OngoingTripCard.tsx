@@ -3,6 +3,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { Clock, Fuel, Route as RouteIcon, Wallet, Navigation, X } from "lucide-react";
 import { useOpenTrip } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
+import { openTripDistanceKm } from "@/lib/trips/openTrip";
 import { formatDurationSeconds } from "@/lib/trips/format";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
@@ -78,21 +79,8 @@ export function OngoingTripCard() {
 
   const durationS = Math.max(0, Math.floor((now - new Date(open.startTime).getTime()) / 1000));
 
-  let distanceKm = 0;
-  if (
-    typeof open.mileageAtStart === "number" &&
-    typeof open.lastMileage === "number" &&
-    open.lastMileage >= open.mileageAtStart
-  ) {
-    distanceKm = open.lastMileage - open.mileageAtStart;
-  } else if (
-    typeof open.startLat === "number" &&
-    typeof open.startLng === "number" &&
-    typeof open.lastLat === "number" &&
-    typeof open.lastLng === "number"
-  ) {
-    distanceKm = haversineKm(open.startLat, open.startLng, open.lastLat, open.lastLng);
-  }
+  const distanceKm = openTripDistanceKm(open) ?? 0;
+
 
   const price = fuelRefs.pricePerLiter;
   const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;

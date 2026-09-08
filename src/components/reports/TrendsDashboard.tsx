@@ -322,21 +322,92 @@ export function TrendsDashboard() {
                 {avgTarget ? ` · meta ${nf1.format(avgTarget)}` : ""}
               </span>
             </header>
-            <div className="h-44">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
-                  <CartesianGrid stroke="var(--border)" vertical={false} />
-                  <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
-                  <YAxis {...axis} />
-                  {avgTarget ? (
-                    <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
-                  ) : null}
-                  <Tooltip content={<ChartTooltip suffix=" km/L" />} cursor={{ fill: "var(--muted)" }} />
-                  <Bar dataKey="kmpl" name="km/L" fill="var(--primary)" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            {hasMeasured ? (
+              <>
+                <div className="mb-2 flex flex-wrap items-center gap-3 text-[10px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded bg-primary" /> Medido
+                    {avgMeasured ? ` · média ${nf1.format(avgMeasured)}` : ""}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded border-t border-dashed border-muted-foreground" />
+                    Estimado (cálculo do app)
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <span className="h-0.5 w-4 rounded border-t border-dashed border-warning" /> Meta
+                    Inmetro
+                  </span>
+                </div>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
+                      <YAxis {...axis} />
+                      {avgTarget ? (
+                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                      ) : null}
+                      <Tooltip content={<ChartTooltip suffix=" km/L" />} />
+                      <Line
+                        type="monotone"
+                        dataKey="measuredKmpl"
+                        name="Medido (abastecimentos)"
+                        stroke="var(--primary)"
+                        strokeWidth={2.5}
+                        dot={{ r: 3, fill: "var(--primary)" }}
+                        connectNulls
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="estimatedKmpl"
+                        name="Estimado (cálculo do app)"
+                        stroke="var(--muted-foreground)"
+                        strokeWidth={1.5}
+                        strokeDasharray="4 3"
+                        dot={false}
+                        connectNulls
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  A linha cheia vem dos seus abastecimentos de tanque cheio. A tracejada é apenas a
+                  estimativa do app, para comparação.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="h-44">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={points} margin={{ top: 4, right: 8, bottom: 0, left: -18 }}>
+                      <CartesianGrid stroke="var(--border)" vertical={false} />
+                      <XAxis dataKey="label" {...axis} interval="preserveStartEnd" />
+                      <YAxis {...axis} />
+                      {avgTarget ? (
+                        <ReferenceLine y={avgTarget} stroke="var(--warning)" strokeDasharray="4 4" />
+                      ) : null}
+                      <Tooltip content={<ChartTooltip suffix=" km/L" />} />
+                      <Line
+                        type="monotone"
+                        dataKey="estimatedKmpl"
+                        name="Estimado (cálculo do app)"
+                        stroke="var(--muted-foreground)"
+                        strokeWidth={1.5}
+                        strokeDasharray="4 3"
+                        dot={false}
+                        connectNulls
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+                <p className="mt-2 rounded-xl border border-border/60 bg-muted/30 p-2 text-[11px] text-muted-foreground">
+                  Só a estimativa está disponível. Registre dois abastecimentos com o tanque cheio
+                  do mesmo combustível para ver seu consumo real aqui.
+                </p>
+              </>
+            )}
           </section>
+
 
           <section className="card-surface p-3">
             <header className="mb-2 flex items-center justify-between">

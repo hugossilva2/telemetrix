@@ -20,7 +20,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { testAutomation } from "@/lib/automations/automations.functions";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Place = Tables<"favorite_places">;
+type Place = Pick<
+  Tables<"favorite_places">,
+  "id" | "name" | "geofence_enabled" | "geofence_radius_m"
+>;
 type Automation = Tables<"place_automations">;
 
 interface Props {

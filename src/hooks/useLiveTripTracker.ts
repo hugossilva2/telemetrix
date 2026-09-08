@@ -108,8 +108,9 @@ export function useLiveTripTracker() {
     // for girada de novo dentro da tolerância, a viagem continua.
     if ((prev === true || prev === undefined) && ign === false) {
       if (!tripStore.get() || closeTimer.current) return;
-      closeTimer.current = setTimeout(() => {
+      const closeNow = () => {
         closeTimer.current = null;
+        pendingClose.current = null;
         const closing = tripStore.get();
         tripStore.set(null);
         void notifyTrackerEvent({ data: { type: "ignition_off" } }).catch(() => {});
@@ -135,8 +136,11 @@ export function useLiveTripTracker() {
               toast.error("Não foi possível salvar a viagem");
             });
         }
-      }, IGNITION_OFF_GRACE_MS);
+      };
+      pendingClose.current = closeNow;
+      closeTimer.current = setTimeout(closeNow, IGNITION_OFF_GRACE_MS);
     }
+
 
 
 

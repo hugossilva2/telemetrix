@@ -90,9 +90,6 @@ const CRONOS_1_3_2022: VehicleSpec = {
 /** Ficha padrão usada quando o veículo ativo ainda não tem dados próprios. */
 export const DEFAULT_SPEC: VehicleSpec = CRONOS_1_3_2022;
 
-/** @deprecated use o veículo ativo (`useActiveVehicle().spec`). */
-export const DEFAULT_SPEC = DEFAULT_SPEC;
-
 /** Colunas de ficha técnica gravadas na tabela `vehicles`. */
 export interface VehicleSpecRow {
   name?: string | null;

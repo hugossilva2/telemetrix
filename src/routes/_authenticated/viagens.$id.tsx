@@ -15,6 +15,7 @@ import {
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
+import { FuelSourceBadge, type FuelSourceValue } from "@/components/fuel/FuelSourceBadge";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { EcoTripCard, parseEcoEvents } from "@/components/eco/EcoTripCard";
 import { EcoEventsChart } from "@/components/eco/EcoEventsChart";
@@ -540,11 +541,13 @@ function Stat({
   label,
   value,
   highlight,
+  hint,
 }: {
   Icon: typeof Clock;
   label: string;
   value: string;
   highlight?: boolean;
+  hint?: React.ReactNode;
 }) {
   return (
     <div className="card-surface p-3">
@@ -555,6 +558,7 @@ function Stat({
       <div className={`mt-1 text-lg font-semibold tabular-nums ${highlight ? "text-success" : ""}`}>
         {value}
       </div>
+      {hint ? <div className="mt-0.5">{hint}</div> : null}
     </div>
   );
 }

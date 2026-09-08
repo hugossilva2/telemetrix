@@ -66,7 +66,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
    * eventos de cerca (push repetido), por isso preservamos last_message_at
    * e geofence_state.
    */
-  async function clearTripFields(deviceId: string) {
+  async function clearTripFields(deviceId: string, nowIso?: string) {
     const { error } = await supabaseAdmin
       .from("device_trip_state")
       .update({
@@ -78,10 +78,15 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
         accum_distance_km: 0,
         max_speed_kmh: 0,
         updated_at: new Date().toISOString(),
+        // CRÍTICO: avançar o marcador da última mensagem lida. Sem isso o coletor
+        // periódico rebusca a mesma janela, revê o motor ligado no passado e cria
+        // viagens duplicadas/sobrepostas a cada rodada.
+        ...(nowIso ? { last_message_at: nowIso } : {}),
       })
       .eq("device_id", deviceId);
     if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
   }
+
 
   let processed = 0;
   let skippedNoDevice = 0;

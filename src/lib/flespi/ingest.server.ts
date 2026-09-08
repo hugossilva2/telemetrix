@@ -66,7 +66,7 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
    * eventos de cerca (push repetido), por isso preservamos last_message_at
    * e geofence_state.
    */
-  async function clearTripFields(deviceId: string) {
+  async function clearTripFields(deviceId: string, nowIso?: string) {
     const { error } = await supabaseAdmin
       .from("device_trip_state")
       .update({
@@ -78,10 +78,15 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
         accum_distance_km: 0,
         max_speed_kmh: 0,
         updated_at: new Date().toISOString(),
+        // CRÍTICO: avançar o marcador da última mensagem lida. Sem isso o coletor
+        // periódico rebusca a mesma janela, revê o motor ligado no passado e cria
+        // viagens duplicadas/sobrepostas a cada rodada.
+        ...(nowIso ? { last_message_at: nowIso } : {}),
       })
       .eq("device_id", deviceId);
     if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
   }
+
 
   let processed = 0;
   let skippedNoDevice = 0;
@@ -225,10 +230,12 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           .eq("device_id", deviceId)
           .maybeSingle();
 
-        // Guarda contra mensagens fora de ordem (Flespi pode enfileirar).
-        if (state?.updated_at) {
-          const stateMs = new Date(state.updated_at as string).getTime();
-          if (tsMs < stateMs - 1000) {
+        // Guarda contra mensagens fora de ordem / reprocessadas. Comparar com
+        // `last_message_at` (horário da última mensagem lida do rastreador) e não
+        // com `updated_at`, que é o relógio do servidor e descartava mensagens boas.
+        if (state?.last_message_at) {
+          const stateMs = new Date(state.last_message_at as string).getTime();
+          if (tsMs <= stateMs) {
             skippedOutOfOrder++;
             console.log(
               "[flespi-webhook] skip: out-of-order",
@@ -236,11 +243,12 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
               "msg",
               nowIso,
               "state",
-              state.updated_at,
+              state.last_message_at,
             );
             continue;
           }
         }
+
 
         console.log(
           "[flespi-webhook]",
@@ -450,9 +458,11 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           }
         }
 
-        // Abre viagem: OFF→ON ou primeira observação já ligada sem estado.
-        const shouldOpen =
-          ign === true && (prevIgn === false || prevIgn === null || state?.start_time == null);
+        // Abre viagem SOMENTE em transição real desligado→ligado (ou na primeira
+        // mensagem de um device sem estado nenhum). Antes bastava "sem viagem
+        // aberta", o que fazia uma releitura da mesma janela abrir viagem de novo.
+        const shouldOpen = ign === true && (state == null || prevIgn !== true);
+
 
         // Fecha viagem: ON→OFF (ou primeira observação desligada com viagem aberta).
         const shouldClose = ign === false && state?.start_time != null;
@@ -518,7 +528,8 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           );
 
           if (distanceKm < MIN_DISTANCE_KM && durationS < MIN_DURATION_S) {
-            await clearTripFields(deviceId);
+            await clearTripFields(deviceId, nowIso);
+
             continue;
           }
 
@@ -612,7 +623,24 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             typeof speed === "number" ? speed : 0,
           );
 
+          // Barreira antiduplicidade: se já existe viagem deste veículo cruzando
+          // este intervalo, este fechamento é reprocessamento — não grava de novo.
+          const { data: overlapping } = await supabaseAdmin
+            .from("trips")
+            .select("id")
+            .eq("vehicle_id", vehicle.id)
+            .lt("start_time", nowIso)
+            .gt("end_time", state.start_time as string)
+            .limit(1);
+          if (overlapping && overlapping.length > 0) {
+            console.log("[ingest] fechamento ignorado: viagem sobreposta já existe", deviceId);
+            skippedDuplicate++;
+            await clearTripFields(deviceId, nowIso);
+            continue;
+          }
+
           // Reentrega do mesmo fechamento é no-op (unique vehicle_id + start_time).
+
           const { data: tripRows, error: tripError } = await supabaseAdmin
             .from("trips")
             .upsert(
@@ -672,9 +700,10 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             }
           }
 
-          // Encerra a viagem sem apagar a linha: preserva last_message_at e
-          // geofence_state, senão o poll seguinte reprocessa e repete os pushes.
-          await clearTripFields(deviceId);
+          // Encerra a viagem sem apagar a linha: preserva geofence_state e avança
+          // o marcador da última mensagem lida (evita reprocessar a janela).
+          await clearTripFields(deviceId, nowIso);
+
           processed++;
           continue;
         }
@@ -713,19 +742,21 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             })
             .eq("device_id", deviceId);
           processed++;
-        } else if (ign === false && state?.start_time == null) {
-          // Persiste "desligado" para a próxima transição OFF→ON abrir viagem.
+        } else if (state?.start_time == null) {
+          // Sem viagem aberta: só registra a leitura (motor ligado ou desligado) e
+          // avança o marcador, para o coletor não rebuscar a mesma janela.
           await supabaseAdmin.from("device_trip_state").upsert({
             device_id: deviceId,
             user_id: vehicle.user_id,
             vehicle_id: vehicle.id,
-            ignition_on: false,
+            ignition_on: ign === true,
             updated_at: nowIso,
             max_speed_kmh: 0,
             last_message_at: nowIso,
             ...(pingWritten ? { last_ping_at: nowIso } : {}),
           });
         }
+
       }
     } finally {
       // Libera o lease mesmo em caso de erro (a linha pode ter sido apagada no

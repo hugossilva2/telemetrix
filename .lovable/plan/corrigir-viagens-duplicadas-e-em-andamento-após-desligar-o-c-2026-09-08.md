@@ -1,3 +1,5 @@
+&nbsp;
+
 # Corrigir viagens duplicadas e "em andamento" após desligar o carro
 
 ## O que está acontecendo
@@ -18,15 +20,15 @@ a fecha outra vez — repetindo o ciclo a cada 2 minutos até o marcador se ajus
 ## Fase 1 — Parar de criar duplicatas (correção da causa)
 
 1. Ao encerrar a viagem, avançar o marcador da última mensagem lida para o horário da
-   mensagem de desligamento, para o coletor nunca reler o mesmo trecho.
+  mensagem de desligamento, para o coletor nunca reler o mesmo trecho.
 2. Só abrir uma nova viagem numa transição real desligado → ligado (ou na primeira
-   mensagem de um rastreador sem estado nenhum). Hoje ele também abre quando o estado
+  mensagem de um rastreador sem estado nenhum). Hoje ele também abre quando o estado
    está "sem viagem", o que é exatamente o caso da releitura.
 3. Usar o marcador da última mensagem (e não o horário do último gravado) na proteção
-   contra mensagens fora de ordem, para não descartar mensagens boas nem aceitar
+  contra mensagens fora de ordem, para não descartar mensagens boas nem aceitar
    reprocessamento.
 4. Antes de gravar, recusar viagem que se sobreponha a outra já existente do mesmo
-   veículo (mesmo fim, ou intervalo cruzando outra viagem).
+  veículo (mesmo fim, ou intervalo cruzando outra viagem).
 
 ## Fase 2 — Trava no banco
 
@@ -49,14 +51,14 @@ observando o resultado.
 ## Detalhes técnicos
 
 - `src/lib/flespi/ingest.server.ts`: `clearTripFields` passa a receber o ISO da mensagem
-  e gravar `last_message_at`; `shouldOpen` deixa de incluir `state?.start_time == null`
-  quando `prevIgn === true`; guarda de fora de ordem passa a comparar com
-  `last_message_at`; checagem de sobreposição antes do `upsert` em `trips`.
+e gravar `last_message_at`; `shouldOpen` deixa de incluir `state?.start_time == null`
+quando `prevIgn === true`; guarda de fora de ordem passa a comparar com
+`last_message_at`; checagem de sobreposição antes do `upsert` em `trips`.
 - Migração: índice único `(vehicle_id, end_time)` em `public.trips` (após a limpeza da
-  Fase 3, senão a criação falha).
+Fase 3, senão a criação falha).
 - `src/lib/trips/saveTrip.ts`: alinhar a janela antiduplicidade com a checagem de
-  sobreposição do servidor.
+sobreposição do servidor.
 - Testes: cobrir "releitura da mesma janela não cria segunda viagem" e a detecção de
-  sobreposição em módulo puro.
+sobreposição em módulo puro.
 
 Cada fase é validada antes de seguir para a próxima.

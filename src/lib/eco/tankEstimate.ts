@@ -35,14 +35,13 @@ export interface TankEstimate {
 
 /** Km/l histórico entre abastecimentos consecutivos (lista em ordem decrescente). */
 export function historicalKmpl(fills: FuelFill[], fuelType?: string): number | null {
-  const complete = fills.filter(
-    (fill) => fill.isFullTank && (!fuelType || fill.fuelType === fuelType),
-  );
+  const complete = fills.filter((fill) => fill.isFullTank);
   const values: number[] = [];
   for (let i = 0; i < complete.length - 1; i++) {
     const newer = complete[i];
     const older = complete[i + 1];
     if (newer.fuelType !== older.fuelType) continue;
+    if (fuelType && newer.fuelType !== fuelType) continue;
     if (newer.odometerKm == null || older.odometerKm == null) continue;
     const km = newer.odometerKm - older.odometerKm;
     if (!(km > 0) || !(newer.liters > 0)) continue;

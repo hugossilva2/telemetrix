@@ -40,6 +40,15 @@ describe("historicalKmpl", () => {
     expect(historicalKmpl(fills)).toBeNull();
   });
 
+  it("não pula uma troca de combustível para ligar tanques não consecutivos", () => {
+    const fills = [
+      fill("2026-08-20T10:00:00Z", 1600, 30, { fuelType: "gasolina" }),
+      fill("2026-08-10T10:00:00Z", 1300, 30, { fuelType: "etanol" }),
+      fill("2026-08-01T10:00:00Z", 1000, 30, { fuelType: "gasolina" }),
+    ];
+    expect(historicalKmpl(fills, "gasolina")).toBeNull();
+  });
+
   it("calcula somente o combustível ativo", () => {
     const fills = [
       fill("2026-08-20T10:00:00Z", 1600, 30, { fuelType: "etanol" }),

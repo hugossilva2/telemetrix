@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { Switch } from "@/components/ui/switch";
+import { useActiveVehicle } from "@/lib/vehicles/active";
+import { fuelLabel, type FuelKind } from "@/lib/vehicles/specs";
 
 export const Route = createFileRoute("/_authenticated/abastecimento")({
   head: () => ({
@@ -37,6 +40,18 @@ interface FuelLog {
   total_cost: number;
   mileage_at_fill: number;
   receipt_url: string | null;
+  is_full_tank: boolean;
+  fuel_type: string;
+}
+
+const FUEL_OPTIONS: FuelKind[] = ["gasolina", "etanol", "misto"];
+
+function PartialBadge() {
+  return (
+    <span className="rounded-md border border-border/70 bg-muted/60 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+      Parcial
+    </span>
+  );
 }
 
 function toLocalDatetimeInput(d: Date) {
@@ -46,6 +61,7 @@ function toLocalDatetimeInput(d: Date) {
 
 function AbastecimentoPage() {
   const { telemetry } = useTelemetry();
+  const { fuel: vehicleFuel } = useActiveVehicle();
   const qc = useQueryClient();
 
   const [price, setPrice] = useState("");
@@ -54,10 +70,16 @@ function AbastecimentoPage() {
   const [datetime, setDatetime] = useState(() => toLocalDatetimeInput(new Date()));
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [isFullTank, setIsFullTank] = useState(true);
+  const [fuelType, setFuelType] = useState<FuelKind>(vehicleFuel);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [existingReceipt, setExistingReceipt] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!editingId) setFuelType(vehicleFuel);
+  }, [vehicleFuel, editingId]);
 
   useEffect(() => {
     if (telemetry.mileageKm != null && !mileage) {
@@ -86,7 +108,9 @@ function AbastecimentoPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("fuel_logs")
-        .select("id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill,receipt_url")
+        .select(
+          "id,date,price_per_liter,liters_filled,total_cost,mileage_at_fill,receipt_url,is_full_tank,fuel_type",
+        )
         .order("date", { ascending: true });
       if (error) throw error;
       return data as FuelLog[];
@@ -99,6 +123,8 @@ function AbastecimentoPage() {
     setPrice("");
     setTotal("");
     setPhoto(null);
+    setIsFullTank(true);
+    setFuelType(vehicleFuel);
     setDatetime(toLocalDatetimeInput(new Date()));
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (cameraInputRef.current) cameraInputRef.current.value = "";
@@ -111,6 +137,8 @@ function AbastecimentoPage() {
     setTotal(String(Number(log.total_cost)));
     setMileage(String(Number(log.mileage_at_fill)));
     setDatetime(toLocalDatetimeInput(new Date(log.date)));
+    setIsFullTank(log.is_full_tank ?? true);
+    setFuelType((log.fuel_type as FuelKind) ?? vehicleFuel);
     setPhoto(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     if (cameraInputRef.current) cameraInputRef.current.value = "";
@@ -158,6 +186,8 @@ function AbastecimentoPage() {
             total_cost: totalNum,
             mileage_at_fill: mileageNum,
             receipt_url: receiptUrl,
+            is_full_tank: isFullTank,
+            fuel_type: fuelType,
           })
           .eq("id", editingId);
         if (error) throw error;
@@ -180,6 +210,8 @@ function AbastecimentoPage() {
           total_cost: totalNum,
           mileage_at_fill: mileageNum,
           receipt_url: receiptUrl,
+          is_full_tank: isFullTank,
+          fuel_type: fuelType,
         })
         .select("id")
         .single();
@@ -335,6 +367,39 @@ function AbastecimentoPage() {
         </div>
 
         <div className="space-y-1.5">
+          <Label>Combustível</Label>
+          <div className="grid grid-cols-3 gap-2">
+            {FUEL_OPTIONS.map((f) => (
+              <button
+                key={f}
+                type="button"
+                onClick={() => setFuelType(f)}
+                className={`rounded-xl border px-2 py-2.5 text-xs font-medium transition-colors ${
+                  fuelType === f
+                    ? "border-primary/50 bg-primary/12 text-primary"
+                    : "border-border bg-background/35 text-muted-foreground"
+                }`}
+              >
+                {fuelLabel(f)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-start justify-between gap-3 rounded-lg bg-muted/40 px-3 py-2.5">
+          <div className="min-w-0">
+            <Label htmlFor="full-tank" className="text-sm">
+              Enchi o tanque
+            </Label>
+            <p className="mt-0.5 text-[11px] text-muted-foreground">
+              Só abastecimentos completos entram no cálculo de km/L. Se você colocou um valor
+              parcial, desligue aqui.
+            </p>
+          </div>
+          <Switch id="full-tank" checked={isFullTank} onCheckedChange={setIsFullTank} />
+        </div>
+
+        <div className="space-y-1.5">
           <Label>Comprovante (opcional)</Label>
           {editingId && existingReceipt && !photo && (
             <p className="text-xs text-muted-foreground">
@@ -440,6 +505,10 @@ function AbastecimentoPage() {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
+                    </p>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
+                      <span>{fuelLabel((log.fuel_type as FuelKind) ?? "misto")}</span>
+                      {log.is_full_tank === false ? <PartialBadge /> : null}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {Number(log.liters_filled).toFixed(2)} L · R${" "}

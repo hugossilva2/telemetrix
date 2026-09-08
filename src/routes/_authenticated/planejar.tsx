@@ -37,6 +37,7 @@ import { formatBRL, formatDecimal } from "@/lib/format";
 import { LongTripCard, useLongTripSummary } from "@/components/trips/LongTripCard";
 import { getFuelKind } from "@/lib/eco/settings";
 import { useActiveVehicle } from "@/lib/vehicles/active";
+import { resolveKmpl, type FuelSource } from "@/lib/fuel/consumption";
 
 const PlanMap = lazy(() => import("@/components/trips/PlanMap"));
 
@@ -174,7 +175,7 @@ function PlaceSearch({
 
 function PlanejarPage() {
   const { telemetry } = useTelemetry();
-  const { vehicle } = useActiveVehicle();
+  const { vehicle, spec, fuel } = useActiveVehicle();
   const plan = useTripPlan();
   const compute = useServerFn(planRoute);
 
@@ -189,29 +190,45 @@ function PlanejarPage() {
       : undefined;
 
   const { data: vehicleInfo } = useQuery({
-    queryKey: ["plan-vehicle", vehicle?.id ?? null],
+    queryKey: ["plan-vehicle", vehicle?.id ?? null, fuel],
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const uid = userData.user?.id;
-      if (!uid) return { kmpl: 10, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: f }] = await Promise.all([
-        supabase
-          .from("fuel_logs")
-          .select("price_per_liter")
-          .eq("user_id", uid)
-          .order("date", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
+      const [{ data: f }, { data: calibration }] = await Promise.all([
+        uid
+          ? supabase
+              .from("fuel_logs")
+              .select("price_per_liter")
+              .eq("user_id", uid)
+              .order("date", { ascending: false })
+              .limit(1)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
+        vehicle?.id
+          ? supabase
+              .from("vehicle_fuel_calibration")
+              .select("kmpl,samples,fuel_type")
+              .eq("vehicle_id", vehicle.id)
+              .eq("fuel_type", fuel)
+              .maybeSingle()
+          : Promise.resolve({ data: null }),
       ]);
       return {
-        kmpl: Number(vehicle?.avg_consumption_kmpl) || 10,
+        calibration,
         price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
       };
     },
     staleTime: 60_000,
   });
 
-  const kmpl = vehicleInfo?.kmpl ?? 10;
+  const resolved = resolveKmpl({
+    calibration: vehicleInfo?.calibration ?? null,
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+    fuel,
+  });
+  const kmpl = resolved.kmpl;
+  const fuelSource: FuelSource = resolved.source;
   const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
 
   const prevPlanRef = useRef<TripPlan | null>(plan);
@@ -515,6 +532,7 @@ function PlanejarPage() {
           pricePerLiter={planPrice}
           onPricePerLiterChange={(v) => patchPlan({ pricePerLiter: v })}
           kmpl={planKmpl}
+          fuelSource={planKmpl === kmpl ? fuelSource : undefined}
           onKmplChange={(v) => patchPlan({ kmpl: v })}
           canReset={planPrice !== price || planKmpl !== kmpl || tollCost !== 0}
           onReset={() => patchPlan({ pricePerLiter: price, kmpl, tollCost: 0 })}

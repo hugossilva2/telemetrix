@@ -1,12 +1,10 @@
 import { Fuel, DollarSign } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { useOpenTrip } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
-import { supabase } from "@/integrations/supabase/client";
 import { useActiveVehicle } from "@/lib/vehicles/active";
-import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
+import { tripFuelLiters } from "@/lib/fuel/consumption";
+import { useFuelRefs } from "@/lib/fuel/useFuelRefs";
 import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
-import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 
 const BRL = new Intl.NumberFormat("pt-BR", {
   style: "currency",
@@ -17,35 +15,10 @@ export function LiveConsumptionCard() {
   const open = useOpenTrip();
   const { vehicle, spec, fuel } = useActiveVehicle();
 
-  const { data } = useQuery({
-    queryKey: ["live-consumption-refs", vehicle?.id ?? null, fuel],
-    queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-      if (!uid) return { pricePerLiter: null, calibration: null };
-      const [{ data: lastFuel }, { data: calibration }] = await Promise.all([
-        supabase
-          .from("fuel_logs")
-          .select("price_per_liter")
-          .eq("user_id", uid)
-          .order("date", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        vehicle?.id
-          ? supabase
-              .from("vehicle_fuel_calibration")
-              .select("kmpl,samples,fuel_type")
-              .eq("vehicle_id", vehicle.id)
-              .eq("fuel_type", fuel)
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
-      return {
-        pricePerLiter: lastFuel?.price_per_liter ?? null,
-        calibration,
-      };
-    },
-    staleTime: 60_000,
+  const { pricePerLiter: price, hasPriceFromLog, kmpl, source } = useFuelRefs(vehicle?.id, fuel, {
+    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
+    spec,
+    avgSpeedKmh: null,
   });
 
   let distanceKm: number | null = null;
@@ -66,18 +39,7 @@ export function LiveConsumptionCard() {
     }
   }
 
-  const DEFAULT_PRICE = DEFAULT_GAS_PRICE_PER_LITER;
-  const avgSpeedKmh = null;
-  const { kmpl, source } = resolveKmpl({
-    calibration: data?.calibration ?? null,
-    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
-    spec,
-    fuel,
-    avgSpeedKmh,
-  });
-  const priceFromLog = data?.pricePerLiter != null ? Number(data.pricePerLiter) : null;
-  const price = Number(priceFromLog) || DEFAULT_PRICE;
-  const usingFallbackPrice = !(Number(priceFromLog) > 0);
+  const usingFallbackPrice = !hasPriceFromLog;
 
   const liters =
     distanceKm !== null

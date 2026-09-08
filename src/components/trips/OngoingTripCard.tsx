@@ -1,12 +1,9 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ClientOnly } from "@tanstack/react-router";
 import { Clock, Fuel, Route as RouteIcon, Wallet, Navigation, X } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import { useOpenTrip } from "@/lib/trips/store";
-import { supabase } from "@/integrations/supabase/client";
 import { haversineKm } from "@/lib/trips/geo";
 import { formatDurationSeconds } from "@/lib/trips/format";
-import { DEFAULT_GAS_PRICE_PER_LITER } from "@/lib/trips/cost";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { tripDestinationStore, useTripDestination } from "@/lib/trips/activeDestination";
 import { Button } from "@/components/ui/button";
@@ -15,7 +12,8 @@ import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
-import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
+import { tripFuelLiters } from "@/lib/fuel/consumption";
+import { useFuelRefs } from "@/lib/fuel/useFuelRefs";
 import { FuelSourceBadge } from "@/components/fuel/FuelSourceBadge";
 
 const MiniTripMap = lazy(() => import("@/components/map/MiniTripMap"));
@@ -32,37 +30,6 @@ export function OngoingTripCard() {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, [open]);
-
-  const { data: vehicleInfo } = useQuery({
-    queryKey: ["ongoing-trip-vehicle", vehicle?.id ?? null, fuel],
-    queryFn: async () => {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-      if (!uid) return { calibration: null, price: DEFAULT_GAS_PRICE_PER_LITER };
-      const [{ data: f }, { data: calibration }] = await Promise.all([
-        supabase
-          .from("fuel_logs")
-          .select("price_per_liter")
-          .eq("user_id", uid)
-          .order("date", { ascending: false })
-          .limit(1)
-          .maybeSingle(),
-        vehicle?.id
-          ? supabase
-              .from("vehicle_fuel_calibration")
-              .select("kmpl,samples,fuel_type")
-              .eq("vehicle_id", vehicle.id)
-              .eq("fuel_type", fuel)
-              .maybeSingle()
-          : Promise.resolve({ data: null }),
-      ]);
-      return {
-        calibration,
-        price: Number(f?.price_per_liter) || DEFAULT_GAS_PRICE_PER_LITER,
-      };
-    },
-    staleTime: 60_000,
-  });
 
   // Distância até o destino (se houver) e detecção de chegada
   const currLat = telemetry.latitude;
@@ -123,15 +90,8 @@ export function OngoingTripCard() {
     distanceKm = haversineKm(open.startLat, open.startLng, open.lastLat, open.lastLng);
   }
 
-  const price = vehicleInfo?.price ?? DEFAULT_GAS_PRICE_PER_LITER;
-  const avgSpeedKmh = durationS > 0 ? (distanceKm / durationS) * 3600 : null;
-  const { kmpl, source: fuelSource } = resolveKmpl({
-    calibration: vehicleInfo?.calibration ?? null,
-    vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
-    spec,
-    fuel,
-    avgSpeedKmh,
-  });
+  const kmpl = fuelRefs.kmpl;
+  const fuelSource = fuelRefs.source;
   const liters = tripFuelLiters({ distanceKm, kmpl, idleSeconds: open.idleSeconds ?? 0 }) ?? 0;
   const cost = liters * price;
 

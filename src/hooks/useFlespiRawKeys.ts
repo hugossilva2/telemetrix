@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import mqtt, { type MqttClient } from "mqtt";
-import { FLESPI_CONFIG, FLESPI_TOPIC } from "@/lib/flespi/config";
+import { FLESPI_BROKER_URL, flespiMqttToken, flespiTopics } from "@/lib/flespi/config";
+import { useActiveVehicle } from "@/lib/vehicles/active";
 
 export interface RawKeyEntry {
   key: string;
@@ -16,11 +17,13 @@ export interface UseFlespiRawKeysResult {
 }
 
 /**
- * Diagnóstico: escuta o device no MQTT e lista TODAS as chaves recebidas,
- * para verificar se o rastreador passou a enviar Green Driving / acelerômetro.
+ * Diagnóstico: escuta o device do veículo ativo no MQTT e lista TODAS as
+ * chaves recebidas. Sem token de cliente ou sem device, não conecta.
  * Só roda no browser (a conexão é criada dentro do useEffect).
  */
 export function useFlespiRawKeys(enabled: boolean): UseFlespiRawKeysResult {
+  const { vehicle } = useActiveVehicle();
+  const deviceId = vehicle?.flespi_device_id ?? null;
   const [keys, setKeys] = useState<RawKeyEntry[]>([]);
   const [messageCount, setMessageCount] = useState(0);
   const [lastMessageAt, setLastMessageAt] = useState<number | null>(null);
@@ -29,9 +32,11 @@ export function useFlespiRawKeys(enabled: boolean): UseFlespiRawKeysResult {
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
+    const token = flespiMqttToken();
+    if (!token || !deviceId) return;
 
-    const client = mqtt.connect(FLESPI_CONFIG.brokerUrl, {
-      username: FLESPI_CONFIG.token,
+    const client = mqtt.connect(FLESPI_BROKER_URL, {
+      username: token,
       password: "",
       clean: true,
       keepalive: 30,
@@ -44,10 +49,7 @@ export function useFlespiRawKeys(enabled: boolean): UseFlespiRawKeysResult {
 
     client.on("connect", () => {
       setConnected(true);
-      client.subscribe(
-        [FLESPI_TOPIC, `flespi/message/gw/devices/${FLESPI_CONFIG.deviceId}`],
-        { qos: 0 },
-      );
+      client.subscribe(flespiTopics(deviceId), { qos: 0 });
     });
     client.on("close", () => setConnected(false));
     client.on("offline", () => setConnected(false));
@@ -76,7 +78,7 @@ export function useFlespiRawKeys(enabled: boolean): UseFlespiRawKeysResult {
       clientRef.current = null;
       setConnected(false);
     };
-  }, [enabled]);
+  }, [enabled, deviceId]);
 
   return { keys, messageCount, lastMessageAt, connected };
 }

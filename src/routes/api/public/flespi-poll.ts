@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { FLESPI_CONFIG } from "@/lib/flespi/config";
 import { verifyWebhookSecret } from "@/lib/http/verifyWebhookSecret";
 import { ingestFlespiMessages } from "@/lib/flespi/ingest.server";
 import type { FlespiMessage } from "@/lib/flespi/ingest.server";
@@ -21,12 +20,13 @@ const LOOKBACK_S = 15 * 60;
 
 
 async function fetchMessages(deviceId: string, fromS: number) {
+  const { flespiAuthHeaders } = await import("@/lib/flespi/config.server");
   const params = new URLSearchParams({
     data: JSON.stringify({ from: fromS, count: MAX_MESSAGES }),
   });
   const res = await fetch(
     `https://flespi.io/gw/devices/${deviceId}/messages?${params.toString()}`,
-    { headers: { Authorization: `FlespiToken ${FLESPI_CONFIG.token}` } },
+    { headers: flespiAuthHeaders() },
   );
   if (!res.ok) {
     throw new Error(`flespi ${res.status}: ${(await res.text()).slice(0, 200)}`);

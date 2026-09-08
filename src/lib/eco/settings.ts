@@ -4,7 +4,11 @@ import type { FuelKind } from "@/lib/vehicles/specs";
 export interface EcoSettings {
   thresholds: EcoThresholds;
   liveAlerts: boolean;
-  /** combustível em uso — define a meta de consumo (Inmetro) do veículo */
+  /**
+   * Cache de leitura offline do combustível em uso. A fonte de verdade é a
+   * coluna `vehicles.fuel_kind` do veículo ativo — este valor só é usado
+   * quando o veículo ainda não carregou (offline / primeiro render).
+   */
   fuel: FuelKind;
 }
 
@@ -37,6 +41,19 @@ export function saveEcoSettings(next: EcoSettings) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 }
 
+/**
+ * Combustível em uso a partir do cache local. Prefira `useActiveVehicle().fuel`
+ * (vehicles.fuel_kind) em código React; esta função existe para caminhos fora
+ * do React e para leitura offline.
+ */
 export function getFuelKind(): FuelKind {
   return getEcoSettings().fuel;
+}
+
+/** Atualiza o cache local com o combustível do veículo ativo (vehicles.fuel_kind). */
+export function cacheFuelKind(fuel: FuelKind) {
+  if (typeof window === "undefined") return;
+  const current = getEcoSettings();
+  if (current.fuel === fuel) return;
+  saveEcoSettings({ ...current, fuel });
 }

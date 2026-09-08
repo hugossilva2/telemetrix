@@ -1,7 +1,10 @@
 import type { EcoEvent, EcoEventType, EcoSeverity } from "./detect";
-import { DEFAULT_SPEC, expectedKmpl, type FuelKind } from "@/lib/vehicles/specs";
-
-const ECO_RPM_MAX = DEFAULT_SPEC.ecoRpm.max;
+import {
+  DEFAULT_SPEC,
+  expectedKmpl,
+  type FuelKind,
+  type VehicleSpec,
+} from "@/lib/vehicles/specs";
 
 
 /** Penalidade por evento (pontos por 100 km). */
@@ -77,6 +80,7 @@ export function summarizeEco({
   pricePerLiter = 5.89,
   fuel,
   avgSpeedKmh,
+  spec = DEFAULT_SPEC,
 }: {
   events: EcoEvent[];
   idleSeconds: number;
@@ -87,9 +91,12 @@ export function summarizeEco({
   fuel?: FuelKind;
   /** velocidade média da viagem, para escolher ciclo urbano/rodoviário */
   avgSpeedKmh?: number | null;
+  /** ficha técnica do veículo ativo — define metas e faixa de giro econômica */
+  spec?: VehicleSpec;
 }): EcoSummary {
   const counts = countEvents(events);
-  const reference = expectedKmpl({ fuel: fuel ?? "misto", avgSpeedKmh });
+  const ecoRpmMax = spec.ecoRpm.max;
+  const reference = expectedKmpl({ fuel: fuel ?? "misto", avgSpeedKmh, spec });
   const effectiveKmpl = kmpl && kmpl > 0 ? kmpl : reference;
 
   let penalty = 0;
@@ -102,7 +109,7 @@ export function summarizeEco({
 
     // Giro alto: penalidade proporcional à distância da faixa econômica.
     if (e.type === "high_rpm" && Number.isFinite(e.value)) {
-      const over = Math.max(0, Number(e.value) - ECO_RPM_MAX) / 1000;
+      const over = Math.max(0, Number(e.value) - ecoRpmMax) / 1000;
       penalty += over * 1.5;
       wasted += over * 0.02;
     }

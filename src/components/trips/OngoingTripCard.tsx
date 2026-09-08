@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { summarizeEco, ecoBand } from "@/lib/eco/score";
 import { DriverLiveStrip } from "@/components/drivers/DriverLiveStrip";
 import { LivePerformanceBadge } from "@/components/eco/LivePerformanceBadge";
-import { getFuelKind } from "@/lib/eco/settings";
 import { LongTripLiveStrip } from "@/components/trips/LongTripLiveStrip";
 import { useActiveVehicle } from "@/lib/vehicles/active";
 import { resolveKmpl, tripFuelLiters } from "@/lib/fuel/consumption";
@@ -141,8 +140,9 @@ export function OngoingTripCard() {
     distanceKm,
     kmpl,
     pricePerLiter: price,
-    fuel: getFuelKind(),
+    fuel,
     avgSpeedKmh,
+    spec,
   });
 
   const band = ecoBand(eco.score);

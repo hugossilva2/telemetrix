@@ -81,6 +81,7 @@ export async function saveClosedTrip(
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
   const fuel = getFuelKind();
+  const spec = specFromVehicleRow(vehicle);
 
   // Calibração medida cheio-a-cheio do veículo, quando existir.
   const { data: calibration } = vehicle?.id
@@ -96,7 +97,7 @@ export async function saveClosedTrip(
   const { kmpl, source: fuelSource } = resolveKmpl({
     calibration,
     vehicleKmpl: vehicle?.avg_consumption_kmpl ?? null,
-    spec: specFromVehicleRow(vehicle),
+    spec,
     fuel,
     avgSpeedKmh,
   });
@@ -113,6 +114,7 @@ export async function saveClosedTrip(
     pricePerLiter: price,
     fuel,
     avgSpeedKmh,
+    spec,
   });
 
   const source = telemetrySourceStore.get();

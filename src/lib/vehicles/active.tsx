@@ -8,6 +8,7 @@ import {
   type FuelKind,
   type VehicleSpec,
 } from "@/lib/vehicles/specs";
+import { cacheFuelKind } from "@/lib/eco/settings";
 
 const STORAGE_KEY = "telemetrix.activeVehicleId";
 
@@ -118,18 +119,25 @@ export function ActiveVehicleProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const fuelKind = parseFuelKind(vehicle?.fuel_kind);
+
+  // Mantém o cache offline alinhado com a fonte de verdade (vehicles.fuel_kind).
+  useEffect(() => {
+    if (vehicle) cacheFuelKind(fuelKind);
+  }, [vehicle, fuelKind]);
+
   const value = useMemo<ActiveVehicleValue>(
     () => ({
       vehicles,
       vehicle,
       vehicleId: vehicle?.id ?? null,
       spec: specFromVehicleRow(vehicle),
-      fuel: parseFuelKind(vehicle?.fuel_kind),
+      fuel: fuelKind,
       loading: isLoading,
       setVehicleId,
     }),
 
-    [vehicles, vehicle, isLoading],
+    [vehicles, vehicle, fuelKind, isLoading],
   );
 
   return <ActiveVehicleContext.Provider value={value}>{children}</ActiveVehicleContext.Provider>;

@@ -700,9 +700,10 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             }
           }
 
-          // Encerra a viagem sem apagar a linha: preserva last_message_at e
-          // geofence_state, senão o poll seguinte reprocessa e repete os pushes.
-          await clearTripFields(deviceId);
+          // Encerra a viagem sem apagar a linha: preserva geofence_state e avança
+          // o marcador da última mensagem lida (evita reprocessar a janela).
+          await clearTripFields(deviceId, nowIso);
+
           processed++;
           continue;
         }

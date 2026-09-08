@@ -277,7 +277,9 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          fuel_type: string
           id: string
+          is_full_tank: boolean
           liters_filled: number
           mileage_at_fill: number
           price_per_liter: number
@@ -289,7 +291,9 @@ export type Database = {
         Insert: {
           created_at?: string
           date?: string
+          fuel_type?: string
           id?: string
+          is_full_tank?: boolean
           liters_filled: number
           mileage_at_fill: number
           price_per_liter: number
@@ -301,7 +305,9 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
+          fuel_type?: string
           id?: string
+          is_full_tank?: boolean
           liters_filled?: number
           mileage_at_fill?: number
           price_per_liter?: number
@@ -1136,7 +1142,10 @@ export type Database = {
           end_lng: number | null
           end_time: string | null
           estimated_cost: number | null
+          fuel_kmpl_used: number | null
           fuel_liters: number | null
+          fuel_liters_device: number | null
+          fuel_source: string | null
           hardware_source: string
           harsh_accel_count: number
           harsh_brake_count: number
@@ -1168,7 +1177,10 @@ export type Database = {
           end_lng?: number | null
           end_time?: string | null
           estimated_cost?: number | null
+          fuel_kmpl_used?: number | null
           fuel_liters?: number | null
+          fuel_liters_device?: number | null
+          fuel_source?: string | null
           hardware_source?: string
           harsh_accel_count?: number
           harsh_brake_count?: number
@@ -1200,7 +1212,10 @@ export type Database = {
           end_lng?: number | null
           end_time?: string | null
           estimated_cost?: number | null
+          fuel_kmpl_used?: number | null
           fuel_liters?: number | null
+          fuel_liters_device?: number | null
+          fuel_source?: string | null
           hardware_source?: string
           harsh_accel_count?: number
           harsh_brake_count?: number
@@ -1382,6 +1397,44 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_fuel_calibration: {
+        Row: {
+          fuel_type: string
+          kmpl: number
+          last_fill_at: string | null
+          samples: number
+          updated_at: string
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          fuel_type: string
+          kmpl: number
+          last_fill_at?: string | null
+          samples?: number
+          updated_at?: string
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          fuel_type?: string
+          kmpl?: number
+          last_fill_at?: string | null
+          samples?: number
+          updated_at?: string
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_fuel_calibration_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_shares: {
         Row: {
           accepted_at: string | null
@@ -1439,7 +1492,7 @@ export type Database = {
           alert_ignition: boolean
           alert_motion_off: boolean
           alert_signal_lost: boolean
-          avg_consumption_kmpl: number
+          avg_consumption_kmpl: number | null
           consumption_ethanol_highway: number
           consumption_ethanol_urban: number
           consumption_gasoline_highway: number
@@ -1473,7 +1526,7 @@ export type Database = {
           alert_ignition?: boolean
           alert_motion_off?: boolean
           alert_signal_lost?: boolean
-          avg_consumption_kmpl?: number
+          avg_consumption_kmpl?: number | null
           consumption_ethanol_highway?: number
           consumption_ethanol_urban?: number
           consumption_gasoline_highway?: number
@@ -1507,7 +1560,7 @@ export type Database = {
           alert_ignition?: boolean
           alert_motion_off?: boolean
           alert_signal_lost?: boolean
-          avg_consumption_kmpl?: number
+          avg_consumption_kmpl?: number | null
           consumption_ethanol_highway?: number
           consumption_ethanol_urban?: number
           consumption_gasoline_highway?: number
@@ -1595,6 +1648,10 @@ export type Database = {
           role: Database["public"]["Enums"]["org_role"]
           user_id: string
         }[]
+      }
+      recompute_fuel_calibration: {
+        Args: { _vehicle_id: string }
+        Returns: undefined
       }
       touch_vehicle_share_seen: {
         Args: { _share_id: string }

@@ -139,6 +139,8 @@ export function useLiveTripTracker() {
       pendingClose.current = closeNow;
       closeTimer.current = setTimeout(closeNow, IGNITION_OFF_GRACE_MS);
     }
+    // Efeito guiado pela ignição/posição; os demais valores são só anotações do ponto.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     telemetry.ignitionOn,
     telemetry.latitude,
@@ -223,6 +225,7 @@ export function useLiveTripTracker() {
     }
 
     tripStore.set(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     telemetry.latitude,
     telemetry.longitude,

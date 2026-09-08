@@ -33,6 +33,8 @@ export function FavoritePlacesEta() {
     return [...allPlaces]
       .sort((a, b) => haversineKm(lat!, lng!, a.lat, a.lng) - haversineKm(lat!, lng!, b.lat, b.lng))
       .slice(0, ETA_PLACE_LIMIT);
+    // originKey já resume lat/lng no grid de ~1 km (evita recálculo a cada jitter do GPS).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allPlaces, hasOrigin, originKey]);
 
   const etaQueries = useQueries({

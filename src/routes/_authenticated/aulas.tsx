@@ -97,7 +97,7 @@ function AulasPage() {
   });
   const [tab, setTab] = useState<"proximas" | "historico">("proximas");
 
-  const allSchool = lessons.data ?? [];
+  const allSchool = useMemo(() => lessons.data ?? [], [lessons.data]);
   // Instrutor de autoescola vê por padrão só as próprias aulas; o dono vê tudo.
   const all =
     isSchool && !isOwner && onlyMine && meId

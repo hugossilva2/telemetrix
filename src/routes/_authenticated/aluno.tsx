@@ -32,7 +32,7 @@ function AlunoAreaPage() {
   const { enrollments, isLoading } = useMyEnrollments();
   const lessons = useMyLessons(enrollments.length > 0);
   const contracted = enrollments.reduce((s, e) => s + e.contracted_lessons, 0);
-  const all = lessons.data ?? [];
+  const all = useMemo(() => lessons.data ?? [], [lessons.data]);
   const progress = useMemo(
     () =>
       studentProgress(

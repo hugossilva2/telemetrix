@@ -26,7 +26,7 @@ export function MaintenanceAlertsCard() {
   const { telemetry } = useTelemetry();
   const currentMileage = telemetry.mileageKm ?? null;
   const { mode } = useAccountMode();
-  const statusOpts = mode === "app" ? { warnKm: HEAVY_WARN_KM } : {};
+  const statusOpts = useMemo(() => (mode === "app" ? { warnKm: HEAVY_WARN_KM } : {}), [mode]);
 
   const { data: records = [] } = useMaintenanceRecords();
 
@@ -37,7 +37,7 @@ export function MaintenanceAlertsCard() {
       .sort(
         (a, b) => (a.info.status === "overdue" ? -1 : 1) - (b.info.status === "overdue" ? -1 : 1),
       );
-  }, [records, currentMileage, statusOpts.warnKm]);
+  }, [records, currentMileage, statusOpts]);
 
   useEffect(() => {
     for (const a of alerts) {

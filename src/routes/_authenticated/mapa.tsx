@@ -99,6 +99,8 @@ function MapaPage() {
     }
     lastPointRef.current = pt;
     setTrail((prev) => (prev.length > 500 ? [...prev.slice(-499), pt] : [...prev, pt]));
+    // A velocidade é apenas anotada no ponto: não deve reexecutar o efeito.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lat, lng, mileage, ignition, mileageStart]);
 
   // Distância: prefere delta de odômetro (mais preciso que Haversine com amostras a 15s).

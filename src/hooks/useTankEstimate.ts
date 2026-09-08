@@ -72,7 +72,7 @@ export function useTankEstimate(): UseTankEstimate {
         liters: Number(r.liters_filled) || 0,
         isFullTank: r.is_full_tank,
         fuelType: r.fuel_type,
-        vehicleId: r.vehicle_id,
+        vehicleId: r.vehicle_id ?? vehicleId,
         odometerKm:
           r.mileage_at_fill != null && Number(r.mileage_at_fill) > 0
             ? Number(r.mileage_at_fill)

@@ -274,7 +274,7 @@ export function TrendsDashboard() {
               unit=" pts"
             />
             <Kpi
-              label="Consumo"
+              label={hasMeasured ? "Consumo medido" : "Consumo estimado"}
               value={cur?.kmpl != null ? `${nf1.format(cur.kmpl)} km/L` : "—"}
               delta={diff(cur?.kmpl, prev?.kmpl)}
               unit=" km/L"

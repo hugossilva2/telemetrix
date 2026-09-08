@@ -1,3 +1,4 @@
+import { DEFAULT_SPEC } from "@/lib/vehicles/specs";
 import { describe, expect, it } from "vitest";
 import { countEvents, ecoBand, formatIdle, summarizeEco } from "@/lib/eco/score";
 import type { EcoEvent, EcoEventType, EcoSeverity } from "@/lib/eco/detect";
@@ -157,5 +158,33 @@ describe("formatIdle", () => {
     expect(formatIdle(300)).toBe("5 min");
     expect(formatIdle(3600)).toBe("1h 0min");
     expect(formatIdle(5400)).toBe("1h 30min");
+  });
+});
+
+describe("summarizeEco com ficha do veículo ativo", () => {
+  const spec = {
+    ...DEFAULT_SPEC,
+    consumption: {
+      etanol: { urban: 5, highway: 6 },
+      gasolina: { urban: 7, highway: 8 },
+    },
+    ecoRpm: { min: 1500, max: 4000 },
+  };
+
+  it("usa o consumo da ficha do veículo informado", () => {
+    const base = summarizeEco({ events: [], idleSeconds: 0, distanceKm: 100 });
+    const custom = summarizeEco({ events: [], idleSeconds: 0, distanceKm: 100, spec });
+    expect(base.score).toBe(custom.score);
+    const ev = [{ type: "harsh_brake", severity: "severe", at: 0, value: 0 }] as never;
+    const a = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 100 });
+    const b = summarizeEco({ events: ev, idleSeconds: 0, distanceKm: 100, spec });
+    expect(b.wastedFuelLiters).not.toBe(a.wastedFuelLiters);
+  });
+
+  it("usa a faixa de giro econômica do veículo informado", () => {
+    const events = [{ type: "high_rpm", severity: "moderate", at: 0, value: 5000 }] as never;
+    const withDefault = summarizeEco({ events, idleSeconds: 0, distanceKm: 100 });
+    const withSpec = summarizeEco({ events, idleSeconds: 0, distanceKm: 100, spec });
+    expect(withSpec.score).not.toBe(withDefault.score);
   });
 });

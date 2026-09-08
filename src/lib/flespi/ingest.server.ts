@@ -742,19 +742,21 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             })
             .eq("device_id", deviceId);
           processed++;
-        } else if (ign === false && state?.start_time == null) {
-          // Persiste "desligado" para a próxima transição OFF→ON abrir viagem.
+        } else if (state?.start_time == null) {
+          // Sem viagem aberta: só registra a leitura (motor ligado ou desligado) e
+          // avança o marcador, para o coletor não rebuscar a mesma janela.
           await supabaseAdmin.from("device_trip_state").upsert({
             device_id: deviceId,
             user_id: vehicle.user_id,
             vehicle_id: vehicle.id,
-            ignition_on: false,
+            ignition_on: ign === true,
             updated_at: nowIso,
             max_speed_kmh: 0,
             last_message_at: nowIso,
             ...(pingWritten ? { last_ping_at: nowIso } : {}),
           });
         }
+
       }
     } finally {
       // Libera o lease mesmo em caso de erro (a linha pode ter sido apagada no

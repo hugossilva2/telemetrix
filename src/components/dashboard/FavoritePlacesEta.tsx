@@ -7,18 +7,11 @@ import { haversineKm } from "@/lib/trips/geo";
 import { useFavoritePlaces } from "@/lib/places/useFavoritePlaces";
 import { useTelemetry } from "@/hooks/useTelemetry";
 import { getRouteEta } from "@/lib/places.functions";
-import { iconFor } from "@/routes/_authenticated/lugares";
+import { iconFor } from "@/lib/places/icons";
+import { formatEta } from "@/lib/format";
 import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 
 const ETA_PLACE_LIMIT = 4;
-
-function formatEta(seconds: number): string {
-  const m = Math.round(seconds / 60);
-  if (m < 60) return `${m} min`;
-  const h = Math.floor(m / 60);
-  const rest = m % 60;
-  return rest === 0 ? `${h} h` : `${h}h${rest.toString().padStart(2, "0")}`;
-}
 
 export function FavoritePlacesEta() {
   const { telemetry } = useTelemetry();

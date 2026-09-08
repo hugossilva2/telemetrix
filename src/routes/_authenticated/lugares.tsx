@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Briefcase, Dumbbell, Home, MapPin, Plus, Search, Trash2 } from "lucide-react";
+import { Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { AppShell } from "@/components/layout/AppShell";
@@ -14,6 +14,7 @@ import { FAVORITE_PLACES_KEY, useFavoritePlaces } from "@/lib/places/useFavorite
 import { getPlaceDetails, searchPlaces, type PlaceSuggestion } from "@/lib/places.functions";
 import { StartTripDialog, useStartTripDialog } from "@/components/trips/StartTripDialog";
 import { PlaceAutomationPanel } from "@/components/places/PlaceAutomationPanel";
+import { ICON_OPTIONS, iconFor, type IconKey } from "@/lib/places/icons";
 
 export const Route = createFileRoute("/_authenticated/lugares")({
   head: () => ({
@@ -26,19 +27,6 @@ export const Route = createFileRoute("/_authenticated/lugares")({
   }),
   component: LugaresPage,
 });
-
-const ICON_OPTIONS = [
-  { key: "home", label: "Casa", Icon: Home },
-  { key: "work", label: "Trabalho", Icon: Briefcase },
-  { key: "gym", label: "Academia", Icon: Dumbbell },
-  { key: "pin", label: "Outro", Icon: MapPin },
-] as const;
-
-type IconKey = (typeof ICON_OPTIONS)[number]["key"];
-
-export function iconFor(key: string) {
-  return ICON_OPTIONS.find((o) => o.key === key)?.Icon ?? MapPin;
-}
 
 function LugaresPage() {
   const qc = useQueryClient();

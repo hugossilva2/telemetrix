@@ -493,9 +493,10 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
           );
 
           if (distanceKm < MIN_DISTANCE_KM && durationS < MIN_DURATION_S) {
-            await supabaseAdmin.from("device_trip_state").delete().eq("device_id", deviceId);
+            await clearTripFields(deviceId);
             continue;
           }
+
 
           const durationH = durationS / 3600;
           const avgSpeed = durationH > 0 ? distanceKm / durationH : 0;

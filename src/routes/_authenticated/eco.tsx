@@ -98,8 +98,13 @@ function EcoPage() {
     const cur = rows.filter((t) => monthKey(t.start_time) === curKey);
     const last = rows.filter((t) => monthKey(t.start_time) === prevKey);
 
-    const avg = (list: EcoTrip[]) =>
-      list.length > 0 ? list.reduce((s, t) => s + (t.eco_score ?? 0), 0) / list.length : null;
+    // Viagem sem nota não conta como zero: fica de fora da média ("Sem dados").
+    const avg = (list: EcoTrip[]) => {
+      const scored = list.filter((t) => t.eco_score != null);
+      return scored.length > 0
+        ? scored.reduce((s, t) => s + Number(t.eco_score), 0) / scored.length
+        : null;
+    };
 
     const counts: Record<EcoEventType, number> = {
       harsh_brake: 0,
@@ -121,12 +126,14 @@ function EcoPage() {
     const wastedR = cur.reduce((s, t) => s + (t.wasted_cost ?? 0), 0);
     const idle = cur.reduce((s, t) => s + (t.idle_seconds ?? 0), 0);
 
-    const best = [...rows].sort((a, b) => (b.eco_score ?? 0) - (a.eco_score ?? 0))[0];
+    const best = rows
+      .filter((t) => t.eco_score != null)
+      .sort((a, b) => Number(b.eco_score) - Number(a.eco_score))[0];
 
     // sequência de viagens recentes com nota >= 90
     let streak = 0;
     for (const t of rows) {
-      if ((t.eco_score ?? 0) >= 90) streak += 1;
+      if (t.eco_score != null && Number(t.eco_score) >= 90) streak += 1;
       else break;
     }
     const weekAgo = Date.now() - 7 * 86400_000;
@@ -290,7 +297,7 @@ function EcoPage() {
                   <span
                     className={`grid size-9 shrink-0 place-items-center rounded-full text-xs font-bold tabular-nums ${band.bg} ${band.color}`}
                   >
-                    {Math.round(t.eco_score ?? 0)}
+                    {t.eco_score == null ? "—" : Math.round(Number(t.eco_score))}
                   </span>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs font-medium">{formatDateTime(t.start_time)}</p>

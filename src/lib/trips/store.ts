@@ -65,6 +65,9 @@ function readInitial(): OpenTrip | null {
     if (!Array.isArray(parsed.trail)) parsed.trail = [];
     if (!Array.isArray(parsed.ecoEvents)) parsed.ecoEvents = [];
     if (typeof parsed.idleSeconds !== "number") parsed.idleSeconds = 0;
+    if (parsed.ownerId === undefined) parsed.ownerId = null;
+    if (parsed.vehicleId === undefined) parsed.vehicleId = null;
+    if (parsed.source === undefined) parsed.source = null;
     return parsed;
   } catch {
     return null;

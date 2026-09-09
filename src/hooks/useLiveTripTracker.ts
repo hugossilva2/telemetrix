@@ -1,7 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { supabase } from "@/integrations/supabase/client";
+import { useActiveVehicle } from "@/lib/vehicles/active";
+import { useTelemetrySource } from "@/lib/telemetry/source";
 import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";

@@ -130,6 +130,9 @@ export async function callAutomation(
       method,
       headers,
       body,
+      // Sem seguir redirecionamento: um destino público não pode desviar a
+      // chamada para um endereço interno.
+      redirect: "manual",
       signal: controller.signal,
     });
     let detail = "";

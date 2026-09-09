@@ -89,6 +89,9 @@ export function useLiveTripTracker() {
     if (shouldOpen) {
       lastSample.current = null;
       const open: OpenTrip = {
+        ownerId: ctxRef.current.ownerId,
+        vehicleId: ctxRef.current.vehicleId,
+        source: ctxRef.current.source,
         startTime: new Date().toISOString(),
         startLat: telemetry.latitude ?? null,
         startLng: telemetry.longitude ?? null,

@@ -15,7 +15,14 @@ export interface TrailPoint {
   t: number;
 }
 
-export interface OpenTrip {
+/** Dono/carro/origem aos quais a viagem em andamento pertence. */
+export interface TripContext {
+  ownerId: string | null;
+  vehicleId: string | null;
+  source: string | null;
+}
+
+export interface OpenTrip extends TripContext {
   startTime: string; // ISO
   startLat: number | null;
   startLng: number | null;
@@ -31,7 +38,21 @@ export interface OpenTrip {
   idleSeconds: number;
 }
 
-const STORAGE_KEY = "openTrip:v2";
+/**
+ * A viagem só pode continuar se pertencer à mesma conta, ao mesmo carro e à
+ * mesma origem de dados. Contexto ainda desconhecido (null) não invalida.
+ */
+export function matchesTripContext(trip: TripContext, ctx: Partial<TripContext>): boolean {
+  const same = (a: string | null | undefined, b: string | null | undefined) =>
+    a == null || b == null || a === b;
+  return (
+    same(trip.ownerId, ctx.ownerId) &&
+    same(trip.vehicleId, ctx.vehicleId) &&
+    same(trip.source, ctx.source)
+  );
+}
+
+const STORAGE_KEY = "openTrip:v3";
 const MAX_TRAIL = 500;
 const MAX_EVENTS = 300;
 

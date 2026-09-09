@@ -38,6 +38,9 @@ export async function saveClosedTrip(
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id;
   if (!userId) return "skipped";
+  // Viagem aberta em outra conta não é gravada nesta.
+  if (trip.ownerId && trip.ownerId !== userId) return "skipped";
+
 
   const startMs = new Date(trip.startTime).getTime();
   const durationS = Math.max(0, (Date.now() - startMs) / 1000);

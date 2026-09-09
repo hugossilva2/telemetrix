@@ -41,23 +41,28 @@ export const publishLiveState = createServerFn({ method: "POST" })
 
     const hasFix = typeof data.lat === "number" && typeof data.lng === "number";
 
-    const { error: stateErr } = await supabaseAdmin.from("device_trip_state").upsert(
-      {
-        device_id: deviceId,
-        user_id: context.userId,
-        vehicle_id: vehicle.id,
-        ignition_on: data.ignitionOn ?? null,
-        start_time: data.startTime ?? null,
-        last_lat: hasFix ? data.lat : null,
-        last_lng: hasFix ? data.lng : null,
-        last_mileage: data.mileageKm ?? null,
-        max_speed_kmh: data.maxSpeedKmh ?? 0,
-        last_message_at: sampleIso,
-        updated_at: nowIso,
-      },
-      { onConflict: "device_id" },
-    );
-    if (stateErr) throw stateErr;
+    // Quando existe rastreador de verdade, o estado interno é do coletor: o app
+    // não escreve nele (senão apaga/avança o que o coletor já gravou).
+    // Só o espelho do próprio app (device sintético) mantém esse estado.
+    if (!vehicle.flespi_device_id) {
+      const { error: stateErr } = await supabaseAdmin.from("device_trip_state").upsert(
+        {
+          device_id: deviceId,
+          user_id: context.userId,
+          vehicle_id: vehicle.id,
+          ignition_on: data.ignitionOn ?? null,
+          start_time: data.startTime ?? null,
+          last_lat: hasFix ? data.lat : null,
+          last_lng: hasFix ? data.lng : null,
+          last_mileage: data.mileageKm ?? null,
+          max_speed_kmh: data.maxSpeedKmh ?? 0,
+          last_message_at: sampleIso,
+          updated_at: nowIso,
+        },
+        { onConflict: "device_id" },
+      );
+      if (stateErr) throw stateErr;
+    }
 
     if (hasFix) {
       const { error: pingErr } = await supabaseAdmin.from("tracker_pings").upsert(

@@ -184,7 +184,7 @@ export async function saveClosedTrip(
     return "queued";
   }
 
-  const { error } = await supabase.from("trips").insert(row);
+  const { data: inserted, error } = await supabase.from("trips").insert(row).select("id").single();
 
   if (error) {
     // 23505: já existe viagem com o mesmo veículo/horário de início (o webhook
@@ -193,5 +193,37 @@ export async function saveClosedTrip(
     await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
     return "queued";
   }
+
+  // Enriquecimento depois de a viagem estar salva: se a internet cair aqui, o
+  // histórico já tem a viagem (só sem o traçado alinhado às ruas).
+  if (inserted?.id) void enrichRoute(inserted.id, trip, source);
   return "saved";
+}
+
+/** Alinha o traçado à geometria das ruas (Google Roads) e atualiza a viagem. */
+async function enrichRoute(
+  tripId: string,
+  trip: OpenTrip,
+  source: "elm327" | "fmc003",
+): Promise<void> {
+  if (!isOnline() || (trip.trail?.length ?? 0) < 2) return;
+  try {
+    const res = await snapToRoads({
+      data: { points: trip.trail.map((p) => ({ lat: p.lat, lng: p.lng })) },
+    });
+    if (!res.snapped) return;
+    const routeData = buildRouteData({
+      trail: trip.trail ?? [],
+      events: trip.ecoEvents ?? [],
+      source,
+      snappedPoints: res.points,
+    });
+    if (!routeData) return;
+    await supabase
+      .from("trips")
+      .update({ route_data: routeData as unknown as never })
+      .eq("id", tripId);
+  } catch (err) {
+    console.error("[saveTrip] snapToRoads falhou, mantendo traçado bruto:", err);
+  }
 }

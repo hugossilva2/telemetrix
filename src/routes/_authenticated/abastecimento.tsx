@@ -178,7 +178,7 @@ function AbastecimentoPage() {
       const litersNum = totalNum / priceNum;
       const mirrored = {
         title: `Abastecimento · ${litersNum.toFixed(2)} L`,
-        expense_date: isoDate.slice(0, 10),
+        expense_date: localDayKey(isoDate),
         amount: totalNum,
         notes: `R$ ${priceNum.toFixed(2)}/L · ${mileageNum.toLocaleString("pt-BR")} km`,
       };

@@ -115,7 +115,7 @@ function aggregate(d?: { trips: WeekTrip[]; fuel: WeekFuel[] }) {
   const refuelCost = (d?.fuel ?? []).reduce((s, r) => s + Number(r.total_cost || 0), 0);
   const refuelLiters = (d?.fuel ?? []).reduce((s, r) => s + Number(r.liters_filled || 0), 0);
 
-  const days = new Set(trips.map((t) => t.start_time.slice(0, 10))).size;
+  const days = new Set(trips.map((t) => localDayKey(t.start_time))).size;
 
   return {
     trips: trips.length,

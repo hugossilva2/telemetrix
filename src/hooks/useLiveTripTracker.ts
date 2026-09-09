@@ -85,7 +85,7 @@ export function useLiveTripTracker() {
     // OFF -> ON: abre viagem local
     const shouldOpen =
       ((prev === false && ign === true) || (prev === undefined && ign === true)) &&
-      !tripStore.get();
+      !tripStore.ensureContext(ctxRef.current);
     if (shouldOpen) {
       lastSample.current = null;
       const open: OpenTrip = {

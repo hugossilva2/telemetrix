@@ -23,6 +23,26 @@ import { notifyTrackerEvent } from "@/lib/push/push.functions";
 export function useLiveTripTracker() {
   const { telemetry } = useTelemetry();
   const queryClient = useQueryClient();
+  const { vehicleId } = useActiveVehicle();
+  const { source } = useTelemetrySource();
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (alive) setOwnerId(data.user?.id ?? null);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // A viagem guardada só continua se for da mesma conta, carro e origem.
+  const ctxRef = useRef({ ownerId, vehicleId, source });
+  ctxRef.current = { ownerId, vehicleId, source };
+  useEffect(() => {
+    tripStore.ensureContext({ ownerId, vehicleId, source });
+  }, [ownerId, vehicleId, source]);
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);

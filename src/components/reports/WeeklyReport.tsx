@@ -12,7 +12,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBRL, formatKm } from "@/lib/format";
+import { formatBRL, formatKm, localDayKey } from "@/lib/format";
 import { downloadCsv, toCsv } from "@/lib/expenses/categories";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { nextWeek, previousWeek, weekKey, weekLabel, weekRange } from "@/lib/reports/week";

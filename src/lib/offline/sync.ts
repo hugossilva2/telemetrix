@@ -1,24 +1,40 @@
 import { supabase } from "@/integrations/supabase/client";
 import { offlineQueue, type QueuedItem } from "./queue";
 
-const MAX_ATTEMPTS = 8;
+/** Erros que nunca vão passar: descartar em vez de tentar para sempre. */
+const PERMANENT_CODES = new Set([
+  "22P02", // valor inválido
+  "23502", // campo obrigatório ausente
+  "23503", // referência inexistente
+  "23514", // regra de coerência violada
+  "42501", // sem permissão
+]);
 
-let running = false;
-let lastResult: { synced: number; failed: number; at: number } | null = null;
+/** Já existe no histórico: contar como enviado. */
+const DUPLICATE_CODE = "23505";
 
 export function isOnline(): boolean {
   return typeof navigator === "undefined" || navigator.onLine !== false;
+}
+
+export function isPermanentError(code?: string | null): boolean {
+  return !!code && PERMANENT_CODES.has(code);
 }
 
 async function pushItem(item: QueuedItem): Promise<boolean> {
   if (item.kind !== "trip") return true;
   const { error } = await supabase.from("trips").insert(item.payload as never);
   if (!error) return true;
-  // Erros de validação/permite descarte após muitas tentativas
-  await offlineQueue.markFailure(item, error.message);
-  if (item.attempts + 1 >= MAX_ATTEMPTS) {
+  const code = (error as { code?: string }).code;
+  // Viagem já gravada (webhook do rastreador): pendência cumprida.
+  if (code === DUPLICATE_CODE) return true;
+  if (isPermanentError(code)) {
     await offlineQueue.remove(item.id);
+    console.error("[offline] pendência descartada por erro definitivo:", error.message);
+    return false;
   }
+  // Erro temporário (rede, servidor): mantém na fila com espera progressiva.
+  await offlineQueue.markFailure(item, error.message);
   return false;
 }
 
@@ -30,7 +46,8 @@ export async function flushOfflineQueue(): Promise<{ synced: number; failed: num
   let failed = 0;
   try {
     offlineQueue.ensureLoaded();
-    const items = [...offlineQueue.items()];
+    const now = Date.now();
+    const items = [...offlineQueue.items()].filter((i) => (i.nextAttemptAt ?? 0) <= now);
     for (const item of items) {
       try {
         const ok = await pushItem(item);
@@ -50,4 +67,10 @@ export async function flushOfflineQueue(): Promise<{ synced: number; failed: num
     lastResult = { synced, failed, at: Date.now() };
   }
   return { synced, failed };
+}
+
+let running = false;
+let lastResult: { synced: number; failed: number; at: number } | null = null;
+export function lastSyncResult() {
+  return lastResult;
 }

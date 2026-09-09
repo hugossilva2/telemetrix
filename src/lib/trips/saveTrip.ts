@@ -131,28 +131,19 @@ export async function saveClosedTrip(
     spec,
   });
 
-  const source = telemetrySourceStore.get();
+  // A origem é a que estava valendo quando a viagem começou.
+  const source = trip.source === "elm327" || trip.source === "fmc003"
+    ? trip.source
+    : telemetrySourceStore.get();
 
-  // Map Matching: alinha o traçado à geometria real das ruas (Google Roads API).
-  // Falha de rede/API não bloqueia o salvamento — cai para os pontos brutos.
-  let snappedPoints = null as Awaited<ReturnType<typeof snapToRoads>>["points"] | null;
-  if (isOnline() && (trip.trail?.length ?? 0) > 1) {
-    try {
-      const res = await snapToRoads({
-        data: { points: trip.trail.map((p) => ({ lat: p.lat, lng: p.lng })) },
-      });
-      if (res.snapped) snappedPoints = res.points;
-    } catch (err) {
-      console.error("[saveTrip] snapToRoads falhou, usando traçado bruto:", err);
-    }
-  }
-
+  // Grava primeiro com o traçado bruto; o alinhamento às ruas vem depois.
   const routeData = buildRouteData({
     trail: trip.trail ?? [],
     events: trip.ecoEvents ?? [],
     source,
-    snappedPoints,
+    snappedPoints: null,
   });
+
 
   const row = {
     user_id: userId,

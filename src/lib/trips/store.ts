@@ -112,6 +112,33 @@ export const tripStore = {
     });
   },
 
+  /**
+   * Garante que a viagem guardada pertence ao contexto atual (conta, carro e
+   * origem). Se não pertencer, descarta — nunca reaproveita a viagem anterior.
+   * Se pertencer e ainda faltar contexto, completa os campos.
+   */
+  ensureContext(ctx: Partial<TripContext>): OpenTrip | null {
+    if (!current) return null;
+    if (!matchesTripContext(current, ctx)) {
+      this.set(null);
+      return null;
+    }
+    const filled: OpenTrip = {
+      ...current,
+      ownerId: current.ownerId ?? ctx.ownerId ?? null,
+      vehicleId: current.vehicleId ?? ctx.vehicleId ?? null,
+      source: current.source ?? ctx.source ?? null,
+    };
+    if (
+      filled.ownerId !== current.ownerId ||
+      filled.vehicleId !== current.vehicleId ||
+      filled.source !== current.source
+    ) {
+      this.set(filled);
+    }
+    return current;
+  },
+
   subscribe(l: () => void) {
     listeners.add(l);
     return () => listeners.delete(l);

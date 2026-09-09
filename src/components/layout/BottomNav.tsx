@@ -17,7 +17,9 @@ import {
 import { useIsObserver } from "@/lib/shares/observer";
 import { useIsStudent } from "@/lib/school/student";
 import { useAccountMode } from "@/lib/account/profile";
+import { useIsAdmin } from "@/lib/account/admin";
 import type { AccountMode } from "@/lib/account/mode";
+
 
 interface NavItem {
   to:
@@ -72,11 +74,33 @@ const studentItems: NavItem[] = [
   base.ajustes,
 ];
 
+/** Admin: todas as telas de todos os perfis, sem repetir. */
+const adminItems: NavItem[] = [
+  base.painel,
+  base.rastreio,
+  base.viagens,
+  base.abastecer,
+  base.corridas,
+  base.lucro,
+  base.aulas,
+  base.alunos,
+  base.escola,
+  base.gestao,
+  base.ajustes,
+];
+
 export function BottomNav() {
   const { isObserver } = useIsObserver();
   const { isStudent } = useIsStudent();
+  const { isAdmin } = useIsAdmin();
   const { mode } = useAccountMode();
-  const navItems = isObserver ? observerItems : isStudent ? studentItems : NAV_BY_MODE[mode];
+  const navItems = isObserver
+    ? observerItems
+    : isStudent
+      ? studentItems
+      : isAdmin
+        ? adminItems
+        : NAV_BY_MODE[mode];
 
   return (
     <nav
@@ -88,6 +112,7 @@ export function BottomNav() {
           isObserver ? "grid-cols-1" : isStudent ? "grid-cols-2" : "grid-cols-6"
         }`}
       >
+
         {navItems.map(({ to, label, Icon, exact }) => (
           <li key={to}>
             <Link

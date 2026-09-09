@@ -17,7 +17,9 @@ import {
 import { useIsObserver } from "@/lib/shares/observer";
 import { useIsStudent } from "@/lib/school/student";
 import { useAccountMode } from "@/lib/account/profile";
+import { useIsAdmin } from "@/lib/account/admin";
 import type { AccountMode } from "@/lib/account/mode";
+
 
 interface NavItem {
   to:

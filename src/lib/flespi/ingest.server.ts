@@ -125,13 +125,19 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
 
   const getVehicleForDevice = async (deviceId: string) => {
     if (vehicleCache.has(deviceId)) return vehicleCache.get(deviceId) ?? null;
-    const { data } = await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("vehicles")
       .select(
         "id,user_id,avg_consumption_kmpl,fuel_kind,model_year,engine,gearbox,zero_to_100_s,consumption_ethanol_urban,consumption_ethanol_highway,consumption_gasoline_urban,consumption_gasoline_highway,signal_lost_notified_at,alert_geofence",
       )
       .eq("flespi_device_id", deviceId)
       .maybeSingle();
+    // Falha de consulta (ou vínculo duplicado) é erro operacional: não pode ser
+    // convertida em "rastreador desconhecido" e nem virar cache negativo.
+    if (error) {
+      console.error("[ingest] falha ao resolver veículo do rastreador", deviceId, error.message);
+      throw new Error(`Falha ao resolver o veículo do rastreador ${deviceId}`);
+    }
     const v = (data as CachedVehicle | null) ?? null;
     vehicleCache.set(deviceId, v);
     return v;

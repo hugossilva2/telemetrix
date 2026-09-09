@@ -50,7 +50,7 @@ describe("fuelMetrics", () => {
     expect(m.avgCostPerKm).toBeCloseTo(0.6, 3);
   });
 
-  it("ignora abastecimento parcial entre dois tanques cheios", () => {
+  it("soma o abastecimento parcial entre dois tanques cheios", () => {
     const partial = { ...log("2026-08-05T10:00:00Z", 1150, 10, 60), is_full_tank: false };
     const m = fuelMetrics([
       log("2026-08-01T10:00:00Z", 1000, 30, 180),
@@ -58,7 +58,9 @@ describe("fuelMetrics", () => {
       log("2026-08-10T10:00:00Z", 1300, 30, 180),
     ]);
     expect(m.points).toHaveLength(1);
-    expect(m.lastKmpl).toBe(10);
+    // 300 km com 40 L = 7,5 km/L (antes ignorava os 10 L parciais e dava 10).
+    expect(m.lastKmpl).toBeCloseTo(7.5, 2);
+    expect(m.lastCostPerKm).toBeCloseTo(0.8, 3);
   });
 
   it("não cria trecho entre combustíveis diferentes", () => {

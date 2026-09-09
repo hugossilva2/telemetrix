@@ -55,7 +55,8 @@ export async function saveClosedTrip(
 
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     (() => {
-      const activeId = getActiveVehicleId();
+      // O carro da viagem vem do estado da viagem; troca de carro depois não muda.
+      const activeId = trip.vehicleId ?? getActiveVehicleId();
       const q = supabase.from("vehicles").select(VEHICLE_SELECT).eq("user_id", userId);
       return activeId
         ? q.eq("id", activeId).maybeSingle()

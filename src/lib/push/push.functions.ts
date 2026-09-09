@@ -11,7 +11,7 @@ const ALLOWED_EVENT_TYPES = new Set([
   "signal_lost",
 ]);
 
-const ALLOWED_ALERT_KINDS = new Set(["fuel", "rest", "distance", "speed", "arrival"]);
+const ALLOWED_ALERT_KINDS = new Set(["descanso", "combustivel", "combustivel-critico"]);
 
 function clamp(value: unknown, max: number): string {
   return String(value ?? "")

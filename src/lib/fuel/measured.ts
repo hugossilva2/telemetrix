@@ -37,30 +37,44 @@ function num(value: unknown): number | null {
 /**
  * Segmentos medidos, em ordem cronológica. `fuelType` filtra o combustível
  * ativo; quando omitido, considera todos.
+ *
+ * Os litros do trecho somam TODOS os abastecimentos feitos entre dois tanques
+ * cheios (inclusive os parciais) — ignorar os parciais inflava o km/L.
  */
 export function measuredSegments(logs: FullTankLog[], fuelType?: string | null): MeasuredSegment[] {
-  const full = logs
-    .filter((l) => l.is_full_tank !== false)
+  const fills = logs
     .filter((l) => (fuelType ? (l.fuel_type ?? "gasolina") === fuelType : true))
     .map((l) => ({
       date: l.date,
       liters: num(l.liters_filled) ?? 0,
       km: num(l.mileage_at_fill) ?? 0,
+      full: l.is_full_tank !== false,
     }))
     .filter((l) => l.km > 0)
     .sort((a, b) => a.km - b.km);
 
   const out: MeasuredSegment[] = [];
-  for (let i = 1; i < full.length; i++) {
-    const prev = full[i - 1];
-    const cur = full[i];
-    const km = cur.km - prev.km;
-    const liters = cur.liters;
-    if (!(liters > 0)) continue;
-    if (km < MIN_SEGMENT_KM || km > MAX_SEGMENT_KM) continue;
-    const kmpl = km / liters;
-    if (kmpl < MIN_KMPL || kmpl > MAX_KMPL) continue;
-    out.push({ date: cur.date, km, liters, kmpl: +kmpl.toFixed(2) });
+  let prevFull: { km: number } | null = null;
+  let pendingLiters = 0;
+
+  for (const fill of fills) {
+    if (!fill.full) {
+      // Parcial: entra nos litros do próximo trecho fechado por tanque cheio.
+      if (prevFull) pendingLiters += Math.max(0, fill.liters);
+      continue;
+    }
+    if (prevFull) {
+      const km = fill.km - prevFull.km;
+      const liters = pendingLiters + Math.max(0, fill.liters);
+      if (liters > 0 && km >= MIN_SEGMENT_KM && km <= MAX_SEGMENT_KM) {
+        const kmpl = km / liters;
+        if (kmpl >= MIN_KMPL && kmpl <= MAX_KMPL) {
+          out.push({ date: fill.date, km, liters: +liters.toFixed(3), kmpl: +kmpl.toFixed(2) });
+        }
+      }
+    }
+    prevFull = { km: fill.km };
+    pendingLiters = 0;
   }
   return out.sort((a, b) => Date.parse(a.date) - Date.parse(b.date));
 }

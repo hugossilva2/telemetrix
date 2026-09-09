@@ -41,7 +41,6 @@ export async function saveClosedTrip(
   // Viagem aberta em outra conta não é gravada nesta.
   if (trip.ownerId && trip.ownerId !== userId) return "skipped";
 
-
   const startMs = new Date(trip.startTime).getTime();
   const durationS = Math.max(0, (Date.now() - startMs) / 1000);
 
@@ -90,7 +89,6 @@ export async function saveClosedTrip(
     if (existing && existing.length > 0) return "duplicate";
   }
 
-
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
   // vehicles.fuel_kind é a fonte de verdade; localStorage só como cache offline.
@@ -132,9 +130,8 @@ export async function saveClosedTrip(
   });
 
   // A origem é a que estava valendo quando a viagem começou.
-  const source = trip.source === "elm327" || trip.source === "fmc003"
-    ? trip.source
-    : telemetrySourceStore.get();
+  const source =
+    trip.source === "elm327" || trip.source === "fmc003" ? trip.source : telemetrySourceStore.get();
 
   // Grava primeiro com o traçado bruto; o alinhamento às ruas vem depois.
   const routeData = buildRouteData({
@@ -143,7 +140,6 @@ export async function saveClosedTrip(
     source,
     snappedPoints: null,
   });
-
 
   const row = {
     user_id: userId,

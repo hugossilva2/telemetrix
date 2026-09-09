@@ -22,16 +22,44 @@ export interface AutomationRow {
   last_fired_at: string | null;
 }
 
+/** IPv4 em redes reservadas/privadas. */
+function isPrivateIPv4(host: string): boolean {
+  const m = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(host);
+  if (!m) return false;
+  const [a, b] = [Number(m[1]), Number(m[2])];
+  if (a > 255 || b > 255 || Number(m[3]) > 255 || Number(m[4]) > 255) return true;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  if (a >= 224) return true; // multicast / reservado
+  return false;
+}
+
+/**
+ * IPv6 reservado, incluindo loopback (::1), link-local (fe80::/10),
+ * unique-local (fc00::/7), não especificado (::) e IPv4 mapeado
+ * (::ffff:127.0.0.1), que era aceito antes.
+ */
+function isPrivateIPv6(hostname: string): boolean {
+  const raw = hostname.replace(/^\[|\]$/g, "").toLowerCase();
+  if (!raw.includes(":")) return false;
+  const mapped = /(?:^|:)((?:\d{1,3}\.){3}\d{1,3})$/.exec(raw);
+  if (mapped && isPrivateIPv4(mapped[1])) return true;
+  if (mapped && /^(?:::ffff:|::)/.test(raw)) return true;
+  if (raw === "::" || raw === "::1") return true;
+  if (/^f[cd]/.test(raw)) return true; // fc00::/7
+  if (/^fe[89ab]/.test(raw)) return true; // fe80::/10
+  if (/^ff/.test(raw)) return true; // multicast
+  return false;
+}
+
 const BLOCKED_HOST_PATTERNS = [
   /^localhost$/i,
-  /^127\./,
-  /^0\.0\.0\.0$/,
-  /^10\./,
-  /^192\.168\./,
-  /^169\.254\./,
-  /^172\.(1[6-9]|2\d|3[01])\./,
-  /^\[?::1\]?$/,
+  /\.local$/i,
   /\.internal$/i,
+  /\.localhost$/i,
 ];
 
 export function validateAutomationUrl(
@@ -47,7 +75,9 @@ export function validateAutomationUrl(
     return { ok: false, error: "Use uma URL http:// ou https://" };
   }
   const host = url.hostname;
-  if (BLOCKED_HOST_PATTERNS.some((re) => re.test(host))) {
+  const blocked =
+    BLOCKED_HOST_PATTERNS.some((re) => re.test(host)) || isPrivateIPv4(host) || isPrivateIPv6(host);
+  if (blocked) {
     return {
       ok: false,
       error:

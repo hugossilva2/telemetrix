@@ -11,6 +11,8 @@ export interface QueuedItem<T = Record<string, unknown>> {
   createdAt: number;
   attempts: number;
   lastError?: string | null;
+  /** Antes deste instante o item não é reenviado (espera progressiva). */
+  nextAttemptAt?: number;
 }
 
 let cache: QueuedItem[] = [];
@@ -33,6 +35,25 @@ async function refresh() {
   }
 }
 
+/** Espera progressiva: 5s, 10s, 20s… até 30 minutos. */
+export function backoffMs(attempts: number): number {
+  const base = 5_000 * Math.pow(2, Math.max(0, attempts - 1));
+  return Math.min(base, 30 * 60_000);
+}
+
+/**
+ * Identificador estável: a mesma viagem enfileirada duas vezes (por retomada
+ * ou recarregamento) reaproveita a mesma pendência em vez de duplicar.
+ */
+export function stableId(kind: QueuedKind, payload: Record<string, unknown>): string {
+  const parts = [kind, payload["vehicle_id"] ?? "sem-carro", payload["start_time"] ?? ""];
+  const key = parts.join("|");
+  if (key.endsWith("|")) {
+    return `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+  return key;
+}
+
 export const offlineQueue = {
   items: () => cache,
   count: () => cache.length,
@@ -40,12 +61,15 @@ export const offlineQueue = {
     if (!loaded) void refresh();
   },
   async enqueue<T extends Record<string, unknown>>(kind: QueuedKind, payload: T) {
+    const id = stableId(kind, payload);
+    const existing = cache.find((i) => i.id === id);
     const item: QueuedItem<T> = {
-      id: `${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      id,
       kind,
       payload,
-      createdAt: Date.now(),
-      attempts: 0,
+      createdAt: existing?.createdAt ?? Date.now(),
+      attempts: existing?.attempts ?? 0,
+      nextAttemptAt: existing?.nextAttemptAt ?? 0,
     };
     await idb.put(item);
     await refresh();
@@ -56,7 +80,13 @@ export const offlineQueue = {
     await refresh();
   },
   async markFailure(item: QueuedItem, error: string) {
-    await idb.put({ ...item, attempts: item.attempts + 1, lastError: error });
+    const attempts = item.attempts + 1;
+    await idb.put({
+      ...item,
+      attempts,
+      lastError: error,
+      nextAttemptAt: Date.now() + backoffMs(attempts),
+    });
     await refresh();
   },
   async clear() {
@@ -71,8 +101,6 @@ export const offlineQueue = {
     };
   },
 };
-
-/** Quantidade de itens aguardando sincronização. */
 
 /** Lista reativa da fila offline. */
 export function useOfflineQueue(): QueuedItem[] {

@@ -25,6 +25,7 @@ export interface UseFlespiMqttResult {
  */
 export function useFlespiMqtt(): UseFlespiMqttResult {
   const { vehicle } = useActiveVehicle();
+  const vehicleId = vehicle?.id ?? null;
   const deviceId = vehicle?.flespi_device_id ?? null;
   const [status, setStatus] = useState<MqttStatus>("idle");
   const [telemetry, setTelemetry] = useState<VehicleTelemetry>({});

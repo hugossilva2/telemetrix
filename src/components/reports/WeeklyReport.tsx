@@ -12,7 +12,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { formatBRL, formatKm } from "@/lib/format";
+import { formatBRL, formatKm, localDayKey } from "@/lib/format";
 import { downloadCsv, toCsv } from "@/lib/expenses/categories";
 import { estimateTripCost } from "@/lib/trips/cost";
 import { nextWeek, previousWeek, weekKey, weekLabel, weekRange } from "@/lib/reports/week";
@@ -115,7 +115,7 @@ function aggregate(d?: { trips: WeekTrip[]; fuel: WeekFuel[] }) {
   const refuelCost = (d?.fuel ?? []).reduce((s, r) => s + Number(r.total_cost || 0), 0);
   const refuelLiters = (d?.fuel ?? []).reduce((s, r) => s + Number(r.liters_filled || 0), 0);
 
-  const days = new Set(trips.map((t) => t.start_time.slice(0, 10))).size;
+  const days = new Set(trips.map((t) => localDayKey(t.start_time))).size;
 
   return {
     trips: trips.length,

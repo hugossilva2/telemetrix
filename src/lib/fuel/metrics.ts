@@ -34,42 +34,60 @@ export interface FuelMetricsSummary {
   lastCostPerKm: number | null;
 }
 
-/** Espera os abastecimentos em qualquer ordem; ordena por data internamente. */
+/**
+ * Espera os abastecimentos em qualquer ordem; ordena por data internamente.
+ * Cada trecho vai de um tanque cheio ao seguinte e soma os litros/valores dos
+ * abastecimentos parciais do meio — assim o km/L não fica inflado.
+ */
 export function fuelMetrics(logs: FuelLogPoint[]): FuelMetricsSummary {
-  const sorted = logs
-    .filter((log) => log.is_full_tank)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sorted = [...logs].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const points: FuelMetricPoint[] = [];
   let totalKm = 0;
   let totalLiters = 0;
   let totalCost = 0;
 
-  for (let i = 1; i < sorted.length; i++) {
-    const prev = sorted[i - 1];
-    const cur = sorted[i];
-    if (prev.fuel_type !== cur.fuel_type) continue;
-    const distanceKm = Number(cur.mileage_at_fill) - Number(prev.mileage_at_fill);
-    const liters = Number(cur.liters_filled);
-    const cost = Number(cur.total_cost);
-    if (!(distanceKm > 0) || !(liters > 0) || !(cost > 0)) continue;
+  let prevFull: FuelLogPoint | null = null;
+  let pendingLiters = 0;
+  let pendingCost = 0;
 
-    const kmpl = distanceKm / liters;
-    if (!Number.isFinite(kmpl) || kmpl <= 0 || kmpl > 60) continue;
+  for (const cur of sorted) {
+    const sameFuel = prevFull ? prevFull.fuel_type === cur.fuel_type : true;
 
-    totalKm += distanceKm;
-    totalLiters += liters;
-    totalCost += cost;
+    if (!cur.is_full_tank) {
+      if (prevFull && sameFuel) {
+        pendingLiters += Math.max(0, Number(cur.liters_filled) || 0);
+        pendingCost += Math.max(0, Number(cur.total_cost) || 0);
+      }
+      continue;
+    }
 
-    points.push({
-      label: new Date(cur.date).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "2-digit",
-      }),
-      date: cur.date,
-      distanceKm,
-      kmpl: +kmpl.toFixed(2),
-      costPerKm: +(cost / distanceKm).toFixed(3),
-    });
+    if (prevFull && sameFuel) {
+      const distanceKm = Number(cur.mileage_at_fill) - Number(prevFull.mileage_at_fill);
+      const liters = pendingLiters + (Number(cur.liters_filled) || 0);
+      const cost = pendingCost + (Number(cur.total_cost) || 0);
+      const kmpl = distanceKm > 0 && liters > 0 ? distanceKm / liters : NaN;
+
+      if (distanceKm > 0 && liters > 0 && cost > 0 && Number.isFinite(kmpl) && kmpl <= 60) {
+        totalKm += distanceKm;
+        totalLiters += liters;
+        totalCost += cost;
+
+        points.push({
+          label: new Date(cur.date).toLocaleDateString("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+          }),
+          date: cur.date,
+          distanceKm,
+          kmpl: +kmpl.toFixed(2),
+          costPerKm: +(cost / distanceKm).toFixed(3),
+        });
+      }
+    }
+
+    prevFull = cur;
+    pendingLiters = 0;
+    pendingCost = 0;
   }
 
   const last = points[points.length - 1] ?? null;

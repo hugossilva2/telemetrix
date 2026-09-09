@@ -24,13 +24,24 @@ describe("measuredSegments", () => {
     expect(segs[0].kmpl).toBeCloseTo(12.5, 2);
   });
 
-  it("ignora abastecimentos parciais e de outro combustível", () => {
+  it("soma o abastecimento parcial do meio nos litros do trecho", () => {
     const segs = measuredSegments(
       [
         log("2026-08-01", 10_000, 40),
-        log("2026-08-05", 10_200, 15, { is_full_tank: false }),
-        log("2026-08-10", 10_500, 40, { fuel_type: "etanol" }),
+        log("2026-08-05", 10_200, 20, { is_full_tank: false }),
+        log("2026-08-10", 10_500, 30),
       ],
+      "gasolina",
+    );
+    expect(segs).toHaveLength(1);
+    // 500 km com 50 L (20 parciais + 30 do tanque cheio) = 10 km/L, não 16,7.
+    expect(segs[0].liters).toBeCloseTo(50, 3);
+    expect(segs[0].kmpl).toBeCloseTo(10, 2);
+  });
+
+  it("ignora abastecimentos de outro combustível", () => {
+    const segs = measuredSegments(
+      [log("2026-08-01", 10_000, 40), log("2026-08-10", 10_500, 40, { fuel_type: "etanol" })],
       "gasolina",
     );
     expect(segs).toHaveLength(0);

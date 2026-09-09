@@ -16,3 +16,15 @@ export function formatEta(seconds: number, minMinutes = 0): string {
   const rest = m % 60;
   return rest === 0 ? `${h} h` : `${h}h${rest.toString().padStart(2, "0")}`;
 }
+
+/**
+ * Dia "AAAA-MM-DD" no fuso do aparelho (o do veículo, na prática).
+ * `toISOString().slice(0,10)` usa UTC e joga um abastecimento das 23h para o
+ * dia seguinte no Brasil.
+ */
+export function localDayKey(date: Date | string = new Date()): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  if (Number.isNaN(d.getTime())) return "";
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}

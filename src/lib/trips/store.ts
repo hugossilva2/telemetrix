@@ -15,7 +15,14 @@ export interface TrailPoint {
   t: number;
 }
 
-export interface OpenTrip {
+/** Dono/carro/origem aos quais a viagem em andamento pertence. */
+export interface TripContext {
+  ownerId: string | null;
+  vehicleId: string | null;
+  source: string | null;
+}
+
+export interface OpenTrip extends TripContext {
   startTime: string; // ISO
   startLat: number | null;
   startLng: number | null;
@@ -31,7 +38,21 @@ export interface OpenTrip {
   idleSeconds: number;
 }
 
-const STORAGE_KEY = "openTrip:v2";
+/**
+ * A viagem só pode continuar se pertencer à mesma conta, ao mesmo carro e à
+ * mesma origem de dados. Contexto ainda desconhecido (null) não invalida.
+ */
+export function matchesTripContext(trip: TripContext, ctx: Partial<TripContext>): boolean {
+  const same = (a: string | null | undefined, b: string | null | undefined) =>
+    a == null || b == null || a === b;
+  return (
+    same(trip.ownerId, ctx.ownerId) &&
+    same(trip.vehicleId, ctx.vehicleId) &&
+    same(trip.source, ctx.source)
+  );
+}
+
+const STORAGE_KEY = "openTrip:v3";
 const MAX_TRAIL = 500;
 const MAX_EVENTS = 300;
 
@@ -44,6 +65,9 @@ function readInitial(): OpenTrip | null {
     if (!Array.isArray(parsed.trail)) parsed.trail = [];
     if (!Array.isArray(parsed.ecoEvents)) parsed.ecoEvents = [];
     if (typeof parsed.idleSeconds !== "number") parsed.idleSeconds = 0;
+    if (parsed.ownerId === undefined) parsed.ownerId = null;
+    if (parsed.vehicleId === undefined) parsed.vehicleId = null;
+    if (parsed.source === undefined) parsed.source = null;
     return parsed;
   } catch {
     return null;
@@ -86,6 +110,33 @@ export const tripStore = {
       ecoEvents: merged.length > MAX_EVENTS ? merged.slice(-MAX_EVENTS) : merged,
       idleSeconds: current.idleSeconds + Math.max(0, extraIdleSeconds),
     });
+  },
+
+  /**
+   * Garante que a viagem guardada pertence ao contexto atual (conta, carro e
+   * origem). Se não pertencer, descarta — nunca reaproveita a viagem anterior.
+   * Se pertencer e ainda faltar contexto, completa os campos.
+   */
+  ensureContext(ctx: Partial<TripContext>): OpenTrip | null {
+    if (!current) return null;
+    if (!matchesTripContext(current, ctx)) {
+      this.set(null);
+      return null;
+    }
+    const filled: OpenTrip = {
+      ...current,
+      ownerId: current.ownerId ?? ctx.ownerId ?? null,
+      vehicleId: current.vehicleId ?? ctx.vehicleId ?? null,
+      source: current.source ?? ctx.source ?? null,
+    };
+    if (
+      filled.ownerId !== current.ownerId ||
+      filled.vehicleId !== current.vehicleId ||
+      filled.source !== current.source
+    ) {
+      this.set(filled);
+    }
+    return current;
   },
 
   subscribe(l: () => void) {

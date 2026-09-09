@@ -38,6 +38,8 @@ export async function saveClosedTrip(
   const { data: auth } = await supabase.auth.getUser();
   const userId = auth.user?.id;
   if (!userId) return "skipped";
+  // Viagem aberta em outra conta não é gravada nesta.
+  if (trip.ownerId && trip.ownerId !== userId) return "skipped";
 
   const startMs = new Date(trip.startTime).getTime();
   const durationS = Math.max(0, (Date.now() - startMs) / 1000);
@@ -52,7 +54,8 @@ export async function saveClosedTrip(
 
   const [{ data: vehicle }, { data: lastFuel }, driverId] = await Promise.all([
     (() => {
-      const activeId = getActiveVehicleId();
+      // O carro da viagem vem do estado da viagem; troca de carro depois não muda.
+      const activeId = trip.vehicleId ?? getActiveVehicleId();
       const q = supabase.from("vehicles").select(VEHICLE_SELECT).eq("user_id", userId);
       return activeId
         ? q.eq("id", activeId).maybeSingle()
@@ -85,7 +88,6 @@ export async function saveClosedTrip(
     const { data: existing } = await q;
     if (existing && existing.length > 0) return "duplicate";
   }
-
 
   const durationH = durationS / 3600;
   const avgSpeedKmh = durationH > 0 ? distanceKm / durationH : null;
@@ -127,27 +129,16 @@ export async function saveClosedTrip(
     spec,
   });
 
-  const source = telemetrySourceStore.get();
+  // A origem é a que estava valendo quando a viagem começou.
+  const source =
+    trip.source === "elm327" || trip.source === "fmc003" ? trip.source : telemetrySourceStore.get();
 
-  // Map Matching: alinha o traçado à geometria real das ruas (Google Roads API).
-  // Falha de rede/API não bloqueia o salvamento — cai para os pontos brutos.
-  let snappedPoints = null as Awaited<ReturnType<typeof snapToRoads>>["points"] | null;
-  if (isOnline() && (trip.trail?.length ?? 0) > 1) {
-    try {
-      const res = await snapToRoads({
-        data: { points: trip.trail.map((p) => ({ lat: p.lat, lng: p.lng })) },
-      });
-      if (res.snapped) snappedPoints = res.points;
-    } catch (err) {
-      console.error("[saveTrip] snapToRoads falhou, usando traçado bruto:", err);
-    }
-  }
-
+  // Grava primeiro com o traçado bruto; o alinhamento às ruas vem depois.
   const routeData = buildRouteData({
     trail: trip.trail ?? [],
     events: trip.ecoEvents ?? [],
     source,
-    snappedPoints,
+    snappedPoints: null,
   });
 
   const row = {
@@ -189,7 +180,7 @@ export async function saveClosedTrip(
     return "queued";
   }
 
-  const { error } = await supabase.from("trips").insert(row);
+  const { data: inserted, error } = await supabase.from("trips").insert(row).select("id").single();
 
   if (error) {
     // 23505: já existe viagem com o mesmo veículo/horário de início (o webhook
@@ -198,5 +189,37 @@ export async function saveClosedTrip(
     await offlineQueue.enqueue("trip", row as unknown as Record<string, unknown>);
     return "queued";
   }
+
+  // Enriquecimento depois de a viagem estar salva: se a internet cair aqui, o
+  // histórico já tem a viagem (só sem o traçado alinhado às ruas).
+  if (inserted?.id) void enrichRoute(inserted.id, trip, source);
   return "saved";
+}
+
+/** Alinha o traçado à geometria das ruas (Google Roads) e atualiza a viagem. */
+async function enrichRoute(
+  tripId: string,
+  trip: OpenTrip,
+  source: "elm327" | "fmc003",
+): Promise<void> {
+  if (!isOnline() || (trip.trail?.length ?? 0) < 2) return;
+  try {
+    const res = await snapToRoads({
+      data: { points: trip.trail.map((p) => ({ lat: p.lat, lng: p.lng })) },
+    });
+    if (!res.snapped) return;
+    const routeData = buildRouteData({
+      trail: trip.trail ?? [],
+      events: trip.ecoEvents ?? [],
+      source,
+      snappedPoints: res.points,
+    });
+    if (!routeData) return;
+    await supabase
+      .from("trips")
+      .update({ route_data: routeData as unknown as never })
+      .eq("id", tripId);
+  } catch (err) {
+    console.error("[saveTrip] snapToRoads falhou, mantendo traçado bruto:", err);
+  }
 }

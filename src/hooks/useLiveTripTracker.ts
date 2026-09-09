@@ -1,7 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTelemetry } from "@/hooks/useTelemetry";
+import { supabase } from "@/integrations/supabase/client";
+import { useActiveVehicle } from "@/lib/vehicles/active";
+import { useTelemetrySource } from "@/lib/telemetry/source";
 import { tripStore, type OpenTrip, type TrailPoint } from "@/lib/trips/store";
 import { haversineKm } from "@/lib/trips/geo";
 import { tripDestinationStore } from "@/lib/trips/activeDestination";
@@ -20,6 +23,26 @@ import { notifyTrackerEvent } from "@/lib/push/push.functions";
 export function useLiveTripTracker() {
   const { telemetry } = useTelemetry();
   const queryClient = useQueryClient();
+  const { vehicleId } = useActiveVehicle();
+  const { source } = useTelemetrySource();
+  const [ownerId, setOwnerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (alive) setOwnerId(data.user?.id ?? null);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  // A viagem guardada só continua se for da mesma conta, carro e origem.
+  const ctxRef = useRef({ ownerId, vehicleId, source });
+  ctxRef.current = { ownerId, vehicleId, source };
+  useEffect(() => {
+    tripStore.ensureContext({ ownerId, vehicleId, source });
+  }, [ownerId, vehicleId, source]);
 
   const prevIgnition = useRef<boolean | undefined>(undefined);
   const lastTrailAt = useRef<number>(0);
@@ -62,10 +85,13 @@ export function useLiveTripTracker() {
     // OFF -> ON: abre viagem local
     const shouldOpen =
       ((prev === false && ign === true) || (prev === undefined && ign === true)) &&
-      !tripStore.get();
+      !tripStore.ensureContext(ctxRef.current);
     if (shouldOpen) {
       lastSample.current = null;
       const open: OpenTrip = {
+        ownerId: ctxRef.current.ownerId,
+        vehicleId: ctxRef.current.vehicleId,
+        source: ctxRef.current.source,
         startTime: new Date().toISOString(),
         startLat: telemetry.latitude ?? null,
         startLng: telemetry.longitude ?? null,

@@ -25,6 +25,7 @@ export interface UseFlespiMqttResult {
  */
 export function useFlespiMqtt(): UseFlespiMqttResult {
   const { vehicle } = useActiveVehicle();
+  const vehicleId = vehicle?.id ?? null;
   const deviceId = vehicle?.flespi_device_id ?? null;
   const [status, setStatus] = useState<MqttStatus>("idle");
   const [telemetry, setTelemetry] = useState<VehicleTelemetry>({});
@@ -35,9 +36,13 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
   // Seed inicial: última mensagem conhecida via servidor, para não ficar
   // "aguardando posição" enquanto o rastreador está parado/dormindo.
   useEffect(() => {
-    if (typeof window === "undefined" || !deviceId) return;
+    if (typeof window === "undefined" || !vehicleId || !deviceId) return;
     let cancelled = false;
-    fetchLastKnownTelemetry(deviceId).then((last) => {
+    // Troca de veículo/conta: limpa a telemetria anterior para não misturar
+    // odômetro e posição de um carro com os do outro.
+    setTelemetry({});
+    setLastMessageAt(null);
+    fetchLastKnownTelemetry(vehicleId).then((last) => {
       if (cancelled || !last) return;
       const { receivedAt, ...tele } = last;
       setTelemetry((prev) => mergeTelemetry(tele, prev));
@@ -46,7 +51,7 @@ export function useFlespiMqtt(): UseFlespiMqttResult {
     return () => {
       cancelled = true;
     };
-  }, [deviceId]);
+  }, [vehicleId, deviceId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;

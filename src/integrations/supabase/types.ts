@@ -1605,6 +1605,7 @@ export type Database = {
     Functions: {
       accept_org_invite: { Args: { _token: string }; Returns: string }
       accept_vehicle_share: { Args: { _share_id: string }; Returns: boolean }
+      can_use_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
       can_view_vehicle: { Args: { _vehicle_id: string }; Returns: boolean }
       current_plan: {
         Args: { _user_id: string }

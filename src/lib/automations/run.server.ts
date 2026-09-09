@@ -45,9 +45,16 @@ function isPrivateIPv4(host: string): boolean {
 function isPrivateIPv6(hostname: string): boolean {
   const raw = hostname.replace(/^\[|\]$/g, "").toLowerCase();
   if (!raw.includes(":")) return false;
-  const mapped = /(?:^|:)((?:\d{1,3}\.){3}\d{1,3})$/.exec(raw);
-  if (mapped && isPrivateIPv4(mapped[1])) return true;
-  if (mapped && /^(?:::ffff:|::)/.test(raw)) return true;
+  const dotted = /(?:^|:)((?:\d{1,3}\.){3}\d{1,3})$/.exec(raw);
+  if (dotted) return isPrivateIPv4(dotted[1]) || /^(?:::ffff:|::)/.test(raw);
+  // IPv4 mapeado que o navegador já normalizou em hexadecimal (::ffff:7f00:1)
+  const hex = /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/.exec(raw);
+  if (hex) {
+    const a = parseInt(hex[1], 16);
+    const b = parseInt(hex[2], 16);
+    const ipv4 = `${a >> 8}.${a & 255}.${b >> 8}.${b & 255}`;
+    return isPrivateIPv4(ipv4);
+  }
   if (raw === "::" || raw === "::1") return true;
   if (/^f[cd]/.test(raw)) return true; // fc00::/7
   if (/^fe[89ab]/.test(raw)) return true; // fe80::/10

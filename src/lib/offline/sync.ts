@@ -13,6 +13,9 @@ const PERMANENT_CODES = new Set([
 /** Já existe no histórico: contar como enviado. */
 const DUPLICATE_CODE = "23505";
 
+let running = false;
+let lastResult: { synced: number; failed: number; at: number } | null = null;
+
 export function isOnline(): boolean {
   return typeof navigator === "undefined" || navigator.onLine !== false;
 }
@@ -69,8 +72,6 @@ export async function flushOfflineQueue(): Promise<{ synced: number; failed: num
   return { synced, failed };
 }
 
-let running = false;
-let lastResult: { synced: number; failed: number; at: number } | null = null;
 export function lastSyncResult() {
   return lastResult;
 }

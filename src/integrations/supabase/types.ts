@@ -1253,6 +1253,27 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_subscriptions: {
         Row: {
           created_at: string
@@ -1630,6 +1651,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_org_member: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
@@ -1662,6 +1690,7 @@ export type Database = {
     Enums: {
       account_mode: "motorista" | "app" | "instrutor" | "autoescola"
       app_plan: "free" | "pro" | "frota"
+      app_role: "admin"
       expense_category:
         | "pedagio"
         | "estacionamento"
@@ -1832,6 +1861,7 @@ export const Constants = {
     Enums: {
       account_mode: ["motorista", "app", "instrutor", "autoescola"],
       app_plan: ["free", "pro", "frota"],
+      app_role: ["admin"],
       expense_category: [
         "pedagio",
         "estacionamento",

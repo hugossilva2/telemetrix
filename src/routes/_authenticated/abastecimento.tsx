@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { toUserMessage } from "@/lib/errors/userMessage";
 import { invalidateFuelMetrics } from "@/lib/fuel/invalidate";
 import { fuelMetrics } from "@/lib/fuel/metrics";
+import { localDayKey } from "@/lib/format";
 import { Camera, FileText, Paperclip, Pencil, Receipt, Trash2, X } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { Button } from "@/components/ui/button";

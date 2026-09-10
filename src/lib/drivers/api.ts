@@ -72,14 +72,15 @@ export function useDriverTrips(driverId: string) {
   return useQuery<DriverTripRow[]>({
     queryKey: ["driver-trips", driverId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select(TRIP_COLUMNS)
-        .eq("driver_id", driverId)
-        .order("start_time", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as DriverTripRow[];
+      // Paginado: o histórico do condutor não pode parar em 500 viagens.
+      return fetchAllRows<DriverTripRow>((from, to) =>
+        supabase
+          .from("trips")
+          .select(TRIP_COLUMNS)
+          .eq("driver_id", driverId)
+          .order("start_time", { ascending: false })
+          .range(from, to),
+      );
     },
   });
 }

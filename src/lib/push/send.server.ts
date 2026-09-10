@@ -79,8 +79,14 @@ export async function sendPushToUser(
         failed += 1;
         console.error("push erro:", e);
       }
-    }),
-  );
+    }
+  };
+
+  // Em lotes: evita abrir uma conexão por aparelho de uma vez só.
+  for (let i = 0; i < subs.length; i += PUSH_CONCURRENCY) {
+    await Promise.all(subs.slice(i, i + PUSH_CONCURRENCY).map(sendOne));
+  }
+
 
   if (dead.length > 0) {
     await supabaseAdmin.from("push_subscriptions").delete().in("id", dead);

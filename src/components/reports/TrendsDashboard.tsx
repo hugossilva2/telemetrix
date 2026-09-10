@@ -15,6 +15,7 @@ import {
 import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { fetchAllRows } from "@/lib/supabase/paginate";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
 import { expectedKmpl, fuelLabel, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";

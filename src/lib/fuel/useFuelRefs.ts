@@ -19,13 +19,12 @@ async function fetchFuelRefs(vehicleId: string | null, fuelKind: FuelKind): Prom
   if (!uid) return { pricePerLiter: null, calibration: null };
 
   const [{ data: lastFuel }, { data: calibration }] = await Promise.all([
-    supabase
-      .from("fuel_logs")
-      .select("price_per_liter")
-      .eq("user_id", uid)
-      .order("date", { ascending: false })
-      .limit(1)
-      .maybeSingle(),
+    (() => {
+      // Preço de referência do carro ativo; sem carro, o último preço da conta.
+      let q = supabase.from("fuel_logs").select("price_per_liter").eq("user_id", uid);
+      if (vehicleId) q = q.eq("vehicle_id", vehicleId);
+      return q.order("date", { ascending: false }).limit(1).maybeSingle();
+    })(),
     vehicleId
       ? supabase
           .from("vehicle_fuel_calibration")

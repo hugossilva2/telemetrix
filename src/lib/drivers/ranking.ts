@@ -4,6 +4,7 @@ import { computeDriverScore, type DriverScore } from "./score";
 import { getFuelKind } from "@/lib/eco/settings";
 import type { DriverSafeStartRow, DriverTripRow } from "./score";
 import { DRIVER_COLUMNS, type DriverRow } from "./api";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 
 const TRIP_COLUMNS =
   "id,driver_id,start_time,end_time,distance_km,fuel_liters,estimated_cost,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost,max_speed_kmh";
@@ -18,28 +19,31 @@ export function useDriverRanking() {
   return useQuery<RankedDriver[]>({
     queryKey: ["driver-ranking"],
     queryFn: async () => {
-      const [drivers, trips, starts] = await Promise.all([
+      const [drivers, tripRows, startRows] = await Promise.all([
         supabase.from("drivers").select(DRIVER_COLUMNS).order("name"),
-        supabase
-          .from("trips")
-          .select(TRIP_COLUMNS)
-          .not("driver_id", "is", null)
-          .order("start_time", { ascending: false })
-          .limit(1000),
-        supabase
-          .from("safe_starts")
-          .select("driver_id,started_at,required,ready,min_rpm")
-          .not("driver_id", "is", null)
-          .order("started_at", { ascending: false })
-          .limit(500),
+        // Paginado: o ranking somava só as 1.000 viagens mais recentes.
+        fetchAllRows<Record<string, unknown>>((from, to) =>
+          supabase
+            .from("trips")
+            .select(TRIP_COLUMNS)
+            .not("driver_id", "is", null)
+            .order("start_time", { ascending: false })
+            .range(from, to),
+        ),
+        fetchAllRows<Record<string, unknown>>((from, to) =>
+          supabase
+            .from("safe_starts")
+            .select("driver_id,started_at,required,ready,min_rpm")
+            .not("driver_id", "is", null)
+            .order("started_at", { ascending: false })
+            .range(from, to),
+        ),
       ]);
 
       if (drivers.error) throw drivers.error;
-      if (trips.error) throw trips.error;
-      if (starts.error) throw starts.error;
 
       const tripsBy = new Map<string, DriverTripRow[]>();
-      for (const t of trips.data ?? []) {
+      for (const t of tripRows) {
         const key = (t as { driver_id: string }).driver_id;
         const list = tripsBy.get(key) ?? [];
         list.push(t as unknown as DriverTripRow);
@@ -47,7 +51,7 @@ export function useDriverRanking() {
       }
 
       const startsBy = new Map<string, DriverSafeStartRow[]>();
-      for (const s of starts.data ?? []) {
+      for (const s of startRows) {
         const key = (s as { driver_id: string }).driver_id;
         const list = startsBy.get(key) ?? [];
         list.push(s as unknown as DriverSafeStartRow);

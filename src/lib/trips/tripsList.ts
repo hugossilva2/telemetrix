@@ -3,6 +3,7 @@
 // undefined ao voltar do detalhe para a lista.
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 
 export const TRIPS_LIST_SELECT =
   "id,start_time,end_time,distance_km,avg_speed_kmh,fuel_liters,estimated_cost,eco_score";
@@ -21,13 +22,14 @@ export type TripListRow = {
 export const TRIPS_LIST_KEY = ["trips-list"] as const;
 
 export async function fetchTrips(): Promise<TripListRow[]> {
-  const { data, error } = await supabase
-    .from("trips")
-    .select(TRIPS_LIST_SELECT)
-    .order("start_time", { ascending: false })
-    .limit(500);
-  if (error) throw error;
-  return (data ?? []) as TripListRow[];
+  // Paginado: o histórico completo, sem corte silencioso em 500 viagens.
+  return fetchAllRows<TripListRow>((from, to) =>
+    supabase
+      .from("trips")
+      .select(TRIPS_LIST_SELECT)
+      .order("start_time", { ascending: false })
+      .range(from, to),
+  );
 }
 
 export function useTripsList() {

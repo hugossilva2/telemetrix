@@ -22,7 +22,11 @@ export default defineConfig({
         filename: "sw.js",
         devOptions: { enabled: false },
         manifest: false,
+        // O build do Nitro publica dist/client; sem isto o sw.js ficava em dist/
+        // e nunca era servido (offline e avisos não funcionavam na instalação).
+        outDir: "dist/client",
         workbox: {
+          globDirectory: "dist/client",
           importScripts: ["/push-sw.js"],
           globPatterns: ["**/*.{js,css,ico,png,svg,webmanifest}"],
           navigateFallback: "/",

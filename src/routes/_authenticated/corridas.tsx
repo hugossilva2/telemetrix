@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Clock, Pencil, PiggyBank, Play, Square, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

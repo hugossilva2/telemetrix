@@ -13,6 +13,7 @@ import {
   Route as RouteIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { backfillTripsFromFlespi } from "@/lib/trips/backfill.functions";

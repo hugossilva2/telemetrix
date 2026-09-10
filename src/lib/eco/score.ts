@@ -149,7 +149,7 @@ export function ecoBand(score: number | null | undefined): EcoBand {
       label: "Sem dados",
       color: "text-muted-foreground",
       bg: "bg-muted",
-      stroke: "hsl(var(--muted-foreground))",
+      stroke: "var(--muted-foreground)",
     };
   }
   if (s >= 90) {

@@ -61,29 +61,29 @@ export function EcoEventsChart({ events }: { events: EcoEvent[] }) {
       <div className="mt-3 h-48 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 8, right: 8, bottom: 0, left: -18 }}>
-            <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" />
+            <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" />
             <XAxis
               type="number"
               dataKey="x"
               domain={["dataMin", "dataMax"]}
               tickFormatter={fmtClock}
-              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-              stroke="hsl(var(--border))"
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              stroke="var(--border)"
             />
             <YAxis
               type="number"
               dataKey="y"
               unit=" km/h"
-              tick={{ fontSize: 10, fill: "hsl(var(--muted-foreground))" }}
-              stroke="hsl(var(--border))"
+              tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+              stroke="var(--border)"
               width={64}
             />
             <ZAxis type="number" dataKey="z" range={[60, 180]} />
             <Tooltip
               cursor={{ strokeDasharray: "3 3" }}
               contentStyle={{
-                background: "hsl(var(--card))",
-                border: "1px solid hsl(var(--border))",
+                background: "var(--card)",
+                border: "1px solid var(--border)",
                 borderRadius: 12,
                 fontSize: 12,
               }}

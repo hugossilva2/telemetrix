@@ -90,7 +90,7 @@ function ViagensPage() {
     ? Date.now() - limits.historyDays * 86_400_000
     : null;
 
-  const { data: trips, isLoading } = useTripsList();
+  const { data: trips, isLoading, isError, error, refetch } = useTripsList();
 
   const queryClient = useQueryClient();
   const runBackfill = useServerFn(backfillTripsFromFlespi);
@@ -283,6 +283,13 @@ function ViagensPage() {
 
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <LoadFailed
+          className="card-surface mt-6 p-4"
+          error={error}
+          fallback="Não foi possível carregar suas viagens agora."
+          onRetry={() => void refetch()}
+        />
       ) : monthTrips.length === 0 ? (
         <div className="mt-8 flex flex-col items-center gap-3 text-center">
           <div className="grid size-12 place-items-center rounded-full bg-primary/10 text-primary">

@@ -72,7 +72,13 @@ function monthKey(iso: string) {
 }
 
 function EcoPage() {
-  const { data: trips, isLoading } = useQuery({
+  const {
+    data: trips,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["eco-trips"],
     queryFn: async (): Promise<EcoTrip[]> => {
       // Paginado: as médias passam a considerar todo o histórico com nota.
@@ -184,6 +190,12 @@ function EcoPage() {
     <AppShell title="Eco Score" subtitle="Sua nota de direção de 0 a 100">
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <LoadFailed
+          error={error}
+          fallback="Não foi possível carregar suas notas de direção agora."
+          onRetry={() => void refetch()}
+        />
       ) : !stats ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
           Ainda não há viagens pontuadas. Assim que você fizer uma viagem com o motor ligado, a nota

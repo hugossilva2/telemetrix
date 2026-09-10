@@ -400,6 +400,13 @@ function CorridasPage() {
         <h2 className="text-sm font-semibold">Últimas corridas</h2>
         {rides.isLoading ? (
           <p className="mt-2 text-xs text-muted-foreground">Carregando…</p>
+        ) : rides.isError ? (
+          <LoadFailed
+            className="mt-2"
+            error={rides.error}
+            fallback="Não foi possível carregar suas corridas agora."
+            onRetry={() => void rides.refetch()}
+          />
         ) : list.length === 0 ? (
           <p className="mt-2 text-xs text-muted-foreground">
             Nenhuma corrida ainda. Registre a primeira acima.

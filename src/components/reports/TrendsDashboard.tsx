@@ -188,7 +188,7 @@ export function TrendsDashboard() {
   const fuel = vehicleFuel ?? fallbackFuel;
   const weeks = useMemo(() => lastWeeks(Number(range)).reverse(), [range]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["trends-trips", range],
     queryFn: async (): Promise<TrendTrip[]> => {
       const since = `${weeks[0]}T00:00:00.000`;
@@ -255,6 +255,12 @@ export function TrendsDashboard() {
 
       {isLoading ? (
         <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <LoadFailed
+          error={error}
+          fallback="Não foi possível carregar a evolução agora."
+          onRetry={() => void refetch()}
+        />
       ) : active.length === 0 ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
           Ainda não há viagens registradas nesse período. Os gráficos aparecem automaticamente na

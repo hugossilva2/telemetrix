@@ -75,7 +75,7 @@ function ConvitePage() {
   const redirect = `/convite/${token}`;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="card-surface w-full max-w-sm p-6 text-center">
         <div className="mx-auto grid size-14 place-items-center rounded-2xl bg-primary/10 text-primary">
           {invite.data?.org_kind === "autoescola" ? (

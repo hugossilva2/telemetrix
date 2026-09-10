@@ -1,6 +1,12 @@
 import { buildPushPayload } from "@block65/webcrypto-web-push";
 import type { PushPayload } from "./config";
 
+/** Prazo máximo de cada envio ao servidor de push do navegador. */
+const PUSH_TIMEOUT_MS = 8_000;
+
+/** Envios simultâneos por usuário (evita rajada em contas com muitos aparelhos). */
+const PUSH_CONCURRENCY = 5;
+
 interface SubRow {
   id: string;
   endpoint: string;
@@ -39,8 +45,8 @@ export async function sendPushToUser(
   let failed = 0;
   const dead: string[] = [];
 
-  await Promise.all(
-    subs.map(async (s) => {
+  const sendOne = async (s: SubRow) => {
+    {
       try {
         const req = await buildPushPayload(
           {
@@ -58,6 +64,8 @@ export async function sendPushToUser(
           method: req.method,
           headers: req.headers,
           body: req.body as unknown as BodyInit,
+          // Um servidor de push lento não pode segurar a ingestão do rastreador.
+          signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
         });
         if (res.ok) {
           sent += 1;
@@ -71,8 +79,13 @@ export async function sendPushToUser(
         failed += 1;
         console.error("push erro:", e);
       }
-    }),
-  );
+    }
+  };
+
+  // Em lotes: evita abrir uma conexão por aparelho de uma vez só.
+  for (let i = 0; i < subs.length; i += PUSH_CONCURRENCY) {
+    await Promise.all(subs.slice(i, i + PUSH_CONCURRENCY).map(sendOne));
+  }
 
   if (dead.length > 0) {
     await supabaseAdmin.from("push_subscriptions").delete().in("id", dead);

@@ -3,7 +3,9 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Award, Flame, Leaf, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { EcoScoreRing } from "@/components/eco/EcoScoreRing";
 import { TelemetryDiagnosticsCard } from "@/components/eco/TelemetryDiagnosticsCard";
 import { DrivingHabitsCard } from "@/components/coach/DrivingHabitsCard";
@@ -71,19 +73,26 @@ function monthKey(iso: string) {
 }
 
 function EcoPage() {
-  const { data: trips, isLoading } = useQuery({
+  const {
+    data: trips,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ["eco-trips"],
     queryFn: async (): Promise<EcoTrip[]> => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select(
-          "id,start_time,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost",
-        )
-        .not("eco_score", "is", null)
-        .order("start_time", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as EcoTrip[];
+      // Paginado: as médias passam a considerar todo o histórico com nota.
+      return fetchAllRows<EcoTrip>((from, to) =>
+        supabase
+          .from("trips")
+          .select(
+            "id,start_time,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost",
+          )
+          .not("eco_score", "is", null)
+          .order("start_time", { ascending: false })
+          .range(from, to),
+      );
     },
   });
 
@@ -182,6 +191,12 @@ function EcoPage() {
     <AppShell title="Eco Score" subtitle="Sua nota de direção de 0 a 100">
       {isLoading ? (
         <p className="mt-6 text-center text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <LoadFailed
+          error={error}
+          fallback="Não foi possível carregar suas notas de direção agora."
+          onRetry={() => void refetch()}
+        />
       ) : !stats ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
           Ainda não há viagens pontuadas. Assim que você fizer uma viagem com o motor ligado, a nota

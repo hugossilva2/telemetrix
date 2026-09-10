@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AlertTriangle, CalendarDays, Play, Plus, Square } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -407,6 +408,13 @@ function AulasPage() {
       <section className="card-surface p-0">
         {lessons.isLoading ? (
           <p className="p-4 text-xs text-muted-foreground">Carregando aulas…</p>
+        ) : lessons.isError ? (
+          <LoadFailed
+            className="p-4"
+            error={lessons.error}
+            fallback="Não foi possível carregar as aulas agora."
+            onRetry={() => void lessons.refetch()}
+          />
         ) : (tab === "proximas" ? upcoming : history).length === 0 ? (
           <p className="p-4 text-xs text-muted-foreground">
             {tab === "proximas"

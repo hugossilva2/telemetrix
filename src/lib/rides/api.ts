@@ -1,5 +1,6 @@
 import { useQuery, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import type { RidePlatform } from "./profit";
 
 export const RIDES_KEY = ["rides"] as const;
@@ -40,14 +41,16 @@ export function useRides(since?: string) {
   return useQuery({
     queryKey: [...RIDES_KEY, from.slice(0, 10)],
     queryFn: async (): Promise<RideRecord[]> => {
-      const { data, error } = await supabase
-        .from("rides")
-        .select(RIDE_SELECT)
-        .gte("occurred_at", from)
-        .order("occurred_at", { ascending: false })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []).map((r) => ({
+      // Paginado: motoristas de app fazem muitas corridas no período.
+      const rows = await fetchAllRows<RideRecord>((rangeFrom, rangeTo) =>
+        supabase
+          .from("rides")
+          .select(RIDE_SELECT)
+          .gte("occurred_at", from)
+          .order("occurred_at", { ascending: false })
+          .range(rangeFrom, rangeTo),
+      );
+      return rows.map((r) => ({
         ...r,
         amount: Number(r.amount),
         tip: Number(r.tip),
@@ -62,14 +65,15 @@ export function useShifts(since?: string) {
   return useQuery({
     queryKey: [...SHIFTS_KEY, from.slice(0, 10)],
     queryFn: async (): Promise<ShiftRecord[]> => {
-      const { data, error } = await supabase
-        .from("shifts")
-        .select(SHIFT_SELECT)
-        .or(`started_at.gte.${from},ended_at.is.null`)
-        .order("started_at", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []).map((s) => ({
+      const rows = await fetchAllRows<ShiftRecord>((rangeFrom, rangeTo) =>
+        supabase
+          .from("shifts")
+          .select(SHIFT_SELECT)
+          .or(`started_at.gte.${from},ended_at.is.null`)
+          .order("started_at", { ascending: false })
+          .range(rangeFrom, rangeTo),
+      );
+      return rows.map((s) => ({
         ...s,
         start_mileage: s.start_mileage === null ? null : Number(s.start_mileage),
         end_mileage: s.end_mileage === null ? null : Number(s.end_mileage),
@@ -90,20 +94,28 @@ export function useProfitCosts(since?: string) {
   return useQuery({
     queryKey: [...PROFIT_COSTS_KEY, from.slice(0, 10)],
     queryFn: async () => {
-      const [fuel, expenses] = await Promise.all([
-        supabase.from("fuel_logs").select("date,total_cost").gte("date", from).limit(1000),
-        supabase
-          .from("expenses")
-          .select("expense_date,amount,category")
-          .gte("expense_date", from.slice(0, 10))
-          .neq("category", "combustivel")
-          .limit(1000),
+      const [fuelRows, expenseRows] = await Promise.all([
+        fetchAllRows<{ date: string; total_cost: number | string }>((rangeFrom, rangeTo) =>
+          supabase
+            .from("fuel_logs")
+            .select("date,total_cost")
+            .gte("date", from)
+            .order("date", { ascending: false })
+            .range(rangeFrom, rangeTo),
+        ),
+        fetchAllRows<{ expense_date: string; amount: number | string }>((rangeFrom, rangeTo) =>
+          supabase
+            .from("expenses")
+            .select("expense_date,amount,category")
+            .gte("expense_date", from.slice(0, 10))
+            .neq("category", "combustivel")
+            .order("expense_date", { ascending: false })
+            .range(rangeFrom, rangeTo),
+        ),
       ]);
-      if (fuel.error) throw fuel.error;
-      if (expenses.error) throw expenses.error;
       return {
-        fuel: (fuel.data ?? []).map((f) => ({ date: f.date, amount: Number(f.total_cost) })),
-        expenses: (expenses.data ?? []).map((e) => ({
+        fuel: fuelRows.map((f) => ({ date: f.date, amount: Number(f.total_cost) })),
+        expenses: expenseRows.map((e) => ({
           // Datas sem hora viram meio-dia local para caírem no dia certo.
           date: `${e.expense_date}T12:00:00`,
           amount: Number(e.amount),

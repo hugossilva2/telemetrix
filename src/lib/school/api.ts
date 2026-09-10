@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import type { ChecklistEntry, LessonStatus } from "./lessons";
 
 export const SCHOOL_KEY = ["school", "mine"] as const;
@@ -180,17 +181,19 @@ export function useLessons(orgId: string | null | undefined, studentId?: string)
     queryKey: [...LESSONS_KEY, orgId, studentId ?? "all"],
     enabled: !!orgId,
     queryFn: async (): Promise<LessonRecord[]> => {
-      let q = supabase
-        .from("lessons")
-        .select(LESSON_SELECT)
-        .eq("org_id", orgId!)
-        .gte("scheduled_at", from)
-        .order("scheduled_at", { ascending: false })
-        .limit(500);
-      if (studentId) q = q.eq("student_id", studentId);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []).map((l) => normalizeLesson(l as unknown as Record<string, unknown>));
+      // Paginado: escolas com muitas aulas não perdem registros na listagem.
+      const rows = await fetchAllRows<Record<string, unknown>>((rangeFrom, rangeTo) => {
+        let q = supabase
+          .from("lessons")
+          .select(LESSON_SELECT)
+          .eq("org_id", orgId!)
+          .gte("scheduled_at", from)
+          .order("scheduled_at", { ascending: false })
+          .range(rangeFrom, rangeTo);
+        if (studentId) q = q.eq("student_id", studentId);
+        return q;
+      });
+      return rows.map((l) => normalizeLesson(l));
     },
   });
 }

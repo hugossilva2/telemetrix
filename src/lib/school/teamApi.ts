@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { VEHICLES_QUERY_KEY } from "@/lib/vehicles/active";
 import { INVITES_KEY, type OrgRole } from "./api";
 
@@ -203,16 +204,19 @@ export function useFleetTrips(vehicleIds: string[], from: Date, to: Date) {
     ],
     enabled: vehicleIds.length > 0,
     queryFn: async (): Promise<FleetTripRow[]> => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select("id,vehicle_id,start_time,distance_km,fuel_liters,estimated_cost,eco_score")
-        .in("vehicle_id", vehicleIds)
-        .gte("start_time", from.toISOString())
-        .lt("start_time", to.toISOString())
-        .not("end_time", "is", null)
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []).map((t) => ({
+      // Paginado: a frota inteira, sem corte em 1.000 viagens.
+      const rows = await fetchAllRows<FleetTripRow>((rangeFrom, rangeTo) =>
+        supabase
+          .from("trips")
+          .select("id,vehicle_id,start_time,distance_km,fuel_liters,estimated_cost,eco_score")
+          .in("vehicle_id", vehicleIds)
+          .gte("start_time", from.toISOString())
+          .lt("start_time", to.toISOString())
+          .not("end_time", "is", null)
+          .order("start_time", { ascending: false })
+          .range(rangeFrom, rangeTo),
+      );
+      return rows.map((t) => ({
         ...t,
         distance_km: t.distance_km == null ? null : Number(t.distance_km),
         fuel_liters: t.fuel_liters == null ? null : Number(t.fuel_liters),

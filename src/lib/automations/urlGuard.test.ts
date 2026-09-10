@@ -24,7 +24,11 @@ describe("validateAutomationUrl", () => {
     });
   }
 
-  const allowed = ["https://exemplo.com/webhook", "http://203.0.113.10/hook", "https://[2001:db8::1]/"];
+  const allowed = [
+    "https://exemplo.com/webhook",
+    "http://203.0.113.10/hook",
+    "https://[2001:db8::1]/",
+  ];
   for (const url of allowed) {
     it(`permite ${url}`, () => {
       expect(validateAutomationUrl(url).ok).toBe(true);

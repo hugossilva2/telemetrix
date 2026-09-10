@@ -14,6 +14,8 @@ import {
 } from "recharts";
 import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
 import { expectedKmpl, fuelLabel, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
@@ -187,18 +189,19 @@ export function TrendsDashboard() {
   const fuel = vehicleFuel ?? fallbackFuel;
   const weeks = useMemo(() => lastWeeks(Number(range)).reverse(), [range]);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["trends-trips", range],
     queryFn: async (): Promise<TrendTrip[]> => {
       const since = `${weeks[0]}T00:00:00.000`;
-      const { data, error } = await supabase
-        .from("trips")
-        .select("id,start_time,distance_km,avg_speed_kmh,fuel_liters,eco_score,idle_seconds")
-        .gte("start_time", since)
-        .order("start_time", { ascending: true })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []) as TrendTrip[];
+      // Paginado: a evolução considera todas as viagens do período.
+      return fetchAllRows<TrendTrip>((from, to) =>
+        supabase
+          .from("trips")
+          .select("id,start_time,distance_km,avg_speed_kmh,fuel_liters,eco_score,idle_seconds")
+          .gte("start_time", since)
+          .order("start_time", { ascending: true })
+          .range(from, to),
+      );
     },
   });
 
@@ -206,15 +209,15 @@ export function TrendsDashboard() {
   const { data: fills } = useQuery({
     queryKey: ["trends-fuel-logs", vehicle?.id ?? null, fuel],
     queryFn: async (): Promise<FullTankLog[]> => {
-      let q = supabase
-        .from("fuel_logs")
-        .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
-        .order("date", { ascending: true })
-        .limit(1000);
-      if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as FullTankLog[];
+      return fetchAllRows<FullTankLog>((from, to) => {
+        let q = supabase
+          .from("fuel_logs")
+          .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
+          .order("date", { ascending: true })
+          .range(from, to);
+        if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
+        return q;
+      });
     },
     staleTime: 60_000,
   });
@@ -253,6 +256,12 @@ export function TrendsDashboard() {
 
       {isLoading ? (
         <p className="py-8 text-center text-sm text-muted-foreground">Carregando…</p>
+      ) : isError ? (
+        <LoadFailed
+          error={error}
+          fallback="Não foi possível carregar a evolução agora."
+          onRetry={() => void refetch()}
+        />
       ) : active.length === 0 ? (
         <div className="card-surface p-4 text-sm text-muted-foreground">
           Ainda não há viagens registradas nesse período. Os gráficos aparecem automaticamente na

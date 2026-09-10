@@ -17,6 +17,8 @@ import type { FlespiMessage } from "@/lib/flespi/ingest.server";
 
 const MAX_MESSAGES = 500;
 const LOOKBACK_S = 15 * 60;
+/** Prazo máximo de resposta da Flespi por veículo. */
+const FLESPI_TIMEOUT_MS = 15_000;
 
 async function fetchMessages(deviceId: string, fromS: number) {
   const { flespiAuthHeaders } = await import("@/lib/flespi/config.server");
@@ -25,7 +27,8 @@ async function fetchMessages(deviceId: string, fromS: number) {
   });
   const res = await fetch(
     `https://flespi.io/gw/devices/${deviceId}/messages?${params.toString()}`,
-    { headers: flespiAuthHeaders() },
+    // Prazo máximo: um device lento não pode consumir a janela do coletor.
+    { headers: flespiAuthHeaders(), signal: AbortSignal.timeout(FLESPI_TIMEOUT_MS) },
   );
   if (!res.ok) {
     throw new Error(`flespi ${res.status}: ${(await res.text()).slice(0, 200)}`);

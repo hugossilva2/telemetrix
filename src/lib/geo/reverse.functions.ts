@@ -40,7 +40,11 @@ export const reverseGeocode = createServerFn({ method: "POST" })
         Authorization: `Bearer ${lovable}`,
         "X-Connection-Api-Key": gmaps,
       },
-    });
+      // Prazo máximo: sem endereço é melhor que a tela travada esperando.
+      signal: AbortSignal.timeout(8_000),
+    }).catch(() => null);
+
+    if (!res) return { address: null, reason: "timeout" };
 
     if (res.status === 403) {
       const details: Array<{ reason?: string }> =

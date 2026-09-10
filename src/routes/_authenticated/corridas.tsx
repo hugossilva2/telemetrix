@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Clock, Pencil, PiggyBank, Play, Square, Trash2 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
+import { LoadFailed } from "@/components/common/LoadFailed";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -400,6 +401,13 @@ function CorridasPage() {
         <h2 className="text-sm font-semibold">Últimas corridas</h2>
         {rides.isLoading ? (
           <p className="mt-2 text-xs text-muted-foreground">Carregando…</p>
+        ) : rides.isError ? (
+          <LoadFailed
+            className="mt-2"
+            error={rides.error}
+            fallback="Não foi possível carregar suas corridas agora."
+            onRetry={() => void rides.refetch()}
+          />
         ) : list.length === 0 ? (
           <p className="mt-2 text-xs text-muted-foreground">
             Nenhuma corrida ainda. Registre a primeira acima.

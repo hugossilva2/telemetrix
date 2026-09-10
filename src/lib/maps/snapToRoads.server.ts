@@ -3,6 +3,9 @@ const GATEWAY = "https://connector-gateway.lovable.dev/google_maps";
 /** Máximo aceito pela Roads API por requisição. */
 const BATCH = 100;
 
+/** Prazo máximo de resposta de cada requisição externa. */
+const EXTERNAL_TIMEOUT_MS = 10_000;
+
 export type SnapInput = { lat: number; lng: number };
 
 export type SnappedPoint = {
@@ -39,6 +42,8 @@ async function snapBatch(points: SnapInput[], offset: number): Promise<SnappedPo
       Authorization: `Bearer ${lovable}`,
       "X-Connection-Api-Key": gmaps,
     },
+    // Prazo máximo: um serviço lento não pode travar o encerramento da viagem.
+    signal: AbortSignal.timeout(EXTERNAL_TIMEOUT_MS),
   });
 
   if (res.status === 403) {

@@ -20,7 +20,6 @@ import { useAccountMode } from "@/lib/account/profile";
 import { useIsAdmin } from "@/lib/account/admin";
 import type { AccountMode } from "@/lib/account/mode";
 
-
 interface NavItem {
   to:
     | "/inicio"
@@ -112,7 +111,6 @@ export function BottomNav() {
           isObserver ? "grid-cols-1" : isStudent ? "grid-cols-2" : "grid-cols-6"
         }`}
       >
-
         {navItems.map(({ to, label, Icon, exact }) => (
           <li key={to}>
             <Link

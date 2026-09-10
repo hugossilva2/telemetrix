@@ -62,12 +62,7 @@ function isPrivateIPv6(hostname: string): boolean {
   return false;
 }
 
-const BLOCKED_HOST_PATTERNS = [
-  /^localhost$/i,
-  /\.local$/i,
-  /\.internal$/i,
-  /\.localhost$/i,
-];
+const BLOCKED_HOST_PATTERNS = [/^localhost$/i, /\.local$/i, /\.internal$/i, /\.localhost$/i];
 
 export function validateAutomationUrl(
   raw: string,

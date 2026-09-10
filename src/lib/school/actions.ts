@@ -35,11 +35,15 @@ export function useEndLesson() {
       const endedAt = new Date().toISOString();
       const startedAt = lesson.started_at ?? lesson.scheduled_at;
       const from = new Date(new Date(startedAt).getTime() - 30 * 60_000).toISOString();
-      const { data: trips } = await supabase
+      // Só vincula viagens do carro da aula (e, sem carro definido, do instrutor).
+      let tripQuery = supabase
         .from("trips")
         .select("id,start_time,end_time")
         .gte("start_time", from)
-        .not("end_time", "is", null)
+        .not("end_time", "is", null);
+      if (lesson.vehicle_id) tripQuery = tripQuery.eq("vehicle_id", lesson.vehicle_id);
+      else tripQuery = tripQuery.eq("user_id", lesson.instructor_id);
+      const { data: trips } = await tripQuery
         .order("start_time", { ascending: false })
         .limit(20);
       const match = lesson.trip_id ? null : matchTripForLesson(trips ?? [], startedAt, endedAt);

@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { formatBRL, formatDecimal, formatSpeed } from "@/lib/format";
 import { FuelSourceBadge, type FuelSourceValue } from "@/components/fuel/FuelSourceBadge";
 import { estimateTripCost } from "@/lib/trips/cost";

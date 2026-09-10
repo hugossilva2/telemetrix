@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { VEHICLES_QUERY_KEY } from "@/lib/vehicles/active";
 import { INVITES_KEY, type OrgRole } from "./api";
 

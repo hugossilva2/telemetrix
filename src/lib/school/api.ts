@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import type { ChecklistEntry, LessonStatus } from "./lessons";
 
 export const SCHOOL_KEY = ["school", "mine"] as const;

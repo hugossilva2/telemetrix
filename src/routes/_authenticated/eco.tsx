@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Award, Flame, Leaf, Sparkles, TrendingDown, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/layout/AppShell";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { EcoScoreRing } from "@/components/eco/EcoScoreRing";
 import { TelemetryDiagnosticsCard } from "@/components/eco/TelemetryDiagnosticsCard";
 import { DrivingHabitsCard } from "@/components/coach/DrivingHabitsCard";

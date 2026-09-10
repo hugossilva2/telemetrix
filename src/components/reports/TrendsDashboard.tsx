@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { ArrowDownRight, ArrowUpRight, Minus, TrendingUp } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getEcoSettings } from "@/lib/eco/settings";
 import { expectedKmpl, fuelLabel, type FuelKind, type VehicleSpec } from "@/lib/vehicles/specs";
@@ -191,14 +192,15 @@ export function TrendsDashboard() {
     queryKey: ["trends-trips", range],
     queryFn: async (): Promise<TrendTrip[]> => {
       const since = `${weeks[0]}T00:00:00.000`;
-      const { data, error } = await supabase
-        .from("trips")
-        .select("id,start_time,distance_km,avg_speed_kmh,fuel_liters,eco_score,idle_seconds")
-        .gte("start_time", since)
-        .order("start_time", { ascending: true })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []) as TrendTrip[];
+      // Paginado: a evolução considera todas as viagens do período.
+      return fetchAllRows<TrendTrip>((from, to) =>
+        supabase
+          .from("trips")
+          .select("id,start_time,distance_km,avg_speed_kmh,fuel_liters,eco_score,idle_seconds")
+          .gte("start_time", since)
+          .order("start_time", { ascending: true })
+          .range(from, to),
+      );
     },
   });
 

@@ -43,9 +43,7 @@ export function useEndLesson() {
         .not("end_time", "is", null);
       if (lesson.vehicle_id) tripQuery = tripQuery.eq("vehicle_id", lesson.vehicle_id);
       else tripQuery = tripQuery.eq("user_id", lesson.instructor_id);
-      const { data: trips } = await tripQuery
-        .order("start_time", { ascending: false })
-        .limit(20);
+      const { data: trips } = await tripQuery.order("start_time", { ascending: false }).limit(20);
       const match = lesson.trip_id ? null : matchTripForLesson(trips ?? [], startedAt, endedAt);
       const { error } = await supabase
         .from("lessons")

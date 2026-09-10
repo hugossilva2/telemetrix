@@ -26,7 +26,9 @@ function clamp(value: unknown, max: number): string {
  * só para o próprio usuário, nunca para observadores de outra conta.
  */
 async function authorizedVehicleId(
-  supabase: { rpc: (fn: "can_use_vehicle", args: { _vehicle_id: string }) => PromiseLike<{ data: unknown }> },
+  supabase: {
+    rpc: (fn: "can_use_vehicle", args: { _vehicle_id: string }) => PromiseLike<{ data: unknown }>;
+  },
   vehicleId: string | null,
 ): Promise<string | null> {
   if (!vehicleId) return null;
@@ -53,11 +55,13 @@ export const sendTestPush = createServerFn({ method: "POST" })
  */
 export const notifyTrackerEvent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { type: string; placeName?: string | null; vehicleId?: string | null }) => ({
-    type: clamp(input?.type, 40),
-    placeName: input?.placeName ? clamp(input.placeName, 80) : null,
-    vehicleId: input?.vehicleId ? String(input.vehicleId) : null,
-  }))
+  .inputValidator(
+    (input: { type: string; placeName?: string | null; vehicleId?: string | null }) => ({
+      type: clamp(input?.type, 40),
+      placeName: input?.placeName ? clamp(input.placeName, 80) : null,
+      vehicleId: input?.vehicleId ? String(input.vehicleId) : null,
+    }),
+  )
   .handler(async ({ data, context }) => {
     if (!ALLOWED_EVENT_TYPES.has(data.type)) return { sent: 0, failed: 0, removed: 0 };
     const { sendTrackerEventPush } = await import("./send.server");

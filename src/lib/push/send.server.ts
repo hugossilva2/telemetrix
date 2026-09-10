@@ -87,7 +87,6 @@ export async function sendPushToUser(
     await Promise.all(subs.slice(i, i + PUSH_CONCURRENCY).map(sendOne));
   }
 
-
   if (dead.length > 0) {
     await supabaseAdmin.from("push_subscriptions").delete().in("id", dead);
   }

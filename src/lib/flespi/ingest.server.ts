@@ -87,7 +87,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
     if (error) console.error("[ingest] falha ao limpar estado da viagem:", error);
   }
 
-
   let processed = 0;
   let skippedNoDevice = 0;
   let skippedUnknownVehicle = 0;
@@ -254,7 +253,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             continue;
           }
         }
-
 
         console.log(
           "[flespi-webhook]",
@@ -468,7 +466,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
         // mensagem de um device sem estado nenhum). Antes bastava "sem viagem
         // aberta", o que fazia uma releitura da mesma janela abrir viagem de novo.
         const shouldOpen = ign === true && (state == null || prevIgn !== true);
-
 
         // Fecha viagem: ON→OFF (ou primeira observação desligada com viagem aberta).
         const shouldClose = ign === false && state?.start_time != null;
@@ -762,7 +759,6 @@ export async function ingestFlespiMessages(messages: FlespiMessage[]): Promise<I
             ...(pingWritten ? { last_ping_at: nowIso } : {}),
           });
         }
-
       }
     } finally {
       // Libera o lease mesmo em caso de erro (a linha pode ter sido apagada no

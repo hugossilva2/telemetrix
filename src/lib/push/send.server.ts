@@ -1,6 +1,12 @@
 import { buildPushPayload } from "@block65/webcrypto-web-push";
 import type { PushPayload } from "./config";
 
+/** Prazo máximo de cada envio ao servidor de push do navegador. */
+const PUSH_TIMEOUT_MS = 8_000;
+
+/** Envios simultâneos por usuário (evita rajada em contas com muitos aparelhos). */
+const PUSH_CONCURRENCY = 5;
+
 interface SubRow {
   id: string;
   endpoint: string;
@@ -58,6 +64,8 @@ export async function sendPushToUser(
           method: req.method,
           headers: req.headers,
           body: req.body as unknown as BodyInit,
+          // Um servidor de push lento não pode segurar a ingestão do rastreador.
+          signal: AbortSignal.timeout(PUSH_TIMEOUT_MS),
         });
         if (res.ok) {
           sent += 1;

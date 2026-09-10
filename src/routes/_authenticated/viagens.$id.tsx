@@ -120,16 +120,23 @@ function TripDetailPage() {
     enabled: needsPingFallback,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("tracker_pings")
-        .select("lat,lng,speed_kmh,recorded_at")
-        .eq("vehicle_id", trip!.vehicle_id as string)
-        .gte("recorded_at", trip!.start_time)
-        .lte("recorded_at", trip!.end_time as string)
-        .order("recorded_at", { ascending: true })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? [])
+      // Paginado: viagens longas têm mais de 1.000 pontos gravados.
+      const rows = await fetchAllRows<{
+        lat: number | null;
+        lng: number | null;
+        speed_kmh: number | null;
+        recorded_at: string;
+      }>((from, to) =>
+        supabase
+          .from("tracker_pings")
+          .select("lat,lng,speed_kmh,recorded_at")
+          .eq("vehicle_id", trip!.vehicle_id as string)
+          .gte("recorded_at", trip!.start_time)
+          .lte("recorded_at", trip!.end_time as string)
+          .order("recorded_at", { ascending: true })
+          .range(from, to),
+      );
+      return rows
         .filter((r) => typeof r.lat === "number" && typeof r.lng === "number")
         .map((r) => ({
           lat: r.lat as number,

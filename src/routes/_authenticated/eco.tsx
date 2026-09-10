@@ -74,16 +74,17 @@ function EcoPage() {
   const { data: trips, isLoading } = useQuery({
     queryKey: ["eco-trips"],
     queryFn: async (): Promise<EcoTrip[]> => {
-      const { data, error } = await supabase
-        .from("trips")
-        .select(
-          "id,start_time,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost",
-        )
-        .not("eco_score", "is", null)
-        .order("start_time", { ascending: false })
-        .limit(500);
-      if (error) throw error;
-      return (data ?? []) as EcoTrip[];
+      // Paginado: as médias passam a considerar todo o histórico com nota.
+      return fetchAllRows<EcoTrip>((from, to) =>
+        supabase
+          .from("trips")
+          .select(
+            "id,start_time,distance_km,eco_score,harsh_brake_count,harsh_accel_count,harsh_corner_count,overspeed_count,high_rpm_count,idle_seconds,wasted_fuel_liters,wasted_cost",
+          )
+          .not("eco_score", "is", null)
+          .order("start_time", { ascending: false })
+          .range(from, to),
+      );
     },
   });
 

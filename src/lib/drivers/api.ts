@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { DOCS_BUCKET } from "@/lib/docs/storage";
+import { fetchAllRows } from "@/lib/supabase/paginate";
 import type { DriverSafeStartRow, DriverTripRow } from "./score";
 
 export interface DriverRow {

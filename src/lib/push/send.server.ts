@@ -45,8 +45,8 @@ export async function sendPushToUser(
   let failed = 0;
   const dead: string[] = [];
 
-  await Promise.all(
-    subs.map(async (s) => {
+  const sendOne = async (s: SubRow) => {
+    {
       try {
         const req = await buildPushPayload(
           {

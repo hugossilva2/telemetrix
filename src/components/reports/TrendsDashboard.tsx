@@ -208,15 +208,15 @@ export function TrendsDashboard() {
   const { data: fills } = useQuery({
     queryKey: ["trends-fuel-logs", vehicle?.id ?? null, fuel],
     queryFn: async (): Promise<FullTankLog[]> => {
-      let q = supabase
-        .from("fuel_logs")
-        .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
-        .order("date", { ascending: true })
-        .limit(1000);
-      if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
-      const { data, error } = await q;
-      if (error) throw error;
-      return (data ?? []) as FullTankLog[];
+      return fetchAllRows<FullTankLog>((from, to) => {
+        let q = supabase
+          .from("fuel_logs")
+          .select("date,liters_filled,mileage_at_fill,is_full_tank,fuel_type")
+          .order("date", { ascending: true })
+          .range(from, to);
+        if (vehicle?.id) q = q.eq("vehicle_id", vehicle.id);
+        return q;
+      });
     },
     staleTime: 60_000,
   });

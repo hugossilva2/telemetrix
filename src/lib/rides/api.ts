@@ -42,7 +42,7 @@ export function useRides(since?: string) {
     queryKey: [...RIDES_KEY, from.slice(0, 10)],
     queryFn: async (): Promise<RideRecord[]> => {
       // Paginado: motoristas de app fazem muitas corridas no período.
-      const rows = await fetchAllRows<Record<string, never>>((rangeFrom, rangeTo) =>
+      const rows = await fetchAllRows<RideRecord>((rangeFrom, rangeTo) =>
         supabase
           .from("rides")
           .select(RIDE_SELECT)
@@ -65,7 +65,7 @@ export function useShifts(since?: string) {
   return useQuery({
     queryKey: [...SHIFTS_KEY, from.slice(0, 10)],
     queryFn: async (): Promise<ShiftRecord[]> => {
-      const rows = await fetchAllRows<Record<string, never>>((rangeFrom, rangeTo) =>
+      const rows = await fetchAllRows<ShiftRecord>((rangeFrom, rangeTo) =>
         supabase
           .from("shifts")
           .select(SHIFT_SELECT)

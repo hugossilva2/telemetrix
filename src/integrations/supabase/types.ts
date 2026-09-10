@@ -1678,6 +1678,7 @@ export type Database = {
           user_id: string
         }[]
       }
+      purge_old_telemetry: { Args: never; Returns: undefined }
       recompute_fuel_calibration: {
         Args: { _vehicle_id: string }
         Returns: undefined
